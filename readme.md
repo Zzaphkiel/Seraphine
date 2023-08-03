@@ -22,7 +22,7 @@ conda activate seraphine
 ```shell
 pip install -r requirements.txt
 ```
-**在管理员身份下**运行 `main.py` 以开始使用
+**以管理员身份**运行 `main.py` 以开始使用
 ```shell
 python main.py
 ```
@@ -32,32 +32,39 @@ python main.py
   - 战绩查询，包括隐藏战绩 ✅
   - 进入 BP 后自动查队友战绩 ✅
   - 进入游戏后自动查对手战绩 ❌（快写好了）
+
 - 其他辅助功能
   - 找到对局后自动接收对局 ✅
   - 开局秒选英雄 ❌（还没想好要不要写）
   - 修改个人主页背景✅，可改为未拥有的皮肤 ✅
   - 修改个人在线状态 ✅
   - 修改个人签名 ✅
+  - 伪造个人状态卡片中的段位显示 ✅
   - 创建 5v5 自定义训练模式房间 ✅
   - 一键卸下勋章 ✅
+
 - 通用功能
   - 开机自动启动 Seraphine ❌（还没想好要不要写）
   - 启动 Seraphine 时自动启动 LOL 客户端 ❌（还没想好要不要写）
 
-## 我会因为使用它而被封号吗 😨？
-由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件、代码或内存的读取或破坏其完整性的行为。
+## 常见问题 Q & A
+### Q：为什么要必须要使用管理员身份运行 😡？
 
-因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**不保证**一定不会封号。
+A：管理员身份仅用于获取 `LeagueClientUx.exe` 进程的命令行参数以调用 LCU API。
+
+### Q：我会因为使用 Seraphine 而被封号吗 😨？
+
+A：由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
+
+### Q：关闭程序时终端显示 `QThread: Destroyed while thread is still running` 怎么办 🤔？
+
+A：忽视它，它并不影响什么。~~我也不知道为什么会这样，我不会修😥。~~
 
 ## 帮助我们改进 Seraphine 😘
-在使用过程中，软件发生任何不符合预期的行为 / 遇到任何 BUG，请提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请带上**环境信息**以及**复现过程**；程序报错请带上**错误信息**。
+在使用过程中，遇到程序发生任何不符合预期的行为或任何 BUG，请提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**以及**复现过程**；程序报错请带上**错误信息**。
 
-有功能上的改进 / 添加建议也欢迎提出 issue 进行讨论。
+有功能上的添加 / 改进建议也欢迎提出 issue 进行讨论。
 
-此外，请忽视程序在退出时 `QThread` 的错误信息提示（它并不影响什么）
-```
-QThread: Destroyed while thread is still running
-```
 
 ## 引用以及参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
@@ -66,14 +73,15 @@ QThread: Destroyed while thread is still running
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
   - https://www.mingweisamuel.com/lcu-schema/tool/#/
 
-  以及其他基于 LCU API 的项目
+  以及其他使用 LCU API 的项目
   - https://github.com/KebsCS/KBotExt
   - https://github.com/XHXIAIEIN/LeagueCustomLobby
   - https://github.com/7rebux/league-tools
+
 - 游戏资源获取请见
   - https://raw.communitydragon.org/latest/
   - https://github.com/CommunityDragon/Docs/blob/master/assets.md
 
 
-## 许可证
+## 许可证 ⚖️
 Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。

@@ -54,7 +54,7 @@ class LolClientEventListener(QThread):
 
         async def onChampionSelectBegin(data):
             if data['eventType'] == 'Create':
-                self.championSelectBegin.emit(data)
+                self.championSelectBegin.emit(data['data'])
 
         async def main():
             wllp = await willump.start()
