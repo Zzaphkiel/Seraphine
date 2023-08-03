@@ -1,14 +1,23 @@
 import threading
 
 import pyperclip
-from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame, QSpacerItem,
-                             QSizePolicy, QLabel, QStackedWidget, QWidget)
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QFrame, QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
-from qfluentwidgets import (ScrollArea, LineEdit, PushButton, ToolButton,
-                            InfoBar, InfoBarPosition, ToolTipFilter,
-                            ToolTipPosition, Theme, isDarkTheme,
-                            FlyoutViewBase, Flyout)
+from qfluentwidgets import (
+    ScrollArea,
+    LineEdit,
+    PushButton,
+    ToolButton,
+    InfoBar,
+    InfoBarPosition,
+    ToolTipFilter,
+    ToolTipPosition,
+    Theme,
+    isDarkTheme,
+    FlyoutViewBase,
+    Flyout,
+)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -80,7 +89,6 @@ class GamesTab(QFrame):
         self.gameDetailReady.connect(self.__onGameDetailReady)
 
     def __onTabClicked(self, gameId):
-
         def _():
             game = self.lolConnector.getGameDetailByGameId(gameId)
             game = processGameDetailData(self.puuid, game, self.lolConnector)
@@ -154,8 +162,7 @@ class GamesTab(QFrame):
             layout.addWidget(tab)
 
         if n < self.gamesNumberPerPage:
-            layout.addSpacerItem(
-                QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            layout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         self.stackWidget.addWidget(widget)
         self.stackWidget.setCurrentIndex(self.currentIndex)
@@ -168,7 +175,6 @@ class GamesTab(QFrame):
             self.prevButton.setEnabled(True)
 
     def updateGames(self, page):
-
         def _():
             if self.maxPage != None:
                 self.gamesInfoReady.emit(page)
@@ -179,20 +185,16 @@ class GamesTab(QFrame):
             begin = len(self.games)
             end = begin + count - 1
 
-            games = self.lolConnector.getSummonerGamesByPuuid(
-                self.puuid, begin, end)
+            games = self.lolConnector.getSummonerGamesByPuuid(self.puuid, begin, end)
 
-            self.games += [
-                processGameData(game, self.lolConnector)
-                for game in games['games']
-            ]
+            self.games += [processGameData(game, self.lolConnector) for game in games["games"]]
 
             if page == 1:
-                if len(games['games']) <= 10:
+                if len(games["games"]) <= 10:
                     self.maxPage = 1
             else:
-                if len(games['games']) < 10:
-                    if len(games['games']) == 0:
+                if len(games["games"]) < 10:
+                    if len(games["games"]) == 0:
                         self.maxPage = page
                     else:
                         self.maxPage = page + 1
@@ -209,8 +211,7 @@ class GamesTab(QFrame):
         m = self.gamesNumberPerPage
         begin = m * (page - 1)
 
-        n = 10 if self.currentIndex != self.maxPage else min(
-            m, (len(self.games) - 1) % m + 1)
+        n = 10 if self.currentIndex != self.maxPage else min(m, (len(self.games) - 1) % m + 1)
 
         self.updateTabs(begin, n)
 
@@ -261,14 +262,13 @@ class GameDetailView(QFrame):
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def updateGame(self, game: dict):
-        isCherry = game['queueId'] == 1700
+        isCherry = game["queueId"] == 1700
 
-        mapIcon = QPixmap(game['mapIcon']).scaled(54, 54, Qt.KeepAspectRatio,
-                                                  Qt.SmoothTransformation)
-        if game['remake']:
-            result = self.tr('Remake')
+        mapIcon = QPixmap(game["mapIcon"]).scaled(54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        if game["remake"]:
+            result = self.tr("Remake")
             color = "162, 162, 162"
-        elif game['win']:
+        elif game["win"]:
             result = self.tr("Win")
             color = "57, 176, 27"
         else:
@@ -276,7 +276,7 @@ class GameDetailView(QFrame):
             color = "211, 25, 12"
 
         if isCherry:
-            cherryResult = game['cherryResult']
+            cherryResult = game["cherryResult"]
             if cherryResult == 1:
                 result = self.tr("1st")
             elif cherryResult == 2:
@@ -286,62 +286,106 @@ class GameDetailView(QFrame):
             else:
                 result = self.tr("4th")
 
-        self.titleBar.updateTitleBar(mapIcon, result, game['mapName'],
-                                     game['modeName'], game['gameDuration'],
-                                     game['gameCreation'], game['gameId'],
-                                     color)
+        self.titleBar.updateTitleBar(
+            mapIcon, result, game["mapName"], game["modeName"], game["gameDuration"], game["gameCreation"], game["gameId"], color
+        )
 
-        team1 = game['teams'][100]
-        team2 = game['teams'][200]
+        team1 = game["teams"][100]
+        team2 = game["teams"][200]
 
         self.teamView1.updateTeam(
-            team1['win'], team1['baronIcon'], team1['baronKills'],
-            team1['dragonIcon'], team1['dragonKills'], team1['riftHeraldIcon'],
-            team1['riftHeraldKills'], team1['inhibitorIcon'],
-            team1['inhibitorKills'], team1['towerIcon'], team1['towerKills'],
-            team1['kills'], team1['deaths'], team1['assists'], team1['bans'],
-            isCherry, self.tr("1st"))
-        self.teamView1.updateSummoners(team1['summoners'])
+            team1["win"],
+            team1["baronIcon"],
+            team1["baronKills"],
+            team1["dragonIcon"],
+            team1["dragonKills"],
+            team1["riftHeraldIcon"],
+            team1["riftHeraldKills"],
+            team1["inhibitorIcon"],
+            team1["inhibitorKills"],
+            team1["towerIcon"],
+            team1["towerKills"],
+            team1["kills"],
+            team1["deaths"],
+            team1["assists"],
+            team1["bans"],
+            isCherry,
+            self.tr("1st"),
+        )
+        self.teamView1.updateSummoners(team1["summoners"])
 
         self.teamView2.updateTeam(
-            team2['win'], team2['baronIcon'], team2['baronKills'],
-            team2['dragonIcon'], team2['dragonKills'], team2['riftHeraldIcon'],
-            team2['riftHeraldKills'], team2['inhibitorIcon'],
-            team2['inhibitorKills'], team2['towerIcon'], team2['towerKills'],
-            team2['kills'], team2['deaths'], team2['assists'], team2['bans'],
-            isCherry, self.tr("2nd"))
-        self.teamView2.updateSummoners(team2['summoners'])
+            team2["win"],
+            team2["baronIcon"],
+            team2["baronKills"],
+            team2["dragonIcon"],
+            team2["dragonKills"],
+            team2["riftHeraldIcon"],
+            team2["riftHeraldKills"],
+            team2["inhibitorIcon"],
+            team2["inhibitorKills"],
+            team2["towerIcon"],
+            team2["towerKills"],
+            team2["kills"],
+            team2["deaths"],
+            team2["assists"],
+            team2["bans"],
+            isCherry,
+            self.tr("2nd"),
+        )
+        self.teamView2.updateSummoners(team2["summoners"])
 
         self.extraTeamView1.setVisible(isCherry)
         self.extraTeamView2.setVisible(isCherry)
 
         if isCherry:
-            team3 = game['teams'][300]
-            team4 = game['teams'][400]
+            team3 = game["teams"][300]
+            team4 = game["teams"][400]
 
             self.extraTeamView1.updateTeam(
-                team3['win'], team3['baronIcon'], team3['baronKills'],
-                team3['dragonIcon'], team3['dragonKills'],
-                team3['riftHeraldIcon'], team3['riftHeraldKills'],
-                team3['inhibitorIcon'], team3['inhibitorKills'],
-                team3['towerIcon'], team3['towerKills'], team3['kills'],
-                team3['deaths'], team3['assists'], team3['bans'], isCherry,
-                self.tr("3rd"))
-            self.extraTeamView1.updateSummoners(team3['summoners'])
+                team3["win"],
+                team3["baronIcon"],
+                team3["baronKills"],
+                team3["dragonIcon"],
+                team3["dragonKills"],
+                team3["riftHeraldIcon"],
+                team3["riftHeraldKills"],
+                team3["inhibitorIcon"],
+                team3["inhibitorKills"],
+                team3["towerIcon"],
+                team3["towerKills"],
+                team3["kills"],
+                team3["deaths"],
+                team3["assists"],
+                team3["bans"],
+                isCherry,
+                self.tr("3rd"),
+            )
+            self.extraTeamView1.updateSummoners(team3["summoners"])
 
             self.extraTeamView2.updateTeam(
-                team4['win'], team4['baronIcon'], team4['baronKills'],
-                team4['dragonIcon'], team4['dragonKills'],
-                team4['riftHeraldIcon'], team4['riftHeraldKills'],
-                team4['inhibitorIcon'], team4['inhibitorKills'],
-                team4['towerIcon'], team4['towerKills'], team4['kills'],
-                team4['deaths'], team4['assists'], team4['bans'], isCherry,
-                self.tr("4th"))
-            self.extraTeamView2.updateSummoners(team4['summoners'])
+                team4["win"],
+                team4["baronIcon"],
+                team4["baronKills"],
+                team4["dragonIcon"],
+                team4["dragonKills"],
+                team4["riftHeraldIcon"],
+                team4["riftHeraldKills"],
+                team4["inhibitorIcon"],
+                team4["inhibitorKills"],
+                team4["towerIcon"],
+                team4["towerKills"],
+                team4["kills"],
+                team4["deaths"],
+                team4["assists"],
+                team4["bans"],
+                isCherry,
+                self.tr("4th"),
+            )
+            self.extraTeamView2.updateSummoners(team4["summoners"])
 
 
 class TeamView(QFrame):
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -373,8 +417,7 @@ class TeamView(QFrame):
         self.__initLayout()
 
         cfg.themeChanged.connect(self.__updateIconColor)
-        self.bansButton.clicked.connect(
-            lambda: Flyout.make(self.bansFlyOut, self.bansButton, self))
+        self.bansButton.clicked.connect(lambda: Flyout.make(self.bansFlyOut, self.bansButton, self))
 
     def __initWidget(self):
         self.teamResultLabel.setObjectName("teamResult")
@@ -390,16 +433,11 @@ class TeamView(QFrame):
         self.riftHeraldIconLabel.setToolTip(self.tr("Rift Herald killed"))
         self.riftHeraldIconLabel.setAlignment(Qt.AlignCenter)
 
-        self.towerIconLabel.installEventFilter(
-            ToolTipFilter(self.towerIconLabel, 500, ToolTipPosition.TOP))
-        self.inhibitorIconLabel.installEventFilter(
-            ToolTipFilter(self.inhibitorIconLabel, 500, ToolTipPosition.TOP))
-        self.baronIconLabel.installEventFilter(
-            ToolTipFilter(self.baronIconLabel, 500, ToolTipPosition.TOP))
-        self.dragonIconLabel.installEventFilter(
-            ToolTipFilter(self.dragonIconLabel, 500, ToolTipPosition.TOP))
-        self.riftHeraldIconLabel.installEventFilter(
-            ToolTipFilter(self.riftHeraldIconLabel, 500, ToolTipPosition.TOP))
+        self.towerIconLabel.installEventFilter(ToolTipFilter(self.towerIconLabel, 500, ToolTipPosition.TOP))
+        self.inhibitorIconLabel.installEventFilter(ToolTipFilter(self.inhibitorIconLabel, 500, ToolTipPosition.TOP))
+        self.baronIconLabel.installEventFilter(ToolTipFilter(self.baronIconLabel, 500, ToolTipPosition.TOP))
+        self.dragonIconLabel.installEventFilter(ToolTipFilter(self.dragonIconLabel, 500, ToolTipPosition.TOP))
+        self.riftHeraldIconLabel.installEventFilter(ToolTipFilter(self.riftHeraldIconLabel, 500, ToolTipPosition.TOP))
 
         self.towerKillsLabel.setToolTip(self.tr("Tower destroyed"))
         self.inhibitorKillsLabel.setToolTip(self.tr("Inhibitor destroyed"))
@@ -407,16 +445,11 @@ class TeamView(QFrame):
         self.dragonKillsLabel.setToolTip(self.tr("Dragon killed"))
         self.riftHeraldKillsLabel.setToolTip(self.tr("Rift Herald killed"))
 
-        self.towerKillsLabel.installEventFilter(
-            ToolTipFilter(self.towerKillsLabel, 500, ToolTipPosition.TOP))
-        self.inhibitorKillsLabel.installEventFilter(
-            ToolTipFilter(self.inhibitorKillsLabel, 500, ToolTipPosition.TOP))
-        self.baronKillsLabel.installEventFilter(
-            ToolTipFilter(self.baronKillsLabel, 500, ToolTipPosition.TOP))
-        self.dragonKillsLabel.installEventFilter(
-            ToolTipFilter(self.dragonKillsLabel, 500, ToolTipPosition.TOP))
-        self.riftHeraldKillsLabel.installEventFilter(
-            ToolTipFilter(self.riftHeraldKillsLabel, 500, ToolTipPosition.TOP))
+        self.towerKillsLabel.installEventFilter(ToolTipFilter(self.towerKillsLabel, 500, ToolTipPosition.TOP))
+        self.inhibitorKillsLabel.installEventFilter(ToolTipFilter(self.inhibitorKillsLabel, 500, ToolTipPosition.TOP))
+        self.baronKillsLabel.installEventFilter(ToolTipFilter(self.baronKillsLabel, 500, ToolTipPosition.TOP))
+        self.dragonKillsLabel.installEventFilter(ToolTipFilter(self.dragonKillsLabel, 500, ToolTipPosition.TOP))
+        self.riftHeraldKillsLabel.installEventFilter(ToolTipFilter(self.riftHeraldKillsLabel, 500, ToolTipPosition.TOP))
 
         self.towerIconLabel.setFixedWidth(24)
         self.inhibitorIconLabel.setFixedWidth(24)
@@ -439,12 +472,9 @@ class TeamView(QFrame):
         self.goldIconLabel.setToolTip(self.tr("Gold earned"))
         self.dmgIconLabel.setToolTip(self.tr("Damage dealed to champions"))
 
-        self.csIconLabel.installEventFilter(
-            ToolTipFilter(self.csIconLabel, 500, ToolTipPosition.TOP))
-        self.goldIconLabel.installEventFilter(
-            ToolTipFilter(self.goldIconLabel, 500, ToolTipPosition.TOP))
-        self.dmgIconLabel.installEventFilter(
-            ToolTipFilter(self.dmgIconLabel, 500, ToolTipPosition.TOP))
+        self.csIconLabel.installEventFilter(ToolTipFilter(self.csIconLabel, 500, ToolTipPosition.TOP))
+        self.goldIconLabel.installEventFilter(ToolTipFilter(self.goldIconLabel, 500, ToolTipPosition.TOP))
+        self.dmgIconLabel.installEventFilter(ToolTipFilter(self.dmgIconLabel, 500, ToolTipPosition.TOP))
 
         self.csIconLabel.setVisible(False)
         self.goldIconLabel.setVisible(False)
@@ -472,8 +502,7 @@ class TeamView(QFrame):
         self.titleBarLayout.addSpacing(18)
         self.titleBarLayout.addWidget(self.riftHeraldIconLabel)
         self.titleBarLayout.addWidget(self.riftHeraldKillsLabel)
-        self.titleBarLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.titleBarLayout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.titleBarLayout.addWidget(self.bansButton)
         self.titleBarLayout.addSpacing(59)
         self.titleBarLayout.addWidget(self.kdaLabel)
@@ -493,14 +522,29 @@ class TeamView(QFrame):
         # self.vBoxLayout.addSpacerItem(
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def updateTeam(self, win, baronIcon, baronKills, dragonIcon, dragonKills,
-                   riftHeraldIcon, riftHeraldKills, inhibitorIcon,
-                   inhibitorKills, towerIcon, towerKills, kills, deaths,
-                   assists, bans, isCherry, result):
-
+    def updateTeam(
+        self,
+        win,
+        baronIcon,
+        baronKills,
+        dragonIcon,
+        dragonKills,
+        riftHeraldIcon,
+        riftHeraldKills,
+        inhibitorIcon,
+        inhibitorKills,
+        towerIcon,
+        towerKills,
+        kills,
+        deaths,
+        assists,
+        bans,
+        isCherry,
+        result,
+    ):
         if isCherry:
             self.teamResultLabel.setText(result)
-        elif win == 'Win':
+        elif win == "Win":
             self.teamResultLabel.setText(self.tr("Winner"))
         else:
             self.teamResultLabel.setText(self.tr("Loser"))
@@ -511,31 +555,17 @@ class TeamView(QFrame):
         self.dragonKillsLabel.setText(str(dragonKills))
         self.riftHeraldKillsLabel.setText(str(riftHeraldKills))
 
-        self.towerIconLabel.setPixmap(
-            QPixmap(towerIcon).scaled(20, 20, Qt.KeepAspectRatio,
-                                      Qt.SmoothTransformation))
-        self.inhibitorIconLabel.setPixmap(
-            QPixmap(inhibitorIcon).scaled(16, 16, Qt.KeepAspectRatio,
-                                          Qt.SmoothTransformation))
-        self.baronIconLabel.setPixmap(
-            QPixmap(baronIcon).scaled(16, 16, Qt.KeepAspectRatio,
-                                      Qt.SmoothTransformation))
-        self.dragonIconLabel.setPixmap(
-            QPixmap(dragonIcon).scaled(16, 16, Qt.KeepAspectRatio,
-                                       Qt.SmoothTransformation))
-        self.riftHeraldIconLabel.setPixmap(
-            QPixmap(riftHeraldIcon).scaled(16, 16, Qt.KeepAspectRatio,
-                                           Qt.SmoothTransformation))
+        self.towerIconLabel.setPixmap(QPixmap(towerIcon).scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.inhibitorIconLabel.setPixmap(QPixmap(inhibitorIcon).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.baronIconLabel.setPixmap(QPixmap(baronIcon).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.dragonIconLabel.setPixmap(QPixmap(dragonIcon).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.riftHeraldIconLabel.setPixmap(QPixmap(riftHeraldIcon).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         self.dmgIconLabel.setText("DMG")
 
-        color = 'white' if isDarkTheme() else 'black'
-        self.goldIconLabel.setPixmap(
-            QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.csIconLabel.setPixmap(
-            QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        color = "white" if isDarkTheme() else "black"
+        self.goldIconLabel.setPixmap(QPixmap(f"app/resource/images/Gold_{color}.png").scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.csIconLabel.setPixmap(QPixmap(f"app/resource/images/Minions_{color}.png").scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         if len(bans) != 0:
             self.bansButton.setVisible(True)
@@ -561,21 +591,15 @@ class TeamView(QFrame):
             self.summonersLayout.addWidget(infoBar)
 
         if len(summoners) != 5:
-            self.summonersLayout.addSpacerItem(
-                QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            self.summonersLayout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def __updateIconColor(self, theme: Theme):
-        color = 'white' if theme == Theme.DARK else 'black'
-        self.goldIconLabel.setPixmap(
-            QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.csIconLabel.setPixmap(
-            QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        color = "white" if theme == Theme.DARK else "black"
+        self.goldIconLabel.setPixmap(QPixmap(f"app/resource/images/Gold_{color}.png").scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.csIconLabel.setPixmap(QPixmap(f"app/resource/images/Minions_{color}.png").scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
 
 class BansFlyoutView(FlyoutViewBase):
-
     def __init__(self, bans, parent=None):
         super().__init__(parent)
         self.hBoxLayout = QHBoxLayout(self)
@@ -586,7 +610,6 @@ class BansFlyoutView(FlyoutViewBase):
 
 
 class SummonerInfoBar(QFrame):
-
     def __init__(self, summoner, parent=None):
         super().__init__(parent)
         self.setFixedHeight(39)
@@ -600,8 +623,8 @@ class SummonerInfoBar(QFrame):
         self.spell2Icon = QLabel()
 
         self.levelLabel = QLabel()
-        self.championIconLabel = RoundIcon(summoner['championIcon'], 25, 0, 3)
-        self.summonerName = SummonerName(summoner['summonerName'])
+        self.championIconLabel = RoundIcon(summoner["championIcon"], 25, 0, 3)
+        self.summonerName = SummonerName(summoner["summonerName"])
 
         self.rankIcon = QLabel()
 
@@ -616,73 +639,53 @@ class SummonerInfoBar(QFrame):
         self.__initWidget(summoner)
         self.__initLayout()
 
-        self.summonerName.clicked.connect(lambda: self.parent().parent(
-        ).summonerNameClicked.emit(summoner['puuid']))
+        self.summonerName.clicked.connect(lambda: self.parent().parent().summonerNameClicked.emit(summoner["puuid"]))
 
     def __initWidget(self, summoner):
-        self.isCurrent = summoner['isCurrent']
+        self.isCurrent = summoner["isCurrent"]
         if self.isCurrent:
             self.setObjectName("currentSummonerWidget")
 
-        self.runeIcon.setPixmap(
-            QPixmap(summoner['runeIcon']).scaled(23, 23, Qt.KeepAspectRatio,
-                                                 Qt.SmoothTransformation))
+        self.runeIcon.setPixmap(QPixmap(summoner["runeIcon"]).scaled(23, 23, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.spell1Icon.setFixedSize(18, 18)
-        self.spell1Icon.setPixmap(
-            QPixmap(summoner['spell1Icon']).scaled(16, 16, Qt.KeepAspectRatio,
-                                                   Qt.SmoothTransformation))
+        self.spell1Icon.setPixmap(QPixmap(summoner["spell1Icon"]).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.spell2Icon.setFixedSize(18, 18)
-        self.spell2Icon.setPixmap(
-            QPixmap(summoner['spell2Icon']).scaled(16, 16, Qt.KeepAspectRatio,
-                                                   Qt.SmoothTransformation))
-        self.spell1Icon.setStyleSheet(
-            "QLabel {border: 1px solid rgb(70, 55, 20)}")
-        self.spell2Icon.setStyleSheet(
-            "QLabel {border: 1px solid rgb(70, 55, 20)}")
+        self.spell2Icon.setPixmap(QPixmap(summoner["spell2Icon"]).scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.spell1Icon.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
+        self.spell2Icon.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
 
-        self.levelLabel.setText(str(summoner['champLevel']))
+        self.levelLabel.setText(str(summoner["champLevel"]))
         self.levelLabel.setObjectName("levelLabel")
         self.levelLabel.setAlignment(Qt.AlignCenter)
         self.levelLabel.setFixedWidth(20)
 
-        self.items = [
-            QPixmap(icon).scaled(21, 21, Qt.KeepAspectRatio,
-                                 Qt.SmoothTransformation)
-            for icon in summoner['itemIcons']
-        ]
+        self.items = [QPixmap(icon).scaled(21, 21, Qt.KeepAspectRatio, Qt.SmoothTransformation) for icon in summoner["itemIcons"]]
 
-        if summoner['rankInfo']:
-            self.rankIcon.setPixmap(
-                QPixmap(summoner['rankIcon']).scaled(30, 30,
-                                                     Qt.KeepAspectRatio,
-                                                     Qt.SmoothTransformation))
+        if summoner["rankInfo"]:
+            self.rankIcon.setPixmap(QPixmap(summoner["rankIcon"]).scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             self.rankIcon.setFixedSize(30, 30)
 
-            tier, divison, lp = summoner['tier'], summoner[
-                'division'], summoner['lp']
-            if tier != '':
+            tier, divison, lp = summoner["tier"], summoner["division"], summoner["lp"]
+            if tier != "":
                 self.rankIcon.setToolTip(f"{tier} {divison} {lp}")
             else:
                 self.rankIcon.setToolTip(self.tr("Unranked"))
 
-            self.rankIcon.installEventFilter(
-                ToolTipFilter(self.rankIcon, 0, ToolTipPosition.TOP))
+            self.rankIcon.installEventFilter(ToolTipFilter(self.rankIcon, 0, ToolTipPosition.TOP))
 
-        self.kdaLabel.setText(
-            f"{summoner['kills']} / {summoner['deaths']} / {summoner['assists']}"
-        )
+        self.kdaLabel.setText(f"{summoner['kills']} / {summoner['deaths']} / {summoner['assists']}")
         self.kdaLabel.setFixedWidth(100)
         self.kdaLabel.setAlignment(Qt.AlignCenter)
 
-        self.csLabel.setText(str(summoner['cs']))
+        self.csLabel.setText(str(summoner["cs"]))
         self.csLabel.setAlignment(Qt.AlignCenter)
         self.csLabel.setFixedWidth(50)
 
-        self.goldLabel.setText(str(summoner['gold']))
+        self.goldLabel.setText(str(summoner["gold"]))
         self.goldLabel.setAlignment(Qt.AlignCenter)
         self.goldLabel.setFixedWidth(60)
 
-        self.demageLabel.setText(str(summoner['demage']))
+        self.demageLabel.setText(str(summoner["demage"]))
         self.demageLabel.setAlignment(Qt.AlignCenter)
         self.demageLabel.setFixedWidth(70)
 
@@ -697,8 +700,7 @@ class SummonerInfoBar(QFrame):
         for icon in self.items:
             itemLabel = QLabel()
             itemLabel.setPixmap(icon)
-            itemLabel.setStyleSheet(
-                "QLabel {border: 1px solid rgb(70, 55, 20)}")
+            itemLabel.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
             itemLabel.setFixedSize(23, 23)
 
             self.itemsLayout.addWidget(itemLabel)
@@ -710,8 +712,7 @@ class SummonerInfoBar(QFrame):
         self.hBoxLayout.addWidget(self.championIconLabel)
         self.hBoxLayout.addWidget(self.summonerName)
         self.hBoxLayout.addSpacing(10)
-        self.hBoxLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.hBoxLayout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.hBoxLayout.addSpacing(5)
         self.hBoxLayout.addWidget(self.rankIcon)
         self.hBoxLayout.addSpacing(5)
@@ -724,7 +725,6 @@ class SummonerInfoBar(QFrame):
 
 
 class GameTitleBar(QFrame):
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -747,8 +747,7 @@ class GameTitleBar(QFrame):
         self.copyGameIdButton.setVisible(False)
         self.copyGameIdButton.setFixedSize(36, 36)
         self.copyGameIdButton.setToolTip(self.tr("Copy game ID"))
-        self.copyGameIdButton.installEventFilter(
-            ToolTipFilter(self.copyGameIdButton, 500, ToolTipPosition.LEFT))
+        self.copyGameIdButton.installEventFilter(ToolTipFilter(self.copyGameIdButton, 500, ToolTipPosition.LEFT))
 
     def __initLayout(self):
         self.infoLayout.setSpacing(0)
@@ -760,34 +759,30 @@ class GameTitleBar(QFrame):
         self.titleBarLayout.addWidget(self.mapIcon)
         self.titleBarLayout.addSpacing(5)
         self.titleBarLayout.addLayout(self.infoLayout)
-        self.titleBarLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.titleBarLayout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.titleBarLayout.addWidget(self.copyGameIdButton)
         self.titleBarLayout.addSpacing(10)
 
-    def updateTitleBar(self, mapIcon, result, mapName, modeName, duration,
-                       creation, gameId, color):
+    def updateTitleBar(self, mapIcon, result, mapName, modeName, duration, creation, gameId, color):
         self.gameId = gameId
         self.mapIcon.setPixmap(mapIcon)
         self.resultLabel.setText(result)
-        self.infoLabel.setText(
-            f"{mapName}  ·  {modeName}  ·  {duration}  ·  {creation}  ·  " +
-            self.tr("Game ID: ") + f"{gameId}")
+        self.infoLabel.setText(f"{mapName}  ·  {modeName}  ·  {duration}  ·  {creation}  ·  " + self.tr("Game ID: ") + f"{gameId}")
         self.copyGameIdButton.setVisible(True)
 
-        self.setStyleSheet(f""" GameTitleBar {{
+        self.setStyleSheet(
+            f""" GameTitleBar {{
             border: 1px solid rgb({color});
             border-radius: 5px;
             background-color: rgba({color}, 0.05);
-        }}""")
+        }}"""
+        )
 
     def __connectSignalToSlot(self):
-        self.copyGameIdButton.clicked.connect(
-            lambda: pyperclip.copy(self.gameId))
+        self.copyGameIdButton.clicked.connect(lambda: pyperclip.copy(self.gameId))
 
 
 class GamesView(QFrame):
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -806,7 +801,6 @@ class GamesView(QFrame):
 
 
 class GameTab(QFrame):
-
     def __init__(self, game=None, parent=None):
         super().__init__(parent)
         self.setFixedHeight(54)
@@ -816,24 +810,22 @@ class GameTab(QFrame):
         self.vBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
 
-        self.gameId = game['gameId']
-        self.championIcon = RoundIcon(game['championIcon'], 32, 2, 2)
+        self.gameId = game["gameId"]
+        self.championIcon = RoundIcon(game["championIcon"], 32, 2, 2)
 
-        self.modeName = QLabel(game['name'].replace("排位赛 ", ""))
+        self.modeName = QLabel(game["name"].replace("排位赛 ", ""))
 
-        self.time = QLabel(
-            f"{game['shortTime']}  {game['kills']}/{game['deaths']}/{game['assists']}"
-        )
+        self.time = QLabel(f"{game['shortTime']}  {game['kills']}/{game['deaths']}/{game['assists']}")
         self.resultLabel = QLabel()
 
-        if game['remake']:
-            self.resultLabel.setText(self.tr('remake'))
-        elif game['win']:
-            self.resultLabel.setText(self.tr('win'))
+        if game["remake"]:
+            self.resultLabel.setText(self.tr("remake"))
+        elif game["win"]:
+            self.resultLabel.setText(self.tr("win"))
         else:
-            self.resultLabel.setText(self.tr('lose'))
+            self.resultLabel.setText(self.tr("lose"))
 
-        self.__setColor(game['remake'], game['win'])
+        self.__setColor(game["remake"], game["win"])
 
         self.__initWidget()
         self.__initLayout()
@@ -849,8 +841,7 @@ class GameTab(QFrame):
         self.vBoxLayout.addSpacing(2)
         self.vBoxLayout.addLayout(self.nameTimeKdaLayout)
 
-        self.vBoxLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.vBoxLayout.addSpacerItem(QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
     def __setColor(self, remake=True, win=True):
         if remake:
@@ -864,7 +855,8 @@ class GameTab(QFrame):
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
         r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
-        self.setStyleSheet(f""" GameTab {{
+        self.setStyleSheet(
+            f""" GameTab {{
             border-radius: 5px;
             border: 1px solid rgb({r}, {g}, {b});
             background-color: rgba({r}, {g}, {b}, 0.05);
@@ -878,15 +870,16 @@ class GameTab(QFrame):
             border-radius: 5px;
             border: 1px solid rgb({r2}, {g2}, {b2});
             background-color: rgba({r2}, {g2}, {b2}, 0.1);
-        }}""")
+        }}"""
+        )
 
     def mousePressEvent(self, a0) -> None:
-        self.setProperty('pressed', True)
+        self.setProperty("pressed", True)
         self.style().polish(self)
         return super().mousePressEvent(a0)
 
     def mouseReleaseEvent(self, a0) -> None:
-        self.setProperty('pressed', False)
+        self.setProperty("pressed", False)
         self.style().polish(self)
 
         self.parent().parent().parent().tabClicked.emit(str(self.gameId))
@@ -917,8 +910,7 @@ class SearchInterface(ScrollArea):
     def __initWidget(self):
         self.searchLineEdit.setAlignment(Qt.AlignCenter)
         self.searchLineEdit.setClearButtonEnabled(True)
-        self.searchLineEdit.setPlaceholderText(
-            self.tr("Please input summoner name"))
+        self.searchLineEdit.setPlaceholderText(self.tr("Please input summoner name"))
         self.careerButton.setEnabled(False)
 
         self.searchButton.setShortcut("Return")
@@ -944,7 +936,7 @@ class SearchInterface(ScrollArea):
         def _():
             try:
                 summoner = self.lolConnector.getSummonerByName(targetName)
-                puuid = summoner['puuid']
+                puuid = summoner["puuid"]
                 self.currentSummonerName = targetName
             except:
                 puuid = "-1"
@@ -954,7 +946,7 @@ class SearchInterface(ScrollArea):
         threading.Thread(target=_).start()
 
     def __onSummonerPuuidGetted(self, puuid):
-        if puuid != '-1':
+        if puuid != "-1":
             self.careerButton.setEnabled(True)
             self.gamesView.gamesTab.updatePuuid(puuid)
         else:
@@ -967,9 +959,10 @@ class SearchInterface(ScrollArea):
     def __showSummonerNotFoundMessage(self):
         InfoBar.error(
             title=self.tr("Summoner not found"),
-            content=self.tr('Please check the summoner name and retry'),
+            content=self.tr("Please check the summoner name and retry"),
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
             duration=5000,
-            parent=self)
+            parent=self,
+        )

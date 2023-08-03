@@ -5,8 +5,8 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
 
-from qfluentwidgets import (NavigationInterface, NavigationItemPosition,
-                            InfoBar, InfoBarPosition, qrouter)
+from qfluentwidgets import (NavigationInterface, NavigationItemPosition, InfoBar, InfoBarPosition, qrouter,
+                            )
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow
 
@@ -91,36 +91,61 @@ class MainWindow(FramelessWindow):
     def __initNavigation(self):
         self.navigationInterface.addSeparator()
 
-        self.__addSubInterface(self.startInterface, 'startInterface',
-                               Icon.HOME, True, self.tr("Start"))
-        self.__addSubInterface(self.careerInterface, 'profileInterface',
-                               Icon.PERSON, False, self.tr('Career'))
-        self.__addSubInterface(self.searchInterface, 'searchInterface',
-                               Icon.SEARCH, False, self.tr('Search'))
-        self.__addSubInterface(self.gameInfoInterface, 'gameinfoInterface',
-                               Icon.GAME, False, self.tr('Game Information'))
-        self.__addSubInterface(self.auxiliaryFuncInterface,
-                               'auxiliaryFuncInterface', Icon.WRENCH, False,
-                               self.tr('Auxiliary Functions'))
+        self.__addSubInterface(
+            self.startInterface, "startInterface", Icon.HOME, True, self.tr("Start"))
+        self.__addSubInterface(
+            self.careerInterface,
+            "profileInterface",
+            Icon.PERSON,
+            False,
+            self.tr("Career"),
+        )
+        self.__addSubInterface(
+            self.searchInterface,
+            "searchInterface",
+            Icon.SEARCH,
+            False,
+            self.tr("Search"),
+        )
+        self.__addSubInterface(
+            self.gameInfoInterface,
+            "gameinfoInterface",
+            Icon.GAME,
+            False,
+            self.tr("Game Information"),
+        )
+        self.__addSubInterface(
+            self.auxiliaryFuncInterface,
+            "auxiliaryFuncInterface",
+            Icon.WRENCH,
+            False,
+            self.tr("Auxiliary Functions"),
+        )
 
         self.navigationInterface.addSeparator()
 
         # add custom widget to bottom
         self.avatarWidget = NavigationAvatarWidget(
-            avatar='app/resource/images/game.png', name=self.tr('Start LOL'))
+            avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
         self.navigationInterface.addWidget(
-            routeKey='avatar',
+            routeKey="avatar",
             widget=self.avatarWidget,
             onClick=self.__onAvatarWidgetClicked,
-            position=NavigationItemPosition.BOTTOM)
+            position=NavigationItemPosition.BOTTOM,
+        )
 
-        self.__addSubInterface(self.settingInterface, 'settingInterface',
-                               FIF.SETTING, True, self.tr('Settings'),
-                               NavigationItemPosition.BOTTOM)
+        self.__addSubInterface(
+            self.settingInterface,
+            "settingInterface",
+            FIF.SETTING,
+            True,
+            self.tr("Settings"),
+            NavigationItemPosition.BOTTOM,
+        )
 
         #!IMPORTANT: don't forget to set the default route key
-        qrouter.setDefaultRouteKey(self.stackWidget,
-                                   self.startInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackWidget, self.startInterface.objectName())
 
         # set the maximum width
         # self.navigationInterface.setExpandWidth(300)
@@ -147,8 +172,8 @@ class MainWindow(FramelessWindow):
     def __initWindow(self):
         self.resize(1134, 826)
         self.setMinimumSize(1134, 826)
-        self.setWindowIcon(QIcon('app/resource/images/logo.png'))
-        self.setWindowTitle('Seraphine')
+        self.setWindowIcon(QIcon("app/resource/images/logo.png"))
+        self.setWindowTitle("Seraphine")
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
 
         # self.splashScreen = SplashScreen(self.windowIcon(), self)
@@ -192,41 +217,44 @@ class MainWindow(FramelessWindow):
         self.rankInfo = self.lolConnector.getRankedStatsByPuuid(
             self.currentSummoner.puuid)
         gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
-            self.currentSummoner.puuid, 0,
-            cfg.get(cfg.careerGamesNumber) - 1)
+            self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
         self.games = {
-            'gameCount': gamesInfo['gameCount'],
-            'wins': 0,
-            'losses': 0,
-            'kills': 0,
-            'deaths': 0,
-            'assists': 0,
-            'games': []
+            "gameCount": gamesInfo["gameCount"],
+            "wins": 0,
+            "losses": 0,
+            "kills": 0,
+            "deaths": 0,
+            "assists": 0,
+            "games": [],
         }
 
-        for game in gamesInfo['games']:
+        for game in gamesInfo["games"]:
             info = processGameData(game, self.lolConnector)
-            if not info['remake'] and info['queueId'] != 0:
-                self.games['kills'] += info['kills']
-                self.games['deaths'] += info['deaths']
-                self.games['assists'] += info['assists']
-                if info['win']:
-                    self.games['wins'] += 1
+            if not info["remake"] and info["queueId"] != 0:
+                self.games["kills"] += info["kills"]
+                self.games["deaths"] += info["deaths"]
+                self.games["assists"] += info["assists"]
+                if info["win"]:
+                    self.games["wins"] += 1
                 else:
-                    self.games['losses'] += 1
+                    self.games["losses"] += 1
 
-            self.games['games'].append(info)
+            self.games["games"].append(info)
 
         self.nameOrIconChanged.emit(icon, name)
-        self.careerInterface.careerInfoChanged.emit(name, icon, level,
-                                                    xpSinceLastLevel,
-                                                    xpUntilNextLevel,
-                                                    self.rankInfo, self.games,
-                                                    True)
+        self.careerInterface.careerInfoChanged.emit(
+            name,
+            icon,
+            level,
+            xpSinceLastLevel,
+            xpUntilNextLevel,
+            self.rankInfo,
+            self.games,
+            True,
+        )
 
     def __onLolClientStarted(self):
-
         def _():
             self.lolConnector.start()
             self.isClientProcessRunning = True
@@ -254,19 +282,16 @@ class MainWindow(FramelessWindow):
         self.__unlockNavigationAndSwitchToCareer()
 
     def __onLolClientEnded(self):
-
         def _():
             self.lolConnector.close()
             self.isClientProcessRunning = False
 
             self.currentSummoner = None
-            icon = 'app/resource/images/game.png'
-            name = self.tr('Start LOL')
+            icon = "app/resource/images/game.png"
+            name = self.tr("Start LOL")
             self.nameOrIconChanged.emit(icon, name)
-            self.careerInterface.careerInfoChanged.emit(
-                self.tr("Connecting..."),
-                'app/resource/game/profile icons/29.jpg', -1, 0, 1, {}, {},
-                True)
+            self.careerInterface.careerInfoChanged.emit(self.tr(
+                "Connecting..."), "app/resource/images/champion-0.png", -1, 0, 1, {}, {}, True)
             self.searchInterface.lolConnector = None
             self.searchInterface.gamesView.gamesTab.lolConnector = None
             self.auxiliaryFuncInterface.lolConnector = None
@@ -283,15 +308,14 @@ class MainWindow(FramelessWindow):
         self.__lockNavigationAndSwitchToStart()
 
     def __onNameOrIconChanged(self, icon: str, name: str):
-        self.avatarWidget.avatar = QImage(icon).scaled(24, 24,
-                                                       Qt.KeepAspectRatio,
-                                                       Qt.SmoothTransformation)
+        self.avatarWidget.avatar = QImage(icon).scaled(
+            24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.avatarWidget.name = name
 
         self.avatarWidget.repaint()
 
     def __onLolInstallFolderChanged(self, folder: str):
-        folder = folder.replace('\\', '/')
+        folder = folder.replace("\\", "/")
         folder = folder.replace("LeagueClient", "TCLS")
         folder = f"{folder[:1].upper()}{folder[1:]}"
 
@@ -314,8 +338,15 @@ class MainWindow(FramelessWindow):
 
             self.nameOrIconChanged.emit(icon, name)
             self.careerInterface.careerInfoChanged.emit(
-                name, icon, level, xpSinceLastLevel, xpUntilNextLevel,
-                self.rankInfo, self.games, False)
+                name,
+                icon,
+                level,
+                xpSinceLastLevel,
+                xpUntilNextLevel,
+                self.rankInfo,
+                self.games,
+                False,
+            )
 
         threading.Thread(target=_).start()
 
@@ -331,66 +362,50 @@ class MainWindow(FramelessWindow):
             self.careerInterface.backToMeButton.clicked.emit()
             self.__switchTo(self.careerInterface)
 
-        # self.eventListener.championSelectBegin.emit({
-        #     "myTeam": [{
-        #         "assignedPosition": "",
-        #         "cellId": 0,
-        #         "championId": 0,
-        #         "championPickIntent": 0,
-        #         "entitledFeatureType": "",
-        #         "nameVisibilityType": "",
-        #         "obfuscatedPuuid": "",
-        #         "obfuscatedSummonerId": 0,
-        #         "puuid": "",
-        #         "selectedSkinId": 0,
-        #         "spell1Id": 1,
-        #         "spell2Id": 3,
-        #         "summonerId": 2926635616,
-        #         "team": 1,
-        #         "wardSkinId": -1
-        #     } for _ in range(5)]
-        # })
-
     def __showStartLolSuccessInfo(self):
-        InfoBar.success(title=self.tr('Start LOL successfully'),
-                        orient=Qt.Vertical,
-                        content="",
-                        isClosable=True,
-                        position=InfoBarPosition.BOTTOM_RIGHT,
-                        duration=5000,
-                        parent=self)
+        InfoBar.success(
+            title=self.tr("Start LOL successfully"),
+            orient=Qt.Vertical,
+            content="",
+            isClosable=True,
+            position=InfoBarPosition.BOTTOM_RIGHT,
+            duration=5000,
+            parent=self,
+        )
 
     def __showLolClientPathErrorInfo(self):
         InfoBar.error(
-            title=self.tr('Invalid path'),
-            content=self.
-            tr('Please set the correct directory of the LOL client in the setting page'
-               ),
+            title=self.tr("Invalid path"),
+            content=self.tr(
+                "Please set the correct directory of the LOL client in the setting page"),
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
             duration=5000,
-            parent=self)
+            parent=self,
+        )
 
     def __showConnectLolSuccessInfo(self):
         InfoBar.success(
-            title=self.tr('LOL Client has been connected'),
-            content=
-            f'--app-port: {self.lolConnector.port}\n--remoting-auth-token: {self.lolConnector.token}',
+            title=self.tr("LOL Client has been connected"),
+            content=f"--app-port: {self.lolConnector.port}\n--remoting-auth-token: {self.lolConnector.token}",
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
             duration=5000,
-            parent=self)
+            parent=self,
+        )
 
-    def __addSubInterface(self,
-                          interface: QWidget,
-                          objectName: str,
-                          icon,
-                          selectable,
-                          text: str,
-                          position=NavigationItemPosition.TOP):
-        """ add sub interface """
+    def __addSubInterface(
+        self,
+        interface: QWidget,
+        objectName: str,
+        icon,
+        selectable,
+        text: str,
+        position=NavigationItemPosition.TOP,
+    ):
+        """add sub interface"""
         interface.setObjectName(objectName)
         self.stackWidget.addWidget(interface)
         self.navigationInterface.addItem(
@@ -400,14 +415,15 @@ class MainWindow(FramelessWindow):
             onClick=lambda: self.__switchTo(interface),
             selectable=selectable,
             position=position,
-            tooltip=text)
+            tooltip=text,
+        )
 
     def __unlockNavigationAndSwitchToCareer(self):
-        qrouter.setDefaultRouteKey(self.stackWidget,
-                                   self.careerInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackWidget, self.careerInterface.objectName())
 
         for item in self.navigationInterface.panel.items.values():
-            if item.routeKey in [self.startInterface.objectName(), 'avatar']:
+            if item.routeKey in [self.startInterface.objectName(), "avatar"]:
                 item.widget.isSelectable = False
             else:
                 item.widget.isSelectable = True
@@ -422,15 +438,15 @@ class MainWindow(FramelessWindow):
         self.stackWidget.setCurrentIndex(1)
 
     def __lockNavigationAndSwitchToStart(self):
-        qrouter.setDefaultRouteKey(self.stackWidget,
-                                   self.startInterface.objectName())
+        qrouter.setDefaultRouteKey(
+            self.stackWidget, self.startInterface.objectName())
 
         for item in self.navigationInterface.panel.items.values():
             item.widget.isSelected = False
 
             if item.routeKey in [
-                    self.startInterface.objectName(),
-                    self.settingInterface.objectName(),
+                self.startInterface.objectName(),
+                self.settingInterface.objectName(),
             ]:
                 item.widget.isSelectable = True
             else:
@@ -443,9 +459,7 @@ class MainWindow(FramelessWindow):
         self.stackWidget.setCurrentIndex(0)
 
     def __switchTo(self, widget, triggerByUser=True):
-        if self.navigationInterface.panel.widget(
-                widget.objectName()).isSelectable:
-
+        if self.navigationInterface.panel.widget(widget.objectName()).isSelectable:
             if widget is self.careerInterface:
                 self.careerInterface.setTableStyle(cfg.theme)
 
@@ -492,37 +506,43 @@ class MainWindow(FramelessWindow):
 
             rankInfo = self.lolConnector.getRankedStatsByPuuid(summoner.puuid)
             gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
-                summoner.puuid, 0,
-                cfg.get(cfg.careerGamesNumber) - 1)
+                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
             games = {
-                'gameCount': gamesInfo['gameCount'],
-                'wins': 0,
-                'losses': 0,
-                'kills': 0,
-                'deaths': 0,
-                'assists': 0,
-                'games': []
+                "gameCount": gamesInfo["gameCount"],
+                "wins": 0,
+                "losses": 0,
+                "kills": 0,
+                "deaths": 0,
+                "assists": 0,
+                "games": [],
             }
 
-            for game in gamesInfo['games']:
+            for game in gamesInfo["games"]:
                 info = processGameData(game, self.lolConnector)
 
-                if not info['remake'] and info['queueId'] != 0:
-                    games['kills'] += info['kills']
-                    games['deaths'] += info['deaths']
-                    games['assists'] += info['assists']
+                if not info["remake"] and info["queueId"] != 0:
+                    games["kills"] += info["kills"]
+                    games["deaths"] += info["deaths"]
+                    games["assists"] += info["assists"]
 
-                    if info['win']:
-                        games['wins'] += 1
+                    if info["win"]:
+                        games["wins"] += 1
                     else:
-                        games['losses'] += 1
+                        games["losses"] += 1
 
-                games['games'].append(info)
+                games["games"].append(info)
 
             self.careerInterface.careerInfoChanged.emit(
-                name, icon, level, xpSinceLastLevel, xpUntilNextLevel,
-                rankInfo, games, True)
+                name,
+                icon,
+                level,
+                xpSinceLastLevel,
+                xpUntilNextLevel,
+                rankInfo,
+                games,
+                True,
+            )
 
         threading.Thread(target=_).start()
         self.__switchTo(self.careerInterface)
@@ -550,133 +570,128 @@ class MainWindow(FramelessWindow):
 
             rankInfo = self.lolConnector.getRankedStatsByPuuid(summoner.puuid)
             gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
-                summoner.puuid, 0,
-                cfg.get(cfg.careerGamesNumber) - 1)
+                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
             games = {
-                'gameCount': gamesInfo['gameCount'],
-                'wins': 0,
-                'losses': 0,
-                'kills': 0,
-                'deaths': 0,
-                'assists': 0,
-                'games': []
+                "gameCount": gamesInfo["gameCount"],
+                "wins": 0,
+                "losses": 0,
+                "kills": 0,
+                "deaths": 0,
+                "assists": 0,
+                "games": [],
             }
 
-            for game in gamesInfo['games']:
+            for game in gamesInfo["games"]:
                 info = processGameData(game, self.lolConnector)
 
-                if not info['remake'] and info['queueId'] != 0:
-                    games['kills'] += info['kills']
-                    games['deaths'] += info['deaths']
-                    games['assists'] += info['assists']
+                if not info["remake"] and info["queueId"] != 0:
+                    games["kills"] += info["kills"]
+                    games["deaths"] += info["deaths"]
+                    games["assists"] += info["assists"]
 
-                    if info['win']:
-                        games['wins'] += 1
+                    if info["win"]:
+                        games["wins"] += 1
                     else:
-                        games['losses'] += 1
+                        games["losses"] += 1
 
-                games['games'].append(info)
+                games["games"].append(info)
 
             self.careerInterface.careerInfoChanged.emit(
-                summoner.name, icon, level, xpSinceLastLevel, xpUntilNextLevel,
-                rankInfo, games, True)
+                summoner.name,
+                icon,
+                level,
+                xpSinceLastLevel,
+                xpUntilNextLevel,
+                rankInfo,
+                games,
+                True,
+            )
 
         threading.Thread(target=_).start()
         self.__switchTo(self.careerInterface)
 
     def __onMatchMade(self):
-        print("hello2")
         if cfg.get(cfg.enableAutoAcceptMatching):
-            print("hello3")
             threading.Thread(
                 target=lambda: self.lolConnector.acceptMatchMaking()).start()
 
     def __onChampionSelectBegin(self, data):
-
         def _():
             summoners = []
 
-            for item in data['myTeam']:
-                summonerId = item['summonerId']
+            for item in data["myTeam"]:
+                summonerId = item["summonerId"]
                 summoner = self.lolConnector.getSummonerById(summonerId)
 
-                iconId = summoner['profileIconId']
+                iconId = summoner["profileIconId"]
                 icon = self.lolConnector.getProfileIcon(iconId)
 
-                puuid = summoner['puuid']
+                puuid = summoner["puuid"]
 
                 origRankInfo = self.lolConnector.getRankedStatsByPuuid(puuid)
-                soloRankInfo = origRankInfo['queueMap']['RANKED_SOLO_5x5']
-                flexRankInfo = origRankInfo['queueMap']['RANKED_FLEX_SR']
+                soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
+                flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
 
-                soloTier = soloRankInfo['tier']
-                soloDivision = soloRankInfo['division']
+                soloTier = soloRankInfo["tier"]
+                soloDivision = soloRankInfo["division"]
 
-                if soloTier == '':
-                    soloIcon = 'app/resource/images/UNRANKED.svg'
-                    soloTier = self.tr('Unranked')
+                if soloTier == "":
+                    soloIcon = "app/resource/images/UNRANKED.svg"
+                    soloTier = self.tr("Unranked")
                 else:
-                    soloIcon = f'app/resource/images/{soloTier}.svg'
+                    soloIcon = f"app/resource/images/{soloTier}.svg"
                     soloTier = translateTier(soloTier, True)
 
-                if soloDivision == 'NA':
-                    soloDivision = ''
+                if soloDivision == "NA":
+                    soloDivision = ""
 
-                flexTier = flexRankInfo['tier']
-                flexDivision = flexRankInfo['division']
+                flexTier = flexRankInfo["tier"]
+                flexDivision = flexRankInfo["division"]
 
-                if flexTier == '':
-                    flexIcon = 'app/resource/images/UNRANKED.svg'
-                    flexTier = self.tr('Unranked')
+                if flexTier == "":
+                    flexIcon = "app/resource/images/UNRANKED.svg"
+                    flexTier = self.tr("Unranked")
                 else:
-                    flexIcon = f'app/resource/images/{flexTier}.svg'
+                    flexIcon = f"app/resource/images/{flexTier}.svg"
                     flexTier = translateTier(flexTier, True)
 
-                if flexDivision == 'NA':
-                    flexDivision = ''
+                if flexDivision == "NA":
+                    flexDivision = ""
 
                 rankInfo = {
-                    'solo': {
-                        'tier': soloTier,
-                        'icon': soloIcon,
-                        'division': soloDivision,
-                        'lp': soloRankInfo['leaguePoints']
+                    "solo": {
+                        "tier": soloTier,
+                        "icon": soloIcon,
+                        "division": soloDivision,
+                        "lp": soloRankInfo["leaguePoints"],
                     },
-                    'flex': {
-                        'tier': flexTier,
-                        'icon': flexIcon,
-                        'division': flexDivision,
-                        'lp': flexRankInfo['leaguePoints']
-                    }
+                    "flex": {
+                        "tier": flexTier,
+                        "icon": flexIcon,
+                        "division": flexDivision,
+                        "lp": flexRankInfo["leaguePoints"],
+                    },
                 }
 
                 origGamesInfo = self.lolConnector.getSummonerGamesByPuuid(
                     puuid, 0, 10)
 
-                gamesInfo = [
-                    processGameData(game, self.lolConnector)
-                    for game in origGamesInfo['games']
-                ]
+                gamesInfo = [processGameData(
+                    game, self.lolConnector) for game in origGamesInfo["games"]]
 
-                summoners.append({
-                    'name':
-                    summoner['displayName'],
-                    'icon':
-                    icon,
-                    'level':
-                    summoner['summonerLevel'],
-                    'rankInfo':
-                    rankInfo,
-                    'gamesInfo':
-                    gamesInfo,
-                    'xpSinceLastLevel':
-                    summoner['xpSinceLastLevel'],
-                    'xpUntilNextLevel':
-                    summoner['xpUntilNextLevel'],
-                    'puuid':
-                    puuid
-                })
+                summoners.append(
+                    {
+                        "name": summoner["displayName"],
+                        "icon": icon,
+                        "level": summoner["summonerLevel"],
+                        "rankInfo": rankInfo,
+                        "gamesInfo": gamesInfo,
+                        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+                        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+                        "puuid": puuid,
+                    }
+                )
 
             self.gameInfoInterface.allySummonersInfoReady.emit(summoners)
 

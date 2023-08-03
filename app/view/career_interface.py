@@ -26,7 +26,7 @@ class CareerInterface(ScrollArea):
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
         self.nameLevelVLayout = QVBoxLayout()
-        self.icon = RoundAvatar('app/resource/game/profile icons/29.jpg',
+        self.icon = RoundAvatar('app/resource/images/champion-0.png',
                                 0,
                                 1,
                                 parent=self)

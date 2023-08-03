@@ -5,19 +5,20 @@ from qfluentwidgets import NavigationWidget, isDarkTheme
 
 
 class NavigationAvatarWidget(NavigationWidget):
-    """ Avatar widget """
+    """Avatar widget"""
 
     def __init__(self, avatar: str, name: str, parent=None):
         super().__init__(isSelectable=False, parent=parent)
 
         self.name = name
-        self.avatar = QImage(avatar).scaled(24, 24, Qt.KeepAspectRatio,
-                                            Qt.SmoothTransformation)
+        self.avatar = QImage(avatar).scaled(
+            24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
+        )
 
     def paintEvent(self, e):
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.SmoothPixmapTransform
-                               | QPainter.Antialiasing)
+        painter.setRenderHints(
+            QPainter.SmoothPixmapTransform | QPainter.Antialiasing)
 
         painter.setPen(Qt.NoPen)
 
@@ -39,7 +40,8 @@ class NavigationAvatarWidget(NavigationWidget):
         if not self.isCompacted:
             painter.setPen(Qt.white if isDarkTheme() else Qt.black)
 
-            painter.drawText(QRect(44, -1, 255, 36), Qt.AlignVCenter,
-                             self.name)
+            painter.drawText(QRect(44, -1, 255, 36),
+                             Qt.AlignVCenter, self.name)
             self.setStyleSheet(
-                "NavigationWidget{font: 14px 'Segoe UI', 'Microsoft YaHei'}")
+                "NavigationWidget{font: 14px 'Segoe UI', 'Microsoft YaHei'}"
+            )

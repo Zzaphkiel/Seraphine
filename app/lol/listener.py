@@ -49,9 +49,7 @@ class LolClientEventListener(QThread):
             self.currentSummonerProfileChanged.emit(data['data'])
 
         async def onMatchMade(data):
-            print(data)
             if data['data']['playerResponse'] == 'None':
-                print('hello1')
                 self.matchMade.emit()
 
         async def onChampionSelectBegin(data):

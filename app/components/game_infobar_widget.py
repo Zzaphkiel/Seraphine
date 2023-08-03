@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSpacerItem, QSizePolicy)
 from PyQt5.QtGui import QPixmap, QPen, QPainter, QColor
 from qfluentwidgets import isDarkTheme, Theme
 
@@ -8,7 +9,6 @@ from ..components.champion_icon_widget import RoundIcon
 
 
 class RoundLevel(QFrame):
-
     def __init__(self, level, diameter, parent=None):
         super().__init__(parent)
         self.level = str(level)
@@ -17,8 +17,8 @@ class RoundLevel(QFrame):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.TextAntialiasing
-                               | QPainter.Antialiasing)
+        painter.setRenderHints(
+            QPainter.TextAntialiasing | QPainter.Antialiasing)
         if isDarkTheme():
             painter.setPen(QPen(QColor(120, 90, 40), 1, Qt.SolidLine))
             painter.setBrush(QColor(1, 10, 19))
@@ -38,7 +38,6 @@ class RoundLevel(QFrame):
 
 
 class RoundIconWithLevel(QWidget):
-
     def __init__(self, icon, level, parent=None):
         super().__init__(parent)
         self.icon = RoundIcon(icon, 58, 6, 4, self)
@@ -49,7 +48,6 @@ class RoundIconWithLevel(QWidget):
 
 
 class ResultModeSpell(QFrame):
-
     def __init__(self, remake, win, mode, spell1, spell2, rune, parent=None):
         super().__init__(parent)
 
@@ -58,28 +56,32 @@ class ResultModeSpell(QFrame):
         self.resultLabel = QLabel()
 
         if remake:
-            color = '162, 162, 162'
-            self.resultLabel.setText(self.tr('Remake'))
+            color = "162, 162, 162"
+            self.resultLabel.setText(self.tr("Remake"))
         elif win:
-            color = '57, 176, 27'
-            self.resultLabel.setText(self.tr('Win'))
+            color = "57, 176, 27"
+            self.resultLabel.setText(self.tr("Win"))
         else:
-            color = '211, 25, 12'
-            self.resultLabel.setText(self.tr('Lose'))
+            color = "211, 25, 12"
+            self.resultLabel.setText(self.tr("Lose"))
 
         self.resultLabel.setStyleSheet(
-            f"QLabel {{color: rgb({color}); font: bold 16px;}}")
+            f"QLabel {{color: rgb({color}); font: bold 16px;}}"
+        )
         self.modeLabel = QLabel(mode)
         self.modeLabel.setStyleSheet("QLabel {font: 12px;}")
 
         self.spell1 = QLabel()
         self.spell2 = QLabel()
         self.spell1.setPixmap(
-            QPixmap(spell1).scaled(22, 22, Qt.KeepAspectRatio,
-                                   Qt.SmoothTransformation))
+            QPixmap(spell1).scaled(
+                22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        )
         self.spell2.setPixmap(
-            QPixmap(spell2).scaled(22, 22, Qt.KeepAspectRatio,
-                                   Qt.SmoothTransformation))
+            QPixmap(spell2).scaled(
+                22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        )
+
         self.spell1.setFixedSize(22, 22)
         self.spell2.setFixedSize(22, 22)
         self.spell1.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
@@ -87,8 +89,9 @@ class ResultModeSpell(QFrame):
 
         self.rune = QLabel()
         self.rune.setPixmap(
-            QPixmap(rune).scaled(24, 24, Qt.KeepAspectRatio,
-                                 Qt.SmoothTransformation))
+            QPixmap(rune).scaled(
+                24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        )
         self.rune.setFixedSize(24, 24)
 
         self.__initLayout()
@@ -104,7 +107,8 @@ class ResultModeSpell(QFrame):
         self.spellsLayout.addSpacing(5)
         self.spellsLayout.addWidget(self.rune)
         self.spellsLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
 
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.addWidget(self.resultLabel)
@@ -114,7 +118,6 @@ class ResultModeSpell(QFrame):
 
 
 class ItemsKdaCsGold(QFrame):
-
     def __init__(self, items, kills, deaths, assists, cs, gold, parent=None):
         super().__init__(parent)
         self.setFixedSize(550, 67)
@@ -132,17 +135,21 @@ class ItemsKdaCsGold(QFrame):
         self.goldLabel.setFixedWidth(55)
 
         self.csIcon = QLabel()
-        color = 'white' if isDarkTheme() else 'black'
+        color = "white" if isDarkTheme() else "black"
         self.csIcon.setPixmap(
             QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
+        )
         self.csIcon.setFixedSize(16, 16)
         self.csIcon.setAlignment(Qt.AlignCenter)
 
         self.goldIcon = QLabel()
         self.goldIcon.setPixmap(
             QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
+        )
         self.goldIcon.setFixedSize(16, 16)
         self.goldIcon.setAlignment(Qt.AlignCenter)
 
@@ -160,8 +167,10 @@ class ItemsKdaCsGold(QFrame):
         for item in items:
             image = QLabel()
             image.setPixmap(
-                QPixmap(item).scaled(34, 34, Qt.KeepAspectRatio,
-                                     Qt.SmoothTransformation))
+                QPixmap(item).scaled(
+                    34, 34, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                )
+            )
             image.setFixedSize(34, 34)
             image.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
 
@@ -185,17 +194,20 @@ class ItemsKdaCsGold(QFrame):
         self.vBoxLayout.addWidget(self.goldIcon)
 
     def __updateIconColor(self, theme: Theme):
-        color = 'white' if theme == Theme.DARK else 'black'
+        color = "white" if theme == Theme.DARK else "black"
         self.csIcon.setPixmap(
             QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
+        )
         self.goldIcon.setPixmap(
             QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            )
+        )
 
 
 class MapTime(QFrame):
-
     def __init__(self, map, time, duration, parent=None):
         super().__init__(parent)
         self.vBoxLayout = QVBoxLayout(self)
@@ -215,11 +227,11 @@ class MapTime(QFrame):
         self.vBoxLayout.addWidget(self.mapLabel)
         self.vBoxLayout.addWidget(self.timeLabel)
         self.vBoxLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        )
 
 
 class GameInfoBar(QFrame):
-
     def __init__(self, game: dict = None, parent: QWidget = None):
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
@@ -228,19 +240,27 @@ class GameInfoBar(QFrame):
         self.__initLayout()
 
     def __initWidget(self, game):
-        self.championIcon = RoundIconWithLevel(game['championIcon'],
-                                               game['champLevel'])
-        self.resultModeSpells = ResultModeSpell(game['remake'], game['win'],
-                                                game['name'],
-                                                game['spell1Icon'],
-                                                game['spell2Icon'],
-                                                game['runeIcon'])
-        self.itemsKdaCsGold = ItemsKdaCsGold(game['itemIcons'], game['kills'],
-                                             game['deaths'], game['assists'],
-                                             game['cs'], game['gold'])
-        self.mapTime = MapTime(game['map'], game['time'], game['duration'])
+        self.championIcon = RoundIconWithLevel(
+            game["championIcon"], game["champLevel"])
+        self.resultModeSpells = ResultModeSpell(
+            game["remake"],
+            game["win"],
+            game["name"],
+            game["spell1Icon"],
+            game["spell2Icon"],
+            game["runeIcon"],
+        )
+        self.itemsKdaCsGold = ItemsKdaCsGold(
+            game["itemIcons"],
+            game["kills"],
+            game["deaths"],
+            game["assists"],
+            game["cs"],
+            game["gold"],
+        )
+        self.mapTime = MapTime(game["map"], game["time"], game["duration"])
 
-        self.__setColor(game["remake"], game['win'])
+        self.__setColor(game["remake"], game["win"])
 
     def __setColor(self, remake, win):
         if remake:
@@ -250,11 +270,13 @@ class GameInfoBar(QFrame):
         else:
             c = "211, 25, 12"
 
-        self.setStyleSheet(f""" GameInfoBar {{
+        self.setStyleSheet(
+            f""" GameInfoBar {{
             border: 1px solid rgb({c});
             border-radius: 5px;
             background-color: rgba({c}, 0.05);
-        }}""")
+        }}"""
+        )
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(11, 8, 11, 8)
@@ -262,9 +284,11 @@ class GameInfoBar(QFrame):
         self.hBoxLayout.addSpacing(5)
         self.hBoxLayout.addWidget(self.resultModeSpells)
         self.hBoxLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
         self.hBoxLayout.addWidget(self.itemsKdaCsGold)
         self.hBoxLayout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
         self.hBoxLayout.addSpacing(15)
         self.hBoxLayout.addWidget(self.mapTime)
