@@ -31,18 +31,22 @@ python main.py
 - 战绩查询功能
   - 战绩查询，包括隐藏战绩 ✅
   - 进入 BP 后自动查队友战绩 ✅
-  - 进入游戏后自动查对手战绩 ❌
+  - 进入游戏后自动查对手战绩 ❌（快写好了）
 - 其他辅助功能
   - 找到对局后自动接收对局 ✅
   - 修改个人主页背景，可改为未拥有的皮肤 ✅
   - 修改个人在线状态 ✅
   - 修改个人签名 ✅
-  - 创建 5v5 训练模式 ✅
+  - 创建 5v5 自定义训练模式房间 ✅
+  - 卸下勋章 ✅
+- 通用功能（还没想好要不要写）
+  - 开机自动启动 Seraphine ❌
+  - 自动 Seraphine 自动启动客户端   ❌
 
 ## 使用它我会被封号吗 😨？
 由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件、代码或内存的读取或破坏其完整性的行为。
 
-因此仅使用 Seraphine 时极大概率（99.99%）不会被封号。
+因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**不保证**一定不会封号。
 
 ## 参考 👀
 - GUI 基于 [PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
@@ -61,4 +65,4 @@ python main.py
 
 
 ## 许可证
-Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许不可商用。
+Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。
