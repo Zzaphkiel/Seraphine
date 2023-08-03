@@ -5,6 +5,8 @@
     基于 LCU API 实现的英雄联盟战绩查询工具
 </p>
 
+<p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/d3deb827-385d-4ef4-a56b-36b944f97276" align="center" /></p>
+
 ## 快速上手🤗
 下载项目 `zip` 文件解压至文件夹或通过 `git`
 ```shell
