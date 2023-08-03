@@ -7,7 +7,7 @@
 
 <p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/d3deb827-385d-4ef4-a56b-36b944f97276" align="center" /></p>
 
-## 快速上手🤗
+## 快速上手 🤗
 下载项目 `zip` 文件解压至文件夹或通过 `git`
 ```shell
 git clone https://github.com/Zzaphkiel/Seraphine.git
@@ -27,7 +27,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## 功能介绍🥰（还在更新中）
+## 功能介绍 🥰（还在更新中）
 - 战绩查询功能
   - 战绩查询，包括隐藏战绩 ✅
   - 进入 BP 后自动查队友战绩 ✅
@@ -39,12 +39,12 @@ python main.py
   - 修改个人签名 ✅
   - 创建 5v5 训练模式 ✅
 
-## 使用它我会被封号吗😨？
+## 使用它我会被封号吗 😨？
 由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件、代码或内存的读取或破坏其完整性的行为。
 
 因此仅使用 Seraphine 时极大概率（99.99%）不会被封号。
 
-## 参考
+## 参考 👀
 - GUI 基于 [PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
 - 部分与 LCU 的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
@@ -61,4 +61,4 @@ python main.py
 
 
 ## 许可证
-Seraphine 使用 GPLv3 许可证，代码不经允许不可商用。
+Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许不可商用。
