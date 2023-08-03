@@ -22,7 +22,7 @@ conda activate seraphine
 ```shell
 pip install -r requirements.txt
 ```
-运行 `main.py` 以开始使用
+**在管理员身份下**运行 `main.py` 以开始使用
 ```shell
 python main.py
 ```
