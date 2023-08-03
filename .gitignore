@@ -1,8 +1,8 @@
 **/__pycache__/
 test.py
 app/config/config.json
-app/resource/game/champion icons
-app/resource/game/item icons
-app/resource/game/profile icons
-app/resource/game/rune icons
-app/resource/game/summoner spell icons
+app/resource/game/champion icons/
+app/resource/game/item icons/
+app/resource/game/profile icons/
+app/resource/game/rune icons/
+app/resource/game/summoner spell icons/
