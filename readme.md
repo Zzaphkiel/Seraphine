@@ -13,7 +13,7 @@
 git clone https://github.com/Zzaphkiel/Seraphine.git
 cd Seraphine
 ```
-创建新的 Anaconda 环境
+创建并激活新的 Anaconda 环境
 ```shell
 conda create -n seraphine python=3.8
 conda activate seraphine
@@ -48,8 +48,13 @@ python main.py
 
 因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**不保证**一定不会封号。
 
+## 帮助我们改进 Seraphine 😘
+在使用过程中，软件发生任何不符合预期的行为 / 遇到任何 BUG，请提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请带上**环境信息**以及**复现过程**；程序报错请带上**错误信息**。
+
+有功能上的改进 / 添加建议也欢迎提出 issue 进行讨论。
+
 ## 参考 👀
-- GUI 基于 [PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
+- GUI 基于 [zhiyiYo/PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
 - 部分与 LCU 的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
