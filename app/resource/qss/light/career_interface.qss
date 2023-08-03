@@ -1,0 +1,49 @@
+QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+QLabel#name {
+    font: 30px 'Microsoft YaHei', 'Segoe UI';
+}
+
+QLabel#level {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+QLabel#rencent20GamesLabel,
+QLabel#winsLabel,
+QLabel#lossesLabel,
+QLabel#kdaLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+QLabel#winsLabel {
+    color: rgb(57, 176, 27);
+}
+
+QLabel#lossesLabel {
+    color: rgb(211, 25, 12);
+}
+
+#gameInfoArea {
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+    background: rgb(253, 253, 253);
+}
+
+QWidget#gameInfoWidget {
+    background: transparent;
+}
+
+GameInfoBar {
+    background-color: rgb(248, 248, 248);
+}
+
+GameInfoBar>QLabel {
+    background: transparent;
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+ItemsKdaCsGold>QLabel {
+    font: 16px 'Segoe UI', 'Microsoft YaHei';
+}

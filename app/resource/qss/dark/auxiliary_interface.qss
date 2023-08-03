@@ -1,0 +1,9 @@
+QLabel#titleLabel {
+    color: white;
+    font: 33px 'Microsoft YaHei';
+    background-color: transparent;
+}
+
+#scrollWidget {
+    background-color: transparent;
+}

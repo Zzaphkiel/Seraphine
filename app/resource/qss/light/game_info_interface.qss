@@ -1,0 +1,73 @@
+SummonersView {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(253, 253, 253);
+}
+
+#summonersGamesView {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(253, 253, 253);
+}
+
+SummonerInfoView {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(243, 243, 243);
+}
+
+SummonerInfoView:enabled:hover {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(233, 233, 233);
+}
+
+SummonerName {
+    font: bold 15px 'Microsoft YaHei', 'Segoe UI';
+    text-align: left;
+    padding: 4px 6px 4px 6px;
+    color: black;
+    border: none;
+    background-color: transparent;
+}
+
+SummonerName:hover {
+    color: --ThemeColorLight1;
+}
+
+SummonerName:pressed {
+    color: --ThemeColorLight3;
+}
+
+SummonerName:disabled {
+    color: rgba(0, 0, 0, 0.43)
+}
+
+SummonerInfoView>QLabel {
+    font: 12px 'Segoe UI', 'Microsoft YaHei';
+    /* border: 1px solid black; */
+}
+
+GameTab>QLabel {
+    font: 13px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTab>#time {
+    font: 11px;
+}
+
+Games {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(243, 243, 243);
+}
+
+Games>#summonerName {
+    font: bold 15px 'Microsoft YaHei', 'Segoe UI';
+}
+
+Games:hover {
+    border-radius: 5px;
+    border: 1px solid rgb(230, 230, 230);
+    background-color: rgb(233, 233, 233);
+}

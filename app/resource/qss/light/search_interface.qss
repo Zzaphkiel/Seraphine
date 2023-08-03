@@ -1,0 +1,128 @@
+GamesView {
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+    background-color: rgb(253, 253, 253);
+}
+
+GamesTab {
+    /* border-right: 1px solid rgb(230, 230, 230); */
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-right: 1px solid rgb(230, 230, 230);
+    background-color: rgb(243, 243, 243);
+}
+
+GamesTab>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+#emptyLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTab>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTab>#time {
+    font: 12px;
+}
+
+GameDetailView {
+    /* border-left: 1px solid rgb(230, 230, 230);
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px; */
+    background-color: transparent;
+}
+
+GameTitleBar>#resultLabel {
+    font: bold 26px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTitleBar>#infoLabel {
+    font: 12px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTitleBar {
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+    background-color: rgb(243, 243, 243);
+}
+
+TeamView {
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+    background-color: rgb(243, 243, 243);
+}
+
+TeamView>#teamResult {
+    font: 18px 'Segoe UI', 'Microsoft YaHei';
+}
+
+TeamView>#dmgIconLabel {
+    font: bold 14px 'Segoe UI', 'Microsoft YaHei';
+    color: rgb(160, 155, 140)
+}
+
+TeamView>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+
+SummonerInfoBar {
+    border: 1px solid rgb(210, 210, 210);
+    border-radius: 5px;
+    background-color: rgb(233, 233, 233);
+}
+
+SummonerInfoBar:hover {
+    border: 1px solid rgb(210, 210, 210);
+    border-radius: 5px;
+    background-color: rgb(223, 223, 223);
+}
+
+SummonerInfoBar>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+}
+
+
+SummonerInfoBar#currentSummonerWidget>QLabel {
+    font: bold 14px 'Segoe UI', 'Microsoft YaHei';
+    color: --ThemeColorPrimary;
+}
+
+SummonerName {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+    text-align: left;
+    padding: 4px 6px 4px 6px;
+    color: black;
+    border: none;
+    background-color: transparent;
+}
+
+SummonerName:hover {
+    color: --ThemeColorLight1;
+}
+
+SummonerName:pressed {
+    color: --ThemeColorLight3;
+}
+
+SummonerName:disabled {
+    color: rgba(0, 0, 0, 0.43)
+}
+
+SummonerInfoBar#currentSummonerWidget>SummonerName {
+    font: bold;
+    color: --ThemeColorPrimary;
+}
+
+SummonerInfoBar#currentSummonerWidget>SummonerName:hover {
+    font: bold;
+    color: --ThemeColorLight1;
+}
+
+SummonerInfoBar#currentSummonerWidget>SummonerName:pressed {
+    font: bold;
+    color: --ThemeColorLight3;
+}

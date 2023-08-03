@@ -1,0 +1,19 @@
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#label1 {
+    font: 33px 'Microsoft YaHei';
+    color: white
+}
+
+QLabel#label2 {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+    color: white
+}
+
+QLabel#label3 {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+    color: rgb(176, 176, 177)
+}
