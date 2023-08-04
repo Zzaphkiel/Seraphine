@@ -72,13 +72,16 @@ class LolClientConnector:
     @retry()
     def __initManager(self):
         items = self.__get("/lol-game-data/assets/v1/items.json").json()
-        spells = self.__get("/lol-game-data/assets/v1/summoner-spells.json").json()
+        spells = self.__get(
+            "/lol-game-data/assets/v1/summoner-spells.json").json()
         runes = self.__get("/lol-game-data/assets/v1/perks.json").json()
         queues = self.__get("/lol-game-queues/v1/queues").json()
-        champions = self.__get("/lol-game-data/assets/v1/champion-summary.json").json()
+        champions = self.__get(
+            "/lol-game-data/assets/v1/champion-summary.json").json()
         skins = self.__get("/lol-game-data/assets/v1/skins.json").json()
 
-        self.manager = JsonManager(items, spells, runes, queues, champions, skins)
+        self.manager = JsonManager(
+            items, spells, runes, queues, champions, skins)
 
     @retry()
     def getRuneIcon(self, runeId):
@@ -287,6 +290,11 @@ class LolClientConnector:
         res = self.__post("/lol-matchmaking/v1/ready-check/accept")
         return res
 
+    @retry()
+    def getGamePlayersInfo(self):
+        res = self.__get("/lol-gameflow/v1/session").json()
+        return res
+
     def selectChampion(self, championId):
         session = self.__get("/lol-champ-select/v1/session").json()
         localPlayerCellId = session["localPlayerCellId"]
@@ -302,7 +310,8 @@ class LolClientConnector:
 
         self.__patch(f"/lol-champ-select/v1/session/actions/{id}", data=data)
 
-        self.__post(f"/lol-champ-select/v1/session/actions/{id}/complete", data=data)
+        self.__post(
+            f"/lol-champ-select/v1/session/actions/{id}/complete", data=data)
 
     @retry()
     def getSummonerById(self, summonerId):
@@ -345,7 +354,8 @@ class JsonManager:
 
         for item in skins.values():
             championId = item["id"] // 1000
-            self.champions[champs[championId]]["skins"][item["name"]] = item["id"]
+            self.champions[champs[championId]
+                           ]["skins"][item["name"]] = item["id"]
             self.champions[champs[championId]]["id"] = championId
 
     def getItemIconPath(self, iconId):

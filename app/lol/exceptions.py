@@ -5,5 +5,6 @@ class SummonerNotFoundError(Exception):
 class ProfileIconNotFound(Exception):
     pass
 
+
 class SummonerGamesNotFound(Exception):
     pass

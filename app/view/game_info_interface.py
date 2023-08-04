@@ -15,8 +15,10 @@ from ..components.summoner_name_button import SummonerName
 
 class GameInfoInterface(ScrollArea):
     allySummonersInfoReady = pyqtSignal(list)
+    enemySummonerInfoReady = pyqtSignal(list)
     summonerViewClicked = pyqtSignal(str)
     summonerGamesClicked = pyqtSignal(str)
+    gameEnd = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,6 +54,9 @@ class GameInfoInterface(ScrollArea):
         self.summonersView.currentTeamChanged.connect(
             self.__onCurrentTeamChanged)
         self.allySummonersInfoReady.connect(self.__onAllySummonerInfoReady)
+        self.enemySummonerInfoReady.connect(self.__onEnemiesSummonerInfoReady)
+
+        self.gameEnd.connect(self.__onGameEnd)
 
     def __onAllySummonerInfoReady(self, summoners):
         self.summonersView.allySummoners.updateSummoners(summoners)
@@ -59,6 +64,19 @@ class GameInfoInterface(ScrollArea):
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
+
+    def __onEnemiesSummonerInfoReady(self, summoners):
+        self.summonersView.enemySummoners.updateSummoners(summoners)
+        self.enemySummonerGamesView.updateSummoners(summoners)
+
+    def __onGameEnd(self):
+        self.summonersView.allySummoners.clear()
+        self.summonersView.enemySummoners.clear()
+        self.allySummonerGamesView.clear()
+        self.enemySummonerGamesView.clear()
+
+        self.summonersView.allyButton.setVisible(False)
+        self.summonersView.enemyButton.setVisible(False)
 
     def __onCurrentTeamChanged(self, ally: bool):
         index = 0 if ally else 1
@@ -138,12 +156,7 @@ class TeamSummoners(QFrame):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     def updateSummoners(self, summoners):
-        for i in reversed(range(self.vBoxLayout.count())):
-            item = self.vBoxLayout.itemAt(i)
-            self.vBoxLayout.removeItem(item)
-
-            if item.widget():
-                item.widget().deleteLater()
+        self.clear()
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
@@ -153,6 +166,14 @@ class TeamSummoners(QFrame):
         if len(summoners) < 5:
             self.vBoxLayout.addSpacerItem(
                 QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+    def clear(self):
+        for i in reversed(range(self.vBoxLayout.count())):
+            item = self.vBoxLayout.itemAt(i)
+            self.vBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()
 
 
 class SummonerInfoView(QFrame):
@@ -286,9 +307,19 @@ class SummonersGamesView(QFrame):
         self.hBoxLayout.setSpacing(0)
 
     def updateSummoners(self, summoners):
+        self.clear()
+
         for summoner in summoners:
             games = Games(summoner)
             self.hBoxLayout.addWidget(games, alignment=Qt.AlignHCenter)
+
+    def clear(self):
+        for i in reversed(range(self.hBoxLayout.count())):
+            item = self.hBoxLayout.itemAt(i)
+            self.hBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()
 
 
 class Games(QFrame):

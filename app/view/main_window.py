@@ -193,11 +193,14 @@ class MainWindow(FramelessWindow):
         self.processListener.lolClientStarted.connect(
             self.__onLolClientStarted)
         self.processListener.lolClientEnded.connect(self.__onLolClientEnded)
+
         self.eventListener.currentSummonerProfileChanged.connect(
             self.__onCurrentSummonerProfileChanged)
         self.eventListener.matchMade.connect(self.__onMatchMade)
         self.eventListener.championSelectBegin.connect(
             self.__onChampionSelectBegin)
+        self.eventListener.gameStart.connect(self.__onGameStart)
+        self.eventListener.gameEnd.connect(self.__onGameEnd)
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
@@ -696,3 +699,107 @@ class MainWindow(FramelessWindow):
             self.gameInfoInterface.allySummonersInfoReady.emit(summoners)
 
         threading.Thread(target=_).start()
+
+    def __onGameStart(self):
+        def _():
+            data = self.lolConnector.getGamePlayersInfo()['gameData']
+
+            # 特判一下斗魂竞技场
+            if data['queue']['id'] == 1700:
+                return
+
+            team1 = data['teamOne']
+            team2 = data['teamTwo']
+            enemies = None
+
+            # 判断哪边是敌方队伍
+            for summoner in team1:
+                if summoner['puuid'] == self.currentSummoner.puuid:
+                    enemies = team2
+                    break
+
+            if enemies == None:
+                enemies = team1
+
+            summoners = []
+
+            # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
+            for item in enemies:
+                puuid = item["puuid"]
+
+                summoner = self.lolConnector.getSummonerByPuuid(puuid)
+
+                iconId = summoner["profileIconId"]
+                icon = self.lolConnector.getProfileIcon(iconId)
+
+                origRankInfo = self.lolConnector.getRankedStatsByPuuid(puuid)
+                soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
+                flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
+
+                soloTier = soloRankInfo["tier"]
+                soloDivision = soloRankInfo["division"]
+
+                if soloTier == "":
+                    soloIcon = "app/resource/images/UNRANKED.svg"
+                    soloTier = self.tr("Unranked")
+                else:
+                    soloIcon = f"app/resource/images/{soloTier}.svg"
+                    soloTier = translateTier(soloTier, True)
+
+                if soloDivision == "NA":
+                    soloDivision = ""
+
+                flexTier = flexRankInfo["tier"]
+                flexDivision = flexRankInfo["division"]
+
+                if flexTier == "":
+                    flexIcon = "app/resource/images/UNRANKED.svg"
+                    flexTier = self.tr("Unranked")
+                else:
+                    flexIcon = f"app/resource/images/{flexTier}.svg"
+                    flexTier = translateTier(flexTier, True)
+
+                if flexDivision == "NA":
+                    flexDivision = ""
+
+                rankInfo = {
+                    "solo": {
+                        "tier": soloTier,
+                        "icon": soloIcon,
+                        "division": soloDivision,
+                        "lp": soloRankInfo["leaguePoints"],
+                    },
+                    "flex": {
+                        "tier": flexTier,
+                        "icon": flexIcon,
+                        "division": flexDivision,
+                        "lp": flexRankInfo["leaguePoints"],
+                    },
+                }
+
+                origGamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+                    puuid, 0, 10)
+
+                gamesInfo = [processGameData(
+                    game, self.lolConnector) for game in origGamesInfo["games"]]
+
+                summoners.append(
+                    {
+                        "name": summoner["displayName"],
+                        "icon": icon,
+                        "level": summoner["summonerLevel"],
+                        "rankInfo": rankInfo,
+                        "gamesInfo": gamesInfo,
+                        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+                        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+                        "puuid": puuid,
+                    }
+                )
+
+            self.gameInfoInterface.enemySummonerInfoReady.emit(summoners)
+
+        threading.Thread(target=_).start()
+
+    def __onGameEnd(self):
+        threading.Thread(
+            target=lambda: self.gameInfoInterface.gameEnd.emit()).start()

@@ -38,6 +38,8 @@ class LolClientEventListener(QThread):
     currentSummonerProfileChanged = pyqtSignal(dict)
     matchMade = pyqtSignal()
     championSelectBegin = pyqtSignal(dict)
+    gameStart = pyqtSignal()
+    gameEnd = pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -56,6 +58,23 @@ class LolClientEventListener(QThread):
             if data['eventType'] == 'Create':
                 self.championSelectBegin.emit(data['data'])
 
+        async def onGameStartOrEnd(data):
+            # {'data': 'Lobby'，'eventType ': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'None', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'Lobby'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'ChampSelect'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'GameStart', 'eventType': 'Update','uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'InProgress'，'eventType': 'update', 'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'waitingForStats'，'eventType': 'Uupdate'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+            # {'data': 'TerminatedInError'，'eventType': 'update'，'uri': '/lol-gameflow/vi/gameflow-phase'}
+            # {'data': 'None ', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
+
+            if data['eventType'] == 'Update':
+                if data['data'] == 'GameStart':
+                    self.gameStart.emit()
+                elif data['data'] == 'None':
+                    self.gameEnd.emit()
+
         async def main():
             wllp = await willump.start()
             allEventSubscription = await wllp.subscribe('OnJsonApiEvent')
@@ -71,9 +90,14 @@ class LolClientEventListener(QThread):
                 allEventSubscription, '/lol-matchmaking/v1/ready-check',
                 onMatchMade)
 
+            # 订阅开始英雄选择消息
             wllp.subscription_filter_endpoint(allEventSubscription,
                                               '/lol-champ-select/v1/session',
                                               onChampionSelectBegin)
+
+            # 订阅进入游戏 \ 游戏结束消息
+            wllp.subscription_filter_endpoint(
+                allEventSubscription, '/lol-gameflow/v1/gameflow-phase', onGameStartOrEnd)
 
             while True:
                 await asyncio.sleep(10)

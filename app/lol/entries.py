@@ -1,16 +1,3 @@
-# class Summoner():
-
-#     def __init__(self, summonerId, name, profileIconId, puuid, level,
-#                  xpSinceLastLevel, xpUntilNextLevel):
-#         self.summonerId = summonerId
-#         self.name = name
-#         self.profileIconId = profileIconId
-#         self.puuid = puuid
-#         self.level = level
-#         self.xpSinceLastLevel = xpSinceLastLevel
-#         self.xpUntilNextLevel = xpUntilNextLevel
-
-
 class Summoner():
 
     def __init__(self, data: dict):

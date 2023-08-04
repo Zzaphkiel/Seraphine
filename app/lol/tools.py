@@ -1,16 +1,7 @@
 import time
 
-from .entries import Summoner
 from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector
-
-
-def jsonToSummoner(data: dict) -> Summoner:
-    print(data)
-    return Summoner(data['summonerId'], data['displayName'],
-                    data['profileIconId'], data['puuid'],
-                    data['summonerLevel'], data['xpSinceLastLevel'],
-                    data['xpUntilNextLevel'])
 
 
 def translateTier(orig: str, short=False) -> str:

@@ -8,10 +8,10 @@
 <p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071" align="center" /></p>
 
 ## 快速上手 🤗
-下载项目 `zip` 文件解压至文件夹或通过 `git`
+下载项目 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
-git clone https://github.com/Zzaphkiel/Seraphine.git
 cd Seraphine
+git clone https://github.com/Zzaphkiel/Seraphine.git
 ```
 创建并激活新的 Anaconda 环境
 ```shell
@@ -31,7 +31,7 @@ python main.py
 - 战绩查询功能
   - 战绩查询，包括隐藏战绩 ✅
   - 进入 BP 后自动查队友战绩 ✅
-  - 进入游戏后自动查对手战绩 ❌（快写好了）
+  - 进入游戏后自动查对手战绩 ✅（暂不支持斗魂竞技场）
 
 - 其他辅助功能
   - 找到对局后自动接收对局 ✅
@@ -47,16 +47,16 @@ python main.py
   - 开机自动启动 Seraphine ❌（还没想好要不要写）
   - 启动 Seraphine 时自动启动 LOL 客户端 ❌（还没想好要不要写）
 
-## 常见问题 Q & A
+## 常见问题 Q&A 🤨
 ### Q：为什么要必须要使用管理员身份运行 😡？
 
-A：管理员身份仅用于获取 `LeagueClientUx.exe` 进程的命令行参数以调用 LCU API。
+A：管理员身份**仅用于**获取 `LeagueClientUx.exe` 进程的命令行参数以调用 LCU API。
 
 ### Q：我会因为使用 Seraphine 而被封号吗 😨？
 
-A：由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
+A：由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为，并且符合[《<英雄联盟>游戏插件公约》](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)关于 “绿色功能” 的定义。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
 
-### Q：关闭程序时终端显示 `QThread: Destroyed while thread is still running` 怎么办 🤔？
+### Q：关闭程序时终端提示 `QThread` 的错误信息怎么办 🤔？
 
 A：忽视它，它并不影响什么。~~我也不知道为什么会这样，我不会修😥。~~
 
