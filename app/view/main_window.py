@@ -5,8 +5,9 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
 
-from qfluentwidgets import (NavigationInterface, NavigationItemPosition, InfoBar, InfoBarPosition, qrouter,
-                            )
+from qfluentwidgets import (
+    NavigationInterface, NavigationItemPosition, InfoBar, InfoBarPosition, qrouter)
+
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow
 

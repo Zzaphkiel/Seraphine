@@ -36,7 +36,7 @@ python main.py
 - 其他辅助功能
   - 找到对局后自动接收对局 ✅
   - 开局秒选英雄 ❌（还没想好要不要写）
-  - 修改个人主页背景✅，可改为未拥有的皮肤 ✅
+  - 修改个人主页背景✅（可改为未拥有的皮肤）
   - 修改个人在线状态 ✅
   - 修改个人签名 ✅
   - 伪造个人状态卡片中的段位显示 ✅
@@ -54,11 +54,11 @@ A：管理员身份**仅用于**获取 `LeagueClientUx.exe` 进程的命令行�
 
 ### Q：我会因为使用 Seraphine 而被封号吗 😨？
 
-A：由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为，并且符合[《<英雄联盟>游戏插件公约》](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)关于 “绿色功能” 的定义。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
+A：由于本程序的功能**完全符合**[英雄联盟游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
 
 ### Q：关闭程序时终端提示 `QThread` 的错误信息怎么办 🤔？
 
-A：忽视它，它并不影响什么。~~我也不知道为什么会这样，我不会修😥。~~
+A：忽视它，它并不影响什么。~~我也不知道为什么会这样，我不会修~~😥
 
 ## 帮助我们改进 Seraphine 😘
 在使用过程中，遇到程序发生任何不符合预期的行为或任何 BUG，请提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**以及**复现过程**；程序报错请带上**错误信息**。
@@ -68,7 +68,7 @@ A：忽视它，它并不影响什么。~~我也不知道为什么会这样，�
 
 ## 引用以及参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
-- 部分与 LCU 的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
+- 部分与 LOL 客户端的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
   - https://www.mingweisamuel.com/lcu-schema/tool/#/

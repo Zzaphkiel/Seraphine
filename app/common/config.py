@@ -2,7 +2,8 @@ from enum import Enum
 
 from PyQt5.QtCore import QLocale
 
-from qfluentwidgets import qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator, OptionsConfigItem, OptionsValidator, ConfigSerializer, RangeConfigItem, RangeValidator
+from qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
+                            OptionsConfigItem, OptionsValidator, ConfigSerializer, RangeConfigItem, RangeValidator)
 
 
 class Language(Enum):

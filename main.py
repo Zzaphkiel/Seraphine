@@ -4,7 +4,6 @@ import os
 
 from PyQt5.QtCore import Qt, QLocale, QTranslator
 from PyQt5.QtWidgets import QApplication
-
 from qfluentwidgets import FluentTranslator
 
 from app.view.main_window import MainWindow
