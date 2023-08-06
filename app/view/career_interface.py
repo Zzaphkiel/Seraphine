@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
 from PyQt5.QtCore import Qt, pyqtSignal
 from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton,
                             ComboBox, SmoothScrollArea, ToolTipFilter,
-                            ToolTipPosition, ToolButton)
+                            ToolTipPosition, ToolButton, IndeterminateProgressRing)
 
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar
@@ -18,6 +18,8 @@ from ..lol.tools import translateTier
 
 class CareerInterface(ScrollArea):
     careerInfoChanged = pyqtSignal(str, str, int, int, int, dict, dict, bool)
+    showLoadingPage = pyqtSignal()
+    hideLoadingPage = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -56,6 +58,8 @@ class CareerInterface(ScrollArea):
         self.gameInfoArea = SmoothScrollArea()
         self.gameInfoLayout = QVBoxLayout()
         self.gameInfoWidget = QWidget()
+
+        self.progressRing = IndeterminateProgressRing()
 
         self.games = []
 
@@ -178,6 +182,8 @@ class CareerInterface(ScrollArea):
         self.gameInfoArea.setWidgetResizable(True)
         self.gameInfoArea.setViewportMargins(0, 0, 5, 0)
 
+        self.vBoxLayout.addWidget(self.progressRing, alignment=Qt.AlignCenter)
+
         self.vBoxLayout.addLayout(self.IconNameHBoxLayout)
         self.vBoxLayout.addSpacing(20)
         self.vBoxLayout.addWidget(self.rankTable)
@@ -188,7 +194,46 @@ class CareerInterface(ScrollArea):
         self.vBoxLayout.addSpacing(10)
 
         self.vBoxLayout.setContentsMargins(30, 32, 30, 20)
-        self.setLayout(self.vBoxLayout)
+
+        self.__showLoadingPage()
+
+    def __showLoadingPage(self):
+        self.icon.setVisible(False)
+        self.name.setVisible(False)
+        self.copyButton.setVisible(False)
+        self.level.setVisible(False)
+        self.backToMeButton.setVisible(False)
+        self.searchButton.setVisible(False)
+        self.rankTable.setVisible(False)
+        self.recent20GamesLabel.setVisible(False)
+        self.filterComboBox.setVisible(False)
+        self.winsLabel.setVisible(False)
+        self.lossesLabel.setVisible(False)
+        self.kdaLabel.setVisible(False)
+        self.winsLabel.setVisible(False)
+        self.lossesLabel.setVisible(False)
+        self.gameInfoArea.setVisible(False)
+
+        self.progressRing.setVisible(True)
+
+    def __hideLoadingPage(self):
+        self.icon.setVisible(True)
+        self.name.setVisible(True)
+        self.copyButton.setVisible(True)
+        self.level.setVisible(True)
+        self.backToMeButton.setVisible(True)
+        self.searchButton.setVisible(True)
+        self.rankTable.setVisible(True)
+        self.recent20GamesLabel.setVisible(True)
+        self.filterComboBox.setVisible(True)
+        self.winsLabel.setVisible(True)
+        self.lossesLabel.setVisible(True)
+        self.kdaLabel.setVisible(True)
+        self.winsLabel.setVisible(True)
+        self.lossesLabel.setVisible(True)
+        self.gameInfoArea.setVisible(True)
+
+        self.progressRing.setVisible(False)
 
     def __updateTable(self):
         for i, line in enumerate(self.rankInfo):
@@ -234,6 +279,9 @@ class CareerInterface(ScrollArea):
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
             lambda: pyperclip.copy(self.name.text()))
+
+        self.hideLoadingPage.connect(self.__hideLoadingPage)
+        self.showLoadingPage.connect(self.__showLoadingPage)
 
     def __onCareerInfoChanged(self,
                               name,

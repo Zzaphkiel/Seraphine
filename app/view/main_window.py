@@ -264,6 +264,7 @@ class MainWindow(FramelessWindow):
             self.isClientProcessRunning = True
 
             self.__changeCareerToCurrentSummoner()
+            self.careerInterface.hideLoadingPage.emit()
 
             folder = self.lolConnector.getInstallFolder()
 
@@ -293,9 +294,10 @@ class MainWindow(FramelessWindow):
             self.currentSummoner = None
             icon = "app/resource/images/game.png"
             name = self.tr("Start LOL")
+
             self.nameOrIconChanged.emit(icon, name)
-            self.careerInterface.careerInfoChanged.emit(self.tr(
-                "Connecting..."), "app/resource/images/champion-0.png", -1, 0, 1, {}, {}, True)
+            self.careerInterface.showLoadingPage.emit()
+
             self.searchInterface.lolConnector = None
             self.searchInterface.gamesView.gamesTab.lolConnector = None
             self.auxiliaryFuncInterface.lolConnector = None
@@ -621,6 +623,7 @@ class MainWindow(FramelessWindow):
                 target=lambda: self.lolConnector.acceptMatchMaking()).start()
 
     def __onChampionSelectBegin(self, data):
+
         def _():
             summoners = []
 
@@ -703,7 +706,8 @@ class MainWindow(FramelessWindow):
 
     def __onGameStart(self):
         def _():
-            data = self.lolConnector.getGamePlayersInfo()['gameData']
+            data = self.lolConnector.getGamePlayersInfo()['data']['gameData']
+            # print(data)
 
             # 特判一下斗魂竞技场
             if data['queue']['id'] == 1700:

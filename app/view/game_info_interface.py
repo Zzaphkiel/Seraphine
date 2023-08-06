@@ -160,7 +160,6 @@ class TeamSummoners(QFrame):
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
-            # print(summoner)
             self.vBoxLayout.addWidget(summonerView)
 
         if len(summoners) < 5:
