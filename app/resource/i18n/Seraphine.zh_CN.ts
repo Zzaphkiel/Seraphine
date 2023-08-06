@@ -105,127 +105,127 @@
 <context>
     <name>CareerInterface</name>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Game Type</source>
         <translation>类型</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Total</source>
         <translation>总场次</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Wins</source>
         <translation>胜场</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Losses</source>
         <translation>负场</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Tier</source>
         <translation>段位</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>LP</source>
         <translation>胜点</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="334"/>
+        <location filename="../../view/career_interface.py" line="382"/>
         <source>Ranked Solo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="336"/>
+        <location filename="../../view/career_interface.py" line="384"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="33"/>
+        <location filename="../../view/career_interface.py" line="35"/>
         <source>Connecting...</source>
         <translation>连接中...</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="109"/>
+        <location filename="../../view/career_interface.py" line="113"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="109"/>
+        <location filename="../../view/career_interface.py" line="113"/>
         <source>Normal</source>
         <translation>匹配模式</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="109"/>
+        <location filename="../../view/career_interface.py" line="113"/>
         <source>A.R.A.M.</source>
         <translation>极地大乱斗</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="50"/>
+        <location filename="../../view/career_interface.py" line="52"/>
         <source>Wins:</source>
         <translation>胜：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="51"/>
+        <location filename="../../view/career_interface.py" line="53"/>
         <source>Losses:</source>
         <translation>负：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="47"/>
+        <location filename="../../view/career_interface.py" line="49"/>
         <source>Recent matches</source>
         <translation>近期对局</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="47"/>
+        <location filename="../../view/career_interface.py" line="49"/>
         <source>(Last</source>
         <translation>（最近</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="47"/>
+        <location filename="../../view/career_interface.py" line="49"/>
         <source>games)</source>
         <translation>场）</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="125"/>
+        <location filename="../../view/career_interface.py" line="129"/>
         <source>Remakes or Customs do not count in statistics</source>
         <translation>重开或自定义对局不计入统计</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="39"/>
+        <location filename="../../view/career_interface.py" line="41"/>
         <source>Back to me</source>
         <translation>回到我</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="40"/>
+        <location filename="../../view/career_interface.py" line="42"/>
         <source>Game history</source>
         <translation>历史战绩</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="69"/>
+        <location filename="../../view/career_interface.py" line="73"/>
         <source>Copy summoner name to ClipBoard</source>
         <translation>复制召唤师名</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="52"/>
+        <location filename="../../view/career_interface.py" line="54"/>
         <source>KDA:</source>
         <translation>KDA：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Highest tier</source>
         <translation>赛季最高</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="91"/>
+        <location filename="../../view/career_interface.py" line="95"/>
         <source>Previous end tier</source>
         <translation>上赛季结算</translation>
     </message>
@@ -251,37 +251,37 @@
 <context>
     <name>GameDetailView</name>
     <message>
-        <location filename="../../view/search_interface.py" line="272"/>
+        <location filename="../../view/search_interface.py" line="278"/>
         <source>Win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="275"/>
+        <location filename="../../view/search_interface.py" line="281"/>
         <source>Lose</source>
         <translation>失败</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="269"/>
+        <location filename="../../view/search_interface.py" line="275"/>
         <source>Remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="297"/>
+        <location filename="../../view/search_interface.py" line="302"/>
         <source>1st</source>
         <translation>第一名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="306"/>
+        <location filename="../../view/search_interface.py" line="323"/>
         <source>2nd</source>
         <translation>第二名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="322"/>
+        <location filename="../../view/search_interface.py" line="351"/>
         <source>3rd</source>
         <translation>第三名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="332"/>
+        <location filename="../../view/search_interface.py" line="372"/>
         <source>4th</source>
         <translation>第四名</translation>
     </message>
@@ -289,17 +289,17 @@
 <context>
     <name>GameTab</name>
     <message>
-        <location filename="../../view/game_info_interface.py" line="337"/>
+        <location filename="../../view/game_info_interface.py" line="367"/>
         <source>remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="339"/>
+        <location filename="../../view/game_info_interface.py" line="369"/>
         <source>win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="341"/>
+        <location filename="../../view/game_info_interface.py" line="371"/>
         <source>lose</source>
         <translation>失败</translation>
     </message>
@@ -307,12 +307,12 @@
 <context>
     <name>GameTitleBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="749"/>
+        <location filename="../../view/search_interface.py" line="792"/>
         <source>Copy game ID</source>
         <translation>复制游戏 ID</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="773"/>
+        <location filename="../../view/search_interface.py" line="815"/>
         <source>Game ID: </source>
         <translation>游戏 ID：</translation>
     </message>
@@ -330,7 +330,7 @@
         <translation type="obsolete">下一页</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="221"/>
+        <location filename="../../view/search_interface.py" line="227"/>
         <source>Empty</source>
         <translation>无结果</translation>
     </message>
@@ -338,69 +338,109 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../view/main_window.py" line="96"/>
+        <location filename="../../view/main_window.py" line="97"/>
         <source>Career</source>
         <translation>生涯</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="98"/>
+        <location filename="../../view/main_window.py" line="104"/>
         <source>Search</source>
         <translation>查查你的👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="100"/>
+        <location filename="../../view/main_window.py" line="111"/>
         <source>Game Information</source>
         <translation>对局信息</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="264"/>
+        <location filename="../../view/main_window.py" line="298"/>
         <source>Start LOL</source>
         <translation>启动游戏</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="117"/>
+        <location filename="../../view/main_window.py" line="138"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="102"/>
+        <location filename="../../view/main_window.py" line="118"/>
         <source>Auxiliary Functions</source>
         <translation>其他功能</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="376"/>
+        <location filename="../../view/main_window.py" line="399"/>
         <source>LOL Client has been connected</source>
         <translation>客户端已连接</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="364"/>
+        <location filename="../../view/main_window.py" line="387"/>
         <source>Invalid path</source>
         <translation>路径非法</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="364"/>
+        <location filename="../../view/main_window.py" line="387"/>
         <source>Please set the correct directory of the LOL client in the setting page</source>
         <translation>请在设置页面中设置正确的 LOL 客户端路径</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="94"/>
+        <location filename="../../view/main_window.py" line="95"/>
         <source>Start</source>
         <translation>启动页</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="355"/>
+        <location filename="../../view/main_window.py" line="376"/>
         <source>Start LOL successfully</source>
         <translation>启动客户端成功</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="266"/>
         <source>Connecting...</source>
-        <translation>连接中...</translation>
+        <translation type="obsolete">连接中...</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="631"/>
+        <location filename="../../view/main_window.py" line="799"/>
         <source>Unranked</source>
         <translation>未定级</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="627"/>
+        <source>Home</source>
+        <translation>游戏大厅</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="630"/>
+        <source>Selecting Champions</source>
+        <translation>英雄选择</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="634"/>
+        <source>Gaming</source>
+        <translation>游戏中</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="637"/>
+        <source>Waiting for status</source>
+        <translation>等待游戏结果</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="640"/>
+        <source>End of game</source>
+        <translation>游戏结束</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="644"/>
+        <source>Lobby</source>
+        <translation>房间组队中</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="647"/>
+        <source>Ready check</source>
+        <translation>匹配确认</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="651"/>
+        <source>Match making</source>
+        <translation>匹配中</translation>
     </message>
 </context>
 <context>
@@ -596,17 +636,17 @@
         <translation type="obsolete">失败</translation>
     </message>
     <message>
-        <location filename="../../components/game_infobar_widget.py" line="62"/>
+        <location filename="../../components/game_infobar_widget.py" line="60"/>
         <source>Remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../components/game_infobar_widget.py" line="65"/>
+        <location filename="../../components/game_infobar_widget.py" line="63"/>
         <source>Win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../components/game_infobar_widget.py" line="68"/>
+        <location filename="../../components/game_infobar_widget.py" line="66"/>
         <source>Lose</source>
         <translation>失败</translation>
     </message>
@@ -619,27 +659,27 @@
         <translation type="obsolete">Search 🔍</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="907"/>
+        <location filename="../../view/search_interface.py" line="949"/>
         <source>Search 🔍</source>
         <translation>搜索召唤师 🔍</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="908"/>
+        <location filename="../../view/search_interface.py" line="950"/>
         <source>Career</source>
         <translation>生涯</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="968"/>
+        <location filename="../../view/search_interface.py" line="1010"/>
         <source>Summoner not found</source>
         <translation>召唤师未找到</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="968"/>
+        <location filename="../../view/search_interface.py" line="1010"/>
         <source>Please check the summoner name and retry</source>
         <translation>请检查召唤师名后重试</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="920"/>
+        <location filename="../../view/search_interface.py" line="962"/>
         <source>Please input summoner name</source>
         <translation>请输入召唤师名</translation>
     </message>
@@ -895,7 +935,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SummonerInfoBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="666"/>
+        <location filename="../../view/search_interface.py" line="711"/>
         <source>Unranked</source>
         <translation>未定级</translation>
     </message>
@@ -923,12 +963,12 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">灵活：</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="223"/>
+        <location filename="../../view/game_info_interface.py" line="243"/>
         <source>Ranked Solo / Duo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="233"/>
+        <location filename="../../view/game_info_interface.py" line="253"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
@@ -936,12 +976,12 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SummonersView</name>
     <message>
-        <location filename="../../view/game_info_interface.py" line="85"/>
+        <location filename="../../view/game_info_interface.py" line="103"/>
         <source>Ally</source>
         <translation>友方</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="86"/>
+        <location filename="../../view/game_info_interface.py" line="104"/>
         <source>Enemy</source>
         <translation>敌方</translation>
     </message>
@@ -949,37 +989,37 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>TeamView</name>
     <message>
-        <location filename="../../view/search_interface.py" line="504"/>
+        <location filename="../../view/search_interface.py" line="569"/>
         <source>Winner</source>
         <translation>胜方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="506"/>
+        <location filename="../../view/search_interface.py" line="571"/>
         <source>Loser</source>
         <translation>败方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="404"/>
+        <location filename="../../view/search_interface.py" line="454"/>
         <source>Tower destroyed</source>
         <translation>摧毁防御塔</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="405"/>
+        <location filename="../../view/search_interface.py" line="455"/>
         <source>Inhibitor destroyed</source>
         <translation>摧毁召唤水晶</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="406"/>
+        <location filename="../../view/search_interface.py" line="456"/>
         <source>Baron Nashor killed</source>
         <translation>击杀男爵</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="407"/>
+        <location filename="../../view/search_interface.py" line="457"/>
         <source>Dragon killed</source>
         <translation>击杀巨龙</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="408"/>
+        <location filename="../../view/search_interface.py" line="458"/>
         <source>Rift Herald killed</source>
         <translation>击杀峡谷先锋</translation>
     </message>
@@ -989,17 +1029,17 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">英雄伤害</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="438"/>
+        <location filename="../../view/search_interface.py" line="488"/>
         <source>Minions killed</source>
         <translation>小兵及野怪击杀</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="439"/>
+        <location filename="../../view/search_interface.py" line="489"/>
         <source>Gold earned</source>
         <translation>获取金钱</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="440"/>
+        <location filename="../../view/search_interface.py" line="490"/>
         <source>Damage dealed to champions</source>
         <translation>对英雄造成伤害</translation>
     </message>

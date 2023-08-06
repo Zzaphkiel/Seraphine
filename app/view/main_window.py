@@ -197,11 +197,9 @@ class MainWindow(FramelessWindow):
 
         self.eventListener.currentSummonerProfileChanged.connect(
             self.__onCurrentSummonerProfileChanged)
-        self.eventListener.matchMade.connect(self.__onMatchMade)
-        self.eventListener.championSelectBegin.connect(
-            self.__onChampionSelectBegin)
-        self.eventListener.gameStart.connect(self.__onGameStart)
-        self.eventListener.gameEnd.connect(self.__onGameEnd)
+
+        self.eventListener.gameStatusChanged.connect(
+            self.__onGameStatusChanged)
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
@@ -282,8 +280,11 @@ class MainWindow(FramelessWindow):
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
+            status = self.lolConnector.getGameStatus()
+            self.eventListener.gameStatusChanged.emit(status)
 
         threading.Thread(target=_).start()
+
         self.__unlockNavigationAndSwitchToCareer()
 
     def __onLolClientEnded(self):
@@ -463,6 +464,7 @@ class MainWindow(FramelessWindow):
         self.navigationInterface.setCurrentItem(
             self.startInterface.objectName())
         self.stackWidget.setCurrentIndex(0)
+        self.setWindowTitle("Seraphine")
 
     def __switchTo(self, widget, triggerByUser=True):
         if self.navigationInterface.panel.widget(widget.objectName()).isSelectable:
@@ -617,15 +619,43 @@ class MainWindow(FramelessWindow):
         threading.Thread(target=_).start()
         self.__switchTo(self.careerInterface)
 
+    def __onGameStatusChanged(self, status):
+        title = None
+
+        if status == 'None':
+            title = self.tr("Home")
+        elif status == 'ChampSelect':
+            title = self.tr("Selecting Champions")
+            self.__onChampionSelectBegin()
+        elif status == 'GameStart':
+            title = self.tr("Gaming")
+            self.__onGameStart()
+        elif status == 'WaitingForStatus':
+            title = self.tr("Waiting for status")
+        elif status == 'EndOfGame':
+            title = self.tr("End of game")
+            self.__onGameEnd()
+        elif status == 'Lobby':
+            title = self.tr("Lobby")
+        elif status == 'ReadyCheck':
+            title = self.tr("Ready check")
+            self.__onMatchMade()
+        elif status == 'Matchmaking':
+            title = self.tr("Match making")
+
+        if title != None:
+            self.setWindowTitle("Seraphine - " + title)
+
     def __onMatchMade(self):
         if cfg.get(cfg.enableAutoAcceptMatching):
             threading.Thread(
                 target=lambda: self.lolConnector.acceptMatchMaking()).start()
 
-    def __onChampionSelectBegin(self, data):
+    def __onChampionSelectBegin(self):
 
         def _():
             summoners = []
+            data = self.lolConnector.getChampSelectSession()
 
             for item in data["myTeam"]:
                 summonerId = item["summonerId"]
@@ -706,8 +736,8 @@ class MainWindow(FramelessWindow):
 
     def __onGameStart(self):
         def _():
-            data = self.lolConnector.getGamePlayersInfo()['data']['gameData']
-            # print(data)
+            session = self.lolConnector.getGamePlayersInfo()
+            data = session['gameData']
 
             # 特判一下斗魂竞技场
             if data['queue']['id'] == 1700:

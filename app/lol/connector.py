@@ -250,7 +250,6 @@ class LolClientConnector:
     @retry()
     def removeTokens(self):
         data = {"challengeIds": []}
-        # data = {"hello": []}
         res = self.__post(
             "/lol-challenges/v1/update-player-preferences/", data=data
         ).content
@@ -295,6 +294,11 @@ class LolClientConnector:
         res = self.__get("/lol-gameflow/v1/session").json()
         return res
 
+    def getChampSelectSession(self):
+        res = self.__get("/lol-champ-select/v1/session").json()
+
+        return res
+
     def selectChampion(self, championId):
         session = self.__get("/lol-champ-select/v1/session").json()
         localPlayerCellId = session["localPlayerCellId"]
@@ -316,6 +320,12 @@ class LolClientConnector:
     @retry()
     def getSummonerById(self, summonerId):
         res = self.__get(f"/lol-summoner/v1/summoners/{summonerId}").json()
+
+        return res
+
+    @retry()
+    def getGameStatus(self):
+        res = self.__get("/lol-gameflow/v1/gameflow-phase").text[1:-1]
 
         return res
 

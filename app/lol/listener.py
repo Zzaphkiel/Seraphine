@@ -36,10 +36,7 @@ class LolProcessExistenceListener(QThread):
 
 class LolClientEventListener(QThread):
     currentSummonerProfileChanged = pyqtSignal(dict)
-    matchMade = pyqtSignal()
-    championSelectBegin = pyqtSignal(dict)
-    gameStart = pyqtSignal()
-    gameEnd = pyqtSignal()
+    gameStatusChanged = pyqtSignal(str)
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -50,12 +47,7 @@ class LolClientEventListener(QThread):
         async def onCurrentSummonerProfileChanged(data):
             self.currentSummonerProfileChanged.emit(data['data'])
 
-        async def onChampionSelectBegin(data):
-            if data['eventType'] == 'Create':
-                self.championSelectBegin.emit(data['data'])
-
         async def onGameFlowPhaseChanged(data):
-            # {'data': 'Lobby'，'eventType ': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
             # {'data': 'None', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
             # {'data': 'Lobby'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
             # {'data': 'ChampSelect'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
@@ -64,16 +56,7 @@ class LolClientEventListener(QThread):
             # {'data': 'waitingForStats'，'eventType': 'Uupdate'，'uri': '/lol-gameflow/v1/gameflow-phase'}
             # {'data': 'TerminatedInError'，'eventType': 'update'，'uri': '/lol-gameflow/vi/gameflow-phase'}
             # {'data': 'None ', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # print(data, '\n')
-
-            phase = data['data']
-
-            if phase == 'ReadyCheck':
-                self.matchMade.emit()
-            elif phase == 'GameStart':
-                self.gameStart.emit()
-            elif phase == 'EndOfGame':
-                self.gameEnd.emit()
+            self.gameStatusChanged.emit(data["data"])
 
         async def main():
             wllp = await willump.start()
@@ -85,16 +68,11 @@ class LolClientEventListener(QThread):
                 f'/lol-summoner/v1/summoners/{self.parent().currentSummoner.summonerId}',
                 onCurrentSummonerProfileChanged)
 
-            # 订阅开始英雄选择消息
-            wllp.subscription_filter_endpoint(allEventSubscription,
-                                              '/lol-champ-select/v1/session',
-                                              onChampionSelectBegin)
-
-            # 订阅进入游戏 / 游戏结束消息
+            # 订阅游戏状态改变消息
             wllp.subscription_filter_endpoint(
                 allEventSubscription, '/lol-gameflow/v1/gameflow-phase', onGameFlowPhaseChanged)
 
-            print("hi")
+            # print("[INFO] Event listener initialized.")
             while True:
                 await asyncio.sleep(10)
 
