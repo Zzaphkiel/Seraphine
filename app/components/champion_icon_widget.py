@@ -26,7 +26,8 @@ class RoundIcon(QWidget):
                                   self.height() + self.overscaled,
                                   Qt.AspectRatioMode.KeepAspectRatio,
                                   Qt.TransformationMode.SmoothTransformation)
-        image.scroll(-self.overscaled / 2, -self.overscaled / 2, image.rect())
+        image.scroll(-self.overscaled // 2, -
+                     self.overscaled // 2, image.rect())
 
         path = QPainterPath()
         path.addEllipse(0, 0, self.width(), self.height())
