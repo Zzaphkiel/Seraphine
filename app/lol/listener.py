@@ -7,7 +7,7 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 
 def isLolProcessExists():
-    processes = subprocess.check_output("tasklist")
+    processes = subprocess.check_output("tasklist", shell=True)
     return b'LeagueClientUx.exe' in processes
 
 

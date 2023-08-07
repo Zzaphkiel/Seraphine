@@ -42,7 +42,7 @@ class LolClientConnector:
 
     def start(self):
         command = "wmic process WHERE name='LeagueClientUx.exe' GET commandline"
-        output = subprocess.check_output(command).decode("gbk")
+        output = subprocess.check_output(command, shell=True).decode("gbk")
 
         self.port = re.findall(r'--app-port=(.+?)"', output)[0]
         self.token = re.findall(r'--remoting-auth-token=(.+?)"', output)[0]
