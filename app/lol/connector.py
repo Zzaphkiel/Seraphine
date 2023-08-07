@@ -249,7 +249,10 @@ class LolClientConnector:
 
     @retry()
     def removeTokens(self):
-        data = {"challengeIds": []}
+        reference = self.__get("/lol-chat/v1/me").json()
+        banner = reference['lol']['bannerIdSelected']
+
+        data = {"challengeIds": [], "bannerAccent": str(banner)}
         res = self.__post(
             "/lol-challenges/v1/update-player-preferences/", data=data
         ).content

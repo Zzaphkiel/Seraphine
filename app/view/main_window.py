@@ -483,6 +483,7 @@ class MainWindow(FramelessWindow):
 
     def closeEvent(self, a0) -> None:
         self.processListener.terminate()
+        self.eventListener.terminate()
 
         return super().closeEvent(a0)
 
