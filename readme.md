@@ -8,6 +8,9 @@
 <p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071" align="center" /></p>
 
 ## 快速上手 🤗
+### 直接使用发布版本
+在 [release](https://github.com/Zzaphkiel/Seraphine/releases) 中下载最新版本的压缩包后解压至本地，以管理员身份运行 `Seraphine.exe` 开始使用。
+### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
 cd Seraphine
@@ -22,11 +25,10 @@ conda activate seraphine
 ```shell
 pip install -r requirements.txt
 ```
-**以管理员身份**运行 `main.py` 以开始使用
+**以管理员身份**运行 `main.py` 开始使用
 ```shell
 python main.py
 ```
-
 ## 功能一览 🥰（还在更新中）
 - 战绩查询功能
   - 战绩查询，包括隐藏战绩 ✅
