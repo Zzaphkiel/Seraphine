@@ -216,6 +216,8 @@ class MainWindow(FramelessWindow):
         xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
         xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
 
+        self.careerInterface.currentSummonerName = name
+
         self.rankInfo = self.lolConnector.getRankedStatsByPuuid(
             self.currentSummoner.puuid)
         gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
@@ -293,6 +295,8 @@ class MainWindow(FramelessWindow):
             self.isClientProcessRunning = False
 
             self.currentSummoner = None
+            self.careerInterface.setCurrentSummonerName(None)
+
             icon = "app/resource/images/game.png"
             name = self.tr("Start LOL")
 
@@ -308,7 +312,7 @@ class MainWindow(FramelessWindow):
             self.auxiliaryFuncInterface.removeTokensCard.lolConnector = None
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
 
-        self.eventListener.exit()
+        self.eventListener.terminate()
 
         threading.Thread(target=_).start()
 

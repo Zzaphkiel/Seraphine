@@ -62,10 +62,13 @@ class LolClientEventListener(QThread):
             wllp = await willump.start()
             allEventSubscription = await wllp.subscribe('OnJsonApiEvent')
 
+            res = await wllp.request("get", "/lol-summoner/v1/current-summoner")
+            res = await res.json()
+
             # 订阅改头像 / 改名字消息
             wllp.subscription_filter_endpoint(
                 allEventSubscription,
-                f'/lol-summoner/v1/summoners/{self.parent().currentSummoner.summonerId}',
+                f'/lol-summoner/v1/summoners/{res["summonerId"]}',
                 onCurrentSummonerProfileChanged)
 
             # 订阅游戏状态改变消息

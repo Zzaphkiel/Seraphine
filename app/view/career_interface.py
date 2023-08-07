@@ -24,6 +24,7 @@ class CareerInterface(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.summoner: Summoner = None
+        self.currentSummonerName: Summoner = None
 
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
@@ -483,7 +484,9 @@ class CareerInterface(ScrollArea):
         self.gameInfoLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def isCurrentSummoner(self):
-        summoner: Summoner = self.parent().parent().parent().currentSummoner
+    def setCurrentSummonerName(self, name):
+        self.currentSummonerName = name
 
-        return summoner == None or summoner.name == self.name.text()
+    def isCurrentSummoner(self):
+
+        return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
