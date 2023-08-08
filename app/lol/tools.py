@@ -285,22 +285,28 @@ def processGameDetailData(puuid, game, connector: LolClientConnector):
                 if getRankInfo:
                     rank = connector.getRankedStatsByPuuid(
                         summonerPuuid)['queueMap']
-                    rankInfo = rank[
-                        'RANKED_FLEX_SR'] if queueId == 440 else rank[
-                            'RANKED_SOLO_5x5']
 
-                    tier: str = rankInfo['tier']
-                    division = rankInfo['division']
-                    lp = rankInfo['leaguePoints']
+                    if queueId != 1700:
+                        rankInfo = rank[
+                            'RANKED_FLEX_SR'] if queueId == 440 else rank[
+                                'RANKED_SOLO_5x5']
 
-                    if tier == '':
-                        rankIcon = 'app/resource/images/unranked.png'
+                        tier: str = rankInfo['tier']
+                        division = rankInfo['division']
+                        lp = rankInfo['leaguePoints']
+
+                        if tier == '':
+                            rankIcon = 'app/resource/images/unranked.png'
+                        else:
+                            rankIcon = f'app/resource/images/{tier.lower()}.png'
+                            tier = translateTier(tier, True)
+
+                        if division == 'NA':
+                            division = ''
                     else:
-                        rankIcon = f'app/resource/images/{tier.lower()}.png'
-                        tier = translateTier(tier, True)
-
-                    if division == 'NA':
-                        division = ''
+                        rankInfo = rank["CHERRY"]
+                        lp = rankInfo['ratedRating']
+                        tier, division, rankIcon = None, None, None
                 else:
                     tier, division, lp, rankIcon = None, None, None, None
 

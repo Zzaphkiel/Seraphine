@@ -700,18 +700,22 @@ class SummonerInfoBar(QFrame):
             21, 21, Qt.KeepAspectRatio, Qt.SmoothTransformation) for icon in summoner["itemIcons"]]
 
         if summoner["rankInfo"]:
-            self.rankIcon.setPixmap(QPixmap(summoner["rankIcon"]).scaled(
-                30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            self.rankIcon.setFixedSize(30, 30)
+            if summoner['rankIcon'] != None:
+                self.rankIcon.setPixmap(QPixmap(summoner["rankIcon"]).scaled(
+                    30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                self.rankIcon.setFixedSize(30, 30)
 
-            tier, divison, lp = summoner["tier"], summoner["division"], summoner["lp"]
-            if tier != "":
-                self.rankIcon.setToolTip(f"{tier} {divison} {lp}")
+                tier, divison, lp = summoner["tier"], summoner["division"], summoner["lp"]
+                if tier != "":
+                    self.rankIcon.setToolTip(f"{tier} {divison} {lp}")
+                else:
+                    self.rankIcon.setToolTip(self.tr("Unranked"))
+
+                self.rankIcon.installEventFilter(
+                    ToolTipFilter(self.rankIcon, 0, ToolTipPosition.TOP))
             else:
-                self.rankIcon.setToolTip(self.tr("Unranked"))
-
-            self.rankIcon.installEventFilter(
-                ToolTipFilter(self.rankIcon, 0, ToolTipPosition.TOP))
+                self.rankIcon.setText(str(summoner['lp']))
+                self.rankIcon.setFixedWidth(40)
 
         self.kdaLabel.setText(
             f"{summoner['kills']} / {summoner['deaths']} / {summoner['assists']}")
