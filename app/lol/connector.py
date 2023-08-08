@@ -142,9 +142,6 @@ class LolClientConnector:
 
     @retry()
     def getSummonerSpellIcon(self, spellId):
-        if spellId == 0:
-            return "app/resource/images/spell-0.png"
-
         icon = f"app/resource/game/summoner spell icons/{spellId}.png"
 
         if not os.path.exists(icon):
