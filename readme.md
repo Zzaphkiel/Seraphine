@@ -50,7 +50,7 @@ python main.py
   - 启动 Seraphine 时自动启动 LOL 客户端 ❌（还没想好要不要写）
 
 ## 常见问题 Q&A 🤨
-### Q：为什么要必须要使用管理员身份运行 😡？
+### Q：为什么必须要使用管理员身份运行 😡？
 
 A：管理员身份**仅用于**获取 `LeagueClientUx.exe` 进程的命令行参数以调用 LCU API。
 
