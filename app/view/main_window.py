@@ -258,9 +258,9 @@ class MainWindow(FramelessWindow):
             True,
         )
 
-    def __onLolClientStarted(self):
+    def __onLolClientStarted(self, pid):
         def _():
-            self.lolConnector.start()
+            self.lolConnector.start(pid)
             self.isClientProcessRunning = True
 
             self.__changeCareerToCurrentSummoner()

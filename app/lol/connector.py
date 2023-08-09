@@ -5,6 +5,7 @@ import json
 import requests
 import time
 
+import psutil
 from ..common.config import cfg, Language
 from .exceptions import *
 
@@ -40,14 +41,24 @@ class LolClientConnector:
 
         self.manager = None
 
-    def start(self):
-        command = "wmic process WHERE name='LeagueClientUx.exe' GET commandline"
-        output = subprocess.check_output(command, shell=True).decode("gbk")
+    def start(self, pid):
+        process = psutil.Process(pid)
+        cmdline = process.cmdline()
 
-        self.port = re.findall(r'--app-port=(.+?)"', output)[0]
-        self.token = re.findall(r'--remoting-auth-token=(.+?)"', output)[0]
+        for cmd in cmdline:
+            p = cmd.find("--app-port=")
+            if p != -1:
+                self.port = cmd[11:]
+
+            p = cmd.find("--remoting-auth-token=")
+            if p != -1:
+                self.token = cmd[22:]
+
+            if self.port and self.token:
+                break
 
         self.url = f"https://riot:{self.token}@127.0.0.1:{self.port}"
+
         self.__initManager()
         self.__initFolder()
 

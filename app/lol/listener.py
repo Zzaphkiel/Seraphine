@@ -6,13 +6,19 @@ import willump
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 
-def isLolProcessExists():
-    processes = subprocess.check_output("tasklist", shell=True)
-    return b'LeagueClientUx.exe' in processes
+def getLolProcessPid():
+    processes = subprocess.check_output(
+        'tasklist /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
+
+    if b'LeagueClientUx.exe' in processes:
+        arr = processes.split()
+        return int(arr[1])
+    else:
+        return 0
 
 
 class LolProcessExistenceListener(QThread):
-    lolClientStarted = pyqtSignal()
+    lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
 
     def __init__(self, parent):
@@ -22,10 +28,11 @@ class LolProcessExistenceListener(QThread):
         isRunning = False
 
         while True:
-            if isLolProcessExists():
+            pid = getLolProcessPid()
+            if pid != 0:
                 if not isRunning:
                     isRunning = True
-                    self.lolClientStarted.emit()
+                    self.lolClientStarted.emit(pid)
             else:
                 if isRunning:
                     isRunning = False

@@ -9,7 +9,7 @@
 
 ## 快速上手 🤗
 ### 直接使用发布版本
-在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压至本地，以管理员身份运行 `Seraphine.exe` 开始使用。
+在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压至本地，运行 `Seraphine.exe` 开始使用。
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
@@ -25,7 +25,7 @@ conda activate seraphine
 ```shell
 pip install -r requirements.txt
 ```
-**以管理员身份**运行 `main.py` 开始使用
+运行 `main.py` 开始使用
 ```shell
 python main.py
 ```
@@ -49,12 +49,8 @@ python main.py
   - 开机自动启动 Seraphine ❌（还没想好要不要写）
   - 启动 Seraphine 时自动启动 LOL 客户端 ❌（还没想好要不要写）
 
-## 常见问题 Q&A 🤨
-### Q：为什么必须要使用管理员身份运行 😡？
 
-A：管理员身份**仅用于**获取 `LeagueClientUx.exe` 进程的命令行参数以调用 LCU API。
-
-### Q：我会因为使用 Seraphine 而被封号吗 😨？
+## 我会因为使用 Seraphine 而被封号吗 😨？
 
 A：由于本程序的功能**完全符合**[《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。但同时，Seraphine **并未得到** Riot Games 的认可，不代表 Riot Games 或任何正式参与《英雄联盟》制作或管理的人的观点或意见。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
 
