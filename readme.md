@@ -8,7 +8,7 @@
 <p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071" align="center" /></p>
 
 ## 快速上手 🤗
-### 直接使用发布版本
+### 直接使用打包好的程序
 在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压至本地，运行 `Seraphine.exe` 开始使用。
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
@@ -52,13 +52,13 @@ python main.py
 
 ## 我会因为使用 Seraphine 而被封号吗 😨？
 
-A：由于本程序的功能**完全符合**[《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。但同时，Seraphine **并未得到** Riot Games 的认可，不代表 Riot Games 或任何正式参与《英雄联盟》制作或管理的人的观点或意见。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
+由于本程序的功能**完全符合**[《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。但同时，Seraphine **并未得到** Riot Games 的认可，不代表 Riot Games 或任何正式参与《英雄联盟》制作或管理的人的观点或意见。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
 
 
 ## 帮助我们改进 Seraphine 😘
-个人开发能力有限，所以在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**以及**复现过程**；程序报错请带上**错误信息**。
+个人开发能力有限，本程序将长期处于测试状态。所以在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
 
-如果您有功能上的添加或改进建议，也非常欢迎提出 issue 进行讨论~
+如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论~
 
 
 ## 引用以及参考资料 👀
