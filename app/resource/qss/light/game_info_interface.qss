@@ -1,25 +1,30 @@
+GameInfoInterface {
+    border: none;
+    background-color: transparent;
+}
+
 SummonersView {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(253, 253, 253);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(255, 255, 255, 0.667);
 }
 
 #summonersGamesView {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(253, 253, 253);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(255, 255, 255, 0.667);
 }
 
 SummonerInfoView {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(243, 243, 243);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(245, 245, 245, 0.667);
 }
 
 SummonerInfoView:enabled:hover {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(233, 233, 233);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(233, 233, 233, 0.5);
 }
 
 SummonerName {
@@ -57,9 +62,9 @@ GameTab>#time {
 }
 
 Games {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(243, 243, 243);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(245, 245, 245, 0.667);
 }
 
 Games>#summonerName {
@@ -67,7 +72,7 @@ Games>#summonerName {
 }
 
 Games:hover {
-    border-radius: 5px;
-    border: 1px solid rgb(230, 230, 230);
-    background-color: rgb(233, 233, 233);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(233, 233, 233, 0.5);
 }

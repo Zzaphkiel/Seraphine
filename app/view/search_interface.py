@@ -138,8 +138,11 @@ class GamesTab(QFrame):
 
         self.stackWidget.setCurrentIndex(0)
         self.pageLabel.setText(" ")
+
         self.prevButton.setEnabled(False)
         self.nextButton.setEnabled(False)
+        self.prevButton.setVisible(False)
+        self.nextButton.setVisible(False)
 
     def updatePuuid(self, puuid):
         if self.puuid == puuid:
@@ -251,6 +254,31 @@ class GameDetailView(QFrame):
         self.extraTeamView2 = TeamView()
 
         self.__initLayout()
+
+    def clear(self):
+        for i in reversed(range(self.vBoxLayout.count())):
+            item = self.vBoxLayout.itemAt(i)
+            self.vBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()
+
+        self.titleBar = GameTitleBar()
+
+        self.teamView1 = TeamView()
+        self.teamView2 = TeamView()
+
+        self.extraTeamView1 = TeamView()
+        self.extraTeamView2 = TeamView()
+        self.vBoxLayout.addWidget(self.titleBar)
+        self.vBoxLayout.addWidget(self.teamView1)
+        self.vBoxLayout.addWidget(self.teamView2)
+
+        self.vBoxLayout.addWidget(self.extraTeamView1)
+        self.vBoxLayout.addWidget(self.extraTeamView2)
+
+        self.extraTeamView1.setVisible(False)
+        self.extraTeamView2.setVisible(False)
 
     def __initLayout(self):
         self.vBoxLayout.addWidget(self.titleBar)
@@ -1002,6 +1030,7 @@ class SearchInterface(ScrollArea):
     def __onSummonerPuuidGetted(self, puuid):
         if puuid != "-1":
             self.careerButton.setEnabled(True)
+            self.gamesView.gameDetailView.clear()
             self.gamesView.gamesTab.updatePuuid(puuid)
         else:
             self.__showSummonerNotFoundMessage()
@@ -1020,3 +1049,15 @@ class SearchInterface(ScrollArea):
             duration=5000,
             parent=self,
         )
+
+    def setEnabled(self, a0: bool) -> None:
+        self.gamesView.gamesTab.backToDefaultPage()
+        self.gamesView.gameDetailView.clear()
+        self.searchLineEdit.clear()
+
+        self.searchLineEdit.setEnabled(a0)
+        self.searchButton.setEnabled(a0)
+
+        return super().setEnabled(a0)
+
+    # def clear(self):

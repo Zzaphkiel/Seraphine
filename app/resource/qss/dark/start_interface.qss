@@ -10,10 +10,5 @@ QLabel#label1 {
 
 QLabel#label2 {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
-    color: white
-}
-
-QLabel#label3 {
-    font: 14px 'Segoe UI', 'Microsoft YaHei';
     color: rgb(176, 176, 177)
 }

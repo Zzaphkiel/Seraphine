@@ -1,4 +1,5 @@
 from enum import Enum
+import sys
 
 from PyQt5.QtCore import QLocale
 
@@ -21,6 +22,10 @@ class LanguageSerializer(ConfigSerializer):
         return Language(QLocale(value)) if value != 'Auto' else Language.AUTO
 
 
+def isWin11():
+    return sys.platform == 'win32' and sys.getwindowsversion().build >= 22000
+
+
 class Config(QConfig):
     lolFolder = ConfigItem("General", "LolPath", "", FolderValidator())
     enableStartWithComputer = ConfigItem("General", "EnableStartWithComputer",
@@ -28,6 +33,8 @@ class Config(QConfig):
     enableStartLolWithApp = ConfigItem("General", "EnableStartLolWithApp",
                                        False, BoolValidator())
 
+    micaEnabled = ConfigItem(
+        "Personalization", "MicaEnabled", isWin11(), BoolValidator())
     dpiScale = OptionsConfigItem("Personalization",
                                  "DpiScale",
                                  "Auto",
@@ -54,7 +61,7 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 

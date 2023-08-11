@@ -26,9 +26,9 @@ QLabel#lossesLabel {
 }
 
 #gameInfoArea {
-    border: 1px solid rgb(230, 230, 230);
-    border-radius: 5px;
-    background: rgb(253, 253, 253);
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.667);
 }
 
 QWidget#gameInfoWidget {
@@ -46,4 +46,9 @@ GameInfoBar>QLabel {
 
 ItemsKdaCsGold>QLabel {
     font: 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
+CareerInterface {
+    border: none;
+    background-color: transparent;
 }

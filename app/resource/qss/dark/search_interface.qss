@@ -1,15 +1,20 @@
+SearchInterface {
+    border: none;
+    background-color: transparent;
+}
+
 GamesView {
-    border: 1px solid rgb(62, 62, 62);
-    border-radius: 5px;
-    background-color: rgb(50, 50, 50);
+    border: 1px solid rgb(35, 35, 35);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
 }
 
 GamesTab {
     /* border-right: 1px solid rgb(230, 230, 230); */
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-    border-right: 1px solid rgb(62, 62, 62);
-    background-color: rgb(54, 54, 54);
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-right: 1px solid rgb(82, 82, 82);
+    background-color: rgba(255, 255, 255, 0.051);
 }
 
 GamesTab>QLabel {
@@ -49,15 +54,15 @@ GameTitleBar>#infoLabel {
 }
 
 GameTitleBar {
-    border: 1px solid rgb(62, 62, 62);
-    border-radius: 5px;
-    background-color: rgb(54, 54, 54);
+    border: 1px solid rgb(82, 82, 82);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
 }
 
 TeamView {
-    border: 1px solid rgb(62, 62, 62);
-    border-radius: 5px;
-    background-color: rgb(54, 54, 54);
+    border: 1px solid rgb(82, 82, 82);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
 }
 
 TeamView>#teamResult {
@@ -80,15 +85,15 @@ SummonerInfoBar>QLabel {
 }
 
 SummonerInfoBar {
-    border: 1px solid rgb(89, 89, 89);
-    border-radius: 5px;
-    background-color: rgb(64, 64, 64);
+    border: 1px solid rgb(82, 82, 82);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
 }
 
 SummonerInfoBar:hover {
-    border: 1px solid rgb(89, 89, 89);
-    border-radius: 5px;
-    background-color: rgb(74, 74, 74);
+    border: 1px solid rgb(82, 82, 82);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.0837);
 }
 
 SummonerInfoBar>#levelLabel {

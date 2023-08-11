@@ -4,6 +4,12 @@ QLabel#titleLabel {
     background-color: transparent;
 }
 
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+AuxiliaryInterface,
 #scrollWidget {
     background-color: transparent;
 }

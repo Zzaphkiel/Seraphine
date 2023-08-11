@@ -290,7 +290,7 @@ class SummonerInfoView(QFrame):
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
 
-        # self.setMinimumHeight(100)
+        # self.setFixedHeight(150)
 
 
 class SummonersGamesView(QFrame):
@@ -311,6 +311,10 @@ class SummonersGamesView(QFrame):
         for summoner in summoners:
             games = Games(summoner)
             self.hBoxLayout.addWidget(games, alignment=Qt.AlignHCenter)
+
+        if len(summoners) < 5:
+            self.hBoxLayout.addSpacerItem(QSpacerItem(
+                1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
     def clear(self):
         for i in reversed(range(self.hBoxLayout.count())):

@@ -1,15 +1,14 @@
 import os
-import subprocess
 
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
 
 from qfluentwidgets import (
-    NavigationInterface, NavigationItemPosition, InfoBar, InfoBarPosition, qrouter)
+    NavigationInterface, NavigationItemPosition, InfoBar,
+    InfoBarPosition, FluentWindow, SplashScreen, Theme, isDarkTheme, FluentStyleSheet)
 
 from qfluentwidgets import FluentIcon as FIF
-from qframelesswindow import FramelessWindow
 
 from .start_interface import StartInterface
 from .setting_interface import SettingInterface
@@ -31,19 +30,12 @@ from ..lol.tools import processGameData, translateTier
 import threading
 
 
-class MainWindow(FramelessWindow):
+class MainWindow(FluentWindow):
     nameOrIconChanged = pyqtSignal(str, str)
     lolInstallFolderChanged = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
-
-        self.setTitleBar(CustomTitleBar(self))
-        self.hBoxLayout = QHBoxLayout(self)
-        self.widgetLayout = QHBoxLayout()
-
-        self.stackWidget = StackedWidget(self)
-        self.navigationInterface = NavigationInterface(self, True, True)
 
         # create sub interface
         self.startInterface = StartInterface(self)
@@ -65,63 +57,42 @@ class MainWindow(FramelessWindow):
 
         self.lolConnector = LolClientConnector()
 
-        # initialize layout
-        self.__initLayout()
+        self.__initInterface()
 
         # add items to navigation interface
         self.__initNavigation()
 
-        self.__initWindow()
-
         self.__initListener()
 
-    def __initLayout(self):
-        self.hBoxLayout.setSpacing(0)
-        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.hBoxLayout.addWidget(self.navigationInterface)
-        self.hBoxLayout.addLayout(self.widgetLayout)
-        self.hBoxLayout.setStretchFactor(self.widgetLayout, 1)
+        self.__initWindow()
 
-        self.widgetLayout.addWidget(self.stackWidget)
-        self.widgetLayout.setContentsMargins(0, 48, 0, 0)
+        cfg.themeChanged.connect(
+            lambda: self.setMicaEffectEnabled(self.isMicaEffectEnabled()))
 
-        self.titleBar.raise_()
-        self.navigationInterface.displayModeChanged.connect(
-            self.titleBar.raise_)
+    def __initInterface(self):
+        self.__lockInterface()
+
+        self.startInterface.setObjectName("startInterface")
+        self.careerInterface.setObjectName("careerInterface")
+        self.searchInterface.setObjectName("searchInterface")
+        self.gameInfoInterface.setObjectName("gameInfoInterface")
+        self.auxiliaryFuncInterface.setObjectName("auxiliaryFuncInterface")
+        self.settingInterface.setObjectName("settingInterface")
 
     def __initNavigation(self):
-        self.navigationInterface.addSeparator()
+        pos = NavigationItemPosition.SCROLL
 
-        self.__addSubInterface(
-            self.startInterface, "startInterface", Icon.HOME, True, self.tr("Start"))
-        self.__addSubInterface(
-            self.careerInterface,
-            "profileInterface",
-            Icon.PERSON,
-            False,
-            self.tr("Career"),
-        )
-        self.__addSubInterface(
-            self.searchInterface,
-            "searchInterface",
-            Icon.SEARCH,
-            False,
-            self.tr("Search"),
-        )
-        self.__addSubInterface(
-            self.gameInfoInterface,
-            "gameinfoInterface",
-            Icon.GAME,
-            False,
-            self.tr("Game Information"),
-        )
-        self.__addSubInterface(
-            self.auxiliaryFuncInterface,
-            "auxiliaryFuncInterface",
-            Icon.WRENCH,
-            False,
-            self.tr("Auxiliary Functions"),
-        )
+        self.addSubInterface(
+            self.startInterface, Icon.HOME, self.tr("Start"), pos)
+        self.addSubInterface(
+            self.careerInterface, Icon.PERSON, self.tr("Career"), pos)
+        self.addSubInterface(
+            self.searchInterface, Icon.SEARCH, self.tr("Search"), pos)
+        self.addSubInterface(
+            self.gameInfoInterface, Icon.GAME, self.tr("Game Information"), pos)
+        self.addSubInterface(
+            self.auxiliaryFuncInterface, Icon.WRENCH,
+            self.tr("Auxiliary Functions"), pos)
 
         self.navigationInterface.addSeparator()
 
@@ -135,27 +106,13 @@ class MainWindow(FramelessWindow):
             position=NavigationItemPosition.BOTTOM,
         )
 
-        self.__addSubInterface(
-            self.settingInterface,
-            "settingInterface",
-            FIF.SETTING,
-            True,
-            self.tr("Settings"),
-            NavigationItemPosition.BOTTOM,
+        self.addSubInterface(
+            self.settingInterface, FIF.SETTING,
+            self.tr("Settings"), NavigationItemPosition.BOTTOM,
         )
 
-        #!IMPORTANT: don't forget to set the default route key
-        qrouter.setDefaultRouteKey(
-            self.stackWidget, self.startInterface.objectName())
-
         # set the maximum width
-        # self.navigationInterface.setExpandWidth(300)
-
-        self.stackWidget.currentWidgetChanged.connect(
-            self.__onCurrentWidgetChanged)
-        self.navigationInterface.setCurrentItem(
-            self.startInterface.objectName())
-        self.stackWidget.setCurrentIndex(0)
+        self.navigationInterface.setExpandWidth(150)
 
         self.careerInterface.searchButton.clicked.connect(
             self.__onCareerInterfaceHistoryButtonClicked)
@@ -169,19 +126,27 @@ class MainWindow(FramelessWindow):
             self.__onSearchInterfaceSummonerNameClicked)
         self.gameInfoInterface.summonerGamesClicked.connect(
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
+        self.settingInterface.micaCard.checkedChanged.connect(
+            self.setMicaEffectEnabled)
+        widget = self.navigationInterface.widget(
+            self.careerInterface.objectName())
+        widget.clicked.connect(self.careerInterface.setTableStyle)
 
     def __initWindow(self):
         self.resize(1134, 826)
         self.setMinimumSize(1134, 826)
         self.setWindowIcon(QIcon("app/resource/images/logo.png"))
         self.setWindowTitle("Seraphine")
-        self.titleBar.setAttribute(Qt.WA_StyledBackground)
+
+        self.titleBar.titleLabel.setStyleSheet(
+            "QLabel {font: 13px 'Segoe UI', 'Microsoft YaHei';}")
+        self.titleBar.hBoxLayout.insertSpacing(0, 10)
+
+        self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
 
         # self.splashScreen = SplashScreen(self.windowIcon(), self)
         # self.splashScreen.setIconSize(QSize(106, 106))
         # self.splashScreen.raise_()
-
-        StyleSheet.MAIN_WINDOW.apply(self)
 
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
@@ -264,6 +229,9 @@ class MainWindow(FramelessWindow):
             self.isClientProcessRunning = True
 
             self.__changeCareerToCurrentSummoner()
+
+            self.startInterface.hideLoadingPage.emit(
+                self.lolConnector.port, self.lolConnector.token)
             self.careerInterface.hideLoadingPage.emit()
 
             folder = self.lolConnector.getInstallFolder()
@@ -286,8 +254,8 @@ class MainWindow(FramelessWindow):
             self.eventListener.gameStatusChanged.emit(status)
 
         threading.Thread(target=_).start()
-
-        self.__unlockNavigationAndSwitchToCareer()
+        self.__switchTo(self.careerInterface)
+        self.__unlockInterface()
 
     def __onLolClientEnded(self):
         def _():
@@ -301,6 +269,8 @@ class MainWindow(FramelessWindow):
             name = self.tr("Start LOL")
 
             self.nameOrIconChanged.emit(icon, name)
+
+            self.startInterface.showLoadingPage.emit()
             self.careerInterface.showLoadingPage.emit()
 
             self.searchInterface.lolConnector = None
@@ -313,10 +283,11 @@ class MainWindow(FramelessWindow):
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
 
         self.eventListener.terminate()
+        self.setWindowTitle("Seraphine")
 
         threading.Thread(target=_).start()
-
-        self.__lockNavigationAndSwitchToStart()
+        self.__switchTo(self.startInterface)
+        self.__lockInterface()
 
     def __onNameOrIconChanged(self, icon: str, name: str):
         self.avatarWidget.avatar = QImage(icon).scaled(
@@ -365,7 +336,7 @@ class MainWindow(FramelessWindow):
         if not self.isClientProcessRunning:
             path = f"{cfg.get(cfg.lolFolder)}/client.exe"
             if os.path.exists(path):
-                subprocess.Popen(f'"{path}"')
+                os.Popen(f'"{path}"')
                 self.__showStartLolSuccessInfo()
             else:
                 self.__showLolClientPathErrorInfo()
@@ -407,83 +378,18 @@ class MainWindow(FramelessWindow):
             parent=self,
         )
 
-    def __addSubInterface(
-        self,
-        interface: QWidget,
-        objectName: str,
-        icon,
-        selectable,
-        text: str,
-        position=NavigationItemPosition.TOP,
-    ):
-        """add sub interface"""
-        interface.setObjectName(objectName)
-        self.stackWidget.addWidget(interface)
-        self.navigationInterface.addItem(
-            routeKey=objectName,
-            icon=icon,
-            text=text,
-            onClick=lambda: self.__switchTo(interface),
-            selectable=selectable,
-            position=position,
-            tooltip=text,
-        )
+    def __switchTo(self, interface):
+        self.navigationInterface.widget(interface.objectName()).click()
 
-    def __unlockNavigationAndSwitchToCareer(self):
-        qrouter.setDefaultRouteKey(
-            self.stackWidget, self.careerInterface.objectName())
+    def __unlockInterface(self):
+        self.searchInterface.setEnabled(True)
+        self.auxiliaryFuncInterface.setEnabled(True)
+        # pass
 
-        for item in self.navigationInterface.panel.items.values():
-            if item.routeKey in [self.startInterface.objectName(), "avatar"]:
-                item.widget.isSelectable = False
-            else:
-                item.widget.isSelectable = True
-
-        self.navigationInterface.panel.widget(
-            self.startInterface.objectName()).isSelected = False
-
-        self.navigationInterface.repaint()
-
-        self.navigationInterface.setCurrentItem(
-            self.careerInterface.objectName())
-        self.stackWidget.setCurrentIndex(1)
-
-    def __lockNavigationAndSwitchToStart(self):
-        qrouter.setDefaultRouteKey(
-            self.stackWidget, self.startInterface.objectName())
-
-        for item in self.navigationInterface.panel.items.values():
-            item.widget.isSelected = False
-
-            if item.routeKey in [
-                self.startInterface.objectName(),
-                self.settingInterface.objectName(),
-            ]:
-                item.widget.isSelectable = True
-            else:
-                item.widget.isSelectable = False
-
-        self.navigationInterface.repaint()
-
-        self.navigationInterface.setCurrentItem(
-            self.startInterface.objectName())
-        self.stackWidget.setCurrentIndex(0)
-        self.setWindowTitle("Seraphine")
-
-    def __switchTo(self, widget, triggerByUser=True):
-        if self.navigationInterface.panel.widget(widget.objectName()).isSelectable:
-            if widget is self.careerInterface:
-                self.careerInterface.setTableStyle(cfg.theme)
-
-            self.stackWidget.setCurrentWidget(widget, not triggerByUser)
-
-    def __onCurrentWidgetChanged(self, widget: QWidget):
-        self.navigationInterface.setCurrentItem(widget.objectName())
-        qrouter.push(self.stackWidget, widget.objectName())
-
-    def resizeEvent(self, e):
-        self.titleBar.move(46, 0)
-        self.titleBar.resize(self.width() - 46, self.titleBar.height())
+    def __lockInterface(self):
+        self.searchInterface.setEnabled(False)
+        self.auxiliaryFuncInterface.setEnabled(False)
+        # pass
 
     def closeEvent(self, a0) -> None:
         self.processListener.terminate()
@@ -629,6 +535,7 @@ class MainWindow(FramelessWindow):
 
         if status == 'None':
             title = self.tr("Home")
+            self.__onGameEnd()
         elif status == 'ChampSelect':
             title = self.tr("Selecting Champions")
             self.__onChampionSelectBegin()
@@ -642,6 +549,7 @@ class MainWindow(FramelessWindow):
             self.__onGameEnd()
         elif status == 'Lobby':
             title = self.tr("Lobby")
+            self.__onGameEnd()
         elif status == 'ReadyCheck':
             title = self.tr("Ready check")
             self.__onMatchMade()

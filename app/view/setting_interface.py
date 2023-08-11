@@ -13,7 +13,8 @@ from PyQt5.QtGui import QIcon, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout
 
 from ..common.icons import Icon
-from ..common.config import cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL
+from ..common.config import (
+    cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
 
 
@@ -101,6 +102,15 @@ class SettingInterface(SmoothScrollArea):
 
         self.personalizationGroup = SettingCardGroup(
             self.tr("Personalization"), self.scrollWidget)
+
+        self.micaCard = SwitchSettingCard(
+            Icon.BLUR,
+            self.tr('Mica effect'),
+            self.tr(
+                'Apply semi transparent to windows and surfaces (only available on Win11)'),
+            cfg.micaEnabled,
+            self.personalizationGroup
+        )
         self.themeCard = ComboBoxSettingCard(
             cfg.themeMode,
             Icon.BRUSH,
@@ -156,6 +166,8 @@ class SettingInterface(SmoothScrollArea):
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
 
+        self.micaCard.switchButton.setEnabled(isWin11())
+
         # initialize style sheet
         self.scrollWidget.setObjectName('scrollWidget')
         self.settingLabel.setObjectName('settingLabel')
@@ -177,6 +189,7 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
 
+        self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
         self.personalizationGroup.addSettingCard(self.themeColorCard)
         self.personalizationGroup.addSettingCard(self.zoomCard)
@@ -196,8 +209,9 @@ class SettingInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.lolFolderCard.clicked.connect(self.__onLolFolderCardClicked)
 
-        cfg.themeChanged.connect(self.__onThemeChanged)
+        cfg.themeChanged.connect(setTheme)
         self.themeColorCard.colorChanged.connect(setThemeColor)
+
         cfg.appRestartSig.connect(self.__showRestartToolTip)
         self.careerGamesCount.pushButton.clicked.connect(
             self.__showRestartToolTip)
@@ -215,10 +229,6 @@ class SettingInterface(SmoothScrollArea):
 
         cfg.set(cfg.lolFolder, folder)
         self.lolFolderCard.setContent(folder)
-
-    def __onThemeChanged(self, theme: Theme):
-        setTheme(theme)
-        StyleSheet.SETTING_INTERFACE.apply(self)
 
     def __showRestartToolTip(self):
         InfoBar.success(self.tr("Updated successfully"),

@@ -252,12 +252,13 @@ class CareerInterface(ScrollArea):
         self.rankTable.horizontalHeader().setSectionResizeMode(
             QHeaderView.Stretch)
 
-    def setTableStyle(self, theme):
-        borderColor = 230 if cfg.theme == Theme.LIGHT else 62
-        borderColor = f'rgb({borderColor}, {borderColor}, {borderColor})'
-
-        backgroundColor = 253 if cfg.theme == Theme.LIGHT else 50
-        backgroundColor = f'rgb({backgroundColor}, {backgroundColor}, {backgroundColor})'
+    def setTableStyle(self, theme=None):
+        if cfg.theme == Theme.LIGHT:
+            borderColor = "rgba(0, 0, 0, 0.095)"
+            backgroundColor = "rgba(255, 255, 255, 0.667)"
+        else:
+            borderColor = "rgb(35, 35, 35)"
+            backgroundColor = "rgba(255, 255, 255, 0.051)"
 
         qss = self.rankTable.styleSheet()
         qss += f'''
@@ -268,7 +269,7 @@ class CareerInterface(ScrollArea):
 
         QTableView {{
             border: 1px solid {borderColor}; 
-            border-radius: 5px;
+            border-radius: 6px;
             background: {backgroundColor};
         }}'''
         self.rankTable.setStyleSheet(qss)

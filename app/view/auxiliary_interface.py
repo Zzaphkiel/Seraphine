@@ -93,6 +93,31 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.expandLayout.addWidget(self.gameGroup)
         self.expandLayout.addWidget(self.profileGroup)
 
+    def setEnabled(self, a0: bool) -> None:
+        self.autoAcceptMatchingCard.switchButton.setEnabled(a0)
+
+        self.createPracticeLobbyCard.clear()
+        self.createPracticeLobbyCard.nameLineEdit.setEnabled(a0)
+        self.createPracticeLobbyCard.passwordLineEdit.setEnabled(a0)
+
+        self.onlineStatusCard.clear()
+        self.onlineStatusCard.lineEdit.setEnabled(a0)
+
+        self.profileBackgroundCard.clear()
+        self.profileBackgroundCard.championEdit.setEnabled(a0)
+
+        self.profileTierCard.clear()
+        self.profileTierCard.rankModeBox.setEnabled(a0)
+        self.profileTierCard.tierBox.setEnabled(a0)
+        self.profileTierCard.divisionBox.setEnabled(a0)
+
+        self.onlineAvailabilityCard.clear()
+        self.onlineAvailabilityCard.comboBox.setEnabled(a0)
+
+        self.removeTokensCard.pushButton.setEnabled(a0)
+
+        return super().setEnabled(a0)
+
     def __connectSignalToSlot(self):
         self.onlineStatusCard.pushButton.clicked.connect(
             self.__onSetStatusButtonClicked)
@@ -132,6 +157,9 @@ class OnlineStatusCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
+    def clear(self):
+        self.lineEdit.clear()
+
 
 class ProfileBackgroundCard(SettingCard):
 
@@ -165,6 +193,11 @@ class ProfileBackgroundCard(SettingCard):
         self.skinComboBox.currentTextChanged.connect(
             self.__onComboBoxTextChanged)
 
+    def clear(self):
+        self.championEdit.clear()
+        self.skinComboBox.clear()
+        self.completer = None
+
     def updateCompleter(self):
         champions = self.lolConnector.manager.getChampionList()
         self.completer = QCompleter(champions)
@@ -173,6 +206,9 @@ class ProfileBackgroundCard(SettingCard):
 
     def __onLineEditTextChanged(self):
         text = self.championEdit.text()
+        if text == "":
+            return
+
         skins = self.lolConnector.manager.getSkinListByChampionName(text)
 
         if len(skins) != 0:
@@ -246,6 +282,15 @@ class ProfileTierCard(SettingCard):
         self.divisionBox.currentTextChanged.connect(
             self.__setPushButtonAvailability)
         self.pushButton.clicked.connect(self.__onPushButtonClicked)
+
+    def clear(self):
+        self.rankModeBox.setCurrentIndex(0)
+        self.tierBox.setCurrentIndex(0)
+        self.divisionBox.setCurrentIndex(0)
+
+        self.rankModeBox.setPlaceholderText(self.tr("Game mode"))
+        self.tierBox.setPlaceholderText(self.tr("Tier"))
+        self.divisionBox.setPlaceholderText(self.tr("Division"))
 
     def __onRankModeTextChanged(self):
         currentText = self.tierBox.currentText()
@@ -368,9 +413,12 @@ class OnlineAvailabilityCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
-        self.comboBox.currentTextChanged.connect(
-            lambda: self.pushButton.setEnabled(True))
+        self.comboBox.currentTextChanged.connect(self.__onComboBoxTextChanged)
         self.pushButton.clicked.connect(self.__onPushButttonClicked)
+
+    def clear(self):
+        self.comboBox.setPlaceholderText(self.tr("Availability"))
+        self.comboBox.setCurrentIndex(0)
 
     def __onPushButttonClicked(self):
         availability = {
@@ -381,6 +429,12 @@ class OnlineAvailabilityCard(SettingCard):
 
         threading.Thread(target=lambda: self.lolConnector.
                          setOnlineAvailability(availability)).start()
+
+    def __onComboBoxTextChanged(self):
+        if self.comboBox.currentIndex == -1:
+            return
+
+        self.pushButton.setEnabled(True)
 
 
 class RemoveTokensCard(SettingCard):
@@ -428,6 +482,10 @@ class CreatePracticeLobbyCard(SettingCard):
 
         self.nameLineEdit.textChanged.connect(self.__onNameLineEditTextChanged)
         self.pushButton.clicked.connect(self.__onPushButtonClicked)
+
+    def clear(self):
+        self.nameLineEdit.clear()
+        self.passwordLineEdit.clear()
 
     def __onNameLineEditTextChanged(self):
         enable = self.nameLineEdit.text() != ""
