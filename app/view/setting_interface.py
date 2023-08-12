@@ -7,7 +7,7 @@ from qfluentwidgets import (
     ExpandLayout, Theme, CustomColorSettingCard, InfoBar, setTheme,
     setThemeColor, SmoothScrollArea, SettingCard, FluentIconBase, SpinBox,
     PushButton, PrimaryPushSettingCard, HyperlinkCard, FlyoutView, Flyout,
-    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView)
+    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout
@@ -155,6 +155,7 @@ class SettingInterface(SmoothScrollArea):
             GITHUB_URL, self.tr("View GitHub"), Icon.INFO, self.tr('About'),
             self.tr('Copyright') + ' © ' + f"{YEAR}, {AUTHOR}. " +
             self.tr('Version') + f" {VERSION}", self.aboutGroup)
+        self.aboutCard.linkButton.setIcon(Icon.GITHUB)
 
         self.__initWidget()
 
