@@ -28,8 +28,8 @@ def isWin11():
 
 class Config(QConfig):
     lolFolder = ConfigItem("General", "LolPath", "", FolderValidator())
-    enableStartWithComputer = ConfigItem("General", "EnableStartWithComputer",
-                                         False, BoolValidator())
+    # enableStartWithComputer = ConfigItem("General", "EnableStartWithComputer",
+    #                                      False, BoolValidator())
     enableStartLolWithApp = ConfigItem("General", "EnableStartLolWithApp",
                                        False, BoolValidator())
 
@@ -61,7 +61,7 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 

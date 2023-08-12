@@ -80,14 +80,14 @@ class SettingInterface(SmoothScrollArea):
                                              self.tr("Client Path"),
                                              cfg.get(cfg.lolFolder),
                                              self.generalGroup)
-        self.enableStartWithComputer = SwitchSettingCard(
-            Icon.DESKTOPRIGHT,
-            self.tr("Auto-start on boot"),
-            self.
-            tr("Start Seraphine on boot automatically. Enabling this option may affect the boot speed"
-               ),
-            configItem=cfg.enableStartWithComputer,
-            parent=self.generalGroup)
+        # self.enableStartWithComputer = SwitchSettingCard(
+        #     Icon.DESKTOPRIGHT,
+        #     self.tr("Auto-start on boot"),
+        #     self.
+        #     tr("Start Seraphine on boot automatically. Enabling this option may affect the boot speed"
+        #        ),
+        #     configItem=cfg.enableStartWithComputer,
+        #     parent=self.generalGroup)
         self.enableStartLolWithApp = SwitchSettingCard(
             Icon.CIRCLERIGHT,
             self.tr("Auto-start LOL"),
@@ -185,7 +185,7 @@ class SettingInterface(SmoothScrollArea):
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
-        self.generalGroup.addSettingCard(self.enableStartWithComputer)
+        # self.generalGroup.addSettingCard(self.enableStartWithComputer)
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
 

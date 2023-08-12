@@ -23,7 +23,7 @@ from ..components.stacked_widget import StackedWidget
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..lol.entries import Summoner
-from ..lol.listener import LolProcessExistenceListener, LolClientEventListener
+from ..lol.listener import LolProcessExistenceListener, LolClientEventListener, getLolProcessPid
 from ..lol.connector import LolClientConnector
 from ..lol.tools import processGameData, translateTier
 
@@ -65,9 +65,6 @@ class MainWindow(FluentWindow):
         self.__initListener()
 
         self.__initWindow()
-
-        cfg.themeChanged.connect(
-            lambda: self.setMicaEffectEnabled(self.isMicaEffectEnabled()))
 
     def __initInterface(self):
         self.__lockInterface()
@@ -147,6 +144,8 @@ class MainWindow(FluentWindow):
         # self.splashScreen = SplashScreen(self.windowIcon(), self)
         # self.splashScreen.setIconSize(QSize(106, 106))
         # self.splashScreen.raise_()
+        cfg.themeChanged.connect(
+            lambda: self.setMicaEffectEnabled(self.isMicaEffectEnabled()))
 
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
@@ -154,6 +153,10 @@ class MainWindow(FluentWindow):
 
         # self.show()
         # QApplication.processEvents()
+
+        if cfg.get(cfg.enableStartLolWithApp):
+            if getLolProcessPid() == 0:
+                self.startInterface.pushButton.click()
 
     def __initListener(self):
         self.processListener.lolClientStarted.connect(
