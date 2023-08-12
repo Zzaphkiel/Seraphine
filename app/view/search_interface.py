@@ -145,9 +145,6 @@ class GamesTab(QFrame):
         self.nextButton.setVisible(False)
 
     def updatePuuid(self, puuid):
-        if self.puuid == puuid:
-            return
-
         if self.puuid != None:
             self.backToDefaultPage()
 

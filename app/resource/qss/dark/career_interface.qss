@@ -5,7 +5,7 @@ QLabel {
 
 QLabel#name {
     color: white;
-    font: 30px 'Segoe UI', 'Microsoft YaHei';
+    font: bold 32px 'Segoe UI', 'Microsoft YaHei';
 }
 
 QLabel#rencent20GamesLabel,

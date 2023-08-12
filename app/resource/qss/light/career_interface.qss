@@ -3,7 +3,7 @@ QLabel {
 }
 
 QLabel#name {
-    font: 30px 'Microsoft YaHei', 'Segoe UI';
+    font: bold 32px 'Microsoft YaHei', 'Segoe UI';
 }
 
 QLabel#level {

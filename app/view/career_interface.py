@@ -23,7 +23,6 @@ class CareerInterface(ScrollArea):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.summoner: Summoner = None
         self.currentSummonerName: Summoner = None
 
         self.vBoxLayout = QVBoxLayout(self)
