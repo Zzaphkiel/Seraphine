@@ -35,6 +35,7 @@ class Icon(FluentIconBase, Enum):
     DELETE = 'Delete'
     BLUR = 'Blur'
     GITHUB = 'Github'
+    EYES = "Eyes"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

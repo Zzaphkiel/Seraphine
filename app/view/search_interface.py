@@ -5,20 +5,9 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
                              QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
-from qfluentwidgets import (
-    ScrollArea,
-    LineEdit,
-    PushButton,
-    ToolButton,
-    InfoBar,
-    InfoBarPosition,
-    ToolTipFilter,
-    ToolTipPosition,
-    Theme,
-    isDarkTheme,
-    FlyoutViewBase,
-    Flyout,
-)
+from qfluentwidgets import (ScrollArea, LineEdit, PushButton, ToolButton, InfoBar, InfoBarPosition,
+                            ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase,
+                            Flyout, CardWidget)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -324,46 +313,10 @@ class GameDetailView(QFrame):
         team1 = game["teams"][100]
         team2 = game["teams"][200]
 
-        self.teamView1.updateTeam(
-            team1["win"],
-            team1["baronIcon"],
-            team1["baronKills"],
-            team1["dragonIcon"],
-            team1["dragonKills"],
-            team1["riftHeraldIcon"],
-            team1["riftHeraldKills"],
-            team1["inhibitorIcon"],
-            team1["inhibitorKills"],
-            team1["towerIcon"],
-            team1["towerKills"],
-            team1["kills"],
-            team1["deaths"],
-            team1["assists"],
-            team1["bans"],
-            isCherry,
-            self.tr("1st"),
-        )
+        self.teamView1.updateTeam(team1, isCherry, self.tr("1st"))
         self.teamView1.updateSummoners(team1["summoners"])
 
-        self.teamView2.updateTeam(
-            team2["win"],
-            team2["baronIcon"],
-            team2["baronKills"],
-            team2["dragonIcon"],
-            team2["dragonKills"],
-            team2["riftHeraldIcon"],
-            team2["riftHeraldKills"],
-            team2["inhibitorIcon"],
-            team2["inhibitorKills"],
-            team2["towerIcon"],
-            team2["towerKills"],
-            team2["kills"],
-            team2["deaths"],
-            team2["assists"],
-            team2["bans"],
-            isCherry,
-            self.tr("2nd"),
-        )
+        self.teamView2.updateTeam(team2, isCherry, self.tr("2nd"))
         self.teamView2.updateSummoners(team2["summoners"])
 
         self.extraTeamView1.setVisible(isCherry)
@@ -373,46 +326,10 @@ class GameDetailView(QFrame):
             team3 = game["teams"][300]
             team4 = game["teams"][400]
 
-            self.extraTeamView1.updateTeam(
-                team3["win"],
-                team3["baronIcon"],
-                team3["baronKills"],
-                team3["dragonIcon"],
-                team3["dragonKills"],
-                team3["riftHeraldIcon"],
-                team3["riftHeraldKills"],
-                team3["inhibitorIcon"],
-                team3["inhibitorKills"],
-                team3["towerIcon"],
-                team3["towerKills"],
-                team3["kills"],
-                team3["deaths"],
-                team3["assists"],
-                team3["bans"],
-                isCherry,
-                self.tr("3rd"),
-            )
+            self.extraTeamView1.updateTeam(team3, isCherry, self.tr("3rd"))
             self.extraTeamView1.updateSummoners(team3["summoners"])
 
-            self.extraTeamView2.updateTeam(
-                team4["win"],
-                team4["baronIcon"],
-                team4["baronKills"],
-                team4["dragonIcon"],
-                team4["dragonKills"],
-                team4["riftHeraldIcon"],
-                team4["riftHeraldKills"],
-                team4["inhibitorIcon"],
-                team4["inhibitorKills"],
-                team4["towerIcon"],
-                team4["towerKills"],
-                team4["kills"],
-                team4["deaths"],
-                team4["assists"],
-                team4["bans"],
-                isCherry,
-                self.tr("4th"),
-            )
+            self.extraTeamView2.updateTeam(team4, isCherry, self.tr("4th"))
             self.extraTeamView2.updateSummoners(team4["summoners"])
 
 
@@ -568,26 +485,23 @@ class TeamView(QFrame):
         # self.vBoxLayout.addSpacerItem(
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def updateTeam(
-        self,
-        win,
-        baronIcon,
-        baronKills,
-        dragonIcon,
-        dragonKills,
-        riftHeraldIcon,
-        riftHeraldKills,
-        inhibitorIcon,
-        inhibitorKills,
-        towerIcon,
-        towerKills,
-        kills,
-        deaths,
-        assists,
-        bans,
-        isCherry,
-        result,
-    ):
+    def updateTeam(self, team, isCherry, result):
+        win = team['win']
+        baronIcon = team['baronIcon']
+        baronKills = team['baronKills']
+        dragonIcon = team['dragonIcon']
+        dragonKills = team['dragonKills']
+        riftHeraldIcon = team['riftHeraldIcon']
+        riftHeraldKills = team['riftHeraldKills']
+        inhibitorIcon = team['inhibitorIcon']
+        inhibitorKills = team['inhibitorKills']
+        towerIcon = team['towerIcon']
+        towerKills = team['towerKills']
+        kills = team['kills']
+        deaths = team['deaths']
+        assists = team['assists']
+        bans = team['bans']
+
         if isCherry:
             self.teamResultLabel.setText(result)
         elif win == "Win":
@@ -847,8 +761,8 @@ class GameTitleBar(QFrame):
 
         self.setStyleSheet(
             f""" GameTitleBar {{
+            border-radius: 6px;
             border: 1px solid rgb({color});
-            border-radius: 5px;
             background-color: rgba({color}, 0.05);
         }}"""
         )

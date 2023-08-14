@@ -245,12 +245,14 @@ class MainWindow(FluentWindow):
             self.eventListener.start()
             self.searchInterface.lolConnector = self.lolConnector
             self.searchInterface.gamesView.gamesTab.lolConnector = self.lolConnector
+
             self.auxiliaryFuncInterface.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileTierCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.removeTokensCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = self.lolConnector
+            self.auxiliaryFuncInterface.spectateCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             status = self.lolConnector.getGameStatus()
@@ -278,12 +280,14 @@ class MainWindow(FluentWindow):
 
             self.searchInterface.lolConnector = None
             self.searchInterface.gamesView.gamesTab.lolConnector = None
+
             self.auxiliaryFuncInterface.lolConnector = None
             self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = None
             self.auxiliaryFuncInterface.profileTierCard.lolConnector = None
             self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = None
             self.auxiliaryFuncInterface.removeTokensCard.lolConnector = None
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
+            self.auxiliaryFuncInterface.spectateCard.lolConnector = None
 
         self.eventListener.terminate()
         self.setWindowTitle("Seraphine")

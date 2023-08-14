@@ -340,6 +340,41 @@ class LolClientConnector:
 
         return res
 
+    def spectate(self, summonerName):
+        info = self.getSummonerByName(summonerName)
+
+        data = {
+            'allowObserveMode': 'ALL',
+            'dropInSpectateGameId': summonerName,
+            'gameQueueType': "",
+            'puuid': info['puuid'],
+        }
+
+        res = self.__post(
+            f"/lol-spectator/v1/spectate/launch", data=data).content
+
+        return res
+
+    def sendNotificationMsg(self, title, content):
+        data = {
+            "critical": True,
+            "data": {
+                "details": content,
+                "title": title,
+            },
+            "detailKey": 'pre_translated_details',
+            "dismissible": True,
+            "id": 0,
+            "state": 'toast',
+            "titleKey": 'pre_translated_title',
+            "type": 'ranked_summary',
+        }
+
+        res = self.__post(
+            "/player-notifications/v1/notifications", data=data).json()
+
+        return res
+
     def __get(self, path, params=None):
         url = self.url + path
         return requests.get(url, params=params, verify=False)

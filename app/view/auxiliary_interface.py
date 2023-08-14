@@ -1,8 +1,7 @@
 import threading
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit,
-                            PushButton, ComboBox, SwitchButton, ConfigItem,
-                            IndicatorPosition)
+                            PushButton, ComboBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
 
@@ -55,6 +54,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             Icon.CIRCLEMARK, self.tr("Auto accept"),
             self.tr("Accept match making automatically"),
             cfg.enableAutoAcceptMatching, self.gameGroup)
+        self.spectateCard = SpectateCard(
+            self.tr("Spectate"),
+            self.tr("Spectate live game of summoner in the same environment"),
+            self.gameGroup
+        )
         # self.autoSelectChampionCard = AutoSelectChampionCard(
         #     self.tr("Auto select champion"),
         #     self.tr("Select champion immediately when blink pick begin"),
@@ -87,6 +91,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
+        self.gameGroup.addSettingCard(self.spectateCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -99,6 +104,9 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.createPracticeLobbyCard.clear()
         self.createPracticeLobbyCard.nameLineEdit.setEnabled(a0)
         self.createPracticeLobbyCard.passwordLineEdit.setEnabled(a0)
+
+        self.spectateCard.lineEdit.clear()
+        self.spectateCard.lineEdit.setEnabled(a0)
 
         self.onlineStatusCard.clear()
         self.onlineStatusCard.lineEdit.setEnabled(a0)
@@ -458,12 +466,12 @@ class CreatePracticeLobbyCard(SettingCard):
     def __init__(self, title, content, parent):
         super().__init__(Icon.TEXTEDIT, title, content, parent)
         self.nameLineEdit = LineEdit()
-        self.nameLineEdit.setMinimumWidth(250)
+        self.nameLineEdit.setMinimumWidth(216)
         self.nameLineEdit.setClearButtonEnabled(True)
         self.nameLineEdit.setPlaceholderText(self.tr("Lobby name"))
 
         self.passwordLineEdit = LineEdit()
-        self.passwordLineEdit.setMinimumWidth(130)
+        self.passwordLineEdit.setMinimumWidth(190)
         self.passwordLineEdit.setClearButtonEnabled(True)
         self.passwordLineEdit.setPlaceholderText(self.tr("Lobby password"))
 
@@ -499,29 +507,33 @@ class CreatePracticeLobbyCard(SettingCard):
                          create5v5PracticeLobby(name, password)).start()
 
 
-# todo
-class AutoSelectChampionCard(SettingCard):
+class SpectateCard(SettingCard):
+    def __init__(self, title, content=None, parent=None):
+        super().__init__(Icon.EYES, title, content, parent)
 
-    def __init__(self,
-                 title,
-                 content,
-                 configItem: ConfigItem = None,
-                 parent=None):
-        super().__init__(Icon.TEXTEDIT, title, content, parent)
-        self.championEdit = LineEdit(self)
-        self.championEdit.setPlaceholderText(
-            self.tr("Place input champion name"))
-        self.championEdit.setMinimumWidth(140)
-        self.championEdit.setClearButtonEnabled(True)
+        self.lineEdit = LineEdit()
+        self.lineEdit.setPlaceholderText(
+            self.tr("Summoner's name"))
+        self.lineEdit.setMinimumWidth(190)
+        self.lineEdit.setClearButtonEnabled(True)
 
-        self.switchButton = SwitchButton(self.tr("Off"), self,
-                                         IndicatorPosition.RIGHT)
-        self.switchButton.setEnabled(False)
+        self.button = PushButton(self.tr("Spectate"))
+        self.button.setMinimumWidth(100)
+        self.button.setEnabled(False)
 
         self.lolConnector: LolClientConnector = None
-        self.completer = None
 
-        self.hBoxLayout.addWidget(self.championEdit)
+        self.hBoxLayout.addWidget(self.lineEdit)
         self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.switchButton)
+        self.hBoxLayout.addWidget(self.button)
         self.hBoxLayout.addSpacing(16)
+
+        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
+        self.button.clicked.connect(self.__onButtonClicked)
+
+    def __onLineEditTextChanged(self):
+        enable = self.lineEdit.text() != ""
+        self.button.setEnabled(enable)
+
+    def __onButtonClicked(self):
+        self.lolConnector.spectate(self.lineEdit.text())
