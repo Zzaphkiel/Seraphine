@@ -37,17 +37,18 @@ python main.py
 
 - 其他辅助功能
   - 找到对局后自动接收对局 ✅
+  - 创建 5v5 自定义训练模式房间 ✅
+  - 观战同大区玩家正在进行的游戏 ✅
   - 修改个人主页背景✅（可改为未拥有的皮肤）
   - 修改个人在线状态 ✅
   - 修改个人签名 ✅
   - 伪造个人状态卡片中的段位显示 ✅
-  - 创建 5v5 自定义训练模式房间 ✅
   - 一键卸下勋章 ✅
 
 
 ## 我会因为使用 Seraphine 而被封号吗 😨？
 
-由于本程序的功能**完全符合**[《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。但同时，Seraphine **并未得到** Riot Games 的认可，不代表 Riot Games 或任何正式参与《英雄联盟》制作或管理的人的观点或意见。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
+由于本程序的功能**完全符合**[《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml)中对于 “**绿色功能**” 的定义，并且**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，**并不保证**一定不会封号。
 
 
 ## 帮助我们改进 Seraphine 😘
@@ -61,6 +62,7 @@ python main.py
 - 部分与 LOL 客户端的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
+  - https://developer.riotgames.com/docs/lol
   - https://www.mingweisamuel.com/lcu-schema/tool/#/
 
   以及其他使用 LCU API 的项目
@@ -72,6 +74,9 @@ python main.py
   - https://raw.communitydragon.org/latest/
   - https://github.com/CommunityDragon/Docs/blob/master/assets.md
 
+
+## 免责声明
+Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
 
 ## 许可证 ⚖️
 Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。
