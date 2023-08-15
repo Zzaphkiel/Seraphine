@@ -198,6 +198,10 @@ class SummonerInfoView(QFrame):
         soloRank = info['rankInfo']['solo']
         self.rankSolo = QLabel(f"{soloRank['tier']} {soloRank['division']}")
 
+        self.levelLabel = QLabel(f"Lv. {info['level']}")
+        self.levelLabel.setAlignment(Qt.AlignCenter)
+        self.levelLabel.setObjectName("levelLabel")
+
         self.rankSoloIcon = QLabel()
 
         if soloRank['tier'] not in ["Unranked", '未定级']:
@@ -280,7 +284,8 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout.addSpacing(-6)
         self.infoVBoxLayout.addWidget(self.summonerName,
                                       alignment=Qt.AlignCenter)
-        self.infoVBoxLayout.addSpacing(6)
+        self.infoVBoxLayout.addWidget(self.levelLabel)
+        self.infoVBoxLayout.addSpacing(3)
         self.infoVBoxLayout.addLayout(self.gridHBoxLayout)
         self.infoVBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))

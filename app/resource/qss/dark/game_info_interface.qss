@@ -52,6 +52,11 @@ SummonerInfoView>QLabel {
     font: 12px 'Segoe UI', 'Microsoft YaHei';
 }
 
+SummonerInfoView>#levelLabel {
+    font: 10px 'Segoe UI', 'Microsoft YaHei';
+    /* border: 1px solid black; */
+}
+
 GameTab>QLabel {
     color: white;
     font: 13px 'Segoe UI', 'Microsoft YaHei';
