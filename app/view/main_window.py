@@ -579,6 +579,10 @@ class MainWindow(FluentWindow):
 
             for item in data["myTeam"]:
                 summonerId = item["summonerId"]
+
+                if summonerId == 0:
+                    continue
+
                 summoner = self.lolConnector.getSummonerById(summonerId)
 
                 iconId = summoner["profileIconId"]
@@ -681,6 +685,9 @@ class MainWindow(FluentWindow):
             # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
             for item in enemies:
                 puuid = item["puuid"]
+
+                if puuid == '00000000-0000-0000-0000-000000000000':
+                    continue
 
                 summoner = self.lolConnector.getSummonerByPuuid(puuid)
 
