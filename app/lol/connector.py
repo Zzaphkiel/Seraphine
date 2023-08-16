@@ -310,23 +310,48 @@ class LolClientConnector:
 
         return res
 
+    #获取当前英雄的代码以及名字，返回作为预备输入
+    def getChampionsList(self):
+        list = self.__get("/lol-champ-select/v1/all-grid-champions").json()
+        res=[]
+        for i in range(0,len(list)):
+            res.append(str(list[i].get("id"))+":"+list[i].get("name"))
+        return res
+
+    #选择英雄
     def selectChampion(self, championId):
-        session = self.__get("/lol-champ-select/v1/session").json()
-        localPlayerCellId = session["localPlayerCellId"]
-
-        for action in session["actions"][0]:
-            if action["actorCellId"] == localPlayerCellId:
-                id = action["id"]
-                break
-
-        data = {
-            "championId": championId,
+        a = True
+        data={
+            "actorCellId": 0,
+            "championId": int(championId),
+            "completed": a,
+            "id": 0,
+            "isAllyAction": a,
+            "type": "pick"
         }
+        #将data转换为json格式
+        data=json.dumps(data)
+        #直接进行10次请求，覆盖所有可能性
+        for i in range(0,11):
+            response = requests.patch(self.url+"/lol-champ-select/v1/session/actions/"+str(i),data=data,verify=False)
+        return "完成"
+    # def selectChampion(self, championId):
+    #     session = self.__get("/lol-champ-select/v1/session").json()
+    #     localPlayerCellId = session["localPlayerCellId"]
 
-        self.__patch(f"/lol-champ-select/v1/session/actions/{id}", data=data)
+    #     for action in session["actions"][0]:
+    #         if action["actorCellId"] == localPlayerCellId:
+    #             id = action["id"]
+    #             break
 
-        self.__post(
-            f"/lol-champ-select/v1/session/actions/{id}/complete", data=data)
+    #     data = {
+    #         "championId": championId,
+    #     }
+
+    #     self.__patch(f"/lol-champ-select/v1/session/actions/{id}", data=data)
+
+    #     self.__post(
+    #         f"/lol-champ-select/v1/session/actions/{id}/complete", data=data)
 
     @retry()
     def getSummonerById(self, summonerId):
