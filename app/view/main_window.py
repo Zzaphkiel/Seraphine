@@ -246,12 +246,14 @@ class MainWindow(FluentWindow):
             self.searchInterface.lolConnector = self.lolConnector
             self.searchInterface.gamesView.gamesTab.lolConnector = self.lolConnector
 
+            #网络控制器分发
             self.auxiliaryFuncInterface.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileTierCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.removeTokensCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = self.lolConnector
+            self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.spectateCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
@@ -570,8 +572,13 @@ class MainWindow(FluentWindow):
         if cfg.get(cfg.enableAutoAcceptMatching):
             threading.Thread(
                 target=lambda: self.lolConnector.acceptMatchMaking()).start()
-
+    #英雄选择界面触发事件
     def __onChampionSelectBegin(self):
+        #将text按照:分割，取第一个为英雄代码
+        ChampionID=self.auxiliaryFuncInterface.autoSelectChampionCard.lineEdit.text().split(":")[0]
+        if(ChampionID!=""):
+            threading.Thread(
+                target=lambda: self.lolConnector.selectChampion(ChampionID)).start()
 
         def _():
             summoners = []

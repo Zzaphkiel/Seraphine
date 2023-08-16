@@ -50,6 +50,7 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Create 5v5 practice lobby"),
             self.tr("Password will NOT be set if line edit is empty"),
             self.gameGroup)
+        #自动接受对局
         self.autoAcceptMatchingCard = SwitchSettingCard(
             Icon.CIRCLEMARK, self.tr("Auto accept"),
             self.tr("Accept match making automatically"),
@@ -59,10 +60,10 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Spectate live game of summoner in the same environment"),
             self.gameGroup
         )
-        # self.autoSelectChampionCard = AutoSelectChampionCard(
-        #     self.tr("Auto select champion"),
-        #     self.tr("Select champion immediately when blink pick begin"),
-        #     self.gameGroup)
+        self.autoSelectChampionCard = AutoSelectChampionCard(
+            self.tr("自动选择英雄"),
+            self.tr("将会在游戏开始时自动选择英雄，-1或空则不会选择"),
+            self.gameGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -83,15 +84,18 @@ class AuxiliaryInterface(SmoothScrollArea):
     def __initLayout(self):
         self.titleLabel.move(36, 30)
 
+        #个人主页
         self.profileGroup.addSettingCard(self.onlineStatusCard)
         self.profileGroup.addSettingCard(self.profileBackgroundCard)
         self.profileGroup.addSettingCard(self.profileTierCard)
         self.profileGroup.addSettingCard(self.onlineAvailabilityCard)
         self.profileGroup.addSettingCard(self.removeTokensCard)
 
+        #游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
+        self.gameGroup.addSettingCard(self.autoSelectChampionCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -134,7 +138,6 @@ class AuxiliaryInterface(SmoothScrollArea):
 
     def __onSetStatusButtonClicked(self):
         msg = self.onlineStatusCard.lineEdit.text()
-
         threading.Thread(
             target=lambda: self.lolConnector.setOnlineStatus(msg)).start()
 
@@ -537,3 +540,45 @@ class SpectateCard(SettingCard):
 
     def __onButtonClicked(self):
         self.lolConnector.spectate(self.lineEdit.text())
+
+#自动选择英雄卡片
+class AutoSelectChampionCard(SettingCard):
+    def __init__(self, title, content=None, parent=None):
+        super().__init__(Icon.EYES, title, content, parent)
+
+        self.lineEdit = LineEdit()
+        self.lineEdit.setPlaceholderText(
+            self.tr("请输入角色id"))
+        self.lineEdit.setMinimumWidth(190)
+        self.lineEdit.setClearButtonEnabled(True)
+        self.championsList=[]#备选英雄列表，在输入时将会完成初始化
+
+        self.button = PushButton(self.tr("确认"))
+        self.button.setMinimumWidth(100)
+        self.button.setEnabled(False)
+
+        self.lolConnector:LolClientConnector = None
+
+        self.hBoxLayout.addWidget(self.lineEdit)
+        self.hBoxLayout.addSpacing(16)
+        self.hBoxLayout.addWidget(self.button)
+        self.hBoxLayout.addSpacing(16)
+
+        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
+        self.button.clicked.connect(self.__onButtonClicked)
+
+    def __onLineEditTextChanged(self):
+        #初始化备选英雄列表
+        if(self.championsList==[]):
+            self.championsList=self.lolConnector.getChampionsList()
+            completer= QCompleter(self.championsList)
+            completer.setFilterMode(Qt.MatchContains)
+            self.lineEdit.setCompleter(completer)
+        enable = self.lineEdit.text() != ""
+        self.button.setText("确认")
+        self.button.setEnabled(enable)
+
+    def __onButtonClicked(self):
+        self.button.setEnabled(False)
+        self.button.setText("已锁定")
+        
