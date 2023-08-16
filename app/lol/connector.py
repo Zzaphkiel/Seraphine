@@ -331,8 +331,8 @@ class LolClientConnector:
         }
         #将data转换为json格式
         data=json.dumps(data)
-        #直接进行5次请求，覆盖所有可能性
-        for i in range(0,6):
+        #直接进行10次请求，覆盖所有可能性
+        for i in range(0,11):
             response = requests.patch(self.url+"/lol-champ-select/v1/session/actions/"+str(i),data=data,verify=False)
         return "完成"
     # def selectChampion(self, championId):
