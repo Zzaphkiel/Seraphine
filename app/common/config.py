@@ -58,6 +58,13 @@ class Config(QConfig):
                                           "EnableAutoAcceptMatching", False,
                                           BoolValidator())
 
+    enableAutoSelectChampion = ConfigItem("Functions",
+                                          "EnableAutoSelectChampion", False,
+                                          BoolValidator())
+
+    autoSelectChampion = ConfigItem("Functions",
+                                    "AutoSelectChampion", "")
+
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"

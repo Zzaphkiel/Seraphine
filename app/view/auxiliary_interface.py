@@ -1,7 +1,8 @@
 import threading
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit,
-                            PushButton, ComboBox)
+                            PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
+                            IndicatorPosition)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
 
@@ -50,7 +51,7 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Create 5v5 practice lobby"),
             self.tr("Password will NOT be set if line edit is empty"),
             self.gameGroup)
-        #自动接受对局
+        # 自动接受对局
         self.autoAcceptMatchingCard = SwitchSettingCard(
             Icon.CIRCLEMARK, self.tr("Auto accept"),
             self.tr("Accept match making automatically"),
@@ -61,8 +62,9 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.gameGroup
         )
         self.autoSelectChampionCard = AutoSelectChampionCard(
-            self.tr("自动选择英雄"),
-            self.tr("将会在游戏开始时自动选择英雄，-1或空则不会选择"),
+            self.tr("Auto select champion"),
+            self.tr("Auto select champion when blind selection begin"),
+            cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
             self.gameGroup)
 
         self.__initWidget()
@@ -84,18 +86,18 @@ class AuxiliaryInterface(SmoothScrollArea):
     def __initLayout(self):
         self.titleLabel.move(36, 30)
 
-        #个人主页
+        # 个人主页
         self.profileGroup.addSettingCard(self.onlineStatusCard)
         self.profileGroup.addSettingCard(self.profileBackgroundCard)
         self.profileGroup.addSettingCard(self.profileTierCard)
         self.profileGroup.addSettingCard(self.onlineAvailabilityCard)
         self.profileGroup.addSettingCard(self.removeTokensCard)
 
-        #游戏
+        # 游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
+        self.gameGroup.addSettingCard(self.autoSelectChampionCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
-        self.gameGroup.addSettingCard(self.autoSelectChampionCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -126,7 +128,12 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.onlineAvailabilityCard.clear()
         self.onlineAvailabilityCard.comboBox.setEnabled(a0)
 
+        self.autoSelectChampionCard.lineEdit.setEnabled(a0)
+
         self.removeTokensCard.pushButton.setEnabled(a0)
+
+        if a0 and cfg.get(cfg.enableAutoSelectChampion):
+            self.autoSelectChampionCard.switchButton.setEnabled(True)
 
         return super().setEnabled(a0)
 
@@ -541,44 +548,68 @@ class SpectateCard(SettingCard):
     def __onButtonClicked(self):
         self.lolConnector.spectate(self.lineEdit.text())
 
-#自动选择英雄卡片
+
+# 自动选择英雄卡片
 class AutoSelectChampionCard(SettingCard):
-    def __init__(self, title, content=None, parent=None):
-        super().__init__(Icon.EYES, title, content, parent)
+    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
+                 championConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.CHECK, title, content, parent)
+
+        self.enableConfigItem = enableConfigItem
+        self.championConfigItem = championConfigItem
 
         self.lineEdit = LineEdit()
         self.lineEdit.setPlaceholderText(
-            self.tr("请输入角色id"))
+            self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(190)
         self.lineEdit.setClearButtonEnabled(True)
-        self.championsList=[]#备选英雄列表，在输入时将会完成初始化
 
-        self.button = PushButton(self.tr("确认"))
-        self.button.setMinimumWidth(100)
-        self.button.setEnabled(False)
+        self.completer = None
+        self.champions = []
 
-        self.lolConnector:LolClientConnector = None
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+        self.switchButton.setEnabled(False)
+
+        self.lolConnector: LolClientConnector = None
 
         self.hBoxLayout.addWidget(self.lineEdit)
+        self.hBoxLayout.addSpacing(46)
+        self.hBoxLayout.addWidget(self.switchButton)
         self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.button)
-        self.hBoxLayout.addSpacing(16)
+
+        self.setValue(qconfig.get(championConfigItem),
+                      qconfig.get(enableConfigItem))
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
-        self.button.clicked.connect(self.__onButtonClicked)
+        self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
+
+    def updateCompleter(self):
+        self.champions = self.lolConnector.manager.getChampionList()
+        self.completer = QCompleter(self.champions)
+        self.completer.setFilterMode(Qt.MatchContains)
+        self.lineEdit.setCompleter(self.completer)
+
+        self.validate()
+
+    def setValue(self, championName: str, isChecked: bool):
+        qconfig.set(self.championConfigItem, championName)
+        qconfig.set(self.enableConfigItem, isChecked)
+
+        self.lineEdit.setText(championName)
+        self.switchButton.setChecked(isChecked)
+
+    def validate(self):
+        text = self.lineEdit.text()
+
+        if text not in self.champions and self.switchButton.checked:
+            self.setValue("", False)
 
     def __onLineEditTextChanged(self):
-        #初始化备选英雄列表
-        if(self.championsList==[]):
-            self.championsList=self.lolConnector.getChampionsList()
-            completer= QCompleter(self.championsList)
-            completer.setFilterMode(Qt.MatchContains)
-            self.lineEdit.setCompleter(completer)
-        enable = self.lineEdit.text() != ""
-        self.button.setText("确认")
-        self.button.setEnabled(enable)
+        enable = self.lineEdit.text() in self.champions
 
-    def __onButtonClicked(self):
-        self.button.setEnabled(False)
-        self.button.setText("已锁定")
-        
+        self.switchButton.setEnabled(enable)
+        self.lineEdit.setEnabled(not enable)
+
+    def __onCheckedChanged(self, isChecked: bool):
+        self.lineEdit.setEnabled(not isChecked)
+        self.setValue(self.lineEdit.text(), isChecked)

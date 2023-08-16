@@ -246,7 +246,6 @@ class MainWindow(FluentWindow):
             self.searchInterface.lolConnector = self.lolConnector
             self.searchInterface.gamesView.gamesTab.lolConnector = self.lolConnector
 
-            #网络控制器分发
             self.auxiliaryFuncInterface.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.profileTierCard.lolConnector = self.lolConnector
@@ -257,6 +256,8 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface.spectateCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
+            self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
+
             status = self.lolConnector.getGameStatus()
             self.eventListener.gameStatusChanged.emit(status)
 
@@ -572,15 +573,11 @@ class MainWindow(FluentWindow):
         if cfg.get(cfg.enableAutoAcceptMatching):
             threading.Thread(
                 target=lambda: self.lolConnector.acceptMatchMaking()).start()
-    #英雄选择界面触发事件
-    def __onChampionSelectBegin(self):
-        #将text按照:分割，取第一个为英雄代码
-        ChampionID=self.auxiliaryFuncInterface.autoSelectChampionCard.lineEdit.text().split(":")[0]
-        if(ChampionID!=""):
-            threading.Thread(
-                target=lambda: self.lolConnector.selectChampion(ChampionID)).start()
 
-        def _():
+    # 英雄选择界面触发事件
+    def __onChampionSelectBegin(self):
+
+        def updateGameInfoInterface():
             summoners = []
             data = self.lolConnector.getChampSelectSession()
 
@@ -663,7 +660,16 @@ class MainWindow(FluentWindow):
 
             self.gameInfoInterface.allySummonersInfoReady.emit(summoners)
 
-        threading.Thread(target=_).start()
+        threading.Thread(target=updateGameInfoInterface).start()
+
+        def selectChampion():
+            champion = cfg.get(cfg.autoSelectChampion)
+            championId = self.lolConnector.manager.getChampionIdByName(
+                champion)
+            self.lolConnector.selectChampion(championId)
+
+        if cfg.get(cfg.enableAutoSelectChampion):
+            threading.Thread(target=selectChampion).start()
 
     def __onGameStart(self):
         def _():
