@@ -65,6 +65,9 @@ class Config(QConfig):
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
 
+    # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
+    #                                    False, BoolValidator())
+
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"

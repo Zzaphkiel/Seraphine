@@ -362,6 +362,12 @@ class LolClientConnector:
 
         return res
 
+    def getConversations(self):
+        res = self.__get("/lol-chat/v1/conversations").json()
+
+        return res
+
+    @retry()
     def sendNotificationMsg(self, title, content):
         data = {
             "critical": True,

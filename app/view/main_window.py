@@ -3,12 +3,11 @@ import os
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
-
 from qfluentwidgets import (
     NavigationInterface, NavigationItemPosition, InfoBar,
     InfoBarPosition, FluentWindow, SplashScreen, Theme, isDarkTheme, FluentStyleSheet)
-
 from qfluentwidgets import FluentIcon as FIF
+import pyperclip
 
 from .start_interface import StartInterface
 from .setting_interface import SettingInterface
@@ -109,7 +108,7 @@ class MainWindow(FluentWindow):
         )
 
         # set the maximum width
-        self.navigationInterface.setExpandWidth(150)
+        self.navigationInterface.setExpandWidth(250)
 
         self.careerInterface.searchButton.clicked.connect(
             self.__onCareerInterfaceHistoryButtonClicked)
@@ -290,6 +289,7 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = None
             self.auxiliaryFuncInterface.removeTokensCard.lolConnector = None
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
+            self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = None
             self.auxiliaryFuncInterface.spectateCard.lolConnector = None
 
         self.eventListener.terminate()
@@ -658,7 +658,8 @@ class MainWindow(FluentWindow):
                     }
                 )
 
-            self.gameInfoInterface.allySummonersInfoReady.emit(summoners)
+            self.gameInfoInterface.allySummonersInfoReady.emit(
+                {'summoners': summoners})
 
         threading.Thread(target=updateGameInfoInterface).start()
 
@@ -675,9 +676,10 @@ class MainWindow(FluentWindow):
         def _():
             session = self.lolConnector.getGamePlayersInfo()
             data = session['gameData']
-
+            queueId = data['queue']['id']
             # 特判一下斗魂竞技场
-            if data['queue']['id'] == 1700:
+
+            if queueId == 1700:
                 return
 
             team1 = data['teamOne']
@@ -771,7 +773,12 @@ class MainWindow(FluentWindow):
                     }
                 )
 
-            self.gameInfoInterface.enemySummonerInfoReady.emit(summoners)
+            self.gameInfoInterface.enemySummonerInfoReady.emit(
+                {'summoners': summoners, 'queueId': queueId})
+
+            # if cfg.get(cfg.enableCopyPlayersInfo):
+            #     msg = self.gameInfoInterface.getPlayersInfoSummary()
+            #     pyperclip.copy(msg)
 
         threading.Thread(target=_).start()
 

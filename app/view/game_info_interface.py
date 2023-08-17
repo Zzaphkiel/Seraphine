@@ -14,8 +14,8 @@ from ..components.summoner_name_button import SummonerName
 
 
 class GameInfoInterface(ScrollArea):
-    allySummonersInfoReady = pyqtSignal(list)
-    enemySummonerInfoReady = pyqtSignal(list)
+    allySummonersInfoReady = pyqtSignal(dict)
+    enemySummonerInfoReady = pyqtSignal(dict)
     summonerViewClicked = pyqtSignal(str)
     summonerGamesClicked = pyqtSignal(str)
     gameEnd = pyqtSignal()
@@ -29,6 +29,8 @@ class GameInfoInterface(ScrollArea):
 
         self.allySummonerGamesView = SummonersGamesView()
         self.enemySummonerGamesView = SummonersGamesView()
+
+        self.queueId = 0
 
         self.__initWidget()
         self.__initLayout()
@@ -58,16 +60,18 @@ class GameInfoInterface(ScrollArea):
 
         self.gameEnd.connect(self.__onGameEnd)
 
-    def __onAllySummonerInfoReady(self, summoners):
-        self.summonersView.allySummoners.updateSummoners(summoners)
-        self.allySummonerGamesView.updateSummoners(summoners)
+    def __onAllySummonerInfoReady(self, info):
+        self.summonersView.allySummoners.updateSummoners(info['summoners'])
+        self.allySummonerGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
 
-    def __onEnemiesSummonerInfoReady(self, summoners):
-        self.summonersView.enemySummoners.updateSummoners(summoners)
-        self.enemySummonerGamesView.updateSummoners(summoners)
+    def __onEnemiesSummonerInfoReady(self, info):
+        self.queueId = info['queueId']
+
+        self.summonersView.enemySummoners.updateSummoners(info['summoners'])
+        self.enemySummonerGamesView.updateSummoners(info['summoners'])
 
     def __onGameEnd(self):
         self.summonersView.allySummoners.clear()
@@ -83,6 +87,37 @@ class GameInfoInterface(ScrollArea):
 
         self.summonersView.stackedWidget.setCurrentIndex(index)
         self.summonersGamesView.setCurrentIndex(index)
+
+    def getPlayersInfoSummary(self):
+        allyWins, allyLosses = 0, 0
+        for summoner in self.allySummonerGamesView.summoners:
+            for game in summoner['gamesInfo']:
+                if game['queueId'] != self.queueId:
+                    continue
+
+                if game['remake']:
+                    continue
+
+                if game['win']:
+                    allyWins += 1
+                else:
+                    allyLosses += 1
+
+        enemyWins, enemyLosses = 0, 0
+        for summoner in self.enemySummonerGamesView.summoners:
+            for game in summoner['gamesInfo']:
+                if game['queueId'] != self.queueId:
+                    continue
+
+                if game['remake']:
+                    continue
+
+                if game['win']:
+                    enemyWins += 1
+                else:
+                    enemyLosses += 1
+
+        return
 
 
 class SummonersView(QFrame):
@@ -304,6 +339,7 @@ class SummonersGamesView(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
+        self.summoners = []
 
         self.__initLayout()
 
@@ -312,6 +348,7 @@ class SummonersGamesView(QFrame):
 
     def updateSummoners(self, summoners):
         self.clear()
+        self.summoners = summoners
 
         for summoner in summoners:
             games = Games(summoner)
@@ -322,6 +359,8 @@ class SummonersGamesView(QFrame):
                 1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
     def clear(self):
+        self.summoners.clear()
+
         for i in reversed(range(self.hBoxLayout.count())):
             item = self.hBoxLayout.itemAt(i)
             self.hBoxLayout.removeItem(item)

@@ -66,6 +66,10 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Auto select champion when blind selection begin"),
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
             self.gameGroup)
+        # self.copyPlayersInfoCard = SwitchSettingCard(
+        #     Icon.COPY, self.tr("Auto copy players' info"),
+        #     self.tr("Copy players' infomation to clipboard when game starts"),
+        #     cfg.enableCopyPlayersInfo)
 
         self.__initWidget()
         self.__initLayout()
@@ -96,6 +100,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         # 游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.autoSelectChampionCard)
+        # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
 
@@ -604,11 +609,12 @@ class AutoSelectChampionCard(SettingCard):
         if text not in self.champions and self.switchButton.checked:
             self.setValue("", False)
 
+        self.__onLineEditTextChanged()
+
     def __onLineEditTextChanged(self):
         enable = self.lineEdit.text() in self.champions
 
         self.switchButton.setEnabled(enable)
-        self.lineEdit.setEnabled(not enable)
 
     def __onCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)

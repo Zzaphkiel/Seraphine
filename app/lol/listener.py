@@ -55,14 +55,6 @@ class LolClientEventListener(QThread):
             self.currentSummonerProfileChanged.emit(data['data'])
 
         async def onGameFlowPhaseChanged(data):
-            # {'data': 'None', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'Lobby'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'ChampSelect'，'eventType': 'update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'GameStart', 'eventType': 'Update','uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'InProgress'，'eventType': 'update', 'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'waitingForStats'，'eventType': 'Uupdate'，'uri': '/lol-gameflow/v1/gameflow-phase'}
-            # {'data': 'TerminatedInError'，'eventType': 'update'，'uri': '/lol-gameflow/vi/gameflow-phase'}
-            # {'data': 'None ', 'eventType': 'Update'，'uri': '/lol-gameflow/v1/gameflow-phase'}
             self.gameStatusChanged.emit(data["data"])
 
         async def main():
