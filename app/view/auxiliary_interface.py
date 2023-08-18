@@ -46,6 +46,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
+        self.dodgeCard = DodgeCard(
+            self.tr("Dodge"),
+            self.tr("Dodge from champion select without closing clint"),
+            self.gameGroup
+        )
 
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
@@ -103,6 +108,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
+        self.gameGroup.addSettingCard(self.dodgeCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -619,3 +625,18 @@ class AutoSelectChampionCard(SettingCard):
     def __onCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)
         self.setValue(self.lineEdit.text(), isChecked)
+
+
+class DodgeCard(SettingCard):
+    def __init__(self, title, content, parent):
+        super().__init__(Icon.EXIT, title, content, parent)
+        self.pushButton = PushButton(self.tr("Dodge"))
+        self.pushButton.setMinimumWidth(100)
+
+        self.hBoxLayout.addWidget(self.pushButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.lolConnector: LolClientConnector = None
+
+        self.pushButton.clicked.connect(lambda: threading.Thread(
+            target=lambda: self.lolConnector.dodge()).start())

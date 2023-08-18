@@ -368,6 +368,12 @@ class LolClientConnector:
         return res
 
     @retry()
+    def dodge(self):
+        res = self.__post("/lol-gameflow/v1/session/dodge").json()
+
+        return res
+
+    @retry()
     def sendNotificationMsg(self, title, content):
         data = {
             "critical": True,
