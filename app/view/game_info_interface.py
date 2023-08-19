@@ -325,7 +325,7 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.hBoxLayout.setContentsMargins(10, 0, 15, 0)
+        self.hBoxLayout.setContentsMargins(5, 0, 5, 0)
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
