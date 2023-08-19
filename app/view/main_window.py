@@ -253,6 +253,7 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = self.lolConnector
             self.auxiliaryFuncInterface.spectateCard.lolConnector = self.lolConnector
+            self.auxiliaryFuncInterface.dodgeCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
@@ -291,6 +292,7 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
             self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = None
             self.auxiliaryFuncInterface.spectateCard.lolConnector = None
+            self.auxiliaryFuncInterface.dodgeCard.lolConnector = None
 
         self.eventListener.terminate()
         self.setWindowTitle("Seraphine")
