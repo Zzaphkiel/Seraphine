@@ -676,7 +676,7 @@ class MainWindow(FluentWindow):
 
     def __onGameStart(self):
         def _():
-            session = self.lolConnector.getGamePlayersInfo()
+            session = self.lolConnector.getGameflowSession()
             data = session['gameData']
             queueId = data['queue']['id']
             # 特判一下斗魂竞技场

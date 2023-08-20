@@ -301,7 +301,7 @@ class LolClientConnector:
         return res
 
     @retry()
-    def getGamePlayersInfo(self):
+    def getGameflowSession(self):
         res = self.__get("/lol-gameflow/v1/session").json()
         return res
 
@@ -367,9 +367,9 @@ class LolClientConnector:
 
         return res
 
-    @retry()
     def dodge(self):
-        res = self.__post("/lol-gameflow/v1/session/dodge").json()
+        res = self.__post(
+            '/lol-login/v1/session/invoke?destination=lcdsServiceProxy&method=call&args=["","teambuilder-draft","quitV2",""])').content
 
         return res
 
