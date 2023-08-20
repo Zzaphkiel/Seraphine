@@ -632,6 +632,7 @@ class DodgeCard(SettingCard):
         super().__init__(Icon.EXIT, title, content, parent)
         self.pushButton = PushButton(self.tr("Dodge"))
         self.pushButton.setMinimumWidth(100)
+        self.pushButton.setEnabled(False)
 
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
@@ -640,3 +641,5 @@ class DodgeCard(SettingCard):
 
         self.pushButton.clicked.connect(lambda: threading.Thread(
             target=lambda: self.lolConnector.dodge()).start())
+
+        # self.pushButton.clicked.connect(lambda: print(f"{1/0}"))

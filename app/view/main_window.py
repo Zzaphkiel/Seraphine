@@ -1,11 +1,13 @@
 import os
+import sys
+import traceback
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
-from qfluentwidgets import (
-    NavigationInterface, NavigationItemPosition, InfoBar,
-    InfoBarPosition, FluentWindow, SplashScreen, Theme, isDarkTheme, FluentStyleSheet)
+from qfluentwidgets import (NavigationInterface, NavigationItemPosition,
+                            InfoBar, InfoBarPosition, FluentWindow, SplashScreen,
+                            Theme, isDarkTheme, FluentStyleSheet, MessageBox)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -156,6 +158,9 @@ class MainWindow(FluentWindow):
         if cfg.get(cfg.enableStartLolWithApp):
             if getLolProcessPid() == 0:
                 self.startInterface.pushButton.click()
+
+        self.oldHook = sys.excepthook
+        sys.excepthook = self.exceptHook
 
     def __initListener(self):
         self.processListener.lolClientStarted.connect(
@@ -787,3 +792,18 @@ class MainWindow(FluentWindow):
     def __onGameEnd(self):
         threading.Thread(
             target=lambda: self.gameInfoInterface.gameEnd.emit()).start()
+
+    def exceptHook(self, ty, value, tb):
+        tracebackFormat = traceback.format_exception(ty, value, tb)
+        title = self.tr('Exception occurred 😥')
+        content = "".join(tracebackFormat)
+
+        w = MessageBox(title, content, self.window())
+
+        w.yesButton.setText(self.tr('Copy to clipboard'))
+        w.cancelButton.setText(self.tr('Cancel'))
+
+        if w.exec():
+            pyperclip.copy(content)
+
+        self.oldHook(ty, value, tb)
