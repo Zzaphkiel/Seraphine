@@ -1,11 +1,30 @@
 <h1 align='center'>
-    Seraphine
+  Seraphine
 </h1>
+
 <p align='center'>
-    基于 LCU API 实现的英雄联盟战绩查询工具
+  基于 LCU API 实现的英雄联盟战绩查询工具
 </p>
 
-<p align='center'><img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071" align="center" /></p>
+<p align='center'>
+  <a href="https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/Zzaphkiel/Seraphine?style=flat">
+  </a>
+  <a href="https://github.com/Zzaphkiel/Seraphine/forks">
+    <img src="https://img.shields.io/github/forks/Zzaphkiel/Seraphine?style=flat">
+  </a>
+  <a href="https://github.com/Zzaphkiel/Seraphine/stargazers">
+    <img src="https://img.shields.io/github/stars/Zzaphkiel/Seraphine?style=flat">
+  </a>
+  <a href="https://github.com/Zzaphkiel/Seraphine/releases">
+    <img src="https://img.shields.io/github/downloads/Zzaphkiel/Seraphine/total?style=flat">
+  </a>
+</p>
+
+
+<p align='center'>
+  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071">
+</p>
 
 ## 快速上手 🤗
 ### 直接使用打包好的程序
