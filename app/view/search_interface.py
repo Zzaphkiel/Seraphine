@@ -14,7 +14,7 @@ from ..common.icons import Icon
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
 from ..components.summoner_name_button import SummonerName
-from ..lol.connector import LolClientConnector
+from ..lol.connector import LolClientConnector, connector
 from ..lol.tools import processGameData, processGameDetailData
 
 
@@ -39,7 +39,6 @@ class GamesTab(QFrame):
         self.gamesNumberPerPage = 10
         self.maxPage = None
 
-        self.lolConnector: LolClientConnector = None
         self.puuid = None
         self.games = []
 
@@ -80,8 +79,8 @@ class GamesTab(QFrame):
 
     def __onTabClicked(self, gameId):
         def _():
-            game = self.lolConnector.getGameDetailByGameId(gameId)
-            game = processGameDetailData(self.puuid, game, self.lolConnector)
+            game = connector.getGameDetailByGameId(gameId)
+            game = processGameDetailData(self.puuid, game)
             self.gameDetailReady.emit(game)
 
         threading.Thread(target=_).start()
@@ -182,10 +181,10 @@ class GamesTab(QFrame):
             begin = len(self.games)
             end = begin + count - 1
 
-            games = self.lolConnector.getSummonerGamesByPuuid(
+            games = connector.getSummonerGamesByPuuid(
                 self.puuid, begin, end)
 
-            self.games += [processGameData(game, self.lolConnector)
+            self.games += [processGameData(game)
                            for game in games["games"]]
 
             if page == 1:
@@ -890,7 +889,6 @@ class SearchInterface(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.lolConnector: LolClientConnector = None
         self.vBoxLayout = QVBoxLayout(self)
 
         self.searchLayout = QHBoxLayout()
@@ -934,7 +932,7 @@ class SearchInterface(ScrollArea):
 
         def _():
             try:
-                summoner = self.lolConnector.getSummonerByName(targetName)
+                summoner = connector.getSummonerByName(targetName)
                 puuid = summoner["puuid"]
                 self.currentSummonerName = targetName
             except:

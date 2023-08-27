@@ -25,7 +25,7 @@ from ..common.icons import Icon
 from ..common.config import cfg
 from ..lol.entries import Summoner
 from ..lol.listener import LolProcessExistenceListener, LolClientEventListener, getLolProcessPid
-from ..lol.connector import LolClientConnector
+from ..lol.connector import LolClientConnector, connector
 from ..lol.tools import processGameData, translateTier
 
 import threading
@@ -55,8 +55,6 @@ class MainWindow(FluentWindow):
         self.currentSummoner: Summoner = None
         self.rankInfo = {}
         self.games = {}
-
-        self.lolConnector = LolClientConnector()
 
         self.__initInterface()
 
@@ -179,10 +177,10 @@ class MainWindow(FluentWindow):
         self.processListener.start()
 
     def __changeCareerToCurrentSummoner(self):
-        self.currentSummoner = Summoner(self.lolConnector.getCurrentSummoner())
+        self.currentSummoner = Summoner(connector.getCurrentSummoner())
 
         iconId = self.currentSummoner.profileIconId
-        icon = self.lolConnector.getProfileIcon(iconId)
+        icon = connector.getProfileIcon(iconId)
         name = self.currentSummoner.name
         level = self.currentSummoner.level
         xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
@@ -190,9 +188,9 @@ class MainWindow(FluentWindow):
 
         self.careerInterface.currentSummonerName = name
 
-        self.rankInfo = self.lolConnector.getRankedStatsByPuuid(
+        self.rankInfo = connector.getRankedStatsByPuuid(
             self.currentSummoner.puuid)
-        gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+        gamesInfo = connector.getSummonerGamesByPuuid(
             self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
         self.games = {
@@ -206,7 +204,7 @@ class MainWindow(FluentWindow):
         }
 
         for game in gamesInfo["games"]:
-            info = processGameData(game, self.lolConnector)
+            info = processGameData(game)
             if not info["remake"] and info["queueId"] != 0:
                 self.games["kills"] += info["kills"]
                 self.games["deaths"] += info["deaths"]
@@ -232,38 +230,26 @@ class MainWindow(FluentWindow):
 
     def __onLolClientStarted(self, pid):
         def _():
-            self.lolConnector.start(pid)
+            connector.start(pid)
             self.isClientProcessRunning = True
 
             self.__changeCareerToCurrentSummoner()
 
             self.startInterface.hideLoadingPage.emit(
-                self.lolConnector.port, self.lolConnector.token)
+                connector.port, connector.token)
             self.careerInterface.hideLoadingPage.emit()
 
-            folder = self.lolConnector.getInstallFolder()
+            folder = connector.getInstallFolder()
 
             if folder != cfg.get(cfg.lolFolder):
                 self.lolInstallFolderChanged.emit(folder)
 
             self.eventListener.start()
-            self.searchInterface.lolConnector = self.lolConnector
-            self.searchInterface.gamesView.gamesTab.lolConnector = self.lolConnector
-
-            self.auxiliaryFuncInterface.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.profileTierCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.removeTokensCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.spectateCard.lolConnector = self.lolConnector
-            self.auxiliaryFuncInterface.dodgeCard.lolConnector = self.lolConnector
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
 
-            status = self.lolConnector.getGameStatus()
+            status = connector.getGameStatus()
             self.eventListener.gameStatusChanged.emit(status)
 
         threading.Thread(target=_).start()
@@ -272,7 +258,7 @@ class MainWindow(FluentWindow):
 
     def __onLolClientEnded(self):
         def _():
-            self.lolConnector.close()
+            connector.close()
             self.isClientProcessRunning = False
 
             self.currentSummoner = None
@@ -285,19 +271,6 @@ class MainWindow(FluentWindow):
 
             self.startInterface.showLoadingPage.emit()
             self.careerInterface.showLoadingPage.emit()
-
-            self.searchInterface.lolConnector = None
-            self.searchInterface.gamesView.gamesTab.lolConnector = None
-
-            self.auxiliaryFuncInterface.lolConnector = None
-            self.auxiliaryFuncInterface.profileBackgroundCard.lolConnector = None
-            self.auxiliaryFuncInterface.profileTierCard.lolConnector = None
-            self.auxiliaryFuncInterface.onlineAvailabilityCard.lolConnector = None
-            self.auxiliaryFuncInterface.removeTokensCard.lolConnector = None
-            self.auxiliaryFuncInterface.createPracticeLobbyCard.lolConnector = None
-            self.auxiliaryFuncInterface.autoSelectChampionCard.lolConnector = None
-            self.auxiliaryFuncInterface.spectateCard.lolConnector = None
-            self.auxiliaryFuncInterface.dodgeCard.lolConnector = None
 
         self.eventListener.terminate()
         self.setWindowTitle("Seraphine")
@@ -330,7 +303,7 @@ class MainWindow(FluentWindow):
             name = self.currentSummoner.name
 
             iconId = self.currentSummoner.profileIconId
-            icon = self.lolConnector.getProfileIcon(iconId)
+            icon = connector.getProfileIcon(iconId)
             level = self.currentSummoner.level
             xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
             xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
@@ -387,7 +360,7 @@ class MainWindow(FluentWindow):
     def __showConnectLolSuccessInfo(self):
         InfoBar.success(
             title=self.tr("LOL Client has been connected"),
-            content=f"--app-port: {self.lolConnector.port}\n--remoting-auth-token: {self.lolConnector.token}",
+            content=f"--app-port: {connector.port}\n--remoting-auth-token: {connector.token}",
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
@@ -432,16 +405,16 @@ class MainWindow(FluentWindow):
         name = self.searchInterface.currentSummonerName
 
         def _():
-            summoner = Summoner(self.lolConnector.getSummonerByName(name))
+            summoner = Summoner(connector.getSummonerByName(name))
             iconId = summoner.profileIconId
 
-            icon = self.lolConnector.getProfileIcon(iconId)
+            icon = connector.getProfileIcon(iconId)
             level = summoner.level
             xpSinceLastLevel = summoner.xpSinceLastLevel
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
-            rankInfo = self.lolConnector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+            rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
+            gamesInfo = connector.getSummonerGamesByPuuid(
                 summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
             games = {
@@ -455,7 +428,7 @@ class MainWindow(FluentWindow):
             }
 
             for game in gamesInfo["games"]:
-                info = processGameData(game, self.lolConnector)
+                info = processGameData(game)
 
                 if not info["remake"] and info["queueId"] != 0:
                     games["kills"] += info["kills"]
@@ -493,19 +466,19 @@ class MainWindow(FluentWindow):
         def _():
             try:
                 summoner = Summoner(
-                    self.lolConnector.getSummonerByPuuid(puuid))
+                    connector.getSummonerByPuuid(puuid))
             except:
                 return
 
             iconId = summoner.profileIconId
 
-            icon = self.lolConnector.getProfileIcon(iconId)
+            icon = connector.getProfileIcon(iconId)
             level = summoner.level
             xpSinceLastLevel = summoner.xpSinceLastLevel
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
-            rankInfo = self.lolConnector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+            rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
+            gamesInfo = connector.getSummonerGamesByPuuid(
                 summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
             games = {
@@ -519,7 +492,7 @@ class MainWindow(FluentWindow):
             }
 
             for game in gamesInfo["games"]:
-                info = processGameData(game, self.lolConnector)
+                info = processGameData(game)
 
                 if not info["remake"] and info["queueId"] != 0:
                     games["kills"] += info["kills"]
@@ -581,14 +554,14 @@ class MainWindow(FluentWindow):
     def __onMatchMade(self):
         if cfg.get(cfg.enableAutoAcceptMatching):
             threading.Thread(
-                target=lambda: self.lolConnector.acceptMatchMaking()).start()
+                target=lambda: connector.acceptMatchMaking()).start()
 
     # 英雄选择界面触发事件
     def __onChampionSelectBegin(self):
 
         def updateGameInfoInterface():
             summoners = []
-            data = self.lolConnector.getChampSelectSession()
+            data = connector.getChampSelectSession()
 
             for item in data["myTeam"]:
                 summonerId = item["summonerId"]
@@ -596,14 +569,14 @@ class MainWindow(FluentWindow):
                 if summonerId == 0:
                     continue
 
-                summoner = self.lolConnector.getSummonerById(summonerId)
+                summoner = connector.getSummonerById(summonerId)
 
                 iconId = summoner["profileIconId"]
-                icon = self.lolConnector.getProfileIcon(iconId)
+                icon = connector.getProfileIcon(iconId)
 
                 puuid = summoner["puuid"]
 
-                origRankInfo = self.lolConnector.getRankedStatsByPuuid(puuid)
+                origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
                 flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
 
@@ -648,11 +621,11 @@ class MainWindow(FluentWindow):
                     },
                 }
 
-                origGamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+                origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 10)
 
-                gamesInfo = [processGameData(
-                    game, self.lolConnector) for game in origGamesInfo["games"]]
+                gamesInfo = [processGameData(game)
+                             for game in origGamesInfo["games"]]
 
                 summoners.append(
                     {
@@ -674,16 +647,16 @@ class MainWindow(FluentWindow):
 
         def selectChampion():
             champion = cfg.get(cfg.autoSelectChampion)
-            championId = self.lolConnector.manager.getChampionIdByName(
+            championId = connector.manager.getChampionIdByName(
                 champion)
-            self.lolConnector.selectChampion(championId)
+            connector.selectChampion(championId)
 
         if cfg.get(cfg.enableAutoSelectChampion):
             threading.Thread(target=selectChampion).start()
 
     def __onGameStart(self):
         def _():
-            session = self.lolConnector.getGameflowSession()
+            session = connector.getGameflowSession()
             data = session['gameData']
             queueId = data['queue']['id']
             # 特判一下斗魂竞技场
@@ -713,12 +686,12 @@ class MainWindow(FluentWindow):
                 if puuid == '00000000-0000-0000-0000-000000000000':
                     continue
 
-                summoner = self.lolConnector.getSummonerByPuuid(puuid)
+                summoner = connector.getSummonerByPuuid(puuid)
 
                 iconId = summoner["profileIconId"]
-                icon = self.lolConnector.getProfileIcon(iconId)
+                icon = connector.getProfileIcon(iconId)
 
-                origRankInfo = self.lolConnector.getRankedStatsByPuuid(puuid)
+                origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
                 flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
 
@@ -763,11 +736,11 @@ class MainWindow(FluentWindow):
                     },
                 }
 
-                origGamesInfo = self.lolConnector.getSummonerGamesByPuuid(
+                origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 10)
 
-                gamesInfo = [processGameData(
-                    game, self.lolConnector) for game in origGamesInfo["games"]]
+                gamesInfo = [processGameData(game)
+                             for game in origGamesInfo["games"]]
 
                 summoners.append(
                     {

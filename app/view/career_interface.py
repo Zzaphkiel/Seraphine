@@ -1,3 +1,5 @@
+import threading
+
 import pyperclip
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
@@ -5,7 +7,8 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
 from PyQt5.QtCore import Qt, pyqtSignal
 from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton,
                             ComboBox, SmoothScrollArea, ToolTipFilter,
-                            ToolTipPosition, ToolButton, IndeterminateProgressRing)
+                            ToolTipPosition, ToolButton, IndeterminateProgressRing,
+                            Flyout, FlyoutViewBase)
 
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar
@@ -52,6 +55,8 @@ class CareerInterface(ScrollArea):
         self.winsLabel = QLabel(self.tr("Wins:") + " None")
         self.lossesLabel = QLabel(self.tr("Losses:") + " None")
         self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
+        self.recentTeamButton = PushButton(self.tr("Recent teammates"))
+        self.teammatesFlyout = TeammatesFlyOut()
         self.filterComboBox = ComboBox()
 
         self.gameInfoAreaLayout = QHBoxLayout()
@@ -87,6 +92,8 @@ class CareerInterface(ScrollArea):
         self.gameInfoWidget.setObjectName("gameInfoWidget")
 
         self.backToMeButton.setEnabled(False)
+
+        self.recentTeamButton.setEnabled(True)
 
         self.rankTable.setRowCount(2)
         self.rankTable.setColumnCount(9)
@@ -160,8 +167,14 @@ class CareerInterface(ScrollArea):
                                          alignment=Qt.AlignCenter)
         self.recentInfoHLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.recentInfoHLayout.addWidget(
+            self.recentTeamButton, alignment=Qt.AlignCenter)
         self.recentInfoHLayout.addWidget(self.filterComboBox,
                                          alignment=Qt.AlignCenter)
+
+        # 这俩玩意的高度居然不一样，看着难受，手动让它俩一样
+        # 33 == self.filterComboBox.height()
+        self.recentTeamButton.setFixedHeight(33)
 
         self.IconNameHBoxLayout.addSpacing(
             self.backToMeButton.sizeHint().width())
@@ -207,6 +220,7 @@ class CareerInterface(ScrollArea):
         self.rankTable.setVisible(False)
         self.recent20GamesLabel.setVisible(False)
         self.filterComboBox.setVisible(False)
+        self.recentTeamButton.setVisible(False)
         self.winsLabel.setVisible(False)
         self.lossesLabel.setVisible(False)
         self.kdaLabel.setVisible(False)
@@ -226,6 +240,7 @@ class CareerInterface(ScrollArea):
         self.rankTable.setVisible(True)
         self.recent20GamesLabel.setVisible(True)
         self.filterComboBox.setVisible(True)
+        self.recentTeamButton.setVisible(True)
         self.winsLabel.setVisible(True)
         self.lossesLabel.setVisible(True)
         self.kdaLabel.setVisible(True)
@@ -283,6 +298,9 @@ class CareerInterface(ScrollArea):
 
         self.hideLoadingPage.connect(self.__hideLoadingPage)
         self.showLoadingPage.connect(self.__showLoadingPage)
+
+        self.recentTeamButton.clicked.connect(
+            self.__onRecentTeammatesButtonClicked)
 
     def __onCareerInfoChanged(self,
                               name,
@@ -415,6 +433,9 @@ class CareerInterface(ScrollArea):
 
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
 
+        if True:
+            self.updateRecentTeammates()
+
     def __updateGameInfo(self):
         for i in reversed(range(self.gameInfoLayout.count())):
             item = self.gameInfoLayout.itemAt(i)
@@ -490,3 +511,32 @@ class CareerInterface(ScrollArea):
     def isCurrentSummoner(self):
 
         return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
+
+    def __onRecentTeammatesButtonClicked(self):
+        Flyout.make(
+            self.teammatesFlyout, self.recentTeamButton, self)
+
+    def updateRecentTeammates(self):
+        def _():
+            summoners = []
+
+            print(len(self.games['games']))
+            for game in self.games['games']:
+                gameId = game['gameId']
+                print(gameId)
+
+            self.teammatesFlyout.summonersInfoReady.emit(summoners)
+
+        threading.Thread(target=_).start()
+
+
+class TeammatesFlyOut(FlyoutViewBase):
+    summonersInfoReady = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.vBoxLayout = QVBoxLayout(self)
+        self.summonersInfoReady.connect(self.__summonersInfoReady)
+
+    def __summonersInfoReady(self, games):
+        pass

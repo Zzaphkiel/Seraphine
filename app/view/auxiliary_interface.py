@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
-from ..lol.connector import LolClientConnector
+from ..lol.connector import LolClientConnector, connector
 
 
 class AuxiliaryInterface(SmoothScrollArea):
@@ -25,8 +25,6 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.profileGroup = SettingCardGroup(self.tr("Profile"),
                                              self.scrollWidget)
         self.gameGroup = SettingCardGroup(self.tr("Game"), self.scrollWidget)
-
-        self.lolConnector: LolClientConnector = None
 
         self.onlineStatusCard = OnlineStatusCard(
             title=self.tr("Online status"),
@@ -157,16 +155,16 @@ class AuxiliaryInterface(SmoothScrollArea):
     def __onSetStatusButtonClicked(self):
         msg = self.onlineStatusCard.lineEdit.text()
         threading.Thread(
-            target=lambda: self.lolConnector.setOnlineStatus(msg)).start()
+            target=lambda: connector.setOnlineStatus(msg)).start()
 
     def __onSetProfileBackgroundButtonClicked(self):
         champion = self.profileBackgroundCard.championEdit.text()
         skin = self.profileBackgroundCard.skinComboBox.currentText()
 
         def _():
-            skinId = self.lolConnector.manager.getSkinIdByChampionAndSkinName(
+            skinId = connector.manager.getSkinIdByChampionAndSkinName(
                 champion, skin)
-            self.lolConnector.setProfileBackground(skinId)
+            connector.setProfileBackground(skinId)
 
         threading.Thread(target=_).start()
 
@@ -208,7 +206,6 @@ class ProfileBackgroundCard(SettingCard):
         self.skinComboBox.setMinimumWidth(250)
         self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
 
-        self.lolConnector: LolClientConnector = None
         self.completer = None
 
         self.hBoxLayout.addWidget(self.championEdit)
@@ -228,7 +225,7 @@ class ProfileBackgroundCard(SettingCard):
         self.completer = None
 
     def updateCompleter(self):
-        champions = self.lolConnector.manager.getChampionList()
+        champions = connector.manager.getChampionList()
         self.completer = QCompleter(champions)
         self.completer.setFilterMode(Qt.MatchContains)
         self.championEdit.setCompleter(self.completer)
@@ -238,7 +235,7 @@ class ProfileBackgroundCard(SettingCard):
         if text == "":
             return
 
-        skins = self.lolConnector.manager.getSkinListByChampionName(text)
+        skins = connector.manager.getSkinListByChampionName(text)
 
         if len(skins) != 0:
             self.skinComboBox.addItems(skins)
@@ -262,8 +259,6 @@ class ProfileTierCard(SettingCard):
         self.tierBox = ComboBox()
         self.divisionBox = ComboBox()
         self.pushButton = PushButton(self.tr("Apply"))
-
-        self.lolConnector: LolClientConnector = None
 
         self.rankModeBox.addItems([
             self.tr("Teamfight Tactics"),
@@ -414,7 +409,7 @@ class ProfileTierCard(SettingCard):
         currentDivision = self.divisionBox.currentText()
         division = currentDivision if currentDivision != '--' else "NA"
 
-        threading.Thread(target=lambda: self.lolConnector.setTierShowed(
+        threading.Thread(target=lambda: connector.setTierShowed(
             queue, tier, division)).start()
 
 
@@ -427,8 +422,6 @@ class OnlineAvailabilityCard(SettingCard):
 
         self.comboBox.setMinimumWidth(130)
         self.pushButton.setMinimumWidth(100)
-
-        self.lolConnector: LolClientConnector = None
 
         self.comboBox.addItems(
             [self.tr("chat"),
@@ -456,7 +449,7 @@ class OnlineAvailabilityCard(SettingCard):
             self.tr("offline"): "offline"
         }[self.comboBox.currentText()]
 
-        threading.Thread(target=lambda: self.lolConnector.
+        threading.Thread(target=lambda: connector.
                          setOnlineAvailability(availability)).start()
 
     def __onComboBoxTextChanged(self):
@@ -476,10 +469,8 @@ class RemoveTokensCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
-        self.lolConnector: LolClientConnector = None
-
         self.pushButton.clicked.connect(lambda: threading.Thread(
-            target=lambda: self.lolConnector.removeTokens()).start())
+            target=lambda: connector.removeTokens()).start())
 
 
 class CreatePracticeLobbyCard(SettingCard):
@@ -499,8 +490,6 @@ class CreatePracticeLobbyCard(SettingCard):
         self.pushButton = PushButton(self.tr("Create"))
         self.pushButton.setMinimumWidth(100)
         self.pushButton.setEnabled(False)
-
-        self.lolConnector: LolClientConnector = None
 
         self.hBoxLayout.addWidget(self.nameLineEdit)
         self.hBoxLayout.addSpacing(16)
@@ -524,7 +513,7 @@ class CreatePracticeLobbyCard(SettingCard):
         name = self.nameLineEdit.text()
         password = self.passwordLineEdit.text()
 
-        threading.Thread(target=lambda: self.lolConnector.
+        threading.Thread(target=lambda: connector.
                          create5v5PracticeLobby(name, password)).start()
 
 
@@ -542,8 +531,6 @@ class SpectateCard(SettingCard):
         self.button.setMinimumWidth(100)
         self.button.setEnabled(False)
 
-        self.lolConnector: LolClientConnector = None
-
         self.hBoxLayout.addWidget(self.lineEdit)
         self.hBoxLayout.addSpacing(16)
         self.hBoxLayout.addWidget(self.button)
@@ -557,7 +544,7 @@ class SpectateCard(SettingCard):
         self.button.setEnabled(enable)
 
     def __onButtonClicked(self):
-        self.lolConnector.spectate(self.lineEdit.text())
+        connector.spectate(self.lineEdit.text())
 
 
 # 自动选择英雄卡片
@@ -581,8 +568,6 @@ class AutoSelectChampionCard(SettingCard):
         self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
         self.switchButton.setEnabled(False)
 
-        self.lolConnector: LolClientConnector = None
-
         self.hBoxLayout.addWidget(self.lineEdit)
         self.hBoxLayout.addSpacing(46)
         self.hBoxLayout.addWidget(self.switchButton)
@@ -595,7 +580,7 @@ class AutoSelectChampionCard(SettingCard):
         self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
 
     def updateCompleter(self):
-        self.champions = self.lolConnector.manager.getChampionList()
+        self.champions = connector.manager.getChampionList()
         self.completer = QCompleter(self.champions)
         self.completer.setFilterMode(Qt.MatchContains)
         self.lineEdit.setCompleter(self.completer)
@@ -637,9 +622,7 @@ class DodgeCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
-        self.lolConnector: LolClientConnector = None
-
         self.pushButton.clicked.connect(lambda: threading.Thread(
-            target=lambda: self.lolConnector.dodge()).start())
+            target=lambda: connector.dodge()).start())
 
         # self.pushButton.clicked.connect(lambda: print(f"{1/0}"))

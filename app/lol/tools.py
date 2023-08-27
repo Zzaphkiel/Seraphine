@@ -1,7 +1,7 @@
 import time
 
 from ..common.config import cfg, Language
-from ..lol.connector import LolClientConnector
+from ..lol.connector import LolClientConnector, connector
 
 
 def translateTier(orig: str, short=False) -> str:
@@ -43,7 +43,7 @@ def secsToStr(secs):
     return time.strftime("%M:%S", time.gmtime(secs))
 
 
-def processGameData(game, connector: LolClientConnector):
+def processGameData(game):
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
     gameId = game['gameId']
@@ -113,7 +113,7 @@ def processGameData(game, connector: LolClientConnector):
     }
 
 
-def processGameDetailData(puuid, game, connector: LolClientConnector):
+def processGameDetailData(puuid, game):
     queueId = game['queueId']
     mapId = game['mapId']
 
