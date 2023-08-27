@@ -763,7 +763,7 @@ class GameTitleBar(QFrame):
             f""" GameTitleBar {{
             border-radius: 6px;
             border: 1px solid rgb({color});
-            background-color: rgba({color}, 0.05);
+            background-color: rgba({color}, 0.15);
         }}"""
         )
 
@@ -851,17 +851,17 @@ class GameTab(QFrame):
             f""" GameTab {{
             border-radius: 5px;
             border: 1px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.05);
+            background-color: rgba({r}, {g}, {b}, 0.15);
         }}
         GameTab:hover {{
             border-radius: 5px;
             border: 1px solid rgb({r1}, {g1}, {b1});
-            background-color: rgba({r1}, {g1}, {b1}, 0.15);
+            background-color: rgba({r1}, {g1}, {b1}, 0.2);
         }}
         GameTab[pressed = true] {{
             border-radius: 5px;
             border: 1px solid rgb({r2}, {g2}, {b2});
-            background-color: rgba({r2}, {g2}, {b2}, 0.1);
+            background-color: rgba({r2}, {g2}, {b2}, 0.25);
         }}"""
         )
 

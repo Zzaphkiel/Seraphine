@@ -274,7 +274,7 @@ class GameInfoBar(QFrame):
             f""" GameInfoBar {{
             border: 1px solid rgb({c});
             border-radius: 5px;
-            background-color: rgba({c}, 0.05);
+            background-color: rgba({c}, 0.15);
         }}"""
         )
 
