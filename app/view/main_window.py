@@ -85,7 +85,7 @@ class MainWindow(FluentWindow):
         self.addSubInterface(
             self.careerInterface, Icon.PERSON, self.tr("Career"), pos)
         self.addSubInterface(
-            self.searchInterface, Icon.SEARCH, self.tr("Search"), pos)
+            self.searchInterface, Icon.SEARCH, self.tr("Search 👀"), pos)
         self.addSubInterface(
             self.gameInfoInterface, Icon.GAME, self.tr("Game Information"), pos)
         self.addSubInterface(
