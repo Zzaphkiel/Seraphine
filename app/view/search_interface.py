@@ -138,6 +138,7 @@ class GamesTab(QFrame):
             self.backToDefaultPage()
 
         self.puuid = puuid
+        self.first = True
         self.prevButton.setVisible(True)
         self.nextButton.setVisible(True)
         self.__onNextButtonClicked()
@@ -164,6 +165,11 @@ class GamesTab(QFrame):
 
         if self.currentIndex != 1:
             self.prevButton.setEnabled(True)
+
+        if self.first:
+            gameId = layout.itemAt(0).widget().gameId
+            self.tabClicked.emit(str(gameId))
+            self.first = False
 
     def updateGames(self, page):
         def _():
