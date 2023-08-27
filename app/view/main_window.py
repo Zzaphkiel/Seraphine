@@ -563,7 +563,9 @@ class MainWindow(FluentWindow):
             title = self.tr("Waiting for status")
         elif status == 'EndOfGame':
             title = self.tr("End of game")
-            self.__onGameEnd()
+
+            # 到房间内才会清除上一局的玩家信息
+            # self.__onGameEnd()
         elif status == 'Lobby':
             title = self.tr("Lobby")
             self.__onGameEnd()
