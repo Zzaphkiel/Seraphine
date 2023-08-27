@@ -17,6 +17,13 @@ def getLolProcessPid():
         return 0
 
 
+def isLolGameProcessExist():
+    processes = subprocess.check_output(
+        'tasklist /FI "imagename eq League of Legends.exe" /NH', shell=True)
+
+    return b'League of Legends.exe' in processes
+
+
 class LolProcessExistenceListener(QThread):
     lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
@@ -34,7 +41,7 @@ class LolProcessExistenceListener(QThread):
                     isRunning = True
                     self.lolClientStarted.emit(pid)
             else:
-                if isRunning:
+                if isRunning and not isLolGameProcessExist():
                     isRunning = False
                     self.lolClientEnded.emit()
 
