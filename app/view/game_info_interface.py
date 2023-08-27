@@ -386,9 +386,15 @@ class Games(QFrame):
         self.vBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignCenter)
         # self.vBoxLayout.addSpacing(10)
 
-        for game in summoner['gamesInfo']:
+        games = summoner['gamesInfo']
+
+        for game in games:
             tab = GameTab(game)
             self.vBoxLayout.addWidget(tab)
+
+        if len(games) < 11:
+            self.vBoxLayout.addSpacerItem(QSpacerItem(
+                1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
 
 class GameTab(QFrame):
