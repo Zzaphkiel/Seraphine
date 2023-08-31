@@ -48,7 +48,7 @@ pip install -r requirements.txt
 ```shell
 python main.py
 ```
-## 功能一览 🥰
+## 功能一览 （持续更新中）🥰
 - 战绩查询功能
   - 同大区召唤师战绩查询 ✅
   - 进入 BP 后自动查队友战绩 ✅
@@ -76,9 +76,11 @@ python main.py
 
 
 ## 帮助我们改进 Seraphine 😘
-个人开发能力有限，本程序将长期处于测试状态。所以在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
+个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论~
+
+_因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解_
 
 
 ## 引用以及参考资料 👀
