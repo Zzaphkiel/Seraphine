@@ -352,3 +352,45 @@ def processGameDetailData(puuid, game):
         'remake': remake,
         'teams': teams,
     }
+
+
+def getTeammates(game, targetPuuid):
+    for participant in game['participantIdentities']:
+        puuid = participant['player']['puuid']
+
+        if puuid == targetPuuid:
+            targetParticipantId = participant['participantId']
+            break
+
+    for player in game['participants']:
+        if player['participantId'] == targetParticipantId:
+            if game['queueId'] != 1700:
+                tid = player['teamId']
+            else:
+                tid = player['stats']['subteamPlacement']
+
+            # TODO!
+            win = player['stats']['win']
+            remake = player['stats']['teamEarlySurrendered']
+
+            break
+
+    res = {'win': win, 'remake': remake, 'summoners': []}
+
+    for player in game['participants']:
+
+        if game['queueId'] != 1700:
+            cmp = player['teamId']
+        else:
+            cmp = player['stats']['subteamPlacement']
+
+        if cmp == tid:
+
+            p = player['participantId']
+            s = game['participantIdentities'][p - 1]['player']
+
+            if s['puuid'] != targetPuuid:
+                res['summoners'].append(
+                    {'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
+
+    return res

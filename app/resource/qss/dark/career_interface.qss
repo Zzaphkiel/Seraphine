@@ -13,14 +13,31 @@ QLabel#winsLabel,
 QLabel#lossesLabel,
 QLabel#kdaLabel {
     color: white;
-    font: 15px 'Segoe UI', 'Microsoft YaHei';
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
 
 QLabel#winsLabel {
+    font: bold;
     color: rgb(57, 176, 27);
 }
 
 QLabel#lossesLabel {
+    font: bold;
+    color: rgb(211, 25, 12);
+}
+
+QLabel#totalLabel {
+    font: bold;
+    color: --ThemeColorPrimary;
+}
+
+TeammateInfoBar>#winsLabel {
+    font: bold;
+    color: rgb(57, 176, 27);
+}
+
+TeammateInfoBar>#lossesLabel {
+    font: bold;
     color: rgb(211, 25, 12);
 }
 
@@ -51,4 +68,33 @@ ItemsKdaCsGold>QLabel {
 CareerInterface {
     border: none;
     background-color: transparent;
+}
+
+TeammateInfoBar {
+    border: 1px solid rgb(35, 35, 35);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+TeammateInfoBar:hover {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.0837);
+}
+
+SummonerName {
+    font: bold 14px 'Segoe UI', 'Microsoft YaHei';
+    text-align: center;
+    padding: 4px 6px 4px 6px;
+    color: white;
+    border: none;
+    background-color: transparent;
+}
+
+SummonerName:hover {
+    color: --ThemeColorDark1;
+}
+
+SummonerName:pressed {
+    color: --ThemeColorDark3;
 }

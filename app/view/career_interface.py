@@ -1,32 +1,41 @@
 import threading
+import time
+import typing
+from PyQt5 import QtCore
 
 import pyperclip
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
-                             QWidget)
+                             QWidget, QFrame, QStackedWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
 from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton,
                             ComboBox, SmoothScrollArea, ToolTipFilter,
                             ToolTipPosition, ToolButton, IndeterminateProgressRing,
-                            Flyout, FlyoutViewBase)
+                            Flyout, FlyoutViewBase, FlyoutAnimationType)
 
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar
+from ..components.champion_icon_widget import RoundIcon
+from ..components.summoner_name_button import SummonerName
 from ..common.style_sheet import StyleSheet
 from ..common.config import cfg
 from ..common.icons import Icon
+from ..lol.connector import connector
 from ..lol.entries import Summoner
-from ..lol.tools import translateTier
+from ..lol.tools import translateTier, getTeammates
 
 
 class CareerInterface(ScrollArea):
-    careerInfoChanged = pyqtSignal(str, str, int, int, int, dict, dict, bool)
+    careerInfoChanged = pyqtSignal(
+        str, str, int, int, int, str, dict, dict, bool)
     showLoadingPage = pyqtSignal()
     hideLoadingPage = pyqtSignal()
+    summonerNameClicked = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.currentSummonerName: Summoner = None
+        self.currentSummonerName = None
+        self.puuid = None
 
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
@@ -308,6 +317,7 @@ class CareerInterface(ScrollArea):
                               level,
                               xpSinceLastLevel,
                               xpUntilNextLevel,
+                              puuid,
                               rankInfo=None,
                               games=None,
                               triggerByUser=True):
@@ -317,6 +327,8 @@ class CareerInterface(ScrollArea):
 
         self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel)
         self.name.setText(name)
+
+        self.puuid = puuid
 
         levelStr = str(level) if level != -1 else "None"
         self.level.setText(f'Lv. {levelStr}')
@@ -434,6 +446,7 @@ class CareerInterface(ScrollArea):
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
 
         if True:
+            self.teammatesFlyout.updatePuuid(puuid)
             self.updateRecentTeammates()
 
     def __updateGameInfo(self):
@@ -513,30 +526,164 @@ class CareerInterface(ScrollArea):
         return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
 
     def __onRecentTeammatesButtonClicked(self):
-        Flyout.make(
-            self.teammatesFlyout, self.recentTeamButton, self)
+        self.w = Flyout.make(
+            self.teammatesFlyout, self.recentTeamButton, self, aniType=FlyoutAnimationType.DROP_DOWN)
 
     def updateRecentTeammates(self):
-        def _():
-            summoners = []
+        self.teammatesFlyout.showLoadingPage.emit()
 
-            print(len(self.games['games']))
+        def _():
+            summoners = {}
+
             for game in self.games['games']:
                 gameId = game['gameId']
-                print(gameId)
+                game = connector.getGameDetailByGameId(gameId)
 
-            self.teammatesFlyout.summonersInfoReady.emit(summoners)
+                teammates = getTeammates(game, self.puuid)
+                for p in teammates['summoners']:
+                    if p['puuid'] not in summoners:
+                        summonerIcon = connector.getProfileIcon(p['icon'])
+                        summoners[p['puuid']] = {
+                            "name": p['name'], 'icon': summonerIcon,
+                            "total": 0, "wins": 0, "losses": 0}
+
+                    summoners[p['puuid']]['total'] += 1
+
+                    if not teammates['remake']:
+                        if teammates['win']:
+                            summoners[p['puuid']]['wins'] += 1
+                        else:
+                            summoners[p['puuid']]['losses'] += 1
+
+            ret = {"puuid": self.puuid, "summoners": [
+                item for item in summoners.values()]}
+
+            ret['summoners'] = sorted(ret['summoners'],
+                                      key=lambda x: x['total'], reverse=True)[:5]
+
+            self.teammatesFlyout.hideLoadingPage.emit()
+            self.teammatesFlyout.summonersInfoReady.emit(ret)
 
         threading.Thread(target=_).start()
 
 
 class TeammatesFlyOut(FlyoutViewBase):
-    summonersInfoReady = pyqtSignal(list)
+    summonersInfoReady = pyqtSignal(dict)
+    showLoadingPage = pyqtSignal()
+    hideLoadingPage = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.vBoxLayout = QVBoxLayout(self)
-        self.summonersInfoReady.connect(self.__summonersInfoReady)
 
-    def __summonersInfoReady(self, games):
-        pass
+        self.vBoxLayout = QVBoxLayout(self)
+        self.stackedWidget = QStackedWidget()
+
+        self.loadingPageWidget = QWidget()
+        self.infoPageWidget = QWidget()
+
+        self.loadingVBoxLayout = QVBoxLayout(self.loadingPageWidget)
+        self.infopageVBoxLayout = QVBoxLayout(self.infoPageWidget)
+
+        self.processRing = IndeterminateProgressRing()
+
+        self.__initLayout()
+        self.__connectSignalToSlot()
+
+    def __connectSignalToSlot(self):
+        self.summonersInfoReady.connect(self.__summonersInfoReady)
+        self.showLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabled(True))
+        self.hideLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabled(False))
+
+    def __initLayout(self):
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.loadingVBoxLayout.addWidget(
+            self.processRing, alignment=Qt.AlignCenter)
+
+        self.vBoxLayout.addWidget(self.stackedWidget)
+
+        self.stackedWidget.addWidget(self.loadingPageWidget)
+        self.stackedWidget.addWidget(self.infoPageWidget)
+
+        self.stackedWidget.setFixedHeight(398)
+        self.stackedWidget.setFixedWidth(525)
+
+    def updatePuuid(self, puuid):
+        self.puuid = puuid
+
+    def clear(self):
+        for i in reversed(range(self.infopageVBoxLayout.count())):
+            item = self.infopageVBoxLayout.itemAt(i)
+            self.infopageVBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()
+
+    def __summonersInfoReady(self, info):
+        if self.puuid != info['puuid']:
+            return
+
+        self.clear()
+
+        for summoner in info['summoners']:
+            infoBar = TeammateInfoBar(summoner)
+            self.infopageVBoxLayout.addWidget(infoBar)
+
+    def __setLoadingPageEnabled(self, enable):
+        index = 0 if enable else 1
+        self.stackedWidget.setCurrentIndex(index)
+
+
+class TeammateInfoBar(QFrame):
+    # closed = pyqtSignal()
+
+    def __init__(self, summoner, parent=None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.icon = RoundIcon(summoner['icon'], 40, 4, 4)
+        self.name = SummonerName(summoner['name'])
+
+        self.totalTitle = QLabel(self.tr("Total: "))
+        self.totalLabel = QLabel(str(summoner["total"]))
+        self.winsTitle = QLabel(self.tr("Wins: "))
+        self.winsLabel = QLabel(str(summoner['wins']))
+        self.lossesTitle = QLabel(self.tr("Losses: "))
+        self.lossesLabel = QLabel(str(summoner['losses']))
+
+        self.__initWidget()
+        self.__initLayout()
+
+        self.setFixedHeight(70)
+
+        self.name.clicked.connect(
+            lambda: self.parent().parent().parent().parent().parent().summonerNameClicked.emit(self.name.text()))
+
+    def __initWidget(self):
+        self.name.setFixedWidth(150)
+        self.totalLabel.setFixedWidth(45)
+        self.winsLabel.setFixedWidth(45)
+        self.lossesLabel.setFixedWidth(45)
+
+        self.totalLabel.setObjectName('totalLabel')
+        self.winsLabel.setObjectName("winsLabel")
+        self.lossesLabel.setObjectName("lossesLabel")
+
+        self.totalTitle.setAlignment(Qt.AlignCenter)
+        self.totalLabel.setAlignment(Qt.AlignCenter)
+        self.winsTitle.setAlignment(Qt.AlignCenter)
+        self.winsLabel.setAlignment(Qt.AlignCenter)
+        self.lossesTitle.setAlignment(Qt.AlignCenter)
+        self.lossesLabel.setAlignment(Qt.AlignCenter)
+
+    def __initLayout(self):
+        self.hBoxLayout.addWidget(self.icon)
+        self.hBoxLayout.addWidget(self.name)
+        self.hBoxLayout.addWidget(self.totalTitle)
+        self.hBoxLayout.addWidget(self.totalLabel)
+        self.hBoxLayout.addWidget(self.winsTitle)
+        self.hBoxLayout.addWidget(self.winsLabel)
+        self.hBoxLayout.addWidget(self.lossesTitle)
+        self.hBoxLayout.addWidget(self.lossesLabel)

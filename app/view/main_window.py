@@ -38,6 +38,8 @@ class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
 
+        self.__initWindow()
+
         # create sub interface
         self.startInterface = StartInterface(self)
         self.careerInterface = CareerInterface(self)
@@ -63,7 +65,7 @@ class MainWindow(FluentWindow):
 
         self.__initListener()
 
-        self.__initWindow()
+        self.splashScreen.finish()
 
     def __initInterface(self):
         self.__lockInterface()
@@ -114,6 +116,8 @@ class MainWindow(FluentWindow):
             self.__onCareerInterfaceHistoryButtonClicked)
         self.careerInterface.backToMeButton.clicked.connect(
             self.__onCareerInterfaceBackToMeButtonClicked)
+        self.careerInterface.summonerNameClicked.connect(
+            self.__onTeammateFlyoutSummonerNameClicked)
         self.searchInterface.careerButton.clicked.connect(
             self.__onSearchInterfaceCareerButtonClicked)
         self.searchInterface.gamesView.gameDetailView.summonerNameClicked.connect(
@@ -140,9 +144,10 @@ class MainWindow(FluentWindow):
 
         self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
 
-        # self.splashScreen = SplashScreen(self.windowIcon(), self)
-        # self.splashScreen.setIconSize(QSize(106, 106))
-        # self.splashScreen.raise_()
+        self.splashScreen = SplashScreen(self.windowIcon(), self)
+        self.splashScreen.setIconSize(QSize(106, 106))
+        self.splashScreen.raise_()
+
         cfg.themeChanged.connect(
             lambda: self.setMicaEffectEnabled(self.isMicaEffectEnabled()))
 
@@ -150,8 +155,8 @@ class MainWindow(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-        # self.show()
-        # QApplication.processEvents()
+        self.show()
+        QApplication.processEvents()
 
         if cfg.get(cfg.enableStartLolWithApp):
             if getLolProcessPid() == 0:
@@ -177,6 +182,7 @@ class MainWindow(FluentWindow):
         self.processListener.start()
 
     def __changeCareerToCurrentSummoner(self):
+        self.careerInterface.showLoadingPage.emit()
         self.currentSummoner = Summoner(connector.getCurrentSummoner())
 
         iconId = self.currentSummoner.profileIconId
@@ -223,10 +229,12 @@ class MainWindow(FluentWindow):
             level,
             xpSinceLastLevel,
             xpUntilNextLevel,
+            self.currentSummoner.puuid,
             self.rankInfo,
             self.games,
             True,
         )
+        self.careerInterface.hideLoadingPage.emit()
 
     def __onLolClientStarted(self, pid):
         def _():
@@ -315,6 +323,7 @@ class MainWindow(FluentWindow):
                 level,
                 xpSinceLastLevel,
                 xpUntilNextLevel,
+                self.currentSummoner.puuid,
                 self.rankInfo,
                 self.games,
                 False,
@@ -402,6 +411,7 @@ class MainWindow(FluentWindow):
         self.__switchTo(self.searchInterface)
 
     def __onSearchInterfaceCareerButtonClicked(self):
+        self.careerInterface.showLoadingPage.emit()
         name = self.searchInterface.currentSummonerName
 
         def _():
@@ -448,13 +458,72 @@ class MainWindow(FluentWindow):
                 level,
                 xpSinceLastLevel,
                 xpUntilNextLevel,
+                summoner.puuid,
                 rankInfo,
                 games,
                 True,
             )
+            self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
         self.__switchTo(self.careerInterface)
+
+    def __onTeammateFlyoutSummonerNameClicked(self, name):
+        self.careerInterface.w.close()
+        self.careerInterface.showLoadingPage.emit()
+
+        def _():
+            summoner = Summoner(connector.getSummonerByName(name))
+            iconId = summoner.profileIconId
+
+            icon = connector.getProfileIcon(iconId)
+            level = summoner.level
+            xpSinceLastLevel = summoner.xpSinceLastLevel
+            xpUntilNextLevel = summoner.xpUntilNextLevel
+
+            rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
+            gamesInfo = connector.getSummonerGamesByPuuid(
+                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+
+            games = {
+                "gameCount": gamesInfo["gameCount"],
+                "wins": 0,
+                "losses": 0,
+                "kills": 0,
+                "deaths": 0,
+                "assists": 0,
+                "games": [],
+            }
+
+            for game in gamesInfo["games"]:
+                info = processGameData(game)
+
+                if not info["remake"] and info["queueId"] != 0:
+                    games["kills"] += info["kills"]
+                    games["deaths"] += info["deaths"]
+                    games["assists"] += info["assists"]
+
+                    if info["win"]:
+                        games["wins"] += 1
+                    else:
+                        games["losses"] += 1
+
+                games["games"].append(info)
+
+            self.careerInterface.careerInfoChanged.emit(
+                name,
+                icon,
+                level,
+                xpSinceLastLevel,
+                xpUntilNextLevel,
+                summoner.puuid,
+                rankInfo,
+                games,
+                True,
+            )
+            self.careerInterface.hideLoadingPage.emit()
+
+        threading.Thread(target=_).start()
 
     def __onCareerInterfaceBackToMeButtonClicked(self):
         threading.Thread(target=self.__changeCareerToCurrentSummoner).start()
@@ -462,6 +531,8 @@ class MainWindow(FluentWindow):
     def __onSearchInterfaceSummonerNameClicked(self, puuid):
         if puuid == "00000000-0000-0000-0000-000000000000":
             return
+
+        self.careerInterface.showLoadingPage.emit()
 
         def _():
             try:
@@ -512,10 +583,12 @@ class MainWindow(FluentWindow):
                 level,
                 xpSinceLastLevel,
                 xpUntilNextLevel,
+                summoner.puuid,
                 rankInfo,
                 games,
                 True,
             )
+            self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
         self.__switchTo(self.careerInterface)

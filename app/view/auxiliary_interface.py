@@ -232,9 +232,6 @@ class ProfileBackgroundCard(SettingCard):
 
     def __onLineEditTextChanged(self):
         text = self.championEdit.text()
-        if text == "":
-            return
-
         skins = connector.manager.getSkinListByChampionName(text)
 
         if len(skins) != 0:
