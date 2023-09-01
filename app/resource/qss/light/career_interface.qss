@@ -99,3 +99,10 @@ SummonerName:hover {
 SummonerName:pressed {
     color: --ThemeColorLight3;
 }
+
+
+/* ChampionsCard {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.667);
+} */

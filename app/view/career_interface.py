@@ -26,8 +26,7 @@ from ..lol.tools import translateTier, getTeammates
 
 
 class CareerInterface(ScrollArea):
-    careerInfoChanged = pyqtSignal(
-        str, str, int, int, int, str, dict, dict, bool)
+    careerInfoChanged = pyqtSignal(dict)
     showLoadingPage = pyqtSignal()
     hideLoadingPage = pyqtSignal()
     summonerNameClicked = pyqtSignal(str)
@@ -64,6 +63,7 @@ class CareerInterface(ScrollArea):
         self.winsLabel = QLabel(self.tr("Wins:") + " None")
         self.lossesLabel = QLabel(self.tr("Losses:") + " None")
         self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
+        self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
         self.teammatesFlyout = TeammatesFlyOut()
         self.filterComboBox = ComboBox()
@@ -177,6 +177,8 @@ class CareerInterface(ScrollArea):
         self.recentInfoHLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.recentInfoHLayout.addWidget(
+            self.championsCard, alignment=Qt.AlignCenter)
+        self.recentInfoHLayout.addWidget(
             self.recentTeamButton, alignment=Qt.AlignCenter)
         self.recentInfoHLayout.addWidget(self.filterComboBox,
                                          alignment=Qt.AlignCenter)
@@ -217,47 +219,30 @@ class CareerInterface(ScrollArea):
 
         self.vBoxLayout.setContentsMargins(30, 32, 30, 20)
 
-        self.__showLoadingPage()
+        self.__setLoadingPageEnabled(True)
 
-    def __showLoadingPage(self):
-        self.icon.setVisible(False)
-        self.name.setVisible(False)
-        self.copyButton.setVisible(False)
-        self.level.setVisible(False)
-        self.backToMeButton.setVisible(False)
-        self.searchButton.setVisible(False)
-        self.rankTable.setVisible(False)
-        self.recent20GamesLabel.setVisible(False)
-        self.filterComboBox.setVisible(False)
-        self.recentTeamButton.setVisible(False)
-        self.winsLabel.setVisible(False)
-        self.lossesLabel.setVisible(False)
-        self.kdaLabel.setVisible(False)
-        self.winsLabel.setVisible(False)
-        self.lossesLabel.setVisible(False)
-        self.gameInfoArea.setVisible(False)
+    def __setLoadingPageEnabled(self, enable):
+        self.gameInfoArea.verticalScrollBar().setSliderPosition(0)
 
-        self.progressRing.setVisible(True)
+        self.icon.setVisible(not enable)
+        self.name.setVisible(not enable)
+        self.copyButton.setVisible(not enable)
+        self.level.setVisible(not enable)
+        self.backToMeButton.setVisible(not enable)
+        self.searchButton.setVisible(not enable)
+        self.rankTable.setVisible(not enable)
+        self.recent20GamesLabel.setVisible(not enable)
+        self.filterComboBox.setVisible(not enable)
+        self.championsCard.setVisible(not enable)
+        self.recentTeamButton.setVisible(not enable)
+        self.winsLabel.setVisible(not enable)
+        self.lossesLabel.setVisible(not enable)
+        self.kdaLabel.setVisible(not enable)
+        self.winsLabel.setVisible(not enable)
+        self.lossesLabel.setVisible(not enable)
+        self.gameInfoArea.setVisible(not enable)
 
-    def __hideLoadingPage(self):
-        self.icon.setVisible(True)
-        self.name.setVisible(True)
-        self.copyButton.setVisible(True)
-        self.level.setVisible(True)
-        self.backToMeButton.setVisible(True)
-        self.searchButton.setVisible(True)
-        self.rankTable.setVisible(True)
-        self.recent20GamesLabel.setVisible(True)
-        self.filterComboBox.setVisible(True)
-        self.recentTeamButton.setVisible(True)
-        self.winsLabel.setVisible(True)
-        self.lossesLabel.setVisible(True)
-        self.kdaLabel.setVisible(True)
-        self.winsLabel.setVisible(True)
-        self.lossesLabel.setVisible(True)
-        self.gameInfoArea.setVisible(True)
-
-        self.progressRing.setVisible(False)
+        self.progressRing.setVisible(enable)
 
     def __updateTable(self):
         for i, line in enumerate(self.rankInfo):
@@ -305,22 +290,24 @@ class CareerInterface(ScrollArea):
         self.copyButton.clicked.connect(
             lambda: pyperclip.copy(self.name.text()))
 
-        self.hideLoadingPage.connect(self.__hideLoadingPage)
-        self.showLoadingPage.connect(self.__showLoadingPage)
+        self.hideLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabled(False))
+        self.showLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabled(True))
 
         self.recentTeamButton.clicked.connect(
             self.__onRecentTeammatesButtonClicked)
 
-    def __onCareerInfoChanged(self,
-                              name,
-                              icon,
-                              level,
-                              xpSinceLastLevel,
-                              xpUntilNextLevel,
-                              puuid,
-                              rankInfo=None,
-                              games=None,
-                              triggerByUser=True):
+    def __onCareerInfoChanged(self, info: dict):
+        name = info['name']
+        icon = info['icon']
+        level = info['level']
+        xpSinceLastLevel = info['xpSinceLastLevel']
+        xpUntilNextLevel = info['xpUntilNextLevel']
+        puuid = info['puuid']
+        rankInfo = info['rankInfo']
+        games = info['games']
+        triggerByUser = info['triggerByUser']
 
         if not triggerByUser and not self.isCurrentSummoner():
             return
@@ -448,6 +435,9 @@ class CareerInterface(ScrollArea):
         if True:
             self.teammatesFlyout.updatePuuid(puuid)
             self.updateRecentTeammates()
+
+        if 'champions' in info:
+            self.championsCard.updateChampions(info['champions'])
 
     def __updateGameInfo(self):
         for i in reversed(range(self.gameInfoLayout.count())):
@@ -606,8 +596,8 @@ class TeammatesFlyOut(FlyoutViewBase):
         self.stackedWidget.addWidget(self.loadingPageWidget)
         self.stackedWidget.addWidget(self.infoPageWidget)
 
-        self.stackedWidget.setFixedHeight(398)
-        self.stackedWidget.setFixedWidth(525)
+        self.stackedWidget.setFixedHeight(352)
+        self.stackedWidget.setFixedWidth(490)
 
     def updatePuuid(self, puuid):
         self.puuid = puuid
@@ -656,13 +646,14 @@ class TeammateInfoBar(QFrame):
         self.__initWidget()
         self.__initLayout()
 
-        self.setFixedHeight(70)
+        self.setFixedHeight(62)
 
         self.name.clicked.connect(
-            lambda: self.parent().parent().parent().parent().parent().summonerNameClicked.emit(self.name.text()))
+            lambda: self.parent().parent().parent().parent()
+            .parent().summonerNameClicked.emit(self.name.text()))
 
     def __initWidget(self):
-        self.name.setFixedWidth(150)
+        self.name.setFixedWidth(180)
         self.totalLabel.setFixedWidth(40)
         self.winsLabel.setFixedWidth(40)
         self.lossesLabel.setFixedWidth(40)
@@ -687,3 +678,39 @@ class TeammateInfoBar(QFrame):
         self.hBoxLayout.addWidget(self.winsLabel)
         self.hBoxLayout.addWidget(self.lossesTitle)
         self.hBoxLayout.addWidget(self.lossesLabel)
+
+
+class ChampionsCard(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.setFixedHeight(33)
+
+    def updateChampions(self, champions):
+        self.clear()
+
+        for champion in champions:
+            icon = RoundIcon(champion['icon'], 28, 2, 2)
+
+            toolTip = self.tr("Total: ") + str(champion['total']) + "   "
+            toolTip += self.tr("Wins: ") + str(champion['wins']) + "   "
+            toolTip += self.tr("Losses: ") + str(champion['losses']) + "   "
+            toolTip += self.tr("Win Rate: ")
+            toolTip += ("100" if champion['losses'] == 0 else "{:.2f}".format(
+                champion['wins'] * 100 / (champion['wins'] + champion['losses']))) + "%"
+            icon.setToolTip(toolTip)
+            icon.installEventFilter(
+                ToolTipFilter(icon, 0, ToolTipPosition.TOP))
+
+            self.hBoxLayout.addWidget(icon, alignment=Qt.AlignCenter)
+
+    def clear(self):
+        for i in reversed(range(self.hBoxLayout.count())):
+            item = self.hBoxLayout.itemAt(i)
+            self.hBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()

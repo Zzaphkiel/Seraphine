@@ -26,7 +26,7 @@ from ..common.config import cfg
 from ..lol.entries import Summoner
 from ..lol.listener import LolProcessExistenceListener, LolClientEventListener, getLolProcessPid
 from ..lol.connector import LolClientConnector, connector
-from ..lol.tools import processGameData, translateTier
+from ..lol.tools import processGameData, translateTier, getRecentChampions
 
 import threading
 
@@ -223,16 +223,20 @@ class MainWindow(FluentWindow):
             self.games["games"].append(info)
 
         self.nameOrIconChanged.emit(icon, name)
+
+        champions = getRecentChampions(self.games['games'])
+
         self.careerInterface.careerInfoChanged.emit(
-            name,
-            icon,
-            level,
-            xpSinceLastLevel,
-            xpUntilNextLevel,
-            self.currentSummoner.puuid,
-            self.rankInfo,
-            self.games,
-            True,
+            {'name': name,
+             'icon': icon,
+             'level': level,
+             'xpSinceLastLevel': xpSinceLastLevel,
+             'xpUntilNextLevel': xpUntilNextLevel,
+             'puuid': self.currentSummoner.puuid,
+             'rankInfo': self.rankInfo,
+             'games': self.games,
+             'champions': champions,
+             'triggerByUser': True, }
         )
         self.careerInterface.hideLoadingPage.emit()
 
@@ -318,15 +322,15 @@ class MainWindow(FluentWindow):
 
             self.nameOrIconChanged.emit(icon, name)
             self.careerInterface.careerInfoChanged.emit(
-                name,
-                icon,
-                level,
-                xpSinceLastLevel,
-                xpUntilNextLevel,
-                self.currentSummoner.puuid,
-                self.rankInfo,
-                self.games,
-                False,
+                {'name': name,
+                 'icon': icon,
+                 'level': level,
+                 'xpSinceLastLevel': xpSinceLastLevel,
+                 'xpUntilNextLevel': xpUntilNextLevel,
+                 'puuid': self.currentSummoner.puuid,
+                 'rankInfo': self.rankInfo,
+                 'games': self.games,
+                 'triggerByUser': False, }
             )
 
         threading.Thread(target=_).start()
@@ -452,16 +456,19 @@ class MainWindow(FluentWindow):
 
                 games["games"].append(info)
 
+            champions = getRecentChampions(games['games'])
+
             self.careerInterface.careerInfoChanged.emit(
-                name,
-                icon,
-                level,
-                xpSinceLastLevel,
-                xpUntilNextLevel,
-                summoner.puuid,
-                rankInfo,
-                games,
-                True,
+                {'name': name,
+                 'icon': icon,
+                 'level': level,
+                 'xpSinceLastLevel': xpSinceLastLevel,
+                 'xpUntilNextLevel': xpUntilNextLevel,
+                 'puuid': summoner.puuid,
+                 'rankInfo': rankInfo,
+                 'games': games,
+                 'champions': champions,
+                 'triggerByUser': True, }
             )
             self.careerInterface.hideLoadingPage.emit()
 
@@ -510,16 +517,19 @@ class MainWindow(FluentWindow):
 
                 games["games"].append(info)
 
+            champions = getRecentChampions(games['games'])
+
             self.careerInterface.careerInfoChanged.emit(
-                name,
-                icon,
-                level,
-                xpSinceLastLevel,
-                xpUntilNextLevel,
-                summoner.puuid,
-                rankInfo,
-                games,
-                True,
+                {'name': name,
+                 'icon': icon,
+                 'level': level,
+                 'xpSinceLastLevel': xpSinceLastLevel,
+                 'xpUntilNextLevel': xpUntilNextLevel,
+                 'puuid': summoner.puuid,
+                 'rankInfo': rankInfo,
+                 'games': games,
+                 'champions': champions,
+                 'triggerByUser': True, }
             )
             self.careerInterface.hideLoadingPage.emit()
 
@@ -577,16 +587,19 @@ class MainWindow(FluentWindow):
 
                 games["games"].append(info)
 
+            champions = getRecentChampions(games['games'])
+
             self.careerInterface.careerInfoChanged.emit(
-                summoner.name,
-                icon,
-                level,
-                xpSinceLastLevel,
-                xpUntilNextLevel,
-                summoner.puuid,
-                rankInfo,
-                games,
-                True,
+                {'name': summoner.name,
+                 'icon': icon,
+                 'level': level,
+                 'xpSinceLastLevel': xpSinceLastLevel,
+                 'xpUntilNextLevel': xpUntilNextLevel,
+                 'puuid': summoner.puuid,
+                 'rankInfo': rankInfo,
+                 'games': games,
+                 'champions': champions,
+                 'triggerByUser': True, }
             )
             self.careerInterface.hideLoadingPage.emit()
 

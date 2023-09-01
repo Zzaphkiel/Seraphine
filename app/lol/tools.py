@@ -99,6 +99,7 @@ def processGameData(game):
         'duration': duration,
         'remake': remake,
         'win': win,
+        'championId': championId,
         'championIcon': championIcon,
         'spell1Icon': spell1Icon,
         'spell2Icon': spell2Icon,
@@ -394,3 +395,29 @@ def getTeammates(game, targetPuuid):
                     {'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
 
     return res
+
+
+def getRecentChampions(games):
+    champions = {}
+
+    for game in games:
+        championId = game['championId']
+
+        if championId not in champions:
+            champions[championId] = {
+                'icon': game['championIcon'], 'wins': 0, 'losses': 0, 'total': 0}
+
+        champions[championId]['total'] += 1
+
+        if not game['remake']:
+            if game['win']:
+                champions[championId]['wins'] += 1
+            else:
+                champions[championId]['losses'] += 1
+
+    ret = [item for item in champions.values()]
+    ret.sort(key=lambda x: x['total'], reverse=True)
+
+    maxLen = 10
+
+    return ret if len(ret) < maxLen else ret[:maxLen]
