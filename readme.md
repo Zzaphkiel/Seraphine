@@ -105,4 +105,4 @@ _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速�
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
 
 ## 许可证 ⚖️
-Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。
+Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。宣传或转载时请带上[本页链接](https://github.com/Zzaphkiel/Seraphine)。

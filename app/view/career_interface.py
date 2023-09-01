@@ -663,9 +663,9 @@ class TeammateInfoBar(QFrame):
 
     def __initWidget(self):
         self.name.setFixedWidth(150)
-        self.totalLabel.setFixedWidth(45)
-        self.winsLabel.setFixedWidth(45)
-        self.lossesLabel.setFixedWidth(45)
+        self.totalLabel.setFixedWidth(40)
+        self.winsLabel.setFixedWidth(40)
+        self.lossesLabel.setFixedWidth(40)
 
         self.totalLabel.setObjectName('totalLabel')
         self.winsLabel.setObjectName("winsLabel")
