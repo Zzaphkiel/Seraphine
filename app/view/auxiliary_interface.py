@@ -1,4 +1,6 @@
 import threading
+import os
+
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
@@ -44,11 +46,15 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
-        self.dodgeCard = DodgeCard(
-            self.tr("Dodge"),
-            self.tr("Dodge from champion select without closing clint"),
-            self.gameGroup
-        )
+        # self.dodgeCard = DodgeCard(
+        #     self.tr("Dodge"),
+        #     self.tr("Dodge from champion select without closing clint"),
+        #     self.gameGroup
+        # )
+        self.lockConfigCard = LockConfigCard(
+            self.tr("Lock config"),
+            self.tr("Make your game config unchangeable"),
+            cfg.lockConfig, self.gameGroup)
 
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
@@ -106,7 +112,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
-        self.gameGroup.addSettingCard(self.dodgeCard)
+        # self.gameGroup.addSettingCard(self.dodgeCard)
+        self.gameGroup.addSettingCard(self.lockConfigCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -143,6 +150,8 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         if a0 and cfg.get(cfg.enableAutoSelectChampion):
             self.autoSelectChampionCard.switchButton.setEnabled(True)
+
+        self.lockConfigCard.setEnabled(a0)
 
         return super().setEnabled(a0)
 
@@ -623,3 +632,35 @@ class DodgeCard(SettingCard):
             target=lambda: connector.dodge()).start())
 
         # self.pushButton.clicked.connect(lambda: print(f"{1/0}"))
+
+
+class LockConfigCard(SettingCard):
+    def __init__(self, title, content, configItem: ConfigItem, parent):
+        super().__init__(Icon.LOCK, title, content, parent)
+
+        self.configItem = configItem
+
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.hBoxLayout.addWidget(self.switchButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
+
+    def setValue(self, isChecked: bool):
+        qconfig.set(self.configItem, isChecked)
+        self.switchButton.setChecked(isChecked)
+
+    def __onCheckedChanged(self, isChecked: bool):
+        self.setValue(isChecked)
+
+        self.setConfigFileReadOnlyEnabled(isChecked)
+
+    def setConfigFileReadOnlyEnabled(self, enable):
+        path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
+
+        if not os.path.exists(path):
+            return
+
+        mode = 0o444 if enable else 0o666
+        os.chmod(path, mode)

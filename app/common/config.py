@@ -65,6 +65,8 @@ class Config(QConfig):
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
 
+    lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
+
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 
