@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from qfluentwidgets import (ScrollArea, LineEdit, PushButton, ToolButton, InfoBar, InfoBarPosition,
                             ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase,
-                            Flyout, CardWidget)
+                            Flyout, CardWidget, IndeterminateProgressRing)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -79,9 +79,11 @@ class GamesTab(QFrame):
 
     def __onTabClicked(self, gameId):
         def _():
+            self.parent().gameDetailView.showLoadingPage.emit()
             game = connector.getGameDetailByGameId(gameId)
             game = processGameDetailData(self.puuid, game)
             self.gameDetailReady.emit(game)
+            self.parent().gameDetailView.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
 
@@ -233,6 +235,9 @@ class GamesTab(QFrame):
 class GameDetailView(QFrame):
     summonerNameClicked = pyqtSignal(str)
 
+    showLoadingPage = pyqtSignal()
+    hideLoadingPage = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.vBoxLayout = QVBoxLayout(self)
@@ -244,7 +249,16 @@ class GameDetailView(QFrame):
         self.extraTeamView1 = TeamView()
         self.extraTeamView2 = TeamView()
 
+        self.processRing = IndeterminateProgressRing()
+
         self.__initLayout()
+        self.__connectSignalToSlot()
+
+    def __connectSignalToSlot(self):
+        self.showLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabeld(True))
+        self.hideLoadingPage.connect(
+            lambda: self.__setLoadingPageEnabeld(False))
 
     def clear(self):
         for i in reversed(range(self.vBoxLayout.count())):
@@ -261,15 +275,10 @@ class GameDetailView(QFrame):
 
         self.extraTeamView1 = TeamView()
         self.extraTeamView2 = TeamView()
-        self.vBoxLayout.addWidget(self.titleBar)
-        self.vBoxLayout.addWidget(self.teamView1)
-        self.vBoxLayout.addWidget(self.teamView2)
 
-        self.vBoxLayout.addWidget(self.extraTeamView1)
-        self.vBoxLayout.addWidget(self.extraTeamView2)
+        self.processRing = IndeterminateProgressRing()
 
-        self.extraTeamView1.setVisible(False)
-        self.extraTeamView2.setVisible(False)
+        self.__initLayout()
 
     def __initLayout(self):
         self.vBoxLayout.addWidget(self.titleBar)
@@ -279,6 +288,9 @@ class GameDetailView(QFrame):
         self.vBoxLayout.addWidget(self.extraTeamView1)
         self.vBoxLayout.addWidget(self.extraTeamView2)
 
+        self.vBoxLayout.addWidget(self.processRing, alignment=Qt.AlignCenter)
+
+        self.processRing.setVisible(False)
         self.extraTeamView1.setVisible(False)
         self.extraTeamView2.setVisible(False)
 
@@ -336,6 +348,20 @@ class GameDetailView(QFrame):
 
             self.extraTeamView2.updateTeam(team4, isCherry, self.tr("4th"))
             self.extraTeamView2.updateSummoners(team4["summoners"])
+
+    def __setLoadingPageEnabeld(self, enable):
+        if not cfg.get(cfg.showTierInGameInfo):
+            return
+
+        self.titleBar.setVisible(not enable)
+        self.teamView1.setVisible(not enable)
+        self.teamView2.setVisible(not enable)
+
+        if enable:
+            self.extraTeamView1.setVisible(not enable)
+            self.extraTeamView2.setVisible(not enable)
+
+        self.processRing.setVisible(enable)
 
 
 class TeamView(QFrame):
