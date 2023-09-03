@@ -4,10 +4,9 @@ import traceback
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
-from PyQt5.QtWidgets import QApplication, QHBoxLayout, QWidget
-from qfluentwidgets import (NavigationInterface, NavigationItemPosition,
-                            InfoBar, InfoBarPosition, FluentWindow, SplashScreen,
-                            Theme, isDarkTheme, FluentStyleSheet, MessageBox)
+from PyQt5.QtWidgets import QApplication
+from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
+                            FluentWindow, SplashScreen, MessageBox)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -17,16 +16,14 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
-from ..common.style_sheet import StyleSheet
 from ..components.avatar_widget import NavigationAvatarWidget
-from ..components.title_bar import CustomTitleBar
-from ..components.stacked_widget import StackedWidget
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..lol.entries import Summoner
-from ..lol.listener import LolProcessExistenceListener, LolClientEventListener, getLolProcessPid
-from ..lol.connector import LolClientConnector, connector
-from ..lol.tools import processGameData, translateTier, getRecentChampions
+from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
+                            getLolProcessPid)
+from ..lol.connector import connector
+from ..lol.tools import (processGameData, translateTier, getRecentChampions)
 
 import threading
 
@@ -118,6 +115,8 @@ class MainWindow(FluentWindow):
             self.__onCareerInterfaceBackToMeButtonClicked)
         self.careerInterface.summonerNameClicked.connect(
             self.__onTeammateFlyoutSummonerNameClicked)
+        self.careerInterface.gameInfoBarClicked.connect(
+            self.__onCareerInterfaceGameInfoBarClicked)
         self.searchInterface.careerButton.clicked.connect(
             self.__onSearchInterfaceCareerButtonClicked)
         self.searchInterface.gamesView.gameDetailView.summonerNameClicked.connect(
@@ -265,7 +264,7 @@ class MainWindow(FluentWindow):
             self.eventListener.gameStatusChanged.emit(status)
 
         threading.Thread(target=_).start()
-        self.__switchTo(self.careerInterface)
+        self.checkAndSwitchTo(self.careerInterface)
         self.__unlockInterface()
 
     def __onLolClientEnded(self):
@@ -288,7 +287,7 @@ class MainWindow(FluentWindow):
         self.setWindowTitle("Seraphine")
 
         threading.Thread(target=_).start()
-        self.__switchTo(self.startInterface)
+        self.checkAndSwitchTo(self.startInterface)
         self.__lockInterface()
 
     def __onNameOrIconChanged(self, icon: str, name: str):
@@ -345,7 +344,7 @@ class MainWindow(FluentWindow):
                 self.__showLolClientPathErrorInfo()
         else:
             self.careerInterface.backToMeButton.clicked.emit()
-            self.__switchTo(self.careerInterface)
+            self.checkAndSwitchTo(self.careerInterface)
 
     def __showStartLolSuccessInfo(self):
         InfoBar.success(
@@ -381,8 +380,11 @@ class MainWindow(FluentWindow):
             parent=self,
         )
 
-    def __switchTo(self, interface):
-        self.navigationInterface.widget(interface.objectName()).click()
+    def checkAndSwitchTo(self, interface):
+        index = self.stackedWidget.indexOf(interface)
+
+        if not self.stackedWidget.currentIndex() == index:
+            self.navigationInterface.widget(interface.objectName()).click()
 
     def __unlockInterface(self):
         self.searchInterface.setEnabled(True)
@@ -406,13 +408,13 @@ class MainWindow(FluentWindow):
         self.searchInterface.searchLineEdit.setText(summonerName)
         self.searchInterface.searchButton.clicked.emit()
 
-        self.__switchTo(self.searchInterface)
+        self.checkAndSwitchTo(self.searchInterface)
 
     def __onGameInfoInterfaceGamesSummonerNameClicked(self, name):
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.searchButton.clicked.emit()
 
-        self.__switchTo(self.searchInterface)
+        self.checkAndSwitchTo(self.searchInterface)
 
     def __onSearchInterfaceCareerButtonClicked(self):
         self.careerInterface.showLoadingPage.emit()
@@ -473,7 +475,7 @@ class MainWindow(FluentWindow):
             self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
-        self.__switchTo(self.careerInterface)
+        self.checkAndSwitchTo(self.careerInterface)
 
     def __onTeammateFlyoutSummonerNameClicked(self, name):
         self.careerInterface.w.close()
@@ -604,7 +606,7 @@ class MainWindow(FluentWindow):
             self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
-        self.__switchTo(self.careerInterface)
+        self.checkAndSwitchTo(self.careerInterface)
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -853,6 +855,14 @@ class MainWindow(FluentWindow):
     def __onGameEnd(self):
         threading.Thread(
             target=lambda: self.gameInfoInterface.gameEnd.emit()).start()
+
+    def __onCareerInterfaceGameInfoBarClicked(self, gameId):
+        name = self.careerInterface.name.text()
+        self.searchInterface.searchLineEdit.setText(name)
+        self.searchInterface.gamesView.gamesTab.triggerByButton = False
+        self.searchInterface.gamesView.gamesTab.updatePuuid(
+            self.careerInterface.puuid)
+        self.searchInterface.gamesView.gamesTab.tabClicked.emit(gameId)
 
     def exceptHook(self, ty, value, tb):
         tracebackFormat = traceback.format_exception(ty, value, tb)

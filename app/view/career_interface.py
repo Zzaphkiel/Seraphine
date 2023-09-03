@@ -30,6 +30,7 @@ class CareerInterface(ScrollArea):
     showLoadingPage = pyqtSignal()
     hideLoadingPage = pyqtSignal()
     summonerNameClicked = pyqtSignal(str)
+    gameInfoBarClicked = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)

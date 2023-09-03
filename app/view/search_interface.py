@@ -42,6 +42,8 @@ class GamesTab(QFrame):
         self.puuid = None
         self.games = []
 
+        self.triggerByButton = True
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -78,6 +80,7 @@ class GamesTab(QFrame):
         self.gameDetailReady.connect(self.__onGameDetailReady)
 
     def __onTabClicked(self, gameId):
+
         def _():
             self.parent().gameDetailView.showLoadingPage.emit()
             game = connector.getGameDetailByGameId(gameId)
@@ -167,10 +170,13 @@ class GamesTab(QFrame):
         if self.currentIndex != 1:
             self.prevButton.setEnabled(True)
 
-        if self.first:
+        if self.first and self.triggerByButton:
             gameId = layout.itemAt(0).widget().gameId
             self.tabClicked.emit(str(gameId))
             self.first = False
+
+        mainWindow = self.parent().parent().parent().parent().parent()
+        mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
 
     def updateGames(self, page):
         def _():
@@ -880,17 +886,17 @@ class GameTab(QFrame):
 
         self.setStyleSheet(
             f""" GameTab {{
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid rgb({r}, {g}, {b});
             background-color: rgba({r}, {g}, {b}, 0.15);
         }}
         GameTab:hover {{
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid rgb({r1}, {g1}, {b1});
             background-color: rgba({r1}, {g1}, {b1}, 0.2);
         }}
         GameTab[pressed = true] {{
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid rgb({r2}, {g2}, {b2});
             background-color: rgba({r2}, {g2}, {b2}, 0.25);
         }}"""
@@ -972,6 +978,7 @@ class SearchInterface(ScrollArea):
         if puuid != "-1":
             self.careerButton.setEnabled(True)
             self.gamesView.gameDetailView.clear()
+            self.gamesView.gamesTab.triggerByButton = True
             self.gamesView.gamesTab.updatePuuid(puuid)
         else:
             self.__showSummonerNotFoundMessage()

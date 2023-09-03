@@ -236,6 +236,9 @@ class GameInfoBar(QFrame):
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
 
+        self.setProperty('press', False)
+        self.gameId = game['gameId']
+
         self.__initWidget(game)
         self.__initLayout()
 
@@ -264,19 +267,32 @@ class GameInfoBar(QFrame):
 
     def __setColor(self, remake, win):
         if remake:
-            c = "162, 162, 162"
+            r, g, b = 162, 162, 162
         elif win:
-            c = "57, 176, 27"
+            r, g, b = 57, 176, 27
         else:
-            c = "211, 25, 12"
+            r, g, b = 211, 25, 12
+
+        f1, f2 = 1.1, 0.8
+        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
+        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
         self.setStyleSheet(
             f""" GameInfoBar {{
-            border: 1px solid rgb({c});
-            border-radius: 5px;
-            background-color: rgba({c}, 0.15);
-        }}"""
-        )
+            border-radius: 6px;
+            border: 1px solid rgb({r}, {g}, {b});
+            background-color: rgba({r}, {g}, {b}, 0.15);
+        }}
+        GameInfoBar:hover {{
+            border-radius: 6px;
+            border: 1px solid rgb({r1}, {g1}, {b1});
+            background-color: rgba({r1}, {g1}, {b1}, 0.2);
+        }}
+        GameInfoBar[pressed = true] {{
+            border-radius: 6px;
+            border: 1px solid rgb({r2}, {g2}, {b2});
+            background-color: rgba({r2}, {g2}, {b2}, 0.25);
+        }}""")
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(11, 8, 11, 8)
@@ -292,3 +308,15 @@ class GameInfoBar(QFrame):
         )
         self.hBoxLayout.addSpacing(15)
         self.hBoxLayout.addWidget(self.mapTime)
+
+    def mousePressEvent(self, a0) -> None:
+        self.setProperty("pressed", True)
+        self.style().polish(self)
+        return super().mousePressEvent(a0)
+
+    def mouseReleaseEvent(self, a0) -> None:
+        self.setProperty("pressed", False)
+        self.style().polish(self)
+
+        self.parent().parent().parent().parent().gameInfoBarClicked.emit(str(self.gameId))
+        return super().mouseReleaseEvent(a0)

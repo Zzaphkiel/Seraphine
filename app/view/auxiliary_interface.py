@@ -631,8 +631,6 @@ class DodgeCard(SettingCard):
         self.pushButton.clicked.connect(lambda: threading.Thread(
             target=lambda: connector.dodge()).start())
 
-        # self.pushButton.clicked.connect(lambda: print(f"{1/0}"))
-
 
 class LockConfigCard(SettingCard):
     def __init__(self, title, content, configItem: ConfigItem, parent):
