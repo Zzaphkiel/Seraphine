@@ -103,9 +103,9 @@ pip install pyinstaller
 
 ### 或选择其他压缩方式
 您可以自行修改 `make.ps1` 脚本中第 `19` 行
-```shell
-rar a $dest\Seraphine.rar .\dist\Seraphine\* -r -ep1
-```
+> ```shell
+> rar a $dest\Seraphine.rar .\dist\Seraphine\* -r -ep1
+> ```
 的 `rar` 命令，来选择其他的压缩方式，或不压缩。
 
 ## 引用以及参考资料 👀
