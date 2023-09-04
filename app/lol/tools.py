@@ -421,3 +421,47 @@ def getRecentChampions(games):
     maxLen = 10
 
     return ret if len(ret) < maxLen else ret[:maxLen]
+
+
+def processRankInfo(info):
+    soloRankInfo = info["queueMap"]["RANKED_SOLO_5x5"]
+    flexRankInfo = info["queueMap"]["RANKED_FLEX_SR"]
+
+    soloTier = soloRankInfo["tier"]
+    soloDivision = soloRankInfo["division"]
+
+    if soloTier == "":
+        soloIcon = "app/resource/images/UNRANKED.svg"
+        soloTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+    else:
+        soloIcon = f"app/resource/images/{soloTier}.svg"
+        soloTier = translateTier(soloTier, True)
+    if soloDivision == "NA":
+        soloDivision = ""
+
+    flexTier = flexRankInfo["tier"]
+    flexDivision = flexRankInfo["division"]
+
+    if flexTier == "":
+        flexIcon = "app/resource/images/UNRANKED.svg"
+        flexTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+    else:
+        flexIcon = f"app/resource/images/{flexTier}.svg"
+        flexTier = translateTier(flexTier, True)
+    if flexDivision == "NA":
+        flexDivision = ""
+
+    return {
+        "solo": {
+            "tier": soloTier,
+            "icon": soloIcon,
+            "division": soloDivision,
+            "lp": soloRankInfo["leaguePoints"],
+        },
+        "flex": {
+            "tier": flexTier,
+            "icon": flexIcon,
+            "division": flexDivision,
+            "lp": flexRankInfo["leaguePoints"],
+        },
+    }

@@ -23,7 +23,8 @@ from ..lol.entries import Summoner
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
-from ..lol.tools import (processGameData, translateTier, getRecentChampions)
+from ..lol.tools import (processGameData, translateTier, getRecentChampions,
+                         processRankInfo)
 
 import threading
 
@@ -665,49 +666,7 @@ class MainWindow(FluentWindow):
                 puuid = summoner["puuid"]
 
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
-                soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
-                flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
-
-                soloTier = soloRankInfo["tier"]
-                soloDivision = soloRankInfo["division"]
-
-                if soloTier == "":
-                    soloIcon = "app/resource/images/UNRANKED.svg"
-                    soloTier = self.tr("Unranked")
-                else:
-                    soloIcon = f"app/resource/images/{soloTier}.svg"
-                    soloTier = translateTier(soloTier, True)
-
-                if soloDivision == "NA":
-                    soloDivision = ""
-
-                flexTier = flexRankInfo["tier"]
-                flexDivision = flexRankInfo["division"]
-
-                if flexTier == "":
-                    flexIcon = "app/resource/images/UNRANKED.svg"
-                    flexTier = self.tr("Unranked")
-                else:
-                    flexIcon = f"app/resource/images/{flexTier}.svg"
-                    flexTier = translateTier(flexTier, True)
-
-                if flexDivision == "NA":
-                    flexDivision = ""
-
-                rankInfo = {
-                    "solo": {
-                        "tier": soloTier,
-                        "icon": soloIcon,
-                        "division": soloDivision,
-                        "lp": soloRankInfo["leaguePoints"],
-                    },
-                    "flex": {
-                        "tier": flexTier,
-                        "icon": flexIcon,
-                        "division": flexDivision,
-                        "lp": flexRankInfo["leaguePoints"],
-                    },
-                }
+                rankInfo = processRankInfo(origRankInfo)
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 10)
@@ -780,49 +739,7 @@ class MainWindow(FluentWindow):
                 icon = connector.getProfileIcon(iconId)
 
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
-                soloRankInfo = origRankInfo["queueMap"]["RANKED_SOLO_5x5"]
-                flexRankInfo = origRankInfo["queueMap"]["RANKED_FLEX_SR"]
-
-                soloTier = soloRankInfo["tier"]
-                soloDivision = soloRankInfo["division"]
-
-                if soloTier == "":
-                    soloIcon = "app/resource/images/UNRANKED.svg"
-                    soloTier = self.tr("Unranked")
-                else:
-                    soloIcon = f"app/resource/images/{soloTier}.svg"
-                    soloTier = translateTier(soloTier, True)
-
-                if soloDivision == "NA":
-                    soloDivision = ""
-
-                flexTier = flexRankInfo["tier"]
-                flexDivision = flexRankInfo["division"]
-
-                if flexTier == "":
-                    flexIcon = "app/resource/images/UNRANKED.svg"
-                    flexTier = self.tr("Unranked")
-                else:
-                    flexIcon = f"app/resource/images/{flexTier}.svg"
-                    flexTier = translateTier(flexTier, True)
-
-                if flexDivision == "NA":
-                    flexDivision = ""
-
-                rankInfo = {
-                    "solo": {
-                        "tier": soloTier,
-                        "icon": soloIcon,
-                        "division": soloDivision,
-                        "lp": soloRankInfo["leaguePoints"],
-                    },
-                    "flex": {
-                        "tier": flexTier,
-                        "icon": flexIcon,
-                        "division": flexDivision,
-                        "lp": flexRankInfo["leaguePoints"],
-                    },
-                }
+                rankInfo = processRankInfo(origRankInfo)
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 10)

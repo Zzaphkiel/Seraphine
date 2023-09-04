@@ -29,6 +29,7 @@
 ## 快速上手 🤗
 ### 直接使用打包好的程序
 在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压至本地，运行 `Seraphine.exe` 开始使用。
+
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
@@ -84,6 +85,21 @@ python main.py
 
 _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
 
+## 您也可以自己打包可执行文件
+首先在 `seraphine` 虚拟环境下安装 `Pyinstaller`
+```shell
+conda activate seraphine
+pip install pyinstaller
+```
+然后执行项目中 `make.ps1` 脚本，通过 `-dest` 参数传入目标文件夹
+``` shell
+.\make -dest .
+```
+或使用默认值，其为当前目录 `.`
+``` shell
+.\make
+```
+命令结束后在目标文件夹获得 `Seraphine.rar`。（您可以自行修改 `make.ps1` 文件来使用其他方式压缩，或不压缩）
 
 ## 引用以及参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
