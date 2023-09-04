@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QGridLayout)
 from PyQt5.QtGui import QPixmap
 
-from qfluentwidgets import (ScrollArea, TransparentTogglePushButton,
+from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
 
 from ..common.style_sheet import StyleSheet
@@ -13,7 +13,7 @@ from ..components.champion_icon_widget import RoundIcon
 from ..components.summoner_name_button import SummonerName
 
 
-class GameInfoInterface(ScrollArea):
+class GameInfoInterface(SmoothScrollArea):
     allySummonersInfoReady = pyqtSignal(dict)
     enemySummonerInfoReady = pyqtSignal(dict)
     summonerViewClicked = pyqtSignal(str)

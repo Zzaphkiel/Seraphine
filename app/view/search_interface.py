@@ -5,9 +5,8 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
                              QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
-from qfluentwidgets import (ScrollArea, LineEdit, PushButton, ToolButton, InfoBar, InfoBarPosition,
-                            ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase,
-                            Flyout, CardWidget, IndeterminateProgressRing)
+from qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
+                            InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout, CardWidget, IndeterminateProgressRing)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -915,7 +914,7 @@ class GameTab(QFrame):
         return super().mouseReleaseEvent(a0)
 
 
-class SearchInterface(ScrollArea):
+class SearchInterface(SmoothScrollArea):
     summonerPuuidGetted = pyqtSignal(str)
 
     def __init__(self, parent=None):

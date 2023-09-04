@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
                              QSpacerItem, QSizePolicy)
 
-from qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, ScrollArea,
+from qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
                             IndeterminateProgressBar)
 
 from ..common.config import cfg
@@ -15,7 +15,7 @@ from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
 
 
-class StartInterface(ScrollArea):
+class StartInterface(SmoothScrollArea):
     hideLoadingPage = pyqtSignal(str, str)
     showLoadingPage = pyqtSignal()
 

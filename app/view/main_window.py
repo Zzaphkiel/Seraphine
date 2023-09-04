@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
-                            FluentWindow, SplashScreen, MessageBox)
+                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -128,9 +128,8 @@ class MainWindow(FluentWindow):
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
         self.settingInterface.micaCard.checkedChanged.connect(
             self.setMicaEffectEnabled)
-        widget = self.navigationInterface.widget(
-            self.careerInterface.objectName())
-        widget.clicked.connect(self.careerInterface.setTableStyle)
+        self.stackedWidget.currentChanged.connect(
+            self.__onCurrentStackedChanged)
 
     def __initWindow(self):
         self.resize(1134, 826)
@@ -160,7 +159,7 @@ class MainWindow(FluentWindow):
 
         if cfg.get(cfg.enableStartLolWithApp):
             if getLolProcessPid() == 0:
-                self.startInterface.pushButton.click()
+                self.__startLolClient()
 
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
@@ -335,14 +334,17 @@ class MainWindow(FluentWindow):
 
         threading.Thread(target=_).start()
 
+    def __startLolClient(self):
+        path = f"{cfg.get(cfg.lolFolder)}/client.exe"
+        if os.path.exists(path):
+            os.popen(f'"{path}"')
+            self.__showStartLolSuccessInfo()
+        else:
+            self.__showLolClientPathErrorInfo()
+
     def __onAvatarWidgetClicked(self):
         if not self.isClientProcessRunning:
-            path = f"{cfg.get(cfg.lolFolder)}/client.exe"
-            if os.path.exists(path):
-                os.Popen(f'"{path}"')
-                self.__showStartLolSuccessInfo()
-            else:
-                self.__showLolClientPathErrorInfo()
+            self.__startLolClient()
         else:
             self.careerInterface.backToMeButton.clicked.emit()
             self.checkAndSwitchTo(self.careerInterface)
@@ -795,3 +797,10 @@ class MainWindow(FluentWindow):
             pyperclip.copy(content)
 
         self.oldHook(ty, value, tb)
+
+    def __onCurrentStackedChanged(self, index):
+        if index == self.stackedWidget.indexOf(self.careerInterface):
+            self.careerInterface.setTableStyle()
+
+        widget: SmoothScrollArea = self.stackedWidget.view.currentWidget()
+        widget.delegate.vScrollBar.resetValue(0)

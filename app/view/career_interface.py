@@ -25,7 +25,7 @@ from ..lol.entries import Summoner
 from ..lol.tools import translateTier, getTeammates
 
 
-class CareerInterface(ScrollArea):
+class CareerInterface(SmoothScrollArea):
     careerInfoChanged = pyqtSignal(dict)
     showLoadingPage = pyqtSignal()
     hideLoadingPage = pyqtSignal()
