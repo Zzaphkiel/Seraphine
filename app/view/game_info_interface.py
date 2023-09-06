@@ -404,7 +404,7 @@ class GameTab(QFrame):
         self.setFixedHeight(54)
         self.setFixedWidth(129)
 
-        self.vBoxLayout = QHBoxLayout(self)
+        self.hBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
 
         self.gameId = game['gameId']
@@ -433,14 +433,16 @@ class GameTab(QFrame):
         self.time.setObjectName("time")
 
     def __initLayout(self):
+        self.hBoxLayout.setContentsMargins(4, 9, 4, 9)
+
         self.nameTimeKdaLayout.addWidget(self.modeName)
         self.nameTimeKdaLayout.addWidget(self.time)
 
-        self.vBoxLayout.addWidget(self.championIcon)
-        self.vBoxLayout.addSpacing(2)
-        self.vBoxLayout.addLayout(self.nameTimeKdaLayout)
+        self.hBoxLayout.addWidget(self.championIcon)
+        self.hBoxLayout.addSpacing(1)
+        self.hBoxLayout.addLayout(self.nameTimeKdaLayout)
 
-        self.vBoxLayout.addSpacerItem(
+        self.hBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
     def __setColor(self, remake=True, win=True):
