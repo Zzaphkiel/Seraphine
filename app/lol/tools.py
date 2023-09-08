@@ -370,7 +370,6 @@ def getTeammates(game, targetPuuid):
             else:
                 tid = player['stats']['subteamPlacement']
 
-            # TODO!
             win = player['stats']['win']
             remake = player['stats']['teamEarlySurrendered']
 
@@ -395,6 +394,13 @@ def getTeammates(game, targetPuuid):
                     {'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
 
     return res
+
+
+def checkTeam(summoners, targetPuuid):
+    visited = {summoner['name']: False for summoner in summoners}
+    counter = 1
+
+    # TODO!
 
 
 def getRecentChampions(games):

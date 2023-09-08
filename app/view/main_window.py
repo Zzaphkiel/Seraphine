@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+import time
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
@@ -55,6 +56,8 @@ class MainWindow(FluentWindow):
         self.currentSummoner: Summoner = None
         self.rankInfo = {}
         self.games = {}
+
+        self.isGaming = False
 
         self.__initInterface()
 
@@ -320,16 +323,13 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
 
             self.nameOrIconChanged.emit(icon, name)
-            self.careerInterface.careerInfoChanged.emit(
+            self.careerInterface.IconLevelExpChanged.emit(
                 {'name': name,
                  'icon': icon,
                  'level': level,
                  'xpSinceLastLevel': xpSinceLastLevel,
                  'xpUntilNextLevel': xpUntilNextLevel,
-                 'puuid': self.currentSummoner.puuid,
-                 'rankInfo': self.rankInfo,
-                 'games': self.games,
-                 'triggerByUser': False, }
+                 }
             )
 
         threading.Thread(target=_).start()
@@ -613,6 +613,7 @@ class MainWindow(FluentWindow):
 
     def __onGameStatusChanged(self, status):
         title = None
+        isGaming = False
 
         if status == 'None':
             title = self.tr("Home")
@@ -623,13 +624,14 @@ class MainWindow(FluentWindow):
         elif status == 'GameStart':
             title = self.tr("Gaming")
             self.__onGameStart()
+            isGaming = True
+        elif status == 'InProgress':
+            title = self.tr("Gaming")
+            isGaming = True
         elif status == 'WaitingForStatus':
             title = self.tr("Waiting for status")
         elif status == 'EndOfGame':
             title = self.tr("End of game")
-
-            # 到房间内才会清除上一局的玩家信息
-            # self.__onGameEnd()
         elif status == 'Lobby':
             title = self.tr("Lobby")
             self.__onGameEnd()
@@ -638,6 +640,11 @@ class MainWindow(FluentWindow):
             self.__onMatchMade()
         elif status == 'Matchmaking':
             title = self.tr("Match making")
+
+        if not isGaming and self.isGaming:
+            self.__updateCareerGames()
+
+        self.isGaming = isGaming
 
         if title != None:
             self.setWindowTitle("Seraphine - " + title)
@@ -774,6 +781,17 @@ class MainWindow(FluentWindow):
     def __onGameEnd(self):
         threading.Thread(
             target=lambda: self.gameInfoInterface.gameEnd.emit()).start()
+
+    def __updateCareerGames(self):
+        if not self.careerInterface.isCurrentSummoner():
+            return
+
+        def _():
+            # 游戏刚出来可能接口返回的信息没刷新，手动让它睡个几秒
+            time.sleep(7)
+            self.__changeCareerToCurrentSummoner()
+
+        threading.Thread(target=_).start()
 
     def __onCareerInterfaceGameInfoBarClicked(self, gameId):
         name = self.careerInterface.name.text()

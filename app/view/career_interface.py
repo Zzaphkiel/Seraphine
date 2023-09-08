@@ -31,6 +31,7 @@ class CareerInterface(SmoothScrollArea):
     hideLoadingPage = pyqtSignal()
     summonerNameClicked = pyqtSignal(str)
     gameInfoBarClicked = pyqtSignal(str)
+    IconLevelExpChanged = pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -286,6 +287,7 @@ class CareerInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         cfg.themeChanged.connect(self.setTableStyle)
         self.careerInfoChanged.connect(self.__onCareerInfoChanged)
+        self.IconLevelExpChanged.connect(self.__onChangeIconLevelAndExp)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
@@ -299,7 +301,23 @@ class CareerInterface(SmoothScrollArea):
         self.recentTeamButton.clicked.connect(
             self.__onRecentTeammatesButtonClicked)
 
+    def __onChangeIconLevelAndExp(self, info):
+        name = info['name']
+        icon = info['icon']
+        level = info['level']
+        xpSinceLastLevel = info['xpSinceLastLevel']
+        xpUntilNextLevel = info['xpUntilNextLevel']
+
+        self.name.setText(name)
+        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel)
+
+        levelStr = str(level) if level != -1 else "None"
+        self.level.setText(f'Lv. {levelStr}')
+
     def __onCareerInfoChanged(self, info: dict):
+        if not info['triggerByUser'] and not self.isCurrentSummoner():
+            return
+
         name = info['name']
         icon = info['icon']
         level = info['level']
@@ -308,10 +326,6 @@ class CareerInterface(SmoothScrollArea):
         puuid = info['puuid']
         rankInfo = info['rankInfo']
         games = info['games']
-        triggerByUser = info['triggerByUser']
-
-        if not triggerByUser and not self.isCurrentSummoner():
-            return
 
         self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel)
         self.name.setText(name)

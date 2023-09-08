@@ -1,6 +1,17 @@
+# 忽略 Python 字节码文件
 **/__pycache__/
+
+# 忽略测试模块
 test.py
+
+# 忽略个人设置文件
 app/config/config.json
+
+# 忽略运行时下载的资源文件
 app/resource/game
+
+# 忽略 VS Code 配置文件夹
 .vscode
-Seraphine.rar
+
+# 忽略自用的打包脚本
+mymake.ps1

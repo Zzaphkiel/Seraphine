@@ -64,6 +64,9 @@ class LolClientEventListener(QThread):
         async def onGameFlowPhaseChanged(data):
             self.gameStatusChanged.emit(data["data"])
 
+        async def defaultHandler(data):
+            print(data)
+
         async def main():
             wllp = await willump.start()
             allEventSubscription = await wllp.subscribe('OnJsonApiEvent')
