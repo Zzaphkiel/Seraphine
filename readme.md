@@ -21,7 +21,6 @@
   </a>
 </p>
 
-
 <p align='center'>
   <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071">
 </p>
@@ -79,11 +78,11 @@ python main.py
 
 
 ## 帮助我们改进 Seraphine 😘
-个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
+个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**（如 Python 版本等），最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
 
-如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论~
+如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！
 
-_因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
+发布新 issue 前先请看看之前是否讨论过相关或类似的问题哦~ _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
 
 ## 您也可以自己打包可执行文件
 在 `seraphine` 虚拟环境下安装 `Pyinstaller`
@@ -125,6 +124,12 @@ pip install pyinstaller
   - https://raw.communitydragon.org/latest/
   - https://github.com/CommunityDragon/Docs/blob/master/assets.md
 
+
+## 点个 Star 支持作者 ⭐
+<!-- ![](https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date) -->
+<p align='center'>
+  <img src="https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date">
+</p>
 
 ## 免责声明
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
