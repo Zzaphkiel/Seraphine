@@ -7,6 +7,7 @@ from PyQt5.QtGui import QPixmap
 from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
 
+from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.champion_icon_widget import RoundIcon
@@ -214,12 +215,28 @@ class SummonerInfoView(QFrame):
 
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
-        self.hBoxLayout = QHBoxLayout(self)
+        self.vBoxLayout = QVBoxLayout(self)
+        self.hBoxLayout = QHBoxLayout()
         self.icon = RoundAvatar(info['icon'],
                                 info['xpSinceLastLevel'],
                                 info['xpUntilNextLevel'],
                                 diameter=70,
                                 sep=20)
+
+        self.teammateIcon = None
+        if info["teammatesMarker"]:
+            self.teammateIcon = QLabel()
+            self.teammateIcon.setPixmap(
+                QPixmap(Icon.TEAM.path()).scaled(
+                    24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                )
+            )
+            self.teammateIcon.setFixedSize(24, 24)
+            self.teammateIcon.scroll(0, 4)
+            self.teammateIcon.setAlignment(Qt.AlignCenter)
+            self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
+            self.teammateIcon.installEventFilter(
+                ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
@@ -329,6 +346,11 @@ class SummonerInfoView(QFrame):
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
+
+        self.vBoxLayout.setAlignment(Qt.AlignVCenter)
+        self.vBoxLayout.addLayout(self.hBoxLayout)
+        if self.teammateIcon:
+            self.vBoxLayout.addWidget(self.teammateIcon)
 
         # self.setFixedHeight(150)
 

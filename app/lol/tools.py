@@ -367,7 +367,7 @@ def getTeammates(game, targetPuuid):
         if player['participantId'] == targetParticipantId:
             if game['queueId'] != 1700:
                 tid = player['teamId']
-            else:
+            else:  # 斗魂竞技场
                 tid = player['stats']['subteamPlacement']
 
             win = player['stats']['win']
@@ -375,7 +375,7 @@ def getTeammates(game, targetPuuid):
 
             break
 
-    res = {'win': win, 'remake': remake, 'summoners': []}
+    res = {'queueId': game['queueId'], 'win': win, 'remake': remake, 'summoners': []}
 
     for player in game['participants']:
 
@@ -391,7 +391,7 @@ def getTeammates(game, targetPuuid):
 
             if s['puuid'] != targetPuuid:
                 res['summoners'].append(
-                    {'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
+                    {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
 
     return res
 

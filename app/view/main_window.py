@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 import time
+from collections import Counter
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
@@ -25,7 +26,7 @@ from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
-                         processRankInfo)
+                         processRankInfo, getTeammates)
 
 import threading
 
@@ -683,6 +684,44 @@ class MainWindow(FluentWindow):
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"]]
 
+                teammatesInfo = [
+                    getTeammates(
+                        connector.getGameDetailByGameId(game["gameId"]),
+                        self.currentSummoner.puuid
+                    ) for game in gamesInfo
+                ]
+
+                # TODO 增加可选的对局模式判定
+                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
+                # 统计出现次数
+                """
+                teammatesCount = Counter({
+                    (4018313666, '召唤师1'): 6, 
+                    (4018314000, '召唤师2'): 3, 
+                    (summonersId, name): cnt,
+                    ...
+                })
+                """
+                teammatesCount = Counter(
+                    (summoner['summonerId'], summoner['name'])
+                    for historyInfo in teammatesInfo
+                    for summoner in historyInfo['summoners']
+                )
+
+                # 取当前游戏队友交集
+                """
+                teammatesMarker = [
+                    {'summonerId': 4018314000, 'cnt': 3, 'name': "召唤师2"}, 
+                    {'summonerId': summonerId, 'cnt': cnt, 'name': name}, 
+                    ...
+                ]
+                """
+                teammatesMarker = [
+                    {'summonerId': sId, 'cnt': cnt, 'name': name}
+                    for (sId, name), cnt in teammatesCount.items()
+                    if sId in [x['summonerId'] for x in data['myTeam']]
+                ]
+
                 summoners.append(
                     {
                         "name": summoner["displayName"],
@@ -693,6 +732,8 @@ class MainWindow(FluentWindow):
                         "xpSinceLastLevel": summoner["xpSinceLastLevel"],
                         "xpUntilNextLevel": summoner["xpUntilNextLevel"],
                         "puuid": puuid,
+                        "summonerId": summonerId,
+                        "teammatesMarker": teammatesMarker,
                     }
                 )
 
@@ -709,6 +750,8 @@ class MainWindow(FluentWindow):
 
         if cfg.get(cfg.enableAutoSelectChampion):
             threading.Thread(target=selectChampion).start()
+
+        self.switchTo(self.gameInfoInterface)
 
     def __onGameStart(self):
         def _():
