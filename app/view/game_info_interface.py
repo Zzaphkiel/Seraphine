@@ -194,6 +194,41 @@ class TeamSummoners(QFrame):
     def updateSummoners(self, summoners):
         self.clear()
 
+        # 取出所有summonerId的映射
+        """
+        {
+            1234: {6666},
+            6666: {1234},
+            9999: set(),
+        }
+        """
+        teams = {item["summonerId"]: set([member["summonerId"] for member in item["teammatesMarker"]]) for item in summoners}
+
+        team_ids = {}
+
+        def dfs(node, team_id):
+            """
+            深度搜索 dfs 分配 team id
+            """
+            if node in team_ids:  # 已经有队伍ID
+                return
+
+            # 深度搜索成员, 分配队伍ID
+            team_ids[node] = team_id
+            for member in teams[node]:
+                dfs(member, team_id)
+
+        current_team_id = 1
+        for summoner in teams:
+            if teams[summoner] and summoner not in team_ids:  # 有队伍, 且未分配id
+                dfs(summoner, current_team_id)
+                current_team_id += 1
+
+        # 整理结果, 放回summoners;
+        # teamId为从1开始的值, 若未预组队则为None
+        for item in summoners:
+            item["teamId"] = team_ids.get(item["summonerId"], None)
+
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
             self.vBoxLayout.addWidget(summonerView)
@@ -223,20 +258,20 @@ class SummonerInfoView(QFrame):
                                 diameter=70,
                                 sep=20)
 
-        # self.teammateIcon = None
-        # if info["teammatesMarker"]:
-        #     self.teammateIcon = QLabel()
-        #     self.teammateIcon.setPixmap(
-        #         QPixmap(Icon.TEAM.path()).scaled(
-        #             24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
-        #         )
-        #     )
-        #     self.teammateIcon.setFixedSize(24, 24)
-        #     self.teammateIcon.scroll(0, 4)
-        #     self.teammateIcon.setAlignment(Qt.AlignCenter)
-        #     self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
-        #     self.teammateIcon.installEventFilter(
-        #         ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
+        self.teammateIcon = None
+        if info["teammatesMarker"]:
+            self.teammateIcon = QLabel()
+            self.teammateIcon.setPixmap(
+                QPixmap(Icon.TEAM.path()).scaled(
+                    24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
+                )
+            )
+            self.teammateIcon.setFixedSize(24, 24)
+            self.teammateIcon.scroll(0, 4)
+            self.teammateIcon.setAlignment(Qt.AlignCenter)
+            self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
+            self.teammateIcon.installEventFilter(
+                ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
@@ -310,6 +345,9 @@ class SummonerInfoView(QFrame):
         self.rankFlexLp.installEventFilter(
             ToolTipFilter(self.rankFlexLp, 0, ToolTipPosition.TOP))
 
+        if info["teamId"]:
+            self.__setColor(info["teamId"])
+
         self.__initLayout()
 
     def __initLayout(self):
@@ -353,6 +391,37 @@ class SummonerInfoView(QFrame):
             self.vBoxLayout.addWidget(self.teammateIcon)
 
         # self.setFixedHeight(150)
+
+    def __setColor(self, teamId):
+        assert 0 < teamId < 3  # 预组队不会超过2个
+
+        if teamId == 1:
+            r, g, b = 255, 176, 27
+        elif teamId == 2:
+            r, g, b = 255, 51, 153
+        else:
+            return
+
+        f1, f2 = 1.1, 0.8
+        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
+        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
+
+        self.setStyleSheet(f""" SummonerInfoView {{
+            border-radius: 5px;
+            border: 1px solid rgb({r}, {g}, {b});
+            background-color: rgba({r}, {g}, {b}, 0.15);
+        }}
+        SummonerInfoView:hover {{
+            border-radius: 5px;
+            border: 1px solid rgb({r1}, {g1}, {b1});
+            background-color: rgba({r1}, {g1}, {b1}, 0.2);
+        }}
+        SummonerInfoView[pressed = true] {{
+            border-radius: 5px;
+            border: 1px solid rgb({r2}, {g2}, {b2});
+            background-color: rgba({r2}, {g2}, {b2}, 0.25);
+        }}""")
+
 
 
 class SummonersGamesView(QFrame):

@@ -784,12 +784,12 @@ class MainWindow(FluentWindow):
 
             summoners = []
 
-            # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
-            for item in enemies:
+            def process_item(item):
+                # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
                 puuid = item["puuid"]
 
                 if puuid == '00000000-0000-0000-0000-000000000000':
-                    continue
+                    return None
 
                 summoner = connector.getSummonerByPuuid(puuid)
 
@@ -805,18 +805,64 @@ class MainWindow(FluentWindow):
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"]]
 
-                summoners.append(
-                    {
-                        "name": summoner["displayName"],
-                        "icon": icon,
-                        "level": summoner["summonerLevel"],
-                        "rankInfo": rankInfo,
-                        "gamesInfo": gamesInfo,
-                        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
-                        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
-                        "puuid": puuid,
-                    }
+                teammatesInfo = [
+                    getTeammates(
+                        connector.getGameDetailByGameId(game["gameId"]),
+                        puuid
+                    ) for game in gamesInfo
+                ]
+
+                # TODO 增加可选的对局模式判定
+                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
+                # 统计出现次数
+                """
+                teammatesCount = Counter({
+                    (4018313666, '召唤师1'): 6, 
+                    (4018314000, '召唤师2'): 3, 
+                    (summonersId, name): cnt,
+                    ...
+                })
+                """
+                teammatesCount = Counter(
+                    (summoner['summonerId'], summoner['name'])
+                    for historyInfo in teammatesInfo
+                    for summoner in historyInfo['summoners']
                 )
+
+                # 取当前游戏队友交集
+                """
+                teammatesMarker = [
+                    {'summonerId': 4018314000, 'cnt': 3, 'name': "召唤师2"}, 
+                    {'summonerId': summonerId, 'cnt': cnt, 'name': name}, 
+                    ...
+                ]
+                """
+                teammatesMarker = [
+                    {'summonerId': sId, 'cnt': cnt, 'name': name}
+                    for (sId, name), cnt in teammatesCount.items()
+                    if sId in [x['summonerId'] for x in enemies]
+                ]
+
+                return {
+                    "name": summoner["displayName"],
+                    "icon": icon,
+                    "level": summoner["summonerLevel"],
+                    "rankInfo": rankInfo,
+                    "gamesInfo": gamesInfo,
+                    "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+                    "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+                    "puuid": puuid,
+                    "summonerId": summoner["summonerId"],
+                    "teammatesMarker": teammatesMarker,
+                }
+
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(process_item, item) for item in enemies]
+
+            for future in as_completed(futures):
+                result = future.result()
+                if result is not None:
+                    summoners.append(result)
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})

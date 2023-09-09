@@ -356,12 +356,16 @@ def processGameDetailData(puuid, game):
 
 
 def getTeammates(game, targetPuuid):
+    targetParticipantId = None
+
     for participant in game['participantIdentities']:
         puuid = participant['player']['puuid']
 
         if puuid == targetPuuid:
             targetParticipantId = participant['participantId']
             break
+
+    assert targetParticipantId is not None
 
     for player in game['participants']:
         if player['participantId'] == targetParticipantId:
