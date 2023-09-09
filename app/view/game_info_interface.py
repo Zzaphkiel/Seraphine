@@ -223,20 +223,20 @@ class SummonerInfoView(QFrame):
                                 diameter=70,
                                 sep=20)
 
-        self.teammateIcon = None
-        if info["teammatesMarker"]:
-            self.teammateIcon = QLabel()
-            self.teammateIcon.setPixmap(
-                QPixmap(Icon.TEAM.path()).scaled(
-                    24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
-                )
-            )
-            self.teammateIcon.setFixedSize(24, 24)
-            self.teammateIcon.scroll(0, 4)
-            self.teammateIcon.setAlignment(Qt.AlignCenter)
-            self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
-            self.teammateIcon.installEventFilter(
-                ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
+        # self.teammateIcon = None
+        # if info["teammatesMarker"]:
+        #     self.teammateIcon = QLabel()
+        #     self.teammateIcon.setPixmap(
+        #         QPixmap(Icon.TEAM.path()).scaled(
+        #             24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
+        #         )
+        #     )
+        #     self.teammateIcon.setFixedSize(24, 24)
+        #     self.teammateIcon.scroll(0, 4)
+        #     self.teammateIcon.setAlignment(Qt.AlignCenter)
+        #     self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
+        #     self.teammateIcon.installEventFilter(
+        #         ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
