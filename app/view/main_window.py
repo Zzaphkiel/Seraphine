@@ -29,7 +29,7 @@ from ..lol.tools import (processGameData, translateTier, getRecentChampions,
                          processRankInfo, getTeammates)
 
 import threading
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class MainWindow(FluentWindow):
     nameOrIconChanged = pyqtSignal(str, str)
@@ -662,11 +662,11 @@ class MainWindow(FluentWindow):
             summoners = []
             data = connector.getChampSelectSession()
 
-            for item in data["myTeam"]:
+            def process_item(item):
                 summonerId = item["summonerId"]
 
                 if summonerId == 0:
-                    continue
+                    return None
 
                 summoner = connector.getSummonerById(summonerId)
 
@@ -687,7 +687,7 @@ class MainWindow(FluentWindow):
                 teammatesInfo = [
                     getTeammates(
                         connector.getGameDetailByGameId(game["gameId"]),
-                        self.currentSummoner.puuid
+                        puuid
                     ) for game in gamesInfo
                 ]
 
@@ -722,20 +722,26 @@ class MainWindow(FluentWindow):
                     if sId in [x['summonerId'] for x in data['myTeam']]
                 ]
 
-                summoners.append(
-                    {
-                        "name": summoner["displayName"],
-                        "icon": icon,
-                        "level": summoner["summonerLevel"],
-                        "rankInfo": rankInfo,
-                        "gamesInfo": gamesInfo,
-                        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
-                        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
-                        "puuid": puuid,
-                        "summonerId": summonerId,
-                        "teammatesMarker": teammatesMarker,
-                    }
-                )
+                return {
+                    "name": summoner["displayName"],
+                    "icon": icon,
+                    "level": summoner["summonerLevel"],
+                    "rankInfo": rankInfo,
+                    "gamesInfo": gamesInfo,
+                    "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+                    "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+                    "puuid": puuid,
+                    "summonerId": summonerId,
+                    "teammatesMarker": teammatesMarker,
+                }
+
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(process_item, item) for item in data["myTeam"]]
+
+            for future in as_completed(futures):
+                result = future.result()
+                if result is not None:
+                    summoners.append(result)
 
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
