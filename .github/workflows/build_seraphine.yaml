@@ -40,7 +40,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Setup environment variables
       run: |
-        export VERSION=`cat .version`
+        export VERSION=`python -c "from app.common.config import VERSION; print(VERSION)"`
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
     - name: Download artifact
       uses: actions/download-artifact@v3
