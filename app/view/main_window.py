@@ -26,7 +26,7 @@ from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
-                         processRankInfo, getTeammates)
+                         processRankInfo, getTeammates, assignTeamId)
 
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -743,6 +743,8 @@ class MainWindow(FluentWindow):
                 if result is not None:
                     summoners.append(result)
 
+            assignTeamId(summoners)
+
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
 
@@ -863,6 +865,8 @@ class MainWindow(FluentWindow):
                 result = future.result()
                 if result is not None:
                     summoners.append(result)
+
+            assignTeamId(summoners)
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})

@@ -400,11 +400,63 @@ def getTeammates(game, targetPuuid):
     return res
 
 
-def checkTeam(summoners, targetPuuid):
-    visited = {summoner['name']: False for summoner in summoners}
-    counter = 1
+def assignTeamId(summoners):
+    """
+    分配队伍ID
 
-    # TODO!
+    存储于teamId字段, 自1递增的数字, 若无队伍则为None
+
+    ---
+    较此前完善判断逻辑:
+    1. A单向B, B单向C -> AB都记为 None
+    2. A双向B, B双向C -> ABC记为同一 teamId
+    3. A双向B且单向C -> AB记为同一 teamId, C记为None
+    ---
+
+    @param summoners: 召唤师信息
+     [{
+        "summonerId": 123456,
+        "teammatesMarker": [{'summonerId': 333333, 'cnt': 3, 'name': "召唤师1"}]
+    }, ... ]
+
+    @return: 变更直接作用于入参 :summoners: 同时会return; 两者为同一实例;
+
+    """
+    team_id = 1
+    summoner_to_team = {}
+
+    # 123456: [333333]
+    # key=summonerId
+    # value=teammates
+    summoner_to_teammates = {
+        summoner["summonerId"]: [teammate["summonerId"] for teammate in summoner["teammatesMarker"]] for summoner in
+        summoners}
+
+    for summoner_id, teammates in summoner_to_teammates.items():
+        for teammate_id in teammates:
+            # 检查双向队友
+            if summoner_id in summoner_to_teammates[teammate_id]:
+                # 检查teamId
+                if summoner_id not in summoner_to_team and teammate_id not in summoner_to_team:
+                    summoner_to_team[summoner_id] = team_id
+                    summoner_to_team[teammate_id] = team_id
+                    team_id += 1
+                # summoner已有teamId, 但队友没有时, 为队友分配相同的teamId
+                elif summoner_id in summoner_to_team and teammate_id not in summoner_to_team:
+                    summoner_to_team[teammate_id] = summoner_to_team[summoner_id]
+                # 队友已有teamId, 但summoner没有时, 为summoner分配相同的teamId
+                elif teammate_id in summoner_to_team and summoner_id not in summoner_to_team:
+                    summoner_to_team[summoner_id] = summoner_to_team[teammate_id]
+
+    # 将teamId添加到原始数据中
+    for summoner in summoners:
+        if summoner["summonerId"] in summoner_to_team:
+            summoner["teamId"] = summoner_to_team[summoner["summonerId"]]
+        else:
+            # 无队伍以及单向的标记为 None
+            summoner["teamId"] = None
+
+    return summoners
 
 
 def getRecentChampions(games):

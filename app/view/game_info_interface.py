@@ -194,41 +194,6 @@ class TeamSummoners(QFrame):
     def updateSummoners(self, summoners):
         self.clear()
 
-        # 取出所有summonerId的映射
-        """
-        {
-            1234: {6666},
-            6666: {1234},
-            9999: set(),
-        }
-        """
-        teams = {item["summonerId"]: set([member["summonerId"] for member in item["teammatesMarker"]]) for item in summoners}
-
-        team_ids = {}
-
-        def dfs(node, team_id):
-            """
-            深度搜索 dfs 分配 team id
-            """
-            if node in team_ids:  # 已经有队伍ID
-                return
-
-            # 深度搜索成员, 分配队伍ID
-            team_ids[node] = team_id
-            for member in teams[node]:
-                dfs(member, team_id)
-
-        current_team_id = 1
-        for summoner in teams:
-            if teams[summoner] and summoner not in team_ids:  # 有队伍, 且未分配id
-                dfs(summoner, current_team_id)
-                current_team_id += 1
-
-        # 整理结果, 放回summoners;
-        # teamId为从1开始的值, 若未预组队则为None
-        for item in summoners:
-            item["teamId"] = team_ids.get(item["summonerId"], None)
-
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
             self.vBoxLayout.addWidget(summonerView)
@@ -259,7 +224,7 @@ class SummonerInfoView(QFrame):
                                 sep=20)
 
         self.teammateIcon = None
-        if info["teammatesMarker"]:
+        if info["teammatesMarker"] and info["teamId"]:
             self.teammateIcon = QLabel()
             self.teammateIcon.setPixmap(
                 QPixmap(Icon.TEAM.path()).scaled(
