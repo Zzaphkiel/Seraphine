@@ -52,6 +52,9 @@ class Config(QConfig):
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(1, 999))
 
+    teamGamesNumber = RangeConfigItem("Functions", "TeamGamesNumber", 1,
+                                      RangeValidator(1, 10))
+
     showTierInGameInfo = ConfigItem("Functions", "ShowTierInGameInfo", False,
                                     BoolValidator())
     enableAutoAcceptMatching = ConfigItem("Functions",

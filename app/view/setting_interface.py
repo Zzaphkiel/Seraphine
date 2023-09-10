@@ -101,7 +101,7 @@ class SettingInterface(SmoothScrollArea):
             tr("Delete all game resources (Apply it when game resources update)"
                ), self.generalGroup)
         self.enableCloseToTray = LooseSwitchSettingCard(
-            Icon.CIRCLERIGHT,
+            Icon.EXIT,
             self.tr("Minimize to tray on close"),
             self.tr("Minimize to system tray when clicking close"),
             configItem=cfg.enableCloseToTray,

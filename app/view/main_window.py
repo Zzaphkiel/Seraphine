@@ -757,7 +757,7 @@ class MainWindow(FluentWindow):
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in data['myTeam']]
+                    if sId in [x['summonerId'] for x in data['myTeam']] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
@@ -859,6 +859,7 @@ class MainWindow(FluentWindow):
                 teammatesCount = Counter({
                     (4018313666, '召唤师1'): 6, 
                     (4018314000, '召唤师2'): 3, 
+                    (123456, '召唤师2'): 1, 
                     (summonersId, name): cnt,
                     ...
                 })
@@ -880,7 +881,7 @@ class MainWindow(FluentWindow):
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in enemies]
+                    if sId in [x['summonerId'] for x in enemies] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
