@@ -16,7 +16,7 @@ from ..common.icons import Icon
 from ..common.config import (
     cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
-from ..components.nullable_switch_setting_card import LooseSwitchSettingCard
+from ..components.loose_switch_setting_card import LooseSwitchSettingCard
 
 
 class LineEditSettingCard(SettingCard):
