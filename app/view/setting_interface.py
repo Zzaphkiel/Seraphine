@@ -16,6 +16,7 @@ from ..common.icons import Icon
 from ..common.config import (
     cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
+from ..components.nullable_switch_setting_card import LooseSwitchSettingCard
 
 
 class LineEditSettingCard(SettingCard):
@@ -99,6 +100,12 @@ class SettingInterface(SmoothScrollArea):
             self.
             tr("Delete all game resources (Apply it when game resources update)"
                ), self.generalGroup)
+        self.enableCloseToTray = LooseSwitchSettingCard(
+            Icon.CIRCLERIGHT,
+            self.tr("Minimize to tray on close"),
+            self.tr("Minimize to system tray when clicking close"),
+            configItem=cfg.enableCloseToTray,
+            parent=self.generalGroup)
 
         self.personalizationGroup = SettingCardGroup(
             self.tr("Personalization"), self.scrollWidget)
@@ -189,6 +196,7 @@ class SettingInterface(SmoothScrollArea):
         # self.generalGroup.addSettingCard(self.enableStartWithComputer)
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
+        self.generalGroup.addSettingCard(self.enableCloseToTray)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)

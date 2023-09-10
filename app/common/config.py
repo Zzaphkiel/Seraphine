@@ -67,6 +67,7 @@ class Config(QConfig):
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
 
+    enableCloseToTray = ConfigItem("General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 
