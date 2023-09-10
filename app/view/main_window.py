@@ -729,8 +729,6 @@ class MainWindow(FluentWindow):
                     ) for game in gamesInfo
                 ]
 
-                # TODO 增加可选的对局模式判定
-                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
                 # 统计出现次数
                 """
                 teammatesCount = Counter({
@@ -852,8 +850,6 @@ class MainWindow(FluentWindow):
                     ) for game in gamesInfo
                 ]
 
-                # TODO 增加可选的对局模式判定
-                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
                 # 统计出现次数
                 """
                 teammatesCount = Counter({
