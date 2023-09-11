@@ -8,6 +8,7 @@ from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
 
+from .setting_interface import LineEditSettingCard
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
@@ -75,6 +76,13 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Auto select champion when blind selection begin"),
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
             self.gameGroup)
+
+        # 预组队判定阈值(共同游戏高于该局数的被视为预组队)
+        self.teamGamesNumberCard = LineEditSettingCard(
+            cfg.teamGamesNumber, self.tr("Apply"),
+            self.tr("Pre-team threshold"), 1, Icon.TEAM,
+            self.tr("Pre-team threshold for common game rounds"), self.gameGroup)
+
         # self.copyPlayersInfoCard = SwitchSettingCard(
         #     Icon.COPY, self.tr("Auto copy players' info"),
         #     self.tr("Copy players' infomation to clipboard when game starts"),
@@ -114,6 +122,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.gameGroup.addSettingCard(self.spectateCard)
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
+        self.gameGroup.addSettingCard(self.teamGamesNumberCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)

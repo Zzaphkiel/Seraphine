@@ -52,6 +52,9 @@ class Config(QConfig):
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(1, 999))
 
+    teamGamesNumber = RangeConfigItem("Functions", "TeamGamesNumber", 1,
+                                      RangeValidator(1, 10))
+
     showTierInGameInfo = ConfigItem("Functions", "ShowTierInGameInfo", False,
                                     BoolValidator())
     enableAutoAcceptMatching = ConfigItem("Functions",
@@ -67,6 +70,7 @@ class Config(QConfig):
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
 
+    enableCloseToTray = ConfigItem("General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 

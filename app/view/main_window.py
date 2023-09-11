@@ -6,9 +6,9 @@ from collections import Counter
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
-                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea)
+                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea, SystemTrayMenu, Action)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -59,6 +59,7 @@ class MainWindow(FluentWindow):
         self.games = {}
 
         self.isGaming = False
+        self.isTrayExit = False
 
         self.__initInterface()
 
@@ -157,6 +158,21 @@ class MainWindow(FluentWindow):
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
+
+        # 托盘图标
+        self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setIcon(QIcon("app/resource/images/logo.png"))
+
+        quitAction = Action('Quit', self)
+        quitAction.triggered.connect(self.__quit)
+
+        self.tray_menu = SystemTrayMenu(self)
+        self.tray_menu.addAction(quitAction)
+
+        self.trayIcon.setContextMenu(self.tray_menu)
+        # 双击事件
+        self.trayIcon.activated.connect(lambda reason: self.show() if reason == QSystemTrayIcon.DoubleClick else None)
+        self.trayIcon.show()
 
         self.show()
         QApplication.processEvents()
@@ -401,10 +417,32 @@ class MainWindow(FluentWindow):
         # pass
 
     def closeEvent(self, a0) -> None:
-        self.processListener.terminate()
-        self.eventListener.terminate()
 
-        return super().closeEvent(a0)
+        # 首次点击 关闭 按钮
+        if cfg.get(cfg.enableCloseToTray) is None:
+            msgBox = MessageBox(
+                "Do you wish to exit?",
+                "Choose action for close button (you can modify it at any time in the settings page)",
+                self
+            )
+            msgBox.yesButton.setText(self.tr('Exit'))
+            msgBox.cancelButton.setText(self.tr('Minimize'))
+
+            self.update()
+
+            cfg.set(cfg.enableCloseToTray, not msgBox.exec())
+
+        if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
+            self.processListener.terminate()
+            self.eventListener.terminate()
+            return super().closeEvent(a0)
+        else:
+            a0.ignore()
+            self.hide()
+
+    def __quit(self):
+        self.isTrayExit = True
+        self.close()
 
     def __onCareerInterfaceHistoryButtonClicked(self):
         summonerName = self.careerInterface.name.text()
@@ -691,8 +729,6 @@ class MainWindow(FluentWindow):
                     ) for game in gamesInfo
                 ]
 
-                # TODO 增加可选的对局模式判定
-                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
                 # 统计出现次数
                 """
                 teammatesCount = Counter({
@@ -719,7 +755,7 @@ class MainWindow(FluentWindow):
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in data['myTeam']]
+                    if sId in [x['summonerId'] for x in data['myTeam']] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
@@ -814,13 +850,12 @@ class MainWindow(FluentWindow):
                     ) for game in gamesInfo
                 ]
 
-                # TODO 增加可选的对局模式判定
-                # TODO 增加可选的判断为预组队的共同游戏场次数阈值设置
                 # 统计出现次数
                 """
                 teammatesCount = Counter({
                     (4018313666, '召唤师1'): 6, 
                     (4018314000, '召唤师2'): 3, 
+                    (123456, '召唤师2'): 1, 
                     (summonersId, name): cnt,
                     ...
                 })
@@ -842,7 +877,7 @@ class MainWindow(FluentWindow):
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in enemies]
+                    if sId in [x['summonerId'] for x in enemies] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
