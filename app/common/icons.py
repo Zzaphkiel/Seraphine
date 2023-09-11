@@ -40,6 +40,7 @@ class Icon(FluentIconBase, Enum):
     EXIT = 'Exit'
     LOCK = 'Lock'
     TEAM = 'Team'
+    SETTING = 'Setting'
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

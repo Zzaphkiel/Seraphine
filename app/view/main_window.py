@@ -31,6 +31,7 @@ from ..lol.tools import (processGameData, translateTier, getRecentChampions,
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+
 class MainWindow(FluentWindow):
     nameOrIconChanged = pyqtSignal(str, str)
     lolInstallFolderChanged = pyqtSignal(str)
@@ -39,6 +40,7 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         self.__initWindow()
+        self.__initSystemTray()
 
         # create sub interface
         self.startInterface = StartInterface(self)
@@ -159,21 +161,6 @@ class MainWindow(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
-        # 托盘图标
-        self.trayIcon = QSystemTrayIcon(self)
-        self.trayIcon.setIcon(QIcon("app/resource/images/logo.png"))
-
-        quitAction = Action('Quit', self)
-        quitAction.triggered.connect(self.__quit)
-
-        self.tray_menu = SystemTrayMenu(self)
-        self.tray_menu.addAction(quitAction)
-
-        self.trayIcon.setContextMenu(self.tray_menu)
-        # 双击事件
-        self.trayIcon.activated.connect(lambda reason: self.show() if reason == QSystemTrayIcon.DoubleClick else None)
-        self.trayIcon.show()
-
         self.show()
         QApplication.processEvents()
 
@@ -183,6 +170,49 @@ class MainWindow(FluentWindow):
 
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
+
+    def __initSystemTray(self):
+        self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setIcon(QIcon("app/resource/images/logo.png"))
+
+        careerAction = Action(Icon.PERSON, self.tr("Career"), self)
+        searchAction = Action(Icon.SEARCH, self.tr("Search 👀"), self)
+        gameInfoAction = Action(Icon.GAME, self.tr("Game Information"), self)
+        settingsAction = Action(Icon.SETTING, self.tr("Settings"), self)
+        quitAction = Action(Icon.EXIT, self.tr('Quit'), self)
+
+        def showAndSwitch(interface):
+            self.show()
+            self.checkAndSwitchTo(interface)
+
+        def quit():
+            self.isTrayExit = True
+            self.close()
+
+        careerAction.triggered.connect(
+            lambda: showAndSwitch(self.careerInterface))
+        searchAction.triggered.connect(
+            lambda: showAndSwitch(self.searchInterface))
+        gameInfoAction.triggered.connect(
+            lambda: showAndSwitch(self.gameInfoInterface))
+        settingsAction.triggered.connect(
+            lambda: showAndSwitch(self.settingInterface))
+        quitAction.triggered.connect(quit)
+
+        self.trayMenu = SystemTrayMenu(self)
+
+        self.trayMenu.addAction(careerAction)
+        self.trayMenu.addAction(searchAction)
+        self.trayMenu.addAction(gameInfoAction)
+        self.trayMenu.addAction(settingsAction)
+        self.trayMenu.addSeparator()
+        self.trayMenu.addAction(quitAction)
+
+        self.trayIcon.setContextMenu(self.trayMenu)
+        # 双击事件
+        self.trayIcon.activated.connect(lambda reason: self.show(
+        ) if reason == QSystemTrayIcon.DoubleClick else None)
+        self.trayIcon.show()
 
     def __initListener(self):
         self.processListener.lolClientStarted.connect(
@@ -439,10 +469,6 @@ class MainWindow(FluentWindow):
         else:
             a0.ignore()
             self.hide()
-
-    def __quit(self):
-        self.isTrayExit = True
-        self.close()
 
     def __onCareerInterfaceHistoryButtonClicked(self):
         summonerName = self.careerInterface.name.text()
@@ -772,7 +798,8 @@ class MainWindow(FluentWindow):
                 }
 
             with ThreadPoolExecutor() as executor:
-                futures = [executor.submit(process_item, item) for item in data["myTeam"]]
+                futures = [executor.submit(process_item, item)
+                           for item in data["myTeam"]]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -894,7 +921,8 @@ class MainWindow(FluentWindow):
                 }
 
             with ThreadPoolExecutor() as executor:
-                futures = [executor.submit(process_item, item) for item in enemies]
+                futures = [executor.submit(process_item, item)
+                           for item in enemies]
 
             for future in as_completed(futures):
                 result = future.result()

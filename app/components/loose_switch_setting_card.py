@@ -1,8 +1,18 @@
+from typing import Union
+from PyQt5.QtGui import QIcon
 from qfluentwidgets import SwitchSettingCard
+from qfluentwidgets.common.config import ConfigItem
+from qfluentwidgets.common.icon import FluentIconBase
 
 
 class LooseSwitchSettingCard(SwitchSettingCard):
     """ 允许bool以外的值来初始化的SwitchSettingCard控件 """
+
+    def __init__(self, icon, title, content=None, configItem: ConfigItem = None, parent=None):
+        super().__init__(icon, title, content, configItem, parent)
+
+        self.switchButton.setOnText(self.tr("On"))
+        self.switchButton.setOffText(self.tr("Off"))
 
     def setValue(self, isChecked):
         """
