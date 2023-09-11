@@ -223,20 +223,20 @@ class SummonerInfoView(QFrame):
                                 diameter=70,
                                 sep=20)
 
-        self.teammateIcon = None
+        # self.teammateIcon = None
         if info["teammatesMarker"] and info["teamId"]:
-            self.teammateIcon = QLabel()
-            self.teammateIcon.setPixmap(
-                QPixmap(Icon.TEAM.path()).scaled(
-                    24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
-                )
-            )
-            self.teammateIcon.setFixedSize(24, 24)
-            self.teammateIcon.scroll(0, 4)
-            self.teammateIcon.setAlignment(Qt.AlignCenter)
-            self.teammateIcon.setToolTip(
+            # self.teammateIcon = QLabel()
+            # self.teammateIcon.setPixmap(
+            #     QPixmap(Icon.TEAM.path()).scaled(
+            #         24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
+            #     )
+            # )
+            # self.teammateIcon.setFixedSize(24, 24)
+            # self.teammateIcon.scroll(0, 4)
+            # self.teammateIcon.setAlignment(Qt.AlignCenter)
+            self.setToolTip(
                 '\n'.join([t['name'] for t in info["teammatesMarker"]]))
-            self.teammateIcon.installEventFilter(
+            self.installEventFilter(
                 ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
@@ -353,8 +353,8 @@ class SummonerInfoView(QFrame):
 
         self.vBoxLayout.setAlignment(Qt.AlignVCenter)
         self.vBoxLayout.addLayout(self.hBoxLayout)
-        if self.teammateIcon:
-            self.vBoxLayout.addWidget(self.teammateIcon)
+        # if self.teammateIcon:
+        #     self.vBoxLayout.addWidget(self.teammateIcon)
 
         # self.setFixedHeight(150)
 
@@ -370,7 +370,6 @@ class SummonerInfoView(QFrame):
 
         f1, f2 = 1.1, 0.8
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
         self.setStyleSheet(f""" SummonerInfoView {{
             border-radius: 5px;
@@ -381,11 +380,6 @@ class SummonerInfoView(QFrame):
             border-radius: 5px;
             border: 1px solid rgb({r1}, {g1}, {b1});
             background-color: rgba({r1}, {g1}, {b1}, 0.2);
-        }}
-        SummonerInfoView[pressed = true] {{
-            border-radius: 5px;
-            border: 1px solid rgb({r2}, {g2}, {b2});
-            background-color: rgba({r2}, {g2}, {b2}, 0.25);
         }}""")
 
 
