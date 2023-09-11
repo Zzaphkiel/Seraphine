@@ -236,7 +236,7 @@ class SummonerInfoView(QFrame):
             self.setToolTip(
                 '\n'.join([t['name'] for t in info["teammatesMarker"]]))
             self.installEventFilter(
-                ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
+                ToolTipFilter(self, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
