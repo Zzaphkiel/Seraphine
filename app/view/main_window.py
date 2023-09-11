@@ -451,16 +451,18 @@ class MainWindow(FluentWindow):
         # 首次点击 关闭 按钮
         if cfg.get(cfg.enableCloseToTray) is None:
             msgBox = MessageBox(
-                "Do you wish to exit?",
-                "Choose action for close button (you can modify it at any time in the settings page)",
+                self.tr("Do you wish to exit?"),
+                self.tr(
+                    "Choose action for close button (you can modify it at any time in the settings page)"),
                 self
             )
-            msgBox.yesButton.setText(self.tr('Exit'))
-            msgBox.cancelButton.setText(self.tr('Minimize'))
+
+            msgBox.yesButton.setText(self.tr('Minimize'))
+            msgBox.cancelButton.setText(self.tr('Exit'))
 
             self.update()
 
-            cfg.set(cfg.enableCloseToTray, not msgBox.exec())
+            cfg.set(cfg.enableCloseToTray, msgBox.exec())
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.processListener.terminate()

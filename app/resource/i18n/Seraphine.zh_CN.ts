@@ -370,17 +370,17 @@
 <context>
     <name>GameTab</name>
     <message>
-        <location filename="../../view/game_info_interface.py" line="477"/>
+        <location filename="../../view/game_info_interface.py" line="469"/>
         <source>remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="479"/>
+        <location filename="../../view/game_info_interface.py" line="471"/>
         <source>win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../view/game_info_interface.py" line="481"/>
+        <location filename="../../view/game_info_interface.py" line="473"/>
         <source>lose</source>
         <translation>失败</translation>
     </message>
@@ -497,57 +497,57 @@
         <translation type="obsolete">未定级</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="684"/>
+        <location filename="../../view/main_window.py" line="686"/>
         <source>Home</source>
         <translation>游戏大厅</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="687"/>
+        <location filename="../../view/main_window.py" line="689"/>
         <source>Selecting Champions</source>
         <translation>英雄选择</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="694"/>
+        <location filename="../../view/main_window.py" line="696"/>
         <source>Gaming</source>
         <translation>游戏中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="697"/>
+        <location filename="../../view/main_window.py" line="699"/>
         <source>Waiting for status</source>
         <translation>等待游戏结果</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="699"/>
+        <location filename="../../view/main_window.py" line="701"/>
         <source>End of game</source>
         <translation>游戏结束</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="701"/>
+        <location filename="../../view/main_window.py" line="703"/>
         <source>Lobby</source>
         <translation>房间组队中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="704"/>
+        <location filename="../../view/main_window.py" line="706"/>
         <source>Ready check</source>
         <translation>匹配确认</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="707"/>
+        <location filename="../../view/main_window.py" line="709"/>
         <source>Match making</source>
         <translation>匹配中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="968"/>
+        <location filename="../../view/main_window.py" line="970"/>
         <source>Exception occurred 😥</source>
         <translation>程序出现异常 😥</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="973"/>
+        <location filename="../../view/main_window.py" line="975"/>
         <source>Copy to clipboard</source>
         <translation>确认并复制到剪贴板</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="974"/>
+        <location filename="../../view/main_window.py" line="976"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -557,19 +557,29 @@
         <translation>战绩查询 👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="458"/>
+        <location filename="../../view/main_window.py" line="460"/>
         <source>Exit</source>
-        <translation>退出</translation>
+        <translation>直接退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="459"/>
+        <location filename="../../view/main_window.py" line="461"/>
         <source>Minimize</source>
-        <translation>最小化</translation>
+        <translation>最小化到任务栏</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="182"/>
         <source>Quit</source>
         <translation>退出</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="453"/>
+        <source>Do you wish to exit?</source>
+        <translation>您第一次点击了关闭按钮</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="453"/>
+        <source>Choose action for close button (you can modify it at any time in the settings page)</source>
+        <translation>请选择点击关闭按钮的默认行为（您可以今后任意时间在设置界面修改它）</translation>
     </message>
 </context>
 <context>
