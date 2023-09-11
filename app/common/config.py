@@ -70,14 +70,15 @@ class Config(QConfig):
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
 
-    enableCloseToTray = ConfigItem("General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
+    enableCloseToTray = ConfigItem(
+        "General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.7.3"
+VERSION = "0.8.0"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 
