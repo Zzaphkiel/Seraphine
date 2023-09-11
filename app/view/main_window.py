@@ -745,10 +745,10 @@ class MainWindow(FluentWindow):
                 rankInfo = processRankInfo(origRankInfo)
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
-                    puuid, 0, 10)
+                    puuid, 0, 14)
 
                 gamesInfo = [processGameData(game)
-                             for game in origGamesInfo["games"]]
+                             for game in origGamesInfo["games"][:11]]
 
                 teammatesInfo = [
                     getTeammates(
@@ -867,10 +867,10 @@ class MainWindow(FluentWindow):
                 rankInfo = processRankInfo(origRankInfo)
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
-                    puuid, 0, 10)
+                    puuid, 0, 14)
 
                 gamesInfo = [processGameData(game)
-                             for game in origGamesInfo["games"]]
+                             for game in origGamesInfo["games"][0:11]]
 
                 teammatesInfo = [
                     getTeammates(
