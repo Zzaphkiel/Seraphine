@@ -89,7 +89,6 @@ python main.py
 ```shell
 pip install pyinstaller
 ```
-### 打包并压缩为 `rar` 文件
 执行项目中 `make.ps1` 脚本，通过 `-dest` 参数传入目标文件夹
 ``` shell
 .\make -dest .
@@ -98,7 +97,7 @@ pip install pyinstaller
 ``` shell
 .\make
 ```
-命令结束后在目标文件夹获得 `Seraphine.rar`。
+命令结束后在目标文件夹获得 `Seraphine.zip`。
 
 
 ## 引用以及参考资料 👀
