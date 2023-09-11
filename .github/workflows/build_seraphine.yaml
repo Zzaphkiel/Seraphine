@@ -1,6 +1,10 @@
 name: Build Seraphine
 
 on:
+  push:
+    branches:
+      - main
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -33,21 +37,28 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Setup environment variables
       run: |
-        export VERSION=`python -c "from app.common.config import VERSION; print(VERSION)"`
+        export VERSION_CHANGED_COMMIT_HASH=$(git blame app/common/config.py --root -l | grep -Po "([\w]+) (?=\(.*\) VERSION = )")
+        export HEAD_COMMIT_HASH=$(git log -1 --format='%H')
+        export UPDATED=$(python -c "import os; UPDATED = 'true' if os.environ['HEAD_COMMIT_HASH'].strip() == os.environ['VERSION_CHANGED_COMMIT_HASH'].strip() else 'false'; print(UPDATED)")
+        export VERSION=$(cat app/common/config.py | grep -Po "(?<=VERSION = \")(.*[^\"])")
         echo "VERSION=v$VERSION" >> $GITHUB_ENV
+        echo "UPDATED=$UPDATED" >> $GITHUB_ENV
     - name: Download artifact
       uses: actions/download-artifact@v3
+      if: env.UPDATED == 'true'
       with:
         name: Seraphine
         path: ./
     - name: Push to release
       uses: ncipollo/release-action@v1
+      if: env.UPDATED == 'true'
       with:
         name: Seraphine ${{ env.VERSION }}
         tag: ${{ env.VERSION }}
-        omitBodyDuringUpdate: true
         token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: false
+        replacesArtifacts: false
         artifacts: Seraphine.zip
