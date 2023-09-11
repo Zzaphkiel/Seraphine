@@ -234,7 +234,8 @@ class SummonerInfoView(QFrame):
             self.teammateIcon.setFixedSize(24, 24)
             self.teammateIcon.scroll(0, 4)
             self.teammateIcon.setAlignment(Qt.AlignCenter)
-            self.teammateIcon.setToolTip(self.tr('\n'.join([t['name'] for t in info["teammatesMarker"]])))
+            self.teammateIcon.setToolTip(
+                '\n'.join([t['name'] for t in info["teammatesMarker"]]))
             self.teammateIcon.installEventFilter(
                 ToolTipFilter(self.teammateIcon, 0, ToolTipPosition.TOP))
 
@@ -386,7 +387,6 @@ class SummonerInfoView(QFrame):
             border: 1px solid rgb({r2}, {g2}, {b2});
             background-color: rgba({r2}, {g2}, {b2}, 0.25);
         }}""")
-
 
 
 class SummonersGamesView(QFrame):
