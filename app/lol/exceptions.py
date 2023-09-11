@@ -1,10 +1,10 @@
-class SummonerNotFoundError(Exception):
+class SummonerNotFound(BaseException):
     pass
 
 
-class ProfileIconNotFound(Exception):
+class SummonerGamesNotFound(BaseException):
     pass
 
 
-class SummonerGamesNotFound(Exception):
+class SummonerNotInGame(BaseException):
     pass

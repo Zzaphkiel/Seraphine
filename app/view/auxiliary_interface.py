@@ -4,14 +4,15 @@ import os
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                            IndicatorPosition)
+                            IndicatorPosition, InfoBar, InfoBarPosition)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
 
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
-from ..lol.connector import LolClientConnector, connector
+from ..lol.connector import connector
+from ..lol.exceptions import *
 
 
 class AuxiliaryInterface(SmoothScrollArea):
@@ -551,7 +552,23 @@ class SpectateCard(SettingCard):
         self.button.setEnabled(enable)
 
     def __onButtonClicked(self):
-        connector.spectate(self.lineEdit.text())
+        def info(type, title, content):
+            f = InfoBar.error if type == 'error' else InfoBar.success
+
+            f(title=title, content=content, orient=Qt.Vertical, isClosable=True,
+              position=InfoBarPosition.TOP_RIGHT, duration=5000,
+              parent=self.parent().parent().parent().parent())
+
+        try:
+            connector.spectate(self.lineEdit.text())
+        except SummonerNotFound:
+            info('error', self.tr("Summoner not found"),
+                 self.tr("Please check the summoner's name and retry"))
+        except SummonerNotInGame:
+            info('error', self.tr("Summoner isn't in game"), "")
+        else:
+            info('success', self.tr("Spectate successfully"),
+                 self.tr("Please wait"),)
 
 
 # 自动选择英雄卡片

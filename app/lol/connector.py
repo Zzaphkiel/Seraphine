@@ -1,5 +1,3 @@
-import subprocess
-import re
 import os
 import json
 import requests
@@ -185,7 +183,7 @@ class LolClientConnector:
         res = self.__get(f"/lol-summoner/v1/summoners", params).json()
 
         if "errorCode" in res:
-            raise SummonerNotFoundError()
+            raise SummonerNotFound()
 
         return res
 
@@ -194,7 +192,7 @@ class LolClientConnector:
         res = self.__get(f"/lol-summoner/v2/summoners/puuid/{puuid}").json()
 
         if "errorCode" in res:
-            raise SummonerNotFoundError()
+            raise SummonerNotFound()
 
         return res
 
@@ -360,8 +358,8 @@ class LolClientConnector:
         res = self.__post(
             f"/lol-spectator/v1/spectate/launch", data=data).content
 
-        if "errorCode" in json.loads(res):
-            raise SummonerGamesNotFound('Summoner may not be in a game')
+        if res != b'':
+            raise SummonerNotInGame()
 
         return res
 
