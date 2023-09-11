@@ -118,14 +118,17 @@ pip install pyinstaller
 
 
 ## 点个 Star 支持作者 ⭐
-<!-- ![](https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date) -->
 <p align='center'>
-  <img src="https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date">
+  <a href="https://github.com/Zzaphkiel/Seraphine/stargazers">
+    <img src="https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date">
+  </a>
 </p>
 
 ## 感谢所有贡献者 🥳！
 <p align='center'>
-  <img src="https://contrib.rocks/image?repo=Zzaphkiel/Seraphine">
+  <a href="https://github.com/Zzaphkiel/Seraphine/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Zzaphkiel/Seraphine">
+  </a>
 </p>
 
 ## 免责声明
