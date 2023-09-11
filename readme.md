@@ -62,8 +62,7 @@ python main.py
     - 创建 5v5 自定义训练模式房间 ✅
     - 观战同大区玩家正在进行的游戏 ✅
     - 锁定游戏内设置 ✅
-    - 不退客户端选人秒退 ❎（暂时用不了）
-  
+
   - 个性化功能
     - 修改个人主页背景 ✅
     - 修改个人在线状态 ✅
@@ -84,7 +83,7 @@ python main.py
 
 发布新 issue 前先请看看之前是否讨论过相关或类似的问题哦~ _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
 
-## 您也可以自己打包可执行文件
+## 您也可以自己打包可执行文件 📂
 在 `seraphine` 虚拟环境下安装 `Pyinstaller`
 ```shell
 pip install pyinstaller
@@ -122,6 +121,11 @@ pip install pyinstaller
 <!-- ![](https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date) -->
 <p align='center'>
   <img src="https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date">
+</p>
+
+## 感谢所有贡献者 🥳！
+<p align='center'>
+  <img src="https://contrib.rocks/image?repo=Zzaphkiel/Seraphine">
 </p>
 
 ## 免责声明
