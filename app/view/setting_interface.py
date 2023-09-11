@@ -62,6 +62,12 @@ class SettingInterface(SmoothScrollArea):
 
         self.functionGroup = SettingCardGroup(self.tr("Functions"),
                                               self.scrollWidget)
+
+        self.teamGamesNumberCard = LineEditSettingCard(
+            cfg.teamGamesNumber, self.tr("Apply"),
+            self.tr("Pre-team threshold"), 1, Icon.TEAM,
+            self.tr("Pre-team threshold for common game rounds"), self.functionGroup)
+
         self.careerGamesCount = LineEditSettingCard(
             cfg.careerGamesNumber, self.tr("Apply"),
             self.tr("Default games number"), 10, Icon.SLIDESEARCH,
@@ -190,6 +196,7 @@ class SettingInterface(SmoothScrollArea):
 
         # add cards to group
         self.functionGroup.addSettingCard(self.careerGamesCount)
+        self.functionGroup.addSettingCard(self.teamGamesNumberCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
