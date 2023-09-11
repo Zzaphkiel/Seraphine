@@ -360,6 +360,9 @@ class LolClientConnector:
         res = self.__post(
             f"/lol-spectator/v1/spectate/launch", data=data).content
 
+        if "errorCode" in json.loads(res):
+            raise SummonerGamesNotFound('Summoner may not be in a game')
+
         return res
 
     def getConversations(self):
