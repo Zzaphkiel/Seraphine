@@ -215,8 +215,7 @@ class SummonerInfoView(QFrame):
 
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
-        self.vBoxLayout = QVBoxLayout(self)
-        self.hBoxLayout = QHBoxLayout()
+        self.hBoxLayout = QHBoxLayout(self)
         self.icon = RoundAvatar(info['icon'],
                                 info['xpSinceLastLevel'],
                                 info['xpUntilNextLevel'],
@@ -241,6 +240,7 @@ class SummonerInfoView(QFrame):
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
+        # self.summonerName = SummonerName("一二三四五六七八九")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
@@ -346,13 +346,11 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.hBoxLayout.setContentsMargins(5, 0, 5, 0)
+        self.hBoxLayout.setContentsMargins(7, 0, 7, 0)
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
 
-        self.vBoxLayout.setAlignment(Qt.AlignVCenter)
-        self.vBoxLayout.addLayout(self.hBoxLayout)
         # if self.teammateIcon:
         #     self.vBoxLayout.addWidget(self.teammateIcon)
 

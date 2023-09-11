@@ -26,7 +26,7 @@ SummonerInfoView:enabled:hover {
 }
 
 SummonerName {
-    font: bold 15px 'Microsoft YaHei', 'Segoe UI', 'PingFang SC';
+    font: bold 13px 'Microsoft YaHei', 'Segoe UI', 'PingFang SC';
     text-align: left;
     padding: 4px 6px 4px 6px;
     color: white;
