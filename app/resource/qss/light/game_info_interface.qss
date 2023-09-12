@@ -53,7 +53,8 @@ SummonerInfoView>QLabel {
     /* border: 1px solid black; */
 }
 
-SummonerInfoView>#levelLabel {
+SummonerInfoView>#kdaLabel,
+SummonerInfoView>#kdaValLabel {
     font: 11px 'Segoe UI', 'Microsoft YaHei';
     /* border: 1px solid black; */
 }
