@@ -11,7 +11,8 @@ QLabel#name {
 QLabel#rencent20GamesLabel,
 QLabel#winsLabel,
 QLabel#lossesLabel,
-QLabel#kdaLabel {
+QLabel#kdaLabel,
+QLabel#kdaValLabel {
     color: white;
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }

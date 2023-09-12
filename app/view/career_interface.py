@@ -16,13 +16,14 @@ from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton,
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar
 from ..components.champion_icon_widget import RoundIcon
+from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
 from ..common.style_sheet import StyleSheet
 from ..common.config import cfg
 from ..common.icons import Icon
 from ..lol.connector import connector
 from ..lol.entries import Summoner
-from ..lol.tools import translateTier, getTeammates
+from ..lol.tools import translateTier, getTeammates, parseGames
 
 
 class CareerInterface(SmoothScrollArea):
@@ -41,14 +42,13 @@ class CareerInterface(SmoothScrollArea):
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
         self.nameLevelVLayout = QVBoxLayout()
-        self.icon = RoundAvatar('app/resource/images/champion-0.png',
+        self.icon = RoundLevelAvatar('app/resource/images/champion-0.png',
                                 0,
                                 1,
                                 parent=self)
         self.name = QLabel(self.tr("Connecting..."))
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
-        self.level = QLabel("Lv. None")
 
         self.buttonsLayout = QVBoxLayout()
         self.backToMeButton = PushButton(self.tr("Back to me"))
@@ -91,7 +91,7 @@ class CareerInterface(SmoothScrollArea):
             ToolTipFilter(self.copyButton, 500, ToolTipPosition.TOP))
 
         self.name.setObjectName("name")
-        self.level.setObjectName("level")
+        # self.level.setObjectName("level")
         self.nameLevelVLayout.setObjectName("nameLevelVLayout")
 
         self.recent20GamesLabel.setObjectName('rencent20GamesLabel')
@@ -163,7 +163,7 @@ class CareerInterface(SmoothScrollArea):
         self.nameLevelVLayout.addSpacerItem(
             QSpacerItem(1, 25, QSizePolicy.Minimum, QSizePolicy.Fixed))
         self.nameLevelVLayout.addLayout(self.nameButtonLayout)
-        self.nameLevelVLayout.addWidget(self.level, alignment=Qt.AlignCenter)
+        # self.nameLevelVLayout.addWidget(self.level, alignment=Qt.AlignCenter)
         self.nameLevelVLayout.addSpacerItem(
             QSpacerItem(1, 25, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
@@ -229,7 +229,7 @@ class CareerInterface(SmoothScrollArea):
         self.icon.setVisible(not enable)
         self.name.setVisible(not enable)
         self.copyButton.setVisible(not enable)
-        self.level.setVisible(not enable)
+        # self.level.setVisible(not enable)
         self.backToMeButton.setVisible(not enable)
         self.searchButton.setVisible(not enable)
         self.rankTable.setVisible(not enable)
@@ -312,10 +312,8 @@ class CareerInterface(SmoothScrollArea):
         xpUntilNextLevel = info['xpUntilNextLevel']
 
         self.name.setText(name)
-        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel)
-
         levelStr = str(level) if level != -1 else "None"
-        self.level.setText(f'Lv. {levelStr}')
+        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, levelStr)
 
     def __onCareerInfoChanged(self, info: dict):
         if not info['triggerByUser'] and not self.isCurrentSummoner():
@@ -330,13 +328,11 @@ class CareerInterface(SmoothScrollArea):
         rankInfo = info['rankInfo']
         games = info['games']
 
-        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel)
+        levelStr = str(level) if level != -1 else "None"
+        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, levelStr)
         self.name.setText(name)
 
         self.puuid = puuid
-
-        levelStr = str(level) if level != -1 else "None"
-        self.level.setText(f'Lv. {levelStr}')
 
         if 'queueMap' in rankInfo:
             soloRankInfo = rankInfo['queueMap']['RANKED_SOLO_5x5']
@@ -494,29 +490,19 @@ class CareerInterface(SmoothScrollArea):
             targetId = 420
         elif index == 4:
             targetId = 440
+        else:
+            targetId = 0
 
-        count, kills, deaths, assists, wins, losses = 0, 0, 0, 0, 0, 0
+        hitGames, kills, deaths, assists, wins, losses = parseGames(self.games["games"], targetId)
 
-        for game in self.games['games']:
-            if index == 0 or game['queueId'] == targetId:
-                bar = GameInfoBar(game)
-                bar.setMaximumHeight(86)
-                self.gameInfoLayout.addWidget(bar)
-                self.gameInfoLayout.addSpacing(5)
-                count += 1
-
-                if not game['remake']:
-                    kills += game['kills']
-                    deaths += game['deaths']
-                    assists += game['assists']
-
-                    if game['win']:
-                        wins += 1
-                    else:
-                        losses += 1
+        for game in hitGames:
+            bar = GameInfoBar(game)
+            bar.setMaximumHeight(86)
+            self.gameInfoLayout.addWidget(bar)
+            self.gameInfoLayout.addSpacing(5)
 
         self.recent20GamesLabel.setText(
-            f"{self.tr('Recent matches')} {self.tr('(Last')} {count} {self.tr('games)')}"
+            f"{self.tr('Recent matches')} {self.tr('(Last')} {len(hitGames)} {self.tr('games)')}"
         )
         self.winsLabel.setText(f"{self.tr('Wins:')} {wins}")
         self.lossesLabel.setText(f"{self.tr('Losses:')} {losses}")

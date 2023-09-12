@@ -1,8 +1,8 @@
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QSpacerItem, QSizePolicy, QStackedWidget,
-                             QGridLayout)
-from PyQt5.QtGui import QPixmap
+                             QGridLayout, QSplitter)
+from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette
 
 from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
@@ -11,7 +11,9 @@ from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.champion_icon_widget import RoundIcon
+from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
+from ..lol.tools import parseGames
 
 
 class GameInfoInterface(SmoothScrollArea):
@@ -216,23 +218,12 @@ class SummonerInfoView(QFrame):
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
         self.hBoxLayout = QHBoxLayout(self)
-        self.icon = RoundAvatar(info['icon'],
-                                info['xpSinceLastLevel'],
-                                info['xpUntilNextLevel'],
-                                diameter=70,
-                                sep=20)
+        self.icon = RoundLevelAvatar(info['icon'],
+                                     info['xpSinceLastLevel'],
+                                     info['xpUntilNextLevel'],
+                                     70, info["level"])
 
-        # self.teammateIcon = None
         if info["teammatesMarker"] and info["teamId"]:
-            # self.teammateIcon = QLabel()
-            # self.teammateIcon.setPixmap(
-            #     QPixmap(Icon.TEAM.path()).scaled(
-            #         24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation
-            #     )
-            # )
-            # self.teammateIcon.setFixedSize(24, 24)
-            # self.teammateIcon.scroll(0, 4)
-            # self.teammateIcon.setAlignment(Qt.AlignCenter)
             self.setToolTip(
                 '\n'.join([t['name'] for t in info["teammatesMarker"]]))
             self.installEventFilter(
@@ -240,20 +231,40 @@ class SummonerInfoView(QFrame):
 
         self.infoVBoxLayout = QVBoxLayout()
         self.summonerName = SummonerName(info['name'])
-        # self.summonerName = SummonerName("一二三四五六七八九")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
         self.gridHBoxLayout = QHBoxLayout()
+        self.kdaHBoxLayout = QHBoxLayout()
 
         self.gridLayout = QGridLayout()
 
         soloRank = info['rankInfo']['solo']
         self.rankSolo = QLabel(f"{soloRank['tier']} {soloRank['division']}")
 
-        self.levelLabel = QLabel(f"Lv. {info['level']}")
-        self.levelLabel.setAlignment(Qt.AlignCenter)
-        self.levelLabel.setObjectName("levelLabel")
+        self.kdaLabel = QLabel(f"KDA: ")
+        self.kdaLabel.setObjectName("kdaLabel")
+
+        k, d, a = info['kda']
+        if d:
+            kda = ((k + a) / d)
+            self.kdaValLabel = QLabel(f"{kda:.1f}")
+            pe = QPalette()
+            if 3 <= kda < 4:
+                pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
+            elif 4 <= kda < 5:
+                pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
+            elif 5 < kda:
+                pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
+            self.kdaValLabel.setPalette(pe)
+        else:
+            self.kdaValLabel = QLabel(f"Perfect")
+            pe = QPalette()
+            pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
+            self.kdaValLabel.setPalette(pe)
+
+        self.kdaValLabel.setAlignment(Qt.AlignCenter)
+        self.kdaValLabel.setObjectName("kdaValLabel")
 
         self.rankSoloIcon = QLabel()
 
@@ -340,7 +351,12 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout.addSpacing(-6)
         self.infoVBoxLayout.addWidget(self.summonerName,
                                       alignment=Qt.AlignCenter)
-        self.infoVBoxLayout.addWidget(self.levelLabel)
+        self.kdaHBoxLayout.addWidget(QSplitter())
+        self.kdaHBoxLayout.addWidget(self.kdaLabel)
+        self.kdaHBoxLayout.addWidget(self.kdaValLabel)
+        self.infoVBoxLayout.addLayout(self.kdaHBoxLayout)
+        self.kdaHBoxLayout.addWidget(QSplitter())
+        # self.infoVBoxLayout.addWidget(self.kdaValLabel)
         self.infoVBoxLayout.addSpacing(3)
         self.infoVBoxLayout.addLayout(self.gridHBoxLayout)
         self.infoVBoxLayout.addSpacerItem(

@@ -408,7 +408,7 @@ def assignTeamId(summoners):
 
     ---
     较此前完善判断逻辑:
-    1. A单向B, B单向C -> AB都记为 None
+    1. A单向B, B单向C -> ABC都记为 None
     2. A双向B, B双向C -> ABC记为同一 teamId
     3. A双向B且单向C -> AB记为同一 teamId, C记为None
     ---
@@ -527,3 +527,33 @@ def processRankInfo(info):
             "lp": flexRankInfo["leaguePoints"],
         },
     }
+
+
+def parseGames(games, targetId=0):
+    f"""
+    解析Games数据
+
+    @param targetId: 需要查询的游戏模式, 不传则收集所有模式的数据
+    @param games: 由 @see: {processGameData} 获取到的games数据
+    @return: hitGame, K, D, A, win, loss
+    @rtype: tuple[list, int, int, int, int, int, int]
+    """
+
+    kills, deaths, assists, wins, losses = 0, 0, 0, 0, 0
+    hitGames = []
+
+    for game in games:
+        if not targetId or game['queueId'] == targetId:
+            hitGames.append(game)
+
+            if not game['remake']:
+                kills += game['kills']
+                deaths += game['deaths']
+                assists += game['assists']
+
+                if game['win']:
+                    wins += 1
+                else:
+                    losses += 1
+
+    return hitGames, kills, deaths, assists, wins, losses

@@ -13,7 +13,8 @@ QLabel#level {
 QLabel#rencent20GamesLabel,
 QLabel#winsLabel,
 QLabel#lossesLabel,
-QLabel#kdaLabel {
+QLabel#kdaLabel
+QLabel#kdaValLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
 

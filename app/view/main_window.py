@@ -26,7 +26,7 @@ from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
-                         processRankInfo, getTeammates, assignTeamId)
+                         processRankInfo, getTeammates, assignTeamId, parseGames)
 
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -748,8 +748,11 @@ class MainWindow(FluentWindow):
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
 
+
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][:11]]
+
+                _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
 
                 teammatesInfo = [
                     getTeammates(
@@ -798,6 +801,7 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summonerId,
                     "teammatesMarker": teammatesMarker,
+                    "kda": [kill, deaths, assists]
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -873,6 +877,8 @@ class MainWindow(FluentWindow):
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][0:11]]
 
+                _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
+
                 teammatesInfo = [
                     getTeammates(
                         connector.getGameDetailByGameId(game["gameId"]),
@@ -921,6 +927,7 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
+                    "kda": [kill, deaths, assists]
                 }
 
             with ThreadPoolExecutor() as executor:

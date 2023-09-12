@@ -7,7 +7,7 @@ from qfluentwidgets import (
     ExpandLayout, Theme, CustomColorSettingCard, InfoBar, setTheme,
     setThemeColor, SmoothScrollArea, SettingCard, FluentIconBase, SpinBox,
     PushButton, PrimaryPushSettingCard, HyperlinkCard, FlyoutView, Flyout,
-    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon)
+    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon, InfoBarPosition)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout
@@ -229,6 +229,8 @@ class SettingInterface(SmoothScrollArea):
         self.themeColorCard.colorChanged.connect(setThemeColor)
 
         cfg.appRestartSig.connect(self.__showRestartToolTip)
+        self.teamGamesNumberCard.pushButton.clicked.connect(
+            self.__showUpdatedSuccessfullyToolTip)
         self.careerGamesCount.pushButton.clicked.connect(
             self.__showRestartToolTip)
         self.feedbackCard.clicked.connect(
@@ -249,6 +251,13 @@ class SettingInterface(SmoothScrollArea):
     def __showRestartToolTip(self):
         InfoBar.success(self.tr("Updated successfully"),
                         self.tr("Configuration takes effect after restart"),
+                        duration=2000,
+                        parent=self)
+        print(cfg.get(cfg.careerGamesNumber))
+
+    def __showUpdatedSuccessfullyToolTip(self):
+        InfoBar.success(self.tr("Updated successfully"),
+                        self.tr("Settings have been applied"),
                         duration=2000,
                         parent=self)
 
