@@ -12,7 +12,7 @@ cpi .\app -destination .\dist\Seraphine -recurse
 rm -r .\dist\Seraphine\app\common
 rm -r .\dist\Seraphine\app\components
 rm -r .\dist\Seraphine\app\lol
-rm -Path .\dist\Seraphine\app\config*
+rm -Path .\dist\Seraphine\app\config* -r
 rm -Path .\dist\Seraphine\app\resource\game* -r
 rm -r .\dist\Seraphine\app\resource\i18n\Seraphine.zh_CN.ts
 rm -r .\dist\Seraphine\app\view
