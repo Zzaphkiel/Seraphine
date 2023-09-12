@@ -707,6 +707,7 @@ class MainWindow(FluentWindow):
             self.__onMatchMade()
         elif status == 'Matchmaking':
             title = self.tr("Match making")
+            self.__onGameEnd()
 
         if not isGaming and self.isGaming:
             self.__updateCareerGames()
