@@ -302,6 +302,9 @@ class CareerInterface(SmoothScrollArea):
             self.__onRecentTeammatesButtonClicked)
 
     def __onChangeIconLevelAndExp(self, info):
+        if not self.isCurrentSummoner():
+            return
+
         name = info['name']
         icon = info['icon']
         level = info['level']
