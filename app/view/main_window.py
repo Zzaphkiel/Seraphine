@@ -1003,8 +1003,8 @@ class MainWindow(FluentWindow):
         self.oldHook(ty, value, tb)
 
     def __onCurrentStackedChanged(self, index):
-        if index == self.stackedWidget.indexOf(self.careerInterface):
-            self.careerInterface.setTableStyle()
+        # if index == self.stackedWidget.indexOf(self.careerInterface):
+        #     self.careerInterface.setTableStyle()
 
         widget: SmoothScrollArea = self.stackedWidget.view.currentWidget()
         widget.delegate.vScrollBar.resetValue(0)

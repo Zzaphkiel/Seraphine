@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
                              QWidget, QFrame, QStackedWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
-from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton,
-                            ComboBox, SmoothScrollArea, ToolTipFilter,
+from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton, ComboBox,
+                            SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
                             ToolTipPosition, ToolButton, IndeterminateProgressRing,
                             Flyout, FlyoutViewBase, FlyoutAnimationType)
 
@@ -43,9 +43,9 @@ class CareerInterface(SmoothScrollArea):
         self.IconNameHBoxLayout = QHBoxLayout()
         self.nameLevelVLayout = QVBoxLayout()
         self.icon = RoundLevelAvatar('app/resource/images/champion-0.png',
-                                0,
-                                1,
-                                parent=self)
+                                     0,
+                                     1,
+                                     parent=self)
         self.name = QLabel(self.tr("Connecting..."))
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
@@ -152,7 +152,7 @@ class CareerInterface(SmoothScrollArea):
         self.__updateTable()
 
         StyleSheet.CAREER_INTERFACE.apply(self)
-        self.setTableStyle(cfg.theme)
+        self.setTableStyle()
 
     def __initLayout(self):
         self.nameButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -262,30 +262,36 @@ class CareerInterface(SmoothScrollArea):
         self.rankTable.horizontalHeader().setSectionResizeMode(
             QHeaderView.Stretch)
 
-    def setTableStyle(self, theme=None):
-        if cfg.theme == Theme.LIGHT:
-            borderColor = "rgba(0, 0, 0, 0.095)"
-            backgroundColor = "rgba(255, 255, 255, 0.667)"
-        else:
-            borderColor = "rgb(35, 35, 35)"
-            backgroundColor = "rgba(255, 255, 255, 0.051)"
+    def setTableStyle(self):
+        light = '''
+            QHeaderView::section:horizontal {
+                border: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.095);
+            }
 
-        qss = self.rankTable.styleSheet()
-        qss += f'''
-        QHeaderView::section:horizontal {{
-            border: none;
-            border-bottom: 1px solid {borderColor};
-        }}
+            QTableView {
+                border: 1px solid rgba(0, 0, 0, 0.095); 
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.667);
+            }
+        '''
 
-        QTableView {{
-            border: 1px solid {borderColor}; 
-            border-radius: 6px;
-            background: {backgroundColor};
-        }}'''
-        self.rankTable.setStyleSheet(qss)
+        dark = '''
+            QHeaderView::section:horizontal {
+                border: none;
+                border-bottom: 1px solid rgb(35, 35, 35);
+            }
+
+            QTableView {
+                border: 1px solid rgb(35, 35, 35); 
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.051);
+            }
+        '''
+
+        setCustomStyleSheet(self.rankTable, light, dark)
 
     def __connectSignalToSlot(self):
-        cfg.themeChanged.connect(self.setTableStyle)
         self.careerInfoChanged.connect(self.__onCareerInfoChanged)
         self.IconLevelExpChanged.connect(self.__onChangeIconLevelAndExp)
         self.filterComboBox.currentIndexChanged.connect(
@@ -313,7 +319,8 @@ class CareerInterface(SmoothScrollArea):
 
         self.name.setText(name)
         levelStr = str(level) if level != -1 else "None"
-        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, levelStr)
+        self.icon.updateIcon(icon, xpSinceLastLevel,
+                             xpUntilNextLevel, levelStr)
 
     def __onCareerInfoChanged(self, info: dict):
         if not info['triggerByUser'] and not self.isCurrentSummoner():
@@ -329,7 +336,8 @@ class CareerInterface(SmoothScrollArea):
         games = info['games']
 
         levelStr = str(level) if level != -1 else "None"
-        self.icon.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, levelStr)
+        self.icon.updateIcon(icon, xpSinceLastLevel,
+                             xpUntilNextLevel, levelStr)
         self.name.setText(name)
 
         self.puuid = puuid
@@ -493,7 +501,8 @@ class CareerInterface(SmoothScrollArea):
         else:
             targetId = 0
 
-        hitGames, kills, deaths, assists, wins, losses = parseGames(self.games["games"], targetId)
+        hitGames, kills, deaths, assists, wins, losses = parseGames(
+            self.games["games"], targetId)
 
         for game in hitGames:
             bar = GameInfoBar(game)
