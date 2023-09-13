@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
-                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea, SystemTrayMenu, Action)
+                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea, Action)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -19,6 +19,7 @@ from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
 from ..components.avatar_widget import NavigationAvatarWidget
+from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..lol.entries import Summoner
@@ -145,6 +146,8 @@ class MainWindow(FluentWindow):
             self.__onSearchInterfaceSummonerNameClicked)
         self.gameInfoInterface.summonerGamesClicked.connect(
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
+        self.settingInterface.careerGamesCount.pushButton.clicked.connect(
+            self.__onCareerInterfaceRefreshButtonClicked)
         self.settingInterface.micaCard.checkedChanged.connect(
             self.setMicaEffectEnabled)
         self.stackedWidget.currentChanged.connect(
@@ -210,17 +213,6 @@ class MainWindow(FluentWindow):
         settingsAction.triggered.connect(
             lambda: showAndSwitch(self.settingInterface))
         quitAction.triggered.connect(quit)
-
-        class TmpSystemTrayMenu(SystemTrayMenu):
-            def adjustPosition(self):
-                m = self.layout().contentsMargins()
-                rect = QApplication.screenAt(QCursor.pos()).availableGeometry()
-                w, h = self.layout().sizeHint().width() + 5, self.layout().sizeHint().height()
-
-                x = min(self.x() - m.left(), rect.right() - w)
-                y = QCursor.pos().y() - self.height() + m.bottom()
-
-                self.move(x, y)
 
         self.trayMenu = TmpSystemTrayMenu(self)
 
@@ -621,7 +613,7 @@ class MainWindow(FluentWindow):
     def __onCareerInterfaceBackToMeButtonClicked(self):
         threading.Thread(target=self.__changeCareerToCurrentSummoner).start()
 
-    def __onSearchInterfaceSummonerNameClicked(self, puuid):
+    def __onSearchInterfaceSummonerNameClicked(self, puuid, switch=True):
         if puuid == "00000000-0000-0000-0000-000000000000":
             return
 
@@ -687,7 +679,9 @@ class MainWindow(FluentWindow):
             self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
-        self.checkAndSwitchTo(self.careerInterface)
+
+        if switch:
+            self.checkAndSwitchTo(self.careerInterface)
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -988,7 +982,8 @@ class MainWindow(FluentWindow):
         self.searchInterface.gamesView.gamesTab.tabClicked.emit(gameId)
 
     def __onCareerInterfaceRefreshButtonClicked(self):
-        self.__onSearchInterfaceSummonerNameClicked(self.careerInterface.puuid)
+        self.__onSearchInterfaceSummonerNameClicked(
+            self.careerInterface.puuid, switch=False)
 
     def exceptHook(self, ty, value, tb):
         tracebackFormat = traceback.format_exception(ty, value, tb)

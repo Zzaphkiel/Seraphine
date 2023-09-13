@@ -226,8 +226,6 @@ class SettingInterface(SmoothScrollArea):
         cfg.appRestartSig.connect(self.__showRestartToolTip)
         self.teamGamesNumberCard.pushButton.clicked.connect(
             self.__showUpdatedSuccessfullyToolTip)
-        self.careerGamesCount.pushButton.clicked.connect(
-            self.__showRestartToolTip)
         self.feedbackCard.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(FEEDBACK_URL)))
         self.deleteResourceCard.clicked.connect(self.__showFlyout)
@@ -244,12 +242,10 @@ class SettingInterface(SmoothScrollArea):
         self.lolFolderCard.setContent(folder)
 
     def __showRestartToolTip(self):
-        # TODO 改为应用成功提示, 添加历史战绩刷新按钮
         InfoBar.success(self.tr("Updated successfully"),
                         self.tr("Configuration takes effect after restart"),
                         duration=2000,
                         parent=self)
-        print(cfg.get(cfg.careerGamesNumber))
 
     def __showUpdatedSuccessfullyToolTip(self):
         InfoBar.success(self.tr("Updated successfully"),
