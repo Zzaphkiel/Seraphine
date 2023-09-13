@@ -124,7 +124,7 @@
     <message>
         <location filename="../../view/auxiliary_interface.py" line="79"/>
         <source>Auto select champion when blind selection begin</source>
-        <translation>在盲选开始时自动选择并锁定英雄</translation>
+        <translation type="unfinished">在盲选开始时自动亮起英雄</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="47"/>
