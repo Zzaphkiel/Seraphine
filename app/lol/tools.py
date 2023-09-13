@@ -379,7 +379,8 @@ def getTeammates(game, targetPuuid):
 
             break
 
-    res = {'queueId': game['queueId'], 'win': win, 'remake': remake, 'summoners': []}
+    res = {'queueId': game['queueId'], 'win': win,
+           'remake': remake, 'summoners': []}
 
     for player in game['participants']:
 

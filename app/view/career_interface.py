@@ -52,6 +52,7 @@ class CareerInterface(SmoothScrollArea):
 
         self.buttonsLayout = QVBoxLayout()
         self.backToMeButton = PushButton(self.tr("Back to me"))
+        self.refreshButton = PushButton(self.tr("Refresh"))
         self.searchButton = PushButton(self.tr("Game history"))
 
         self.tableLayout = QHBoxLayout()
@@ -152,7 +153,7 @@ class CareerInterface(SmoothScrollArea):
         self.__updateTable()
 
         StyleSheet.CAREER_INTERFACE.apply(self)
-        self.setTableStyle()
+        self.initTableStyle()
 
     def __initLayout(self):
         self.nameButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -200,6 +201,7 @@ class CareerInterface(SmoothScrollArea):
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         self.buttonsLayout.addWidget(self.backToMeButton)
+        self.buttonsLayout.addWidget(self.refreshButton)
         self.buttonsLayout.addWidget(self.searchButton)
         self.IconNameHBoxLayout.addLayout(self.buttonsLayout)
 
@@ -229,7 +231,7 @@ class CareerInterface(SmoothScrollArea):
         self.icon.setVisible(not enable)
         self.name.setVisible(not enable)
         self.copyButton.setVisible(not enable)
-        # self.level.setVisible(not enable)
+        self.refreshButton.setVisible(not enable)
         self.backToMeButton.setVisible(not enable)
         self.searchButton.setVisible(not enable)
         self.rankTable.setVisible(not enable)
@@ -262,7 +264,7 @@ class CareerInterface(SmoothScrollArea):
         self.rankTable.horizontalHeader().setSectionResizeMode(
             QHeaderView.Stretch)
 
-    def setTableStyle(self):
+    def initTableStyle(self):
         light = '''
             QHeaderView::section:horizontal {
                 border: none;
@@ -454,9 +456,8 @@ class CareerInterface(SmoothScrollArea):
 
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
 
-        if True:
-            self.teammatesFlyout.updatePuuid(puuid)
-            self.updateRecentTeammates()
+        self.teammatesFlyout.updatePuuid(puuid)
+        self.updateRecentTeammates()
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
@@ -530,19 +531,21 @@ class CareerInterface(SmoothScrollArea):
 
     def __onRecentTeammatesButtonClicked(self):
         self.w = Flyout.make(
-            self.teammatesFlyout, self.recentTeamButton, self, aniType=FlyoutAnimationType.DROP_DOWN)
+            self.teammatesFlyout, self.recentTeamButton, self,
+            aniType=FlyoutAnimationType.DROP_DOWN, isDeleteOnClose=False)
 
     def updateRecentTeammates(self):
         self.teammatesFlyout.showLoadingPage.emit()
 
         def _():
             summoners = {}
+            puuid = self.puuid
 
             for game in self.games['games']:
                 gameId = game['gameId']
                 game = connector.getGameDetailByGameId(gameId)
 
-                teammates = getTeammates(game, self.puuid)
+                teammates = getTeammates(game, puuid)
                 for p in teammates['summoners']:
                     if p['puuid'] not in summoners:
                         summonerIcon = connector.getProfileIcon(p['icon'])

@@ -57,18 +57,14 @@ class MainWindow(FluentWindow):
         self.eventListener = LolClientEventListener(self)
 
         self.currentSummoner: Summoner = None
-        self.rankInfo = {}
-        self.games = {}
 
         self.isGaming = False
         self.isTrayExit = False
 
         self.__initInterface()
-
-        # add items to navigation interface
         self.__initNavigation()
-
         self.__initListener()
+        self.__conncetSignalToSlot()
 
         self.splashScreen.finish()
 
@@ -117,6 +113,20 @@ class MainWindow(FluentWindow):
         # set the maximum width
         self.navigationInterface.setExpandWidth(250)
 
+    def __conncetSignalToSlot(self):
+        self.processListener.lolClientStarted.connect(
+            self.__onLolClientStarted)
+        self.processListener.lolClientEnded.connect(self.__onLolClientEnded)
+
+        self.eventListener.currentSummonerProfileChanged.connect(
+            self.__onCurrentSummonerProfileChanged)
+
+        self.eventListener.gameStatusChanged.connect(
+            self.__onGameStatusChanged)
+
+        self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
+        self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
+
         self.careerInterface.searchButton.clicked.connect(
             self.__onCareerInterfaceHistoryButtonClicked)
         self.careerInterface.backToMeButton.clicked.connect(
@@ -125,6 +135,8 @@ class MainWindow(FluentWindow):
             self.__onTeammateFlyoutSummonerNameClicked)
         self.careerInterface.gameInfoBarClicked.connect(
             self.__onCareerInterfaceGameInfoBarClicked)
+        self.careerInterface.refreshButton.clicked.connect(
+            self.__onCareerInterfaceRefreshButtonClicked)
         self.searchInterface.careerButton.clicked.connect(
             self.__onSearchInterfaceCareerButtonClicked)
         self.searchInterface.gamesView.gameDetailView.summonerNameClicked.connect(
@@ -226,19 +238,6 @@ class MainWindow(FluentWindow):
         self.trayIcon.show()
 
     def __initListener(self):
-        self.processListener.lolClientStarted.connect(
-            self.__onLolClientStarted)
-        self.processListener.lolClientEnded.connect(self.__onLolClientEnded)
-
-        self.eventListener.currentSummonerProfileChanged.connect(
-            self.__onCurrentSummonerProfileChanged)
-
-        self.eventListener.gameStatusChanged.connect(
-            self.__onGameStatusChanged)
-
-        self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
-        self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
-
         self.processListener.start()
 
     def __changeCareerToCurrentSummoner(self):
@@ -254,12 +253,12 @@ class MainWindow(FluentWindow):
 
         self.careerInterface.currentSummonerName = name
 
-        self.rankInfo = connector.getRankedStatsByPuuid(
+        rankInfo = connector.getRankedStatsByPuuid(
             self.currentSummoner.puuid)
         gamesInfo = connector.getSummonerGamesByPuuid(
             self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
-        self.games = {
+        games = {
             "gameCount": gamesInfo["gameCount"],
             "wins": 0,
             "losses": 0,
@@ -272,19 +271,20 @@ class MainWindow(FluentWindow):
         for game in gamesInfo["games"]:
             info = processGameData(game)
             if not info["remake"] and info["queueId"] != 0:
-                self.games["kills"] += info["kills"]
-                self.games["deaths"] += info["deaths"]
-                self.games["assists"] += info["assists"]
-                if info["win"]:
-                    self.games["wins"] += 1
-                else:
-                    self.games["losses"] += 1
+                games["kills"] += info["kills"]
+                games["deaths"] += info["deaths"]
+                games["assists"] += info["assists"]
 
-            self.games["games"].append(info)
+                if info["win"]:
+                    games["wins"] += 1
+                else:
+                    games["losses"] += 1
+
+            games["games"].append(info)
 
         self.nameOrIconChanged.emit(icon, name)
 
-        champions = getRecentChampions(self.games['games'])
+        champions = getRecentChampions(games['games'])
 
         self.careerInterface.careerInfoChanged.emit(
             {'name': name,
@@ -293,8 +293,8 @@ class MainWindow(FluentWindow):
              'xpSinceLastLevel': xpSinceLastLevel,
              'xpUntilNextLevel': xpUntilNextLevel,
              'puuid': self.currentSummoner.puuid,
-             'rankInfo': self.rankInfo,
-             'games': self.games,
+             'rankInfo': rankInfo,
+             'games': games,
              'champions': champions,
              'triggerByUser': True, }
         )
@@ -986,6 +986,9 @@ class MainWindow(FluentWindow):
         self.searchInterface.gamesView.gamesTab.updatePuuid(
             self.careerInterface.puuid)
         self.searchInterface.gamesView.gamesTab.tabClicked.emit(gameId)
+
+    def __onCareerInterfaceRefreshButtonClicked(self):
+        self.__onSearchInterfaceSummonerNameClicked(self.careerInterface.puuid)
 
     def exceptHook(self, ty, value, tb):
         tracebackFormat = traceback.format_exception(ty, value, tb)
