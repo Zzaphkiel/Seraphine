@@ -219,8 +219,8 @@ class MainWindow(FluentWindow):
         self.trayMenu.addAction(careerAction)
         self.trayMenu.addAction(searchAction)
         self.trayMenu.addAction(gameInfoAction)
-        self.trayMenu.addAction(settingsAction)
         self.trayMenu.addSeparator()
+        self.trayMenu.addAction(settingsAction)
         self.trayMenu.addAction(quitAction)
 
         self.trayIcon.setContextMenu(self.trayMenu)
