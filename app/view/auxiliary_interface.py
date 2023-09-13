@@ -67,7 +67,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         # 自动接受对局
         self.autoAcceptMatchingCard = AutoAcceptMatchingCard(
             self.tr("Auto accept"),
-            self.tr("Accept match making automatically"),
+            self.tr(
+                "Accept match making automatically after the number of seconds you set"),
             cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
             self.gameGroup)
         self.spectateCard = SpectateCard(
