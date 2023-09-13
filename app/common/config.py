@@ -60,6 +60,8 @@ class Config(QConfig):
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,
                                           BoolValidator())
+    autoAcceptMatchingDelay = RangeConfigItem(
+        "Functions", "AutoAcceptMatchingDelay", 0, RangeValidator(0, 11))
 
     enableAutoSelectChampion = ConfigItem("Functions",
                                           "EnableAutoSelectChampion", False,

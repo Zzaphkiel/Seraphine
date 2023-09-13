@@ -21,14 +21,9 @@ from ..components.loose_switch_setting_card import LooseSwitchSettingCard
 
 class LineEditSettingCard(SettingCard):
 
-    def __init__(self,
-                 configItem,
-                 text,
-                 title,
-                 step,
+    def __init__(self, configItem, text, title, step,
                  icon: Union[str, QIcon, FluentIconBase],
-                 content=None,
-                 parent=None):
+                 content=None, parent=None):
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
         self.lineEdit = SpinBox(self)

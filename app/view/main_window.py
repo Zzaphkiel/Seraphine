@@ -719,8 +719,12 @@ class MainWindow(FluentWindow):
 
     def __onMatchMade(self):
         if cfg.get(cfg.enableAutoAcceptMatching):
-            threading.Thread(
-                target=lambda: connector.acceptMatchMaking()).start()
+            def _():
+                timeDelay = cfg.get(cfg.autoAcceptMatchingDelay)
+                time.sleep(timeDelay)
+                connector.acceptMatchMaking()
+
+            threading.Thread(target=_).start()
 
     # 英雄选择界面触发事件
     def __onChampionSelectBegin(self):
@@ -747,7 +751,6 @@ class MainWindow(FluentWindow):
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
-
 
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][:11]]

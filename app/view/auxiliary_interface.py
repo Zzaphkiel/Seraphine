@@ -1,12 +1,15 @@
 import threading
 import os
+from typing import Union
+from PyQt5.QtGui import QIcon
 
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                            IndicatorPosition, InfoBar, InfoBarPosition)
+                            IndicatorPosition, InfoBar, InfoBarPosition, SpinBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
+from qfluentwidgets.common.icon import FluentIconBase
 
 from ..common.icons import Icon
 from ..common.config import cfg
@@ -62,10 +65,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Password will NOT be set if line edit is empty"),
             self.gameGroup)
         # 自动接受对局
-        self.autoAcceptMatchingCard = SwitchSettingCard(
-            Icon.CIRCLEMARK, self.tr("Auto accept"),
+        self.autoAcceptMatchingCard = AutoAcceptMatchingCard(
+            self.tr("Auto accept"),
             self.tr("Accept match making automatically"),
-            cfg.enableAutoAcceptMatching, self.gameGroup)
+            cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
+            self.gameGroup)
         self.spectateCard = SpectateCard(
             self.tr("Spectate"),
             self.tr("Spectate live game of summoner in the same environment"),
@@ -124,6 +128,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
     def setEnabled(self, a0: bool) -> None:
         self.autoAcceptMatchingCard.switchButton.setEnabled(a0)
+        self.autoAcceptMatchingCard.lineEdit.setEnabled(a0)
 
         self.createPracticeLobbyCard.clear()
         self.createPracticeLobbyCard.nameLineEdit.setEnabled(a0)
@@ -570,6 +575,46 @@ class SpectateCard(SettingCard):
         else:
             info('success', self.tr("Spectate successfully"),
                  self.tr("Please wait"),)
+
+
+class AutoAcceptMatchingCard(SettingCard):
+    def __init__(self, title, content, enableConfigItem: ConfigItem = None,
+                 delayConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.CIRCLEMARK, title, content, parent)
+
+        self.enableConfigItem = enableConfigItem
+        self.delayConfigItem = delayConfigItem
+
+        self.lineEdit = SpinBox()
+        self.lineEdit.setRange(0, 11)
+        self.lineEdit.setValue(cfg.get(self.delayConfigItem))
+        self.lineEdit.setSingleStep(1)
+        self.lineEdit.setMinimumWidth(190)
+
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+        self.switchButton.setEnabled(False)
+        self.switchButton.setChecked(cfg.get(self.enableConfigItem))
+
+        self.hBoxLayout.addWidget(self.lineEdit)
+        self.hBoxLayout.addSpacing(46)
+        self.hBoxLayout.addWidget(self.switchButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.lineEdit.valueChanged.connect(self.__onLineEditValueChanged)
+        self.switchButton.checkedChanged.connect(
+            self.__onSwitchButtonCheckedChanged)
+
+        # 这玩意在 enabled 是 false 的时候边框怪怪的，强行让它不那么怪
+
+    def setValue(self, delay: int, isChecked: bool):
+        qconfig.set(self.delayConfigItem, delay)
+        qconfig.set(self.enableConfigItem, isChecked)
+
+    def __onSwitchButtonCheckedChanged(self, isChecked: bool):
+        self.setValue(self.lineEdit.value(), isChecked)
+
+    def __onLineEditValueChanged(self, value):
+        self.setValue(value, self.switchButton.isChecked())
 
 
 # 自动选择英雄卡片
