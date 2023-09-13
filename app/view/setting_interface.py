@@ -224,6 +224,8 @@ class SettingInterface(SmoothScrollArea):
         self.themeColorCard.colorChanged.connect(setThemeColor)
 
         cfg.appRestartSig.connect(self.__showRestartToolTip)
+        self.careerGamesCount.pushButton.clicked.connect(
+            self.__showUpdatedSuccessfullyToolTip)
         self.teamGamesNumberCard.pushButton.clicked.connect(
             self.__showUpdatedSuccessfullyToolTip)
         self.feedbackCard.clicked.connect(
