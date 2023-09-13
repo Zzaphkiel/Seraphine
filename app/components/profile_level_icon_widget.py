@@ -38,8 +38,9 @@ class ProgressArc(ProgressRing):
         degree = int(self.val / (self.maximum() - self.minimum()) * 270)
 
         painter.drawArc(rc, -135 * 16, -degree * 16)
-        painter.setFont(QFont('Microsoft YaHei', self.fontSize))
-        text_rect = QRectF(0, self.height() * 0.85, self.width(), self.height() * 0.15)
+        painter.setFont(QFont('Microsoft YaHei', self.fontSize, QFont.Bold))
+        text_rect = QRectF(0, self.height() * 0.85,
+                           self.width(), self.height() * 0.15)
 
         painter.drawText(text_rect, Qt.AlignCenter, f"Lv.{self.text}")
 
@@ -62,7 +63,8 @@ class RoundLevelAvatar(QWidget):
 
         self.xpSinceLastLevel = xpSinceLastLevel
         self.xpUntilNextLevel = xpUntilNextLevel
-        self.progressRing = ProgressArc(self, text=text, fontSize=int(.1*diameter))
+        self.progressRing = ProgressArc(
+            self, text=text, fontSize=int(.1*diameter))
         self.progressRing.setTextVisible(False)
         self.progressRing.setFixedSize(self.diameter, self.diameter)
 
