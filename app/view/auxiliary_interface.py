@@ -4,7 +4,7 @@ from typing import Union
 from PyQt5.QtGui import QIcon
 
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
-                            SmoothScrollArea, SettingCard, LineEdit,
+                            SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox)
 from PyQt5.QtCore import Qt
@@ -605,6 +605,14 @@ class AutoAcceptMatchingCard(SettingCard):
             self.__onSwitchButtonCheckedChanged)
 
         # 这玩意在 enabled 是 false 的时候边框怪怪的，强行让它不那么怪
+        qss = """
+            SpinBox:disabled {
+                color: rgba(255, 255, 255, 150);
+                border: 1px solid rgba(255, 255, 255, 0.0698);
+                background-color: rgba(255, 255, 255, 0.0419);
+            }
+        """
+        setCustomStyleSheet(self.lineEdit, "", qss)
 
     def setValue(self, delay: int, isChecked: bool):
         qconfig.set(self.delayConfigItem, delay)
