@@ -244,6 +244,7 @@ class SettingInterface(SmoothScrollArea):
         self.lolFolderCard.setContent(folder)
 
     def __showRestartToolTip(self):
+        # TODO 改为应用成功提示, 添加历史战绩刷新按钮
         InfoBar.success(self.tr("Updated successfully"),
                         self.tr("Configuration takes effect after restart"),
                         duration=2000,

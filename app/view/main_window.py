@@ -5,7 +5,7 @@ import time
 from collections import Counter
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QIcon, QImage
+from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
                             FluentWindow, SplashScreen, MessageBox, SmoothScrollArea, SystemTrayMenu, Action)
@@ -199,7 +199,18 @@ class MainWindow(FluentWindow):
             lambda: showAndSwitch(self.settingInterface))
         quitAction.triggered.connect(quit)
 
-        self.trayMenu = SystemTrayMenu(self)
+        class TmpSystemTrayMenu(SystemTrayMenu):
+            def adjustPosition(self):
+                m = self.layout().contentsMargins()
+                rect = QApplication.screenAt(QCursor.pos()).availableGeometry()
+                w, h = self.layout().sizeHint().width() + 5, self.layout().sizeHint().height()
+
+                x = min(self.x() - m.left(), rect.right() - w)
+                y = QCursor.pos().y() - self.height() + m.bottom()
+
+                self.move(x, y)
+
+        self.trayMenu = TmpSystemTrayMenu(self)
 
         self.trayMenu.addAction(careerAction)
         self.trayMenu.addAction(searchAction)
