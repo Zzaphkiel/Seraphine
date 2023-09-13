@@ -308,7 +308,7 @@ class LolClientConnector:
 
         return res
 
-    # 选择英雄（直接确定）
+    # 选择英雄
     def selectChampion(self, championId):
         session = self.__get("/lol-champ-select/v1/session").json()
 
@@ -325,7 +325,7 @@ class LolClientConnector:
         data = {
             "championId": championId,
             'type': 'pick',
-            'completed': True,
+            # 'completed': True,
         }
 
         res = self.__patch(

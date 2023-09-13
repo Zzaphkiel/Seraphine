@@ -146,7 +146,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.onlineAvailabilityCard.clear()
         self.onlineAvailabilityCard.comboBox.setEnabled(a0)
 
-        self.autoSelectChampionCard.lineEdit.setEnabled(a0)
+        if not cfg.get(cfg.enableAutoSelectChampion):
+            self.autoSelectChampionCard.lineEdit.setEnabled(a0)
 
         self.removeTokensCard.pushButton.setEnabled(a0)
 
@@ -585,6 +586,7 @@ class AutoSelectChampionCard(SettingCard):
             self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(190)
         self.lineEdit.setClearButtonEnabled(True)
+        self.lineEdit.setEnabled(False)
 
         self.completer = None
         self.champions = []
