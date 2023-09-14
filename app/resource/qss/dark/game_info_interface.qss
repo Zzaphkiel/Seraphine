@@ -68,11 +68,15 @@ GameTab>#time {
     font: 11px;
 }
 
+
 Games {
-    color: white;
-    border-radius: 6px;
-    border: 1px solid rgb(82, 82, 82);
-    background-color: rgba(255, 255, 255, 0.051);
+    border: none;
+    border-right: 1px solid rgb(35, 35, 35);
+    background-color: transparent;
+}
+
+Games[isLast=true] {
+    border: none;
 }
 
 Games>#summonerName {
@@ -81,7 +85,19 @@ Games>#summonerName {
 }
 
 Games:hover {
-    border-radius: 6px;
-    border: 1px solid rgb(82, 82, 82);
+    border: none;
+    border-radius: 0;
+    background-color: rgba(255, 255, 255, 0.0837);
+}
+
+Games[isFirst=true]:hover {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.0837);
+}
+
+Games[isLast=true]:hover {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
     background-color: rgba(255, 255, 255, 0.0837);
 }

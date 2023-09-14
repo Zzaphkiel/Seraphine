@@ -236,7 +236,7 @@ class GameInfoBar(QFrame):
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
 
-        self.setProperty('press', False)
+        self.setProperty('pressed', False)
         self.gameId = game['gameId']
 
         self.__initWidget(game)

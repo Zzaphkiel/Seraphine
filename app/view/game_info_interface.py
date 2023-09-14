@@ -192,17 +192,17 @@ class TeamSummoners(QFrame):
 
     def __initLayout(self):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        # self.vBoxLayout.setSpacing(0)
 
     def updateSummoners(self, summoners):
         self.clear()
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
-            self.vBoxLayout.addWidget(summonerView)
+            self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
-            self.vBoxLayout.addSpacerItem(
-                QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            self.vBoxLayout.addStretch(5 - len(summoners))
 
     def clear(self):
         for i in reversed(range(self.vBoxLayout.count())):
@@ -362,7 +362,7 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-        self.hBoxLayout.setContentsMargins(7, 0, 7, 0)
+        self.hBoxLayout.setContentsMargins(9, 0, 9, 0)
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
@@ -409,18 +409,23 @@ class SummonersGamesView(QFrame):
 
     def __initLayout(self):
         self.hBoxLayout.setSpacing(0)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     def updateSummoners(self, summoners):
         self.clear()
         self.summoners = summoners
 
-        for summoner in summoners:
+        for i, summoner in enumerate(summoners):
             games = Games(summoner)
-            self.hBoxLayout.addWidget(games, alignment=Qt.AlignHCenter)
+            self.hBoxLayout.addWidget(games, stretch=1)
+
+            if i == 0:
+                games.setProperty("isFirst", True)
+            elif i == len(summoners) - 1:
+                games.setProperty("isLast", True)
 
         if len(summoners) < 5:
-            self.hBoxLayout.addSpacerItem(QSpacerItem(
-                1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            self.hBoxLayout.addStretch(5 - len(summoners))
 
     def clear(self):
         self.summoners.clear()
@@ -440,6 +445,10 @@ class Games(QFrame):
 
         self.vBoxLayout = QVBoxLayout(self)
         self.vBoxLayout.setSpacing(5)
+        # self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.setSizePolicy(QSizePolicy.Policy.Expanding,
+                           QSizePolicy.Policy.Expanding)
 
         self.summonerName = SummonerName(summoner['name'])
         self.summonerName.setObjectName("summonerName")
@@ -447,8 +456,9 @@ class Games(QFrame):
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))
 
         # self.vBoxLayout.setContentsMargins(4, 4, 4, 4)
+        self.vBoxLayout.addSpacing(5)
         self.vBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignCenter)
-        # self.vBoxLayout.addSpacing(10)
+        self.vBoxLayout.addSpacing(10)
 
         games = summoner['gamesInfo']
 
@@ -456,17 +466,17 @@ class Games(QFrame):
             tab = GameTab(game)
             self.vBoxLayout.addWidget(tab)
 
-        if len(games) < 11:
-            self.vBoxLayout.addSpacerItem(QSpacerItem(
-                1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        # if len(games) < 11:
+        #     self.vBoxLayout.addSpacerItem(QSpacerItem(
+        #         1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
 
 class GameTab(QFrame):
 
     def __init__(self, game=None, parent=None):
         super().__init__(parent)
-        self.setFixedHeight(54)
-        self.setFixedWidth(129)
+        # self.setFixedHeight(54)
+        # self.setFixedWidth(129)
 
         self.hBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
@@ -477,7 +487,7 @@ class GameTab(QFrame):
         self.modeName = QLabel(game['name'].replace("排位赛 ", ""))
 
         self.time = QLabel(
-            f"{game['shortTime']}  {game['kills']}/{game['deaths']}/{game['assists']}"
+            f"{game['shortTime']}  {game['kills']}-{game['deaths']}-{game['assists']}"
         )
         self.resultLabel = QLabel()
 
@@ -497,7 +507,7 @@ class GameTab(QFrame):
         self.time.setObjectName("time")
 
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(4, 9, 4, 9)
+        self.hBoxLayout.setContentsMargins(7, 9, 7, 9)
 
         self.nameTimeKdaLayout.addWidget(self.modeName)
         self.nameTimeKdaLayout.addWidget(self.time)

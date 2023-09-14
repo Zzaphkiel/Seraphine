@@ -831,7 +831,7 @@ class GameTab(QFrame):
         super().__init__(parent)
         self.setFixedHeight(54)
         self.setFixedWidth(141)
-        self.setProperty("press", False)
+        self.setProperty("pressed", False)
 
         self.vBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()

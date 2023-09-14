@@ -59,18 +59,32 @@ SummonerInfoView>#kdaValLabel {
     /* border: 1px solid black; */
 }
 
+SummonerInfoView>#kdaValLabel {
+    font: bold;
+}
+
 GameTab>QLabel {
     font: 13px 'Segoe UI', 'Microsoft YaHei';
 }
 
 GameTab>#time {
-    font: 11px;
+    font: bold 11px;
 }
 
-Games {
+/* Games {
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.095);
     background-color: rgba(245, 245, 245, 0.667);
+} */
+
+Games {
+    border: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: transparent;
+}
+
+Games[isLast=true] {
+    border: none;
 }
 
 Games>#summonerName {
@@ -78,7 +92,17 @@ Games>#summonerName {
 }
 
 Games:hover {
-    border-radius: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.095);
+    background-color: rgba(233, 233, 233, 0.5);
+}
+
+Games[isFirst=true]:hover {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    background-color: rgba(233, 233, 233, 0.5);
+}
+
+Games[isLast=true]:hover {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
     background-color: rgba(233, 233, 233, 0.5);
 }
