@@ -7,8 +7,9 @@ from collections import Counter
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
-from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition,
-                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea, Action)
+from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
+                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
+                            ToolTipFilter)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -188,6 +189,9 @@ class MainWindow(FluentWindow):
 
     def __initSystemTray(self):
         self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setToolTip("Seraphine")
+        self.trayIcon.installEventFilter(ToolTipFilter(self.trayIcon))
+
         self.trayIcon.setIcon(QIcon("app/resource/images/logo.png"))
 
         careerAction = Action(Icon.PERSON, self.tr("Career"), self)
