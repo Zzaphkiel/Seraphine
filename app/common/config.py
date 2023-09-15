@@ -80,7 +80,7 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.8.0"
+VERSION = "0.8.1"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 
