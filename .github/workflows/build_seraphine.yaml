@@ -57,7 +57,7 @@ jobs:
       uses: ncipollo/release-action@v1
       if: env.UPDATED == 'true'
       with:
-        name: Seraphine ${{ env.VERSION }}
+        name: ${{ env.VERSION }}
         tag: ${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         replacesArtifacts: false
