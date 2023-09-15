@@ -154,6 +154,8 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         if not cfg.get(cfg.enableAutoSelectChampion):
             self.autoSelectChampionCard.lineEdit.setEnabled(a0)
+        if a0:
+            self.autoSelectChampionCard.validate()
 
         self.removeTokensCard.pushButton.setEnabled(a0)
 
@@ -680,12 +682,14 @@ class AutoSelectChampionCard(SettingCard):
         if text not in self.champions and self.switchButton.checked:
             self.setValue("", False)
 
-        self.__onLineEditTextChanged()
+        self.__onLineEditTextChanged(text)
 
-    def __onLineEditTextChanged(self):
-        enable = self.lineEdit.text() in self.champions
+    def __onLineEditTextChanged(self, text):
+        enable = text in self.champions
 
         self.switchButton.setEnabled(enable)
+
+        self.setValue(text, self.switchButton.isChecked())
 
     def __onCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)
