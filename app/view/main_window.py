@@ -703,6 +703,7 @@ class MainWindow(FluentWindow):
             self.checkAndSwitchTo(self.careerInterface)
 
     def __onChampSelectChanged(self, data):
+        # FIXME 可能存在调用频繁影响性能, 可以通过判断当前IconId来避免重复更新
         for t in data["myTeam"]:
             if t['championId']:
                 championIconPath = connector.getChampionIcon(t['championId'])
