@@ -63,6 +63,7 @@ class MainWindow(FluentWindow):
 
         self.isGaming = False
         self.isTrayExit = False
+        self.isChampSelected = False
 
         self.__initInterface()
         self.__initNavigation()
@@ -703,15 +704,15 @@ class MainWindow(FluentWindow):
             self.checkAndSwitchTo(self.careerInterface)
 
     def __onChampSelectChanged(self, data):
-        # FIXME 可能存在调用频繁影响性能, 可以通过判断当前IconId来避免重复更新
         for t in data["myTeam"]:
             if t['championId']:
-                championIconPath = connector.getChampionIcon(t['championId'])
 
                 # 控件可能未绘制, 判断一下避免报错
                 summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(t["summonerId"])
                 if summonersView:
-                    summonersView.updateIcon(championIconPath)
+                    if summonersView.nowIconId != t['championId']:  # 只有切换了才触发更新
+                        championIconPath = connector.getChampionIcon(t['championId'])
+                        summonersView.updateIcon(championIconPath)
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -723,12 +724,14 @@ class MainWindow(FluentWindow):
         elif status == 'ChampSelect':
             title = self.tr("Selecting Champions")
             self.__onChampionSelectBegin()
+            self.isChampSelected = True
         elif status == 'GameStart':
             title = self.tr("Gaming")
             self.__onGameStart()
             isGaming = True
         elif status == 'InProgress':
             title = self.tr("Gaming")
+            self.__onGameStart()
             isGaming = True
         elif status == 'WaitingForStatus':
             title = self.tr("Waiting for status")
@@ -764,7 +767,7 @@ class MainWindow(FluentWindow):
     # 英雄选择界面触发事件
     def __onChampionSelectBegin(self):
 
-        def updateGameInfoInterface():
+        def updateGameInfoInterface(callback=None):
             summoners = []
             data = connector.getChampSelectSession()
 
@@ -856,7 +859,14 @@ class MainWindow(FluentWindow):
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
 
-        threading.Thread(target=updateGameInfoInterface).start()
+            if callback:
+                callback()
+
+            # if cfg.get(cfg.enableCopyPlayersInfo):
+            #     msg = self.gameInfoInterface.getPlayersInfoSummary()
+            #     pyperclip.copy(msg)
+
+        threading.Thread(target=updateGameInfoInterface, args=(lambda: self.switchTo(self.gameInfoInterface),)).start()
 
         def selectChampion():
             champion = cfg.get(cfg.autoSelectChampion)
@@ -867,10 +877,8 @@ class MainWindow(FluentWindow):
         if cfg.get(cfg.enableAutoSelectChampion):
             threading.Thread(target=selectChampion).start()
 
-        self.switchTo(self.gameInfoInterface)
-
     def __onGameStart(self):
-        def _():
+        def _(callback=None, *args):
             session = connector.getGameflowSession()
             data = session['gameData']
             queueId = data['queue']['id']
@@ -887,10 +895,12 @@ class MainWindow(FluentWindow):
             for summoner in team1:
                 if summoner['puuid'] == self.currentSummoner.puuid:
                     enemies = team2
+                    allys = team1
                     break
 
             if enemies == None:
                 enemies = team1
+                allys = team2
 
             summoners = []
 
@@ -989,11 +999,29 @@ class MainWindow(FluentWindow):
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})
 
+            if not self.isChampSelected:
+                summoners = []
+                with ThreadPoolExecutor() as executor:
+                    futures = [executor.submit(process_item, item) for item in allys]
+
+                for future in as_completed(futures):
+                    result = future.result()
+                    if result is not None:
+                        summoners.append(result)
+
+                assignTeamId(summoners)
+
+                self.gameInfoInterface.allySummonersInfoReady.emit(
+                    {'summoners': summoners})
+
+            if callback:
+                callback(args)
+
             # if cfg.get(cfg.enableCopyPlayersInfo):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
             #     pyperclip.copy(msg)
 
-        threading.Thread(target=_).start()
+        threading.Thread(target=_, args=(lambda: self.switchTo(self.gameInfoInterface),)).start()
 
     def __onGameEnd(self):
         threading.Thread(

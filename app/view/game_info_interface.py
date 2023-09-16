@@ -82,6 +82,9 @@ class GameInfoInterface(SmoothScrollArea):
         self.summonersView.enemySummoners.updateSummoners(info['summoners'])
         self.enemySummonerGamesView.updateSummoners(info['summoners'])
 
+        self.summonersView.allyButton.setVisible(True)
+        self.summonersView.enemyButton.setVisible(True)
+
     def __onGameEnd(self):
         self.summonersView.allySummoners.clear()
         self.summonersView.enemySummoners.clear()
@@ -226,6 +229,7 @@ class SummonerInfoView(QFrame):
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
         self.hBoxLayout = QHBoxLayout(self)
+        self.nowIconId = ''
         self.icon = RoundLevelAvatar(info['icon'],
                                      info['xpSinceLastLevel'],
                                      info['xpUntilNextLevel'],
@@ -416,6 +420,7 @@ class SummonerInfoView(QFrame):
         QApplication.restoreOverrideCursor()
 
     def updateIcon(self, iconPath: str):
+        self.nowIconId = iconPath.split("/")[-1][:-4]
         self.icon.updateIcon(iconPath)
 
 
