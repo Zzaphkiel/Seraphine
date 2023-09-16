@@ -1,8 +1,10 @@
-from PyQt5.QtCore import pyqtSignal, Qt
+from typing import Dict
+
+from PyQt5.QtCore import pyqtSignal, Qt, QPropertyAnimation, QRect
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QSpacerItem, QSizePolicy, QStackedWidget,
-                             QGridLayout, QSplitter)
-from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette
+                             QGridLayout, QSplitter, QApplication)
+from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage
 
 from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
@@ -21,14 +23,18 @@ class GameInfoInterface(SmoothScrollArea):
     enemySummonerInfoReady = pyqtSignal(dict)
     summonerViewClicked = pyqtSignal(str)
     summonerGamesClicked = pyqtSignal(str)
+    pageSwitchSignal = pyqtSignal()
     gameEnd = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.pageState = 1
+
         self.hBoxLayout = QHBoxLayout(self)
 
         self.summonersView = SummonersView()
         self.summonersGamesView = QStackedWidget()
+        # TODO 动画 行为
 
         self.allySummonerGamesView = SummonersGamesView()
         self.enemySummonerGamesView = SummonersGamesView()
@@ -186,6 +192,7 @@ class TeamSummoners(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.items: Dict[str, SummonerInfoView] = {}
         self.vBoxLayout = QVBoxLayout(self)
 
         self.__initLayout()
@@ -199,6 +206,7 @@ class TeamSummoners(QFrame):
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
+            self.items[summoner["summonerId"]] = summonerView  # 用 summonerId 避免空字符串
             self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
@@ -395,6 +403,20 @@ class SummonerInfoView(QFrame):
             border: 1px solid rgb({r1}, {g1}, {b1});
             background-color: rgba({r1}, {g1}, {b1}, 0.2);
         }}""")
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            (self.parent().parent().parent().parent().parent().parent()
+             .parent().gameInfoInterface.pageSwitchSignal.emit())
+
+    def enterEvent(self, event):
+        QApplication.setOverrideCursor(Qt.PointingHandCursor)
+
+    def leaveEvent(self, event):
+        QApplication.restoreOverrideCursor()
+
+    def updateIcon(self, iconPath: str):
+        self.icon.updateIcon(iconPath)
 
 
 class SummonersGamesView(QFrame):
