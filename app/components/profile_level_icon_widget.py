@@ -91,13 +91,17 @@ class RoundLevelAvatar(QWidget):
         painter.setClipPath(clipPath)
         painter.drawImage(self.sep // 2, self.sep // 2, scaledImage)
 
-    def updateIcon(self, icon, xpSinceLastLevel, xpUntilNextLevel, text=""):
+    def updateIcon(self, icon: str, xpSinceLastLevel=None, xpUntilNextLevel=None, text=""):
         self.image = QImage(icon)
-        self.xpSinceLastLevel = xpSinceLastLevel
-        self.xpUntilNextLevel = xpUntilNextLevel
+        if xpSinceLastLevel is None and xpUntilNextLevel is not None:
+            self.xpSinceLastLevel = xpSinceLastLevel
+            self.xpUntilNextLevel = xpUntilNextLevel
 
-        self.setToolTip(f"Exp: {xpSinceLastLevel} / {xpUntilNextLevel}")
-        self.progressRing.text = text
+            self.setToolTip(f"Exp: {xpSinceLastLevel} / {xpUntilNextLevel}")
+
+        if text:
+            self.progressRing.text = text
+
         self.repaint()
 
 

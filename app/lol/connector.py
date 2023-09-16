@@ -163,7 +163,14 @@ class LolClientConnector:
         return icon
 
     @retry()
-    def getChampionIcon(self, championId):
+    def getChampionIcon(self, championId) -> str:
+        """
+
+        @param championId:
+        @return: path
+        @rtype: str
+        """
+
         if championId == -1:
             return "app/resource/images/champion-0.png"
 

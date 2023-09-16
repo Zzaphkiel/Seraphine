@@ -1,10 +1,11 @@
+import json
 import os
 import sys
 import traceback
 import time
 from collections import Counter
 
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QAbstractAnimation
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
@@ -126,6 +127,10 @@ class MainWindow(FluentWindow):
         self.eventListener.gameStatusChanged.connect(
             self.__onGameStatusChanged)
 
+        self.eventListener.champSelectChanged.connect(
+            self.__onChampSelectChanged
+        )
+
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
 
@@ -147,6 +152,8 @@ class MainWindow(FluentWindow):
             self.__onSearchInterfaceSummonerNameClicked)
         self.gameInfoInterface.summonerGamesClicked.connect(
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
+        self.gameInfoInterface.pageSwitchSignal.connect(
+            self.__onGameInfoPageSwitch)
         self.settingInterface.careerGamesCount.pushButton.clicked.connect(
             self.__onCareerInterfaceRefreshButtonClicked)
         self.settingInterface.micaCard.checkedChanged.connect(
@@ -493,6 +500,14 @@ class MainWindow(FluentWindow):
 
         self.checkAndSwitchTo(self.searchInterface)
 
+    def __onGameInfoPageSwitch(self):
+        if self.gameInfoInterface.pageState == 1:
+            # TODO 动画 行为
+            self.gameInfoInterface.pageState = 2
+        else:
+            # TODO 动画 行为
+            self.gameInfoInterface.pageState = 1
+
     def __onSearchInterfaceCareerButtonClicked(self):
         self.careerInterface.showLoadingPage.emit()
         name = self.searchInterface.currentSummonerName
@@ -687,6 +702,16 @@ class MainWindow(FluentWindow):
         if switch:
             self.checkAndSwitchTo(self.careerInterface)
 
+    def __onChampSelectChanged(self, data):
+        for t in data["myTeam"]:
+            if t['championId']:
+                championIconPath = connector.getChampionIcon(t['championId'])
+
+                # 控件可能未绘制, 判断一下避免报错
+                summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(t["summonerId"])
+                if summonersView:
+                    summonersView.updateIcon(championIconPath)
+
     def __onGameStatusChanged(self, status):
         title = None
         isGaming = False
@@ -870,15 +895,22 @@ class MainWindow(FluentWindow):
 
             def process_item(item):
                 # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
-                puuid = item["puuid"]
+                puuid = item.get("puuid")
+
+                # AI是没有该字段的, 避免报错
+                if not puuid:
+                    return None
 
                 if puuid == '00000000-0000-0000-0000-000000000000':
                     return None
 
                 summoner = connector.getSummonerByPuuid(puuid)
 
-                iconId = summoner["profileIconId"]
-                icon = connector.getProfileIcon(iconId)
+                # iconId = summoner["profileIconId"]
+                # icon = connector.getProfileIcon(iconId)
+
+                iconId = item["championId"]
+                icon = connector.getChampionIcon(iconId)
 
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 rankInfo = processRankInfo(origRankInfo)

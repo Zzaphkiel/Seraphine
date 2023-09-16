@@ -51,6 +51,7 @@ class LolProcessExistenceListener(QThread):
 class LolClientEventListener(QThread):
     currentSummonerProfileChanged = pyqtSignal(dict)
     gameStatusChanged = pyqtSignal(str)
+    champSelectChanged = pyqtSignal(dict)
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -63,6 +64,9 @@ class LolClientEventListener(QThread):
 
         async def onGameFlowPhaseChanged(data):
             self.gameStatusChanged.emit(data["data"])
+
+        async def onChampSelectChanged(data):
+            self.champSelectChanged.emit(data["data"])
 
         async def defaultHandler(data):
             print(data)
@@ -83,6 +87,10 @@ class LolClientEventListener(QThread):
             # 订阅游戏状态改变消息
             wllp.subscription_filter_endpoint(
                 allEventSubscription, '/lol-gameflow/v1/gameflow-phase', onGameFlowPhaseChanged)
+
+            # 订阅英雄选择消息
+            wllp.subscription_filter_endpoint(
+                allEventSubscription, '/lol-champ-select/v1/session', onChampSelectChanged)
 
             # print("[INFO] Event listener initialized.")
             while True:
