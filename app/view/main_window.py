@@ -878,7 +878,7 @@ class MainWindow(FluentWindow):
             threading.Thread(target=selectChampion).start()
 
     def __onGameStart(self):
-        def _(callback=None, *args):
+        def _(callback=None):
             session = connector.getGameflowSession()
             data = session['gameData']
             queueId = data['queue']['id']
@@ -1015,7 +1015,7 @@ class MainWindow(FluentWindow):
                     {'summoners': summoners})
 
             if callback:
-                callback(args)
+                callback()
 
             # if cfg.get(cfg.enableCopyPlayersInfo):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
