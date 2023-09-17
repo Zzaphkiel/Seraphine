@@ -222,7 +222,7 @@ class TeamSummoners(QFrame):
 
             if item.widget():
                 item.widget().deleteLater()
-        self.items = []
+        self.items = {}
 
 
 class SummonerInfoView(QFrame):
