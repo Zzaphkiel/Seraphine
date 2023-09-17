@@ -102,8 +102,6 @@ class RoundLevelAvatar(QWidget):
         if text:
             self.progressRing.text = text
 
-        self.repaint()
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
