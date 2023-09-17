@@ -968,7 +968,7 @@ class MainWindow(FluentWindow):
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in enemies] and cnt >= cfg.get(cfg.teamGamesNumber)
+                    if sId in [x.get('summonerId') for x in enemies] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
