@@ -93,7 +93,7 @@ class RoundLevelAvatar(QWidget):
 
     def updateIcon(self, icon: str, xpSinceLastLevel=None, xpUntilNextLevel=None, text=""):
         self.image = QImage(icon)
-        if xpSinceLastLevel is None and xpUntilNextLevel is not None:
+        if xpSinceLastLevel is not None and xpUntilNextLevel is not None:
             self.xpSinceLastLevel = xpSinceLastLevel
             self.xpUntilNextLevel = xpUntilNextLevel
 

@@ -352,6 +352,12 @@ class LolClientConnector:
 
         return res
 
+    @retry()
+    def getReadyCheckStatus(self):
+        res = self.__get("/lol-matchmaking/v1/ready-check").json()
+
+        return res
+
     def spectate(self, summonerName):
         info = self.getSummonerByName(summonerName)
 

@@ -708,10 +708,12 @@ class MainWindow(FluentWindow):
             if t['championId']:
 
                 # 控件可能未绘制, 判断一下避免报错
-                summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(t["summonerId"])
+                summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(
+                    t["summonerId"])
                 if summonersView:
                     if summonersView.nowIconId != t['championId']:  # 只有切换了才触发更新
-                        championIconPath = connector.getChampionIcon(t['championId'])
+                        championIconPath = connector.getChampionIcon(
+                            t['championId'])
                         summonersView.updateIcon(championIconPath)
 
     def __onGameStatusChanged(self, status):
@@ -756,11 +758,16 @@ class MainWindow(FluentWindow):
             self.setWindowTitle("Seraphine - " + title)
 
     def __onMatchMade(self):
+
         if cfg.get(cfg.enableAutoAcceptMatching):
             def _():
                 timeDelay = cfg.get(cfg.autoAcceptMatchingDelay)
                 time.sleep(timeDelay)
-                connector.acceptMatchMaking()
+
+                status = connector.getReadyCheckStatus()
+
+                if not status['playerResponse'] == 'Declined':
+                    connector.acceptMatchMaking()
 
             threading.Thread(target=_).start()
 
@@ -866,7 +873,8 @@ class MainWindow(FluentWindow):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
             #     pyperclip.copy(msg)
 
-        threading.Thread(target=updateGameInfoInterface, args=(lambda: self.switchTo(self.gameInfoInterface),)).start()
+        threading.Thread(target=updateGameInfoInterface, args=(
+            lambda: self.switchTo(self.gameInfoInterface),)).start()
 
         def selectChampion():
             champion = cfg.get(cfg.autoSelectChampion)
@@ -1002,7 +1010,8 @@ class MainWindow(FluentWindow):
             if not self.isChampSelected:
                 summoners = []
                 with ThreadPoolExecutor() as executor:
-                    futures = [executor.submit(process_item, item) for item in allys]
+                    futures = [executor.submit(process_item, item)
+                               for item in allys]
 
                 for future in as_completed(futures):
                     result = future.result()
@@ -1021,7 +1030,8 @@ class MainWindow(FluentWindow):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
             #     pyperclip.copy(msg)
 
-        threading.Thread(target=_, args=(lambda: self.switchTo(self.gameInfoInterface),)).start()
+        threading.Thread(target=_, args=(
+            lambda: self.switchTo(self.gameInfoInterface),)).start()
 
     def __onGameEnd(self):
         threading.Thread(
