@@ -209,7 +209,7 @@ class TeamSummoners(QFrame):
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
-            self.items[summoner["summonerId"]] = summonerView  # 用 summonerId 避免空字符串
+            self.items[str(summoner["summonerId"])] = summonerView  # 用 summonerId 避免空字符串
             self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
@@ -222,6 +222,7 @@ class TeamSummoners(QFrame):
 
             if item.widget():
                 item.widget().deleteLater()
+        self.items = []
 
 
 class SummonerInfoView(QFrame):
