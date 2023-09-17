@@ -44,6 +44,7 @@ def secsToStr(secs):
 
 
 def processGameData(game):
+    timeStamp = game["gameCreation"]
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
     gameId = game['gameId']
@@ -111,6 +112,7 @@ def processGameData(game):
         'runeIcon': runeIcon,
         'cs': cs,
         'gold': gold,
+        'timeStamp': timeStamp,
     }
 
 
