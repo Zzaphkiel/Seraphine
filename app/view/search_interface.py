@@ -1,4 +1,5 @@
 import threading
+import time
 
 import pyperclip
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
@@ -6,12 +7,14 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
-                            InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout, CardWidget, IndeterminateProgressRing)
+                            InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
+                            CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
+from ..components.mode_filter_widget import ModeFilterWidget
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
 from ..lol.tools import processGameData, processGameDetailData
@@ -40,6 +43,8 @@ class GamesTab(QFrame):
 
         self.puuid = None
         self.games = []
+
+        self.begIndex = 0
 
         self.triggerByButton = True
 
@@ -103,6 +108,9 @@ class GamesTab(QFrame):
             self.prevButton.setEnabled(False)
 
     def __onNextButtonClicked(self):
+        if self.currentIndex == 0:
+            self.begIndex = 0
+
         self.currentIndex += 1
 
         if len(self.stackWidget) <= self.currentIndex:
@@ -178,35 +186,52 @@ class GamesTab(QFrame):
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
 
     def updateGames(self, page):
-        def _():
-            if self.maxPage != None:
-                self.gamesInfoReady.emit(page)
-                return
+        def _(page, callback=None):
+            # retry = 0
+            tmp_games_cnt = len(self.games)
+            endIndex = self.begIndex + 9
+            while True:
+                games = connector.getSummonerGamesByPuuid(
+                    self.puuid, self.begIndex, endIndex)
 
-            count = 10 * (page + 1) - len(self.games)
-
-            begin = len(self.games)
-            end = begin + count - 1
-
-            games = connector.getSummonerGamesByPuuid(
-                self.puuid, begin, end)
-
-            self.games += [processGameData(game)
-                           for game in games["games"]]
-
-            if page == 1:
-                if len(games["games"]) <= 10:
-                    self.maxPage = 1
-            else:
-                if len(games["games"]) < 10:
-                    if len(games["games"]) == 0:
+                for game in games["games"]:
+                    if time.time() - game['gameCreation'] / 1000 > 60 * 60 * 24 * 365:
                         self.maxPage = page
-                    else:
-                        self.maxPage = page + 1
+                        break
 
+                    if self.games:
+                        # 避免重复添加
+                        if game['gameCreation'] >= self.games[-1]["timeStamp"]:
+                            continue
+
+                    if game["queueId"] in self.window().searchInterface.filterData:
+                        self.games += [processGameData(game)]
+
+                if len(self.games) - tmp_games_cnt >= 10:
+                    self.maxPage = page + 1
+                    self.games = self.games[:10 * self.maxPage]
+                    break
+
+                # if retry >= 5:
+                #     self.maxPage = page
+                #     break
+
+                self.begIndex = endIndex + 1
+                endIndex += 10
+                # retry += 1
+            if callback:
+                callback()
+
+            # self.gamesInfoReady.emit(page)
+
+        if page == 1:  # 第一页时加载自身数据, 完成后切换; 并且并发加载下一页数据
+            threading.Thread(target=_, args=(page, lambda page: self.gamesInfoReady.emit(page))).start()
+        else:  # 除第一页外, 直接切换到该页, 并加载下一页;
             self.gamesInfoReady.emit(page)
 
-        threading.Thread(target=_).start()
+        self.nextButton.setEnabled(False)
+        threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
+
 
     def __onGamesInfoReady(self, page):
         if len(self.games) == 0:
@@ -304,7 +329,6 @@ class GameDetailView(QFrame):
 
     def updateGame(self, game: dict):
         isCherry = game["queueId"] == 1700
-
         mapIcon = QPixmap(game["mapIcon"]).scaled(
             54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         if game["remake"]:
@@ -926,12 +950,17 @@ class SearchInterface(SmoothScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.filterData = (420, 440, 430, 450)  # 默认全选
+        self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+
         self.vBoxLayout = QVBoxLayout(self)
 
         self.searchLayout = QHBoxLayout()
         self.searchLineEdit = LineEdit()
         self.searchButton = PushButton(self.tr("Search 🔍"))
         self.careerButton = PushButton(self.tr("Career"))
+        self.filterButton = PushButton(self.tr("Filter"))
+        self.filterButton.clicked.connect(self.showFilterFlyout)
 
         self.gamesView = GamesView()
         self.currentSummonerName = None
@@ -956,6 +985,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLayout.addSpacing(5)
         self.searchLayout.addWidget(self.searchButton)
         self.searchLayout.addWidget(self.careerButton)
+        self.searchLayout.addWidget(self.filterButton)
 
         self.vBoxLayout.addLayout(self.searchLayout)
         self.vBoxLayout.addSpacing(5)
@@ -1014,3 +1044,33 @@ class SearchInterface(SmoothScrollArea):
         return super().setEnabled(a0)
 
     # def clear(self):
+
+    def showFilterFlyout(self):
+        filterFlyout = FlyoutView("", "")
+
+        filterBoxGroup = ModeFilterWidget()
+        filterBoxGroup.setCheckBoxState(self.filterData)
+
+        def _():
+            self.filterTimer.cancel()
+
+            # 将选中状态同步到 interface
+            self.filterData = filterBoxGroup.getFilterMode()
+            self.gamesView.gamesTab.currentIndex = 0
+
+            # 消除频繁切换筛选条件带来的抖动
+            self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+            self.filterTimer.start()
+            # self.__onSearchButtonClicked()
+        filterBoxGroup.setCallback(_)
+
+        filterFlyout.widgetLayout.addWidget(filterBoxGroup, 0, Qt.AlignCenter)
+
+        filterFlyout.widgetLayout.setContentsMargins(1, 1, 1, 1)
+        filterFlyout.widgetLayout.setAlignment(Qt.AlignCenter)
+
+        filterFlyout.viewLayout.setSpacing(0)
+        filterFlyout.viewLayout.setContentsMargins(1, 1, 1, 1)
+
+        w = Flyout.make(filterFlyout, self.filterButton, self.window(), FlyoutAnimationType.DROP_DOWN)
+        filterFlyout.closed.connect(w.close)
