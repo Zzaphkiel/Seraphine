@@ -931,6 +931,7 @@ class SearchInterface(SmoothScrollArea):
         super().__init__(parent)
 
         self.filterData = (420, 440, 430, 450)  # 默认全选
+        self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -1031,10 +1032,16 @@ class SearchInterface(SmoothScrollArea):
         filterBoxGroup.setCheckBoxState(self.filterData)
 
         def _():
+            self.filterTimer.cancel()
+
             # 将选中状态同步到 interface
             self.filterData = filterBoxGroup.getFilterMode()
             self.gamesView.gamesTab.currentIndex = 0
-            self.__onSearchButtonClicked()
+
+            # 消除频繁切换筛选条件带来的抖动
+            self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+            self.filterTimer.start()
+            # self.__onSearchButtonClicked()
         filterBoxGroup.setCallback(_)
 
         filterFlyout.widgetLayout.addWidget(filterBoxGroup, 0, Qt.AlignCenter)
