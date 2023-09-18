@@ -395,6 +395,8 @@ class TeamView(QFrame):
         self.dmgIconLabel = QLabel()
         self.kdaLabel = QLabel()
 
+        self.isToolTipInit = False
+
         self.bansFlyOut = None
 
         self.__initWidget()
@@ -402,11 +404,34 @@ class TeamView(QFrame):
 
         cfg.themeChanged.connect(self.__updateIconColor)
         self.bansButton.clicked.connect(lambda: Flyout.make(
-            self.bansFlyOut, self.bansButton, self))
+            self.bansFlyOut, self.bansButton, self, isDeleteOnClose=False))
 
     def __initWidget(self):
         self.teamResultLabel.setObjectName("teamResult")
 
+        self.towerIconLabel.setFixedWidth(24)
+        self.inhibitorIconLabel.setFixedWidth(24)
+        self.baronIconLabel.setFixedWidth(24)
+        self.dragonIconLabel.setFixedWidth(24)
+        self.riftHeraldIconLabel.setFixedWidth(24)
+
+        self.bansButton.setVisible(False)
+
+        self.kdaLabel.setFixedWidth(100)
+        self.kdaLabel.setAlignment(Qt.AlignCenter)
+        self.csIconLabel.setFixedWidth(50)
+        self.csIconLabel.setAlignment(Qt.AlignCenter)
+        self.goldIconLabel.setFixedWidth(60)
+        self.goldIconLabel.setAlignment(Qt.AlignCenter)
+        self.dmgIconLabel.setFixedWidth(70)
+        self.dmgIconLabel.setAlignment(Qt.AlignCenter)
+
+        self.csIconLabel.setVisible(False)
+        self.goldIconLabel.setVisible(False)
+
+        self.dmgIconLabel.setObjectName("dmgIconLabel")
+
+    def __initToolTip(self):
         self.towerIconLabel.setToolTip(self.tr("Tower destroyed"))
         self.towerIconLabel.setAlignment(Qt.AlignCenter)
         self.inhibitorIconLabel.setToolTip(self.tr("Inhibitor destroyed"))
@@ -446,38 +471,15 @@ class TeamView(QFrame):
         self.riftHeraldKillsLabel.installEventFilter(ToolTipFilter(
             self.riftHeraldKillsLabel, 500, ToolTipPosition.TOP))
 
-        self.towerIconLabel.setFixedWidth(24)
-        self.inhibitorIconLabel.setFixedWidth(24)
-        self.baronIconLabel.setFixedWidth(24)
-        self.dragonIconLabel.setFixedWidth(24)
-        self.riftHeraldIconLabel.setFixedWidth(24)
-
-        self.bansButton.setVisible(False)
-
-        self.kdaLabel.setFixedWidth(100)
-        self.kdaLabel.setAlignment(Qt.AlignCenter)
-        self.csIconLabel.setFixedWidth(50)
-        self.csIconLabel.setAlignment(Qt.AlignCenter)
-        self.goldIconLabel.setFixedWidth(60)
-        self.goldIconLabel.setAlignment(Qt.AlignCenter)
-        self.dmgIconLabel.setFixedWidth(70)
-        self.dmgIconLabel.setAlignment(Qt.AlignCenter)
-
         self.csIconLabel.setToolTip(self.tr("Minions killed"))
         self.goldIconLabel.setToolTip(self.tr("Gold earned"))
         self.dmgIconLabel.setToolTip(self.tr("Damage dealed to champions"))
-
         self.csIconLabel.installEventFilter(ToolTipFilter(
             self.csIconLabel, 500, ToolTipPosition.TOP))
         self.goldIconLabel.installEventFilter(ToolTipFilter(
             self.goldIconLabel, 500, ToolTipPosition.TOP))
         self.dmgIconLabel.installEventFilter(ToolTipFilter(
             self.dmgIconLabel, 500, ToolTipPosition.TOP))
-
-        self.csIconLabel.setVisible(False)
-        self.goldIconLabel.setVisible(False)
-
-        self.dmgIconLabel.setObjectName("dmgIconLabel")
 
     def __initLayout(self):
         self.teamResultLabel.setFixedHeight(43)
@@ -522,6 +524,10 @@ class TeamView(QFrame):
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def updateTeam(self, team, isCherry, result):
+        if not self.isToolTipInit:
+            self.isToolTipInit = True
+            self.__initToolTip()
+
         win = team['win']
         baronIcon = team['baronIcon']
         baronKills = team['baronKills']
