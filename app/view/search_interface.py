@@ -187,7 +187,6 @@ class GamesTab(QFrame):
 
     def updateGames(self, page):
         def _(page, callback=None):
-            # retry = 0
             tmp_games_cnt = len(self.games)
             endIndex = self.begIndex + 9
             while True:
@@ -212,26 +211,25 @@ class GamesTab(QFrame):
                     self.games = self.games[:10 * self.maxPage]
                     break
 
-                # if retry >= 5:
-                #     self.maxPage = page
-                #     break
-
                 self.begIndex = endIndex + 1
                 endIndex += 10
-                # retry += 1
             if callback:
                 callback()
 
-            # self.gamesInfoReady.emit(page)
-
         if page == 1:  # 第一页时加载自身数据, 完成后切换; 并且并发加载下一页数据
-            threading.Thread(target=_, args=(page, lambda page: self.gamesInfoReady.emit(page))).start()
+            def firstPageCallback():
+                """
+                禁用下一页按钮必须在gamesInfoReady信号之后, 所以要另外拿出来做回调
+                """
+                self.gamesInfoReady.emit(page)
+                self.nextButton.setEnabled(False)
+                threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
+
+            threading.Thread(target=_, args=(page, firstPageCallback)).start()
         else:  # 除第一页外, 直接切换到该页, 并加载下一页;
             self.gamesInfoReady.emit(page)
-
-        self.nextButton.setEnabled(False)
-        threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
-
+            self.nextButton.setEnabled(False)
+            threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
 
     def __onGamesInfoReady(self, page):
         if len(self.games) == 0:
@@ -952,6 +950,7 @@ class SearchInterface(SmoothScrollArea):
 
         self.filterData = (420, 440, 430, 450)  # 默认全选
         self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+        self.filterOld = None  # 条件改动前后若无变化, 则不触发更新逻辑
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -1043,7 +1042,11 @@ class SearchInterface(SmoothScrollArea):
 
         return super().setEnabled(a0)
 
-    # def clear(self):
+    def fillterTimerRun(self):
+        if self.filterOld != self.filterData:
+            self.__onSearchButtonClicked()
+
+        self.filterOld = None
 
     def showFilterFlyout(self):
         filterFlyout = FlyoutView("", "")
@@ -1054,14 +1057,17 @@ class SearchInterface(SmoothScrollArea):
         def _():
             self.filterTimer.cancel()
 
+            if not self.filterOld:
+                self.filterOld = self.filterData
+
             # 将选中状态同步到 interface
             self.filterData = filterBoxGroup.getFilterMode()
             self.gamesView.gamesTab.currentIndex = 0
 
             # 消除频繁切换筛选条件带来的抖动
-            self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+            self.filterTimer = threading.Timer(.7, lambda obj=self: obj.fillterTimerRun())
             self.filterTimer.start()
-            # self.__onSearchButtonClicked()
+
         filterBoxGroup.setCallback(_)
 
         filterFlyout.widgetLayout.addWidget(filterBoxGroup, 0, Qt.AlignCenter)
