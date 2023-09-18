@@ -69,6 +69,14 @@ class SettingInterface(SmoothScrollArea):
             self.
             tr("Setting the maximum number of games shows in the career interface"
                ), self.functionGroup)
+
+        # TODO 逻辑
+        self.gameInfoFilterCard = SwitchSettingCard(
+            Icon.FILTER, self.tr("Rank filter other mode"),
+            self.tr("When in ranked mode, filter out other modes on the GameInfo page"),
+            cfg.gameInfoFilter
+        )
+
         self.gameInfoShowTierCard = SwitchSettingCard(
             Icon.TROPHY, self.tr("Show tier in game information"),
             self.
@@ -192,6 +200,7 @@ class SettingInterface(SmoothScrollArea):
         # add cards to group
         self.functionGroup.addSettingCard(self.careerGamesCount)
         self.functionGroup.addSettingCard(self.teamGamesNumberCard)
+        self.functionGroup.addSettingCard(self.gameInfoFilterCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
