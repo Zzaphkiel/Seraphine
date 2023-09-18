@@ -14,10 +14,9 @@ class ModeFilterWidget(QWidget):
 
         self.selected: List[int] = []
 
-        self.hBoxLayout = QVBoxLayout(self)
-        self.hBoxLayout.setAlignment(Qt.AlignCenter)
+        self.vBoxLayout = QVBoxLayout(self)
+        self.vBoxLayout.setAlignment(Qt.AlignCenter)
 
-        # TODO 本地化
         self.rankSoloCheckBox = CheckBox(self.tr("Ranked solo"))
         self.rankFlexCheckBox = CheckBox(self.tr("Ranked Flex"))
         self.normalCheckBox = CheckBox(self.tr("Normal"))
@@ -34,15 +33,15 @@ class ModeFilterWidget(QWidget):
             checkBox.stateChanged.connect(
                 lambda state, num=num: self.updateSelected(state, num))
 
-        self.hBoxLayout.addWidget(
+        self.vBoxLayout.addWidget(
             self.rankSoloCheckBox, alignment=Qt.AlignLeft)
-        self.hBoxLayout.addWidget(
+        self.vBoxLayout.addWidget(
             self.rankFlexCheckBox, alignment=Qt.AlignLeft)
-        self.hBoxLayout.addWidget(
+        self.vBoxLayout.addWidget(
             self.normalCheckBox, alignment=Qt.AlignLeft)
-        self.hBoxLayout.addWidget(self.aramCheckBox, alignment=Qt.AlignLeft)
+        self.vBoxLayout.addWidget(self.aramCheckBox, alignment=Qt.AlignLeft)
 
-        self.setLayout(self.hBoxLayout)
+        self.setLayout(self.vBoxLayout)
 
     def updateSelected(self, state, num, callback=None):
         if state == Qt.Checked:
