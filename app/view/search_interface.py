@@ -1,4 +1,5 @@
 import threading
+import time
 
 import pyperclip
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
@@ -185,8 +186,8 @@ class GamesTab(QFrame):
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
 
     def updateGames(self, page):
-        def _():
-            retry = 0
+        def _(page, callback=None):
+            # retry = 0
             tmp_games_cnt = len(self.games)
             endIndex = self.begIndex + 9
             while True:
@@ -194,6 +195,10 @@ class GamesTab(QFrame):
                     self.puuid, self.begIndex, endIndex)
 
                 for game in games["games"]:
+                    if time.time() - game['gameCreation'] / 1000 > 60 * 60 * 24 * 365:
+                        self.maxPage = page
+                        break
+
                     if self.games:
                         # 避免重复添加
                         if game['gameCreation'] >= self.games[-1]["timeStamp"]:
@@ -207,17 +212,26 @@ class GamesTab(QFrame):
                     self.games = self.games[:10 * self.maxPage]
                     break
 
-                if retry >= 5:
-                    self.maxPage = page
-                    break
+                # if retry >= 5:
+                #     self.maxPage = page
+                #     break
 
                 self.begIndex = endIndex + 1
-                endIndex += 4
-                retry += 1
+                endIndex += 10
+                # retry += 1
+            if callback:
+                callback()
 
+            # self.gamesInfoReady.emit(page)
+
+        if page == 1:  # 第一页时加载自身数据, 完成后切换; 并且并发加载下一页数据
+            threading.Thread(target=_, args=(page, lambda page: self.gamesInfoReady.emit(page))).start()
+        else:  # 除第一页外, 直接切换到该页, 并加载下一页;
             self.gamesInfoReady.emit(page)
 
-        threading.Thread(target=_).start()
+        self.nextButton.setEnabled(False)
+        threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
+
 
     def __onGamesInfoReady(self, page):
         if len(self.games) == 0:

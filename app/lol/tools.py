@@ -30,6 +30,9 @@ def translateTier(orig: str, short=False) -> str:
 
 
 def timeStampToStr(stamp):
+    """
+    @param stamp: Millisecond timestamp
+    """
     timeArray = time.localtime(stamp / 1000)
     return time.strftime("%Y/%m/%d %H:%M", timeArray)
 
@@ -44,7 +47,7 @@ def secsToStr(secs):
 
 
 def processGameData(game):
-    timeStamp = game["gameCreation"]
+    timeStamp = game["gameCreation"]  # 毫秒级时间戳
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
     gameId = game['gameId']
