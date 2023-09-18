@@ -182,7 +182,7 @@ class GamesTab(QFrame):
             self.tabClicked.emit(str(gameId))
             self.first = False
 
-        mainWindow = self.parent().parent().parent().parent().parent()
+        mainWindow = self.window()
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
 
     def updateGames(self, page):
@@ -225,13 +225,14 @@ class GamesTab(QFrame):
             # self.gamesInfoReady.emit(page)
 
         if page == 1:  # 第一页时加载自身数据, 完成后切换; 并且并发加载下一页数据
-            threading.Thread(target=_, args=(page, lambda page: self.gamesInfoReady.emit(page))).start()
+            threading.Thread(target=_, args=(
+                page, lambda page: self.gamesInfoReady.emit(page))).start()
         else:  # 除第一页外, 直接切换到该页, 并加载下一页;
             self.gamesInfoReady.emit(page)
 
         self.nextButton.setEnabled(False)
-        threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
-
+        threading.Thread(target=_, args=(
+            page + 1, lambda: self.nextButton.setEnabled(True))).start()
 
     def __onGamesInfoReady(self, page):
         if len(self.games) == 0:
@@ -1059,7 +1060,8 @@ class SearchInterface(SmoothScrollArea):
             self.gamesView.gamesTab.currentIndex = 0
 
             # 消除频繁切换筛选条件带来的抖动
-            self.filterTimer = threading.Timer(.5, self.__onSearchButtonClicked)
+            self.filterTimer = threading.Timer(.5,
+                                               self.__onSearchButtonClicked)
             self.filterTimer.start()
             # self.__onSearchButtonClicked()
         filterBoxGroup.setCallback(_)
@@ -1072,5 +1074,6 @@ class SearchInterface(SmoothScrollArea):
         filterFlyout.viewLayout.setSpacing(0)
         filterFlyout.viewLayout.setContentsMargins(1, 1, 1, 1)
 
-        w = Flyout.make(filterFlyout, self.filterButton, self.window(), FlyoutAnimationType.DROP_DOWN)
+        w = Flyout.make(filterFlyout, self.filterButton,
+                        self.window(), FlyoutAnimationType.DROP_DOWN)
         filterFlyout.closed.connect(w.close)

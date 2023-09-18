@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QApplication
+from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout
 from qfluentwidgets import CheckBox
 from typing import List, Tuple
 
@@ -14,14 +14,14 @@ class ModeFilterWidget(QWidget):
 
         self.selected: List[int] = []
 
-        self.hBoxLayout = QHBoxLayout(self)
+        self.hBoxLayout = QVBoxLayout(self)
         self.hBoxLayout.setAlignment(Qt.AlignCenter)
 
         # TODO 本地化
-        self.rankSoloCheckBox = CheckBox(self.tr("Rank solo"))
-        self.rankFlexCheckBox = CheckBox(self.tr("Rank Flex"))
+        self.rankSoloCheckBox = CheckBox(self.tr("Ranked solo"))
+        self.rankFlexCheckBox = CheckBox(self.tr("Ranked Flex"))
         self.normalCheckBox = CheckBox(self.tr("Normal"))
-        self.aramCheckBox = CheckBox(self.tr("Aram"))
+        self.aramCheckBox = CheckBox(self.tr("A.R.A.M."))
 
         self.checkBoxDict = {
             self.rankSoloCheckBox: 420,  # 单双排
@@ -31,12 +31,16 @@ class ModeFilterWidget(QWidget):
         }
 
         for checkBox, num in self.checkBoxDict.items():
-            checkBox.stateChanged.connect(lambda state, num=num: self.updateSelected(state, num))
+            checkBox.stateChanged.connect(
+                lambda state, num=num: self.updateSelected(state, num))
 
-        self.hBoxLayout.addWidget(self.rankSoloCheckBox, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addWidget(self.rankFlexCheckBox, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addWidget(self.normalCheckBox, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addWidget(self.aramCheckBox, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addWidget(
+            self.rankSoloCheckBox, alignment=Qt.AlignLeft)
+        self.hBoxLayout.addWidget(
+            self.rankFlexCheckBox, alignment=Qt.AlignLeft)
+        self.hBoxLayout.addWidget(
+            self.normalCheckBox, alignment=Qt.AlignLeft)
+        self.hBoxLayout.addWidget(self.aramCheckBox, alignment=Qt.AlignLeft)
 
         self.setLayout(self.hBoxLayout)
 
@@ -57,7 +61,8 @@ class ModeFilterWidget(QWidget):
         @return:
         """
         for checkBox, num in self.checkBoxDict.items():
-            checkBox.stateChanged.connect(lambda state, num=num, func=func: self.updateSelected(state, num, func))
+            checkBox.stateChanged.connect(
+                lambda state, num=num, func=func: self.updateSelected(state, num, func))
 
     def getFilterMode(self) -> Tuple[int]:
         """

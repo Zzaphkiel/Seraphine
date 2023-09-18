@@ -7,5 +7,6 @@ SOURCES += app/view/main_window.py \
            app/view/game_info_interface.py \
            app/components/game_infobar_widget.py \
            app/components/loose_switch_setting_card.py \
+           app/components/mode_filter_widget.py \
 
 TRANSLATIONS += app/resource/i18n/Seraphine.zh_CN.ts
