@@ -976,6 +976,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.setPlaceholderText(
             self.tr("Please input summoner name"))
         self.careerButton.setEnabled(False)
+        self.filterButton.setEnabled(False)
 
         self.searchButton.setShortcut("Return")
 
@@ -1013,6 +1014,7 @@ class SearchInterface(SmoothScrollArea):
     def __onSummonerPuuidGetted(self, puuid):
         if puuid != "-1":
             self.careerButton.setEnabled(True)
+            self.filterButton.setEnabled(True)
             self.gamesView.gameDetailView.clear()
             self.gamesView.gamesTab.triggerByButton = True
             self.gamesView.gamesTab.updatePuuid(puuid)
@@ -1041,6 +1043,8 @@ class SearchInterface(SmoothScrollArea):
 
         self.searchLineEdit.setEnabled(a0)
         self.searchButton.setEnabled(a0)
+
+        self.filterButton.setEnabled(a0)
 
         return super().setEnabled(a0)
 
