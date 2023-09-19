@@ -223,13 +223,15 @@ class GamesTab(QFrame):
                 """
                 self.gamesInfoReady.emit(page)
                 self.nextButton.setEnabled(False)
-                threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
+                threading.Thread(target=_, args=(
+                    page + 1, lambda: self.nextButton.setEnabled(True))).start()
 
             threading.Thread(target=_, args=(page, firstPageCallback)).start()
         else:  # 除第一页外, 直接切换到该页, 并加载下一页;
             self.gamesInfoReady.emit(page)
             self.nextButton.setEnabled(False)
-            threading.Thread(target=_, args=(page + 1, lambda: self.nextButton.setEnabled(True))).start()
+            threading.Thread(target=_, args=(
+                page + 1, lambda: self.nextButton.setEnabled(True))).start()
 
     def __onGamesInfoReady(self, page):
         if len(self.games) == 0:
@@ -823,13 +825,12 @@ class GameTitleBar(QFrame):
             f"{mapName}  ·  {modeName}  ·  {duration}  ·  {creation}  ·  " + self.tr("Game ID: ") + f"{gameId}")
         self.copyGameIdButton.setVisible(True)
 
-        self.setStyleSheet(
-            f""" GameTitleBar {{
-            border-radius: 6px;
-            border: 1px solid rgb({color});
-            background-color: rgba({color}, 0.15);
-        }}"""
-        )
+        self.setStyleSheet(f""" 
+            GameTitleBar {{
+                border-radius: 6px;
+                border: 1px solid rgb({color});
+                background-color: rgba({color}, 0.15);
+            }}""")
 
     def __connectSignalToSlot(self):
         self.copyGameIdButton.clicked.connect(
@@ -1069,7 +1070,8 @@ class SearchInterface(SmoothScrollArea):
             self.gamesView.gamesTab.currentIndex = 0
 
             # 消除频繁切换筛选条件带来的抖动
-            self.filterTimer = threading.Timer(.7, lambda obj=self: obj.fillterTimerRun())
+            self.filterTimer = threading.Timer(.7,
+                                               lambda obj=self: obj.fillterTimerRun())
             self.filterTimer.start()
 
         filterBoxGroup.setCallback(_)

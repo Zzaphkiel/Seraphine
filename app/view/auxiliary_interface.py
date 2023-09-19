@@ -6,9 +6,9 @@ from PyQt5.QtGui import QIcon
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                            IndicatorPosition, InfoBar, InfoBarPosition, SpinBox)
+                            IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QCompleter
+from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout
 from qfluentwidgets.common.icon import FluentIconBase
 
 from ..common.icons import Icon
@@ -580,28 +580,58 @@ class SpectateCard(SettingCard):
                  self.tr("Please wait"),)
 
 
-class AutoAcceptMatchingCard(SettingCard):
+class AutoAcceptMatchingCard(ExpandGroupSettingCard):
     def __init__(self, title, content, enableConfigItem: ConfigItem = None,
                  delayConfigItem: ConfigItem = None, parent=None):
         super().__init__(Icon.CIRCLEMARK, title, content, parent)
 
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.secondsLabel = QLabel(self.tr("Delay seconds after match made:"))
+        self.lineEdit = SpinBox()
+
+        self.switchButtonWidget = QWidget(self.view)
+        self.switchButtonLayout = QHBoxLayout(self.switchButtonWidget)
+
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
         self.enableConfigItem = enableConfigItem
         self.delayConfigItem = delayConfigItem
 
-        self.lineEdit = SpinBox()
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(self.secondsLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
+        self.switchButtonLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.switchButtonWidget)
+
+    def __initWidget(self):
         self.lineEdit.setRange(0, 11)
         self.lineEdit.setValue(cfg.get(self.delayConfigItem))
         self.lineEdit.setSingleStep(1)
-        self.lineEdit.setMinimumWidth(190)
+        self.lineEdit.setMinimumWidth(250)
 
-        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
         self.switchButton.setEnabled(False)
         self.switchButton.setChecked(cfg.get(self.enableConfigItem))
-
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(46)
-        self.hBoxLayout.addWidget(self.switchButton)
-        self.hBoxLayout.addSpacing(16)
 
         self.lineEdit.valueChanged.connect(self.__onLineEditValueChanged)
         self.switchButton.checkedChanged.connect(
@@ -617,15 +647,27 @@ class AutoAcceptMatchingCard(SettingCard):
         """
         setCustomStyleSheet(self.lineEdit, "", qss)
 
+        value, isChecked = self.lineEdit.value(), self.switchButton.isChecked()
+        self.__setStatusLableText(value, isChecked)
+
     def setValue(self, delay: int, isChecked: bool):
         qconfig.set(self.delayConfigItem, delay)
         qconfig.set(self.enableConfigItem, isChecked)
 
     def __onSwitchButtonCheckedChanged(self, isChecked: bool):
         self.setValue(self.lineEdit.value(), isChecked)
+        self.__setStatusLableText(self.lineEdit.value(), isChecked)
 
     def __onLineEditValueChanged(self, value):
         self.setValue(value, self.switchButton.isChecked())
+        self.__setStatusLableText(value, self.switchButton.isChecked())
+
+    def __setStatusLableText(self, value, isChecked):
+        if isChecked:
+            self.statusLabel.setText(self.tr("Enabled, Delay: ") + str(value) +
+                                     self.tr(" seconds"))
+        else:
+            self.statusLabel.setText(self.tr("Disabled"))
 
 
 # 自动选择英雄卡片
