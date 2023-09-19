@@ -959,7 +959,6 @@ class SearchInterface(SmoothScrollArea):
         self.searchButton = PushButton(self.tr("Search 🔍"))
         self.careerButton = PushButton(self.tr("Career"))
         self.filterButton = PushButton(self.tr("Filter"))
-        self.filterButton.clicked.connect(self.showFilterFlyout)
 
         self.gamesView = GamesView()
         self.currentSummonerName = None
@@ -1022,6 +1021,7 @@ class SearchInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
+        self.filterButton.clicked.connect(self.__onShowFilterFlyout)
 
     def __showSummonerNotFoundMessage(self):
         InfoBar.error(
@@ -1052,7 +1052,7 @@ class SearchInterface(SmoothScrollArea):
 
         self.filterOld = None
 
-    def showFilterFlyout(self):
+    def __onShowFilterFlyout(self):
         filterFlyout = FlyoutView("", "")
 
         filterBoxGroup = ModeFilterWidget()
