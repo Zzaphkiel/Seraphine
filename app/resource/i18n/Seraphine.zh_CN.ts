@@ -31,7 +31,7 @@
     <message>
         <location filename="../../view/auxiliary_interface.py" line="667"/>
         <source>Enabled, Delay: </source>
-        <translation>已启用，延迟：</translation>
+        <translation type="obsolete">已启用，延迟：</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="667"/>
@@ -42,6 +42,11 @@
         <location filename="../../view/auxiliary_interface.py" line="670"/>
         <source>Disabled</source>
         <translation>未启用</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="667"/>
+        <source>Enabled, delay: </source>
+        <translation>已启用，延迟：</translation>
     </message>
 </context>
 <context>
@@ -57,9 +62,29 @@
         <translation type="obsolete">关</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="683"/>
+        <location filename="../../view/auxiliary_interface.py" line="722"/>
         <source>Champion name</source>
         <translation>请输入英雄名</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="684"/>
+        <source>Champion seleted automatically:</source>
+        <translation type="obsolete">将要自动选择的英雄</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="737"/>
+        <source>Enabled, champion: </source>
+        <translation>已启用，自动选择：</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="739"/>
+        <source>Disabled</source>
+        <translation>未启用</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="684"/>
+        <source>Champion will be seleted automatically:</source>
+        <translation>将要自动选择的英雄</translation>
     </message>
 </context>
 <context>
@@ -377,7 +402,7 @@
 <context>
     <name>DodgeCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="744"/>
+        <location filename="../../view/auxiliary_interface.py" line="781"/>
         <source>Dodge</source>
         <translation>秒退</translation>
     </message>
