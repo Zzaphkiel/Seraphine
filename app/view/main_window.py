@@ -797,6 +797,18 @@ class MainWindow(FluentWindow):
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
 
+                # FIXME getChampSelectSession 接口没有 queueId的信息
+                # if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
+                #     origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                #     begIdx = 15
+                #     while len(origGamesInfo["games"]) < 11:
+                #         endIdx = begIdx + 5
+                #         origGamesInfo["games"].extend([
+                #             game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                #             if game["queueId"] in (420, 440)
+                #         ])
+                #         begIdx = endIdx + 1
+
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][:11]]
 
@@ -936,6 +948,17 @@ class MainWindow(FluentWindow):
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
+
+                if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
+                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                    begIdx = 15
+                    while len(origGamesInfo["games"]) < 11:
+                        endIdx = begIdx + 5
+                        origGamesInfo["games"].extend([
+                            game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                            if game["queueId"] in (420, 440)
+                        ])
+                        begIdx = endIdx + 1
 
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][0:11]]
