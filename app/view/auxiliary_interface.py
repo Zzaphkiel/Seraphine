@@ -62,7 +62,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
-            self.tr("Password will NOT be set if line edit is empty"),
+            self.tr("Only bots can be added to the lobby"),
             self.gameGroup)
         # 自动接受对局
         self.autoAcceptMatchingCard = AutoAcceptMatchingCard(
@@ -490,30 +490,72 @@ class RemoveTokensCard(SettingCard):
             target=lambda: connector.removeTokens()).start())
 
 
-class CreatePracticeLobbyCard(SettingCard):
+class CreatePracticeLobbyCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
         super().__init__(Icon.TEXTEDIT, title, content, parent)
-        self.nameLineEdit = LineEdit()
-        self.nameLineEdit.setMinimumWidth(216)
-        self.nameLineEdit.setClearButtonEnabled(True)
-        self.nameLineEdit.setPlaceholderText(self.tr("Lobby name"))
 
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QVBoxLayout(self.inputWidget)
+
+        self.nameLayout = QHBoxLayout()
+        self.nameLabel = QLabel(self.tr("Lobby's name: (cannot be empty)"))
+        self.nameLineEdit = LineEdit()
+
+        self.passwordLayout = QHBoxLayout()
+        self.passwordLabel = QLabel(
+            self.tr("Password: (password will NOT be set if it's empty)"))
         self.passwordLineEdit = LineEdit()
-        self.passwordLineEdit.setMinimumWidth(190)
-        self.passwordLineEdit.setClearButtonEnabled(True)
-        self.passwordLineEdit.setPlaceholderText(self.tr("Lobby password"))
+
+        self.pushButtonWidget = QWidget(self.view)
+        self.pushButtonLayout = QHBoxLayout(self.pushButtonWidget)
 
         self.pushButton = PushButton(self.tr("Create"))
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.nameLayout.setContentsMargins(0, 0, 0, 0)
+        self.nameLayout.addWidget(self.nameLabel, alignment=Qt.AlignLeft)
+        self.nameLayout.addWidget(self.nameLineEdit, alignment=Qt.AlignRight)
+
+        self.passwordLayout.setContentsMargins(0, 0, 0, 0)
+        self.passwordLayout.addWidget(
+            self.passwordLabel, alignment=Qt.AlignLeft)
+        self.passwordLayout.addWidget(
+            self.passwordLineEdit, alignment=Qt.AlignRight)
+
+        self.inputLayout.addLayout(self.nameLayout)
+        self.inputLayout.addLayout(self.passwordLayout)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.pushButtonLayout.setContentsMargins(48, 18, 44, 18)
+        self.pushButtonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.pushButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.pushButtonWidget)
+
+    def __initWidget(self):
+        self.nameLineEdit.setMinimumWidth(250)
+        self.nameLineEdit.setClearButtonEnabled(True)
+        self.nameLineEdit.setPlaceholderText(
+            self.tr("Please input lobby's name"))
+
+        self.passwordLineEdit.setMinimumWidth(250)
+        self.passwordLineEdit.setClearButtonEnabled(True)
+        self.passwordLineEdit.setPlaceholderText(
+            self.tr("Please input password"))
+
         self.pushButton.setMinimumWidth(100)
         self.pushButton.setEnabled(False)
-
-        self.hBoxLayout.addWidget(self.nameLineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.passwordLineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
 
         self.nameLineEdit.textChanged.connect(self.__onNameLineEditTextChanged)
         self.pushButton.clicked.connect(self.__onPushButtonClicked)

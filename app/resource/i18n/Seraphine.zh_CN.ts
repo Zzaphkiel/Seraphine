@@ -4,7 +4,7 @@
 <context>
     <name>AutoAcceptMatchingCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="593"/>
+        <location filename="../../view/auxiliary_interface.py" line="635"/>
         <source>Delay seconds after match made:</source>
         <translation>在对局找到后接受对局前延迟的秒数：</translation>
     </message>
@@ -34,17 +34,17 @@
         <translation type="obsolete">已启用，延迟：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="667"/>
+        <location filename="../../view/auxiliary_interface.py" line="709"/>
         <source> seconds</source>
         <translation> 秒</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="670"/>
+        <location filename="../../view/auxiliary_interface.py" line="712"/>
         <source>Disabled</source>
         <translation>未启用</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="667"/>
+        <location filename="../../view/auxiliary_interface.py" line="709"/>
         <source>Enabled, delay: </source>
         <translation>已启用，延迟：</translation>
     </message>
@@ -62,7 +62,7 @@
         <translation type="obsolete">关</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="722"/>
+        <location filename="../../view/auxiliary_interface.py" line="764"/>
         <source>Champion name</source>
         <translation>请输入英雄名</translation>
     </message>
@@ -72,19 +72,19 @@
         <translation type="obsolete">将要自动选择的英雄</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="737"/>
+        <location filename="../../view/auxiliary_interface.py" line="779"/>
         <source>Enabled, champion: </source>
         <translation>已启用，自动选择：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="739"/>
+        <location filename="../../view/auxiliary_interface.py" line="781"/>
         <source>Disabled</source>
         <translation>未启用</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="684"/>
+        <location filename="../../view/auxiliary_interface.py" line="726"/>
         <source>Champion will be seleted automatically:</source>
-        <translation>将要自动选择的英雄</translation>
+        <translation>将要自动选择的英雄：</translation>
     </message>
 </context>
 <context>
@@ -162,7 +162,7 @@
     <message>
         <location filename="../../view/auxiliary_interface.py" line="63"/>
         <source>Password will NOT be set if line edit is empty</source>
-        <translation>编辑框留空则将不设置房间密码</translation>
+        <translation type="obsolete">编辑框留空则将不设置房间密码</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="68"/>
@@ -218,6 +218,11 @@
         <location filename="../../view/auxiliary_interface.py" line="68"/>
         <source>Accept match making automatically after the number of seconds you set</source>
         <translation>在你设置的秒数之后自动接收对局匹配</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="63"/>
+        <source>Only bots can be added to the lobby</source>
+        <translation>只能添加人机玩家</translation>
     </message>
 </context>
 <context>
@@ -386,23 +391,48 @@
     <message>
         <location filename="../../view/auxiliary_interface.py" line="500"/>
         <source>Lobby name</source>
-        <translation>房间名</translation>
+        <translation type="obsolete">房间名</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="507"/>
+        <location filename="../../view/auxiliary_interface.py" line="513"/>
         <source>Create</source>
         <translation>创建</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="505"/>
         <source>Lobby password</source>
-        <translation>房间密码</translation>
+        <translation type="obsolete">房间密码</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="502"/>
+        <source>Lobby&apos;s name: (cannot be empty)</source>
+        <translation>房间名：（不可为空）</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="506"/>
+        <source>Password: (can be empty)</source>
+        <translation type="obsolete">房间密码：（可为空）</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="549"/>
+        <source>Please input lobby&apos;s name</source>
+        <translation>请输入房间名</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="554"/>
+        <source>Please input password</source>
+        <translation>请输入房间密码</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="506"/>
+        <source>Password: (password will NOT be set if it&apos;s empty)</source>
+        <translation>房间密码：（若留空则不设密码）</translation>
     </message>
 </context>
 <context>
     <name>DodgeCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="781"/>
+        <location filename="../../view/auxiliary_interface.py" line="823"/>
         <source>Dodge</source>
         <translation>秒退</translation>
     </message>
@@ -1177,37 +1207,37 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SpectateCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="542"/>
+        <location filename="../../view/auxiliary_interface.py" line="584"/>
         <source>Summoner&apos;s name</source>
         <translation>召唤师名</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="547"/>
+        <location filename="../../view/auxiliary_interface.py" line="589"/>
         <source>Spectate</source>
         <translation>观战</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="574"/>
+        <location filename="../../view/auxiliary_interface.py" line="616"/>
         <source>Summoner not found</source>
         <translation>召唤师未找到</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="574"/>
+        <location filename="../../view/auxiliary_interface.py" line="616"/>
         <source>Please check the summoner&apos;s name and retry</source>
         <translation>请检查召唤师名后重试</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="577"/>
+        <location filename="../../view/auxiliary_interface.py" line="619"/>
         <source>Summoner isn&apos;t in game</source>
         <translation>召唤师不在游戏中</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="579"/>
+        <location filename="../../view/auxiliary_interface.py" line="621"/>
         <source>Spectate successfully</source>
         <translation>观战拉起成功</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="579"/>
+        <location filename="../../view/auxiliary_interface.py" line="621"/>
         <source>Please wait</source>
         <translation>请等待游戏观战启动</translation>
     </message>
