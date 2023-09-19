@@ -778,6 +778,9 @@ class MainWindow(FluentWindow):
             summoners = []
             data = connector.getChampSelectSession()
 
+            # TODO queueId查询逻辑
+            isRank = bool(data["myTeam"][0]["assignedPosition"])  # 排位会有预选位
+
             def process_item(item):
                 summonerId = item["summonerId"]
 
