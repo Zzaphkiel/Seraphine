@@ -167,15 +167,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         return super().setEnabled(a0)
 
     def __connectSignalToSlot(self):
-        self.onlineStatusCard.pushButton.clicked.connect(
-            self.__onSetStatusButtonClicked)
         self.profileBackgroundCard.pushButton.clicked.connect(
             self.__onSetProfileBackgroundButtonClicked)
-
-    def __onSetStatusButtonClicked(self):
-        msg = self.onlineStatusCard.lineEdit.text()
-        threading.Thread(
-            target=lambda: connector.setOnlineStatus(msg)).start()
 
     def __onSetProfileBackgroundButtonClicked(self):
         champion = self.profileBackgroundCard.championEdit.text()
@@ -189,20 +182,54 @@ class AuxiliaryInterface(SmoothScrollArea):
         threading.Thread(target=_).start()
 
 
-class OnlineStatusCard(SettingCard):
-
+class OnlineStatusCard(ExpandGroupSettingCard):
     def __init__(self, title, content, parent=None):
-
         super().__init__(Icon.COMMENT, title, content, parent)
-        self.lineEdit = LineEdit(self)
-        self.lineEdit.setMinimumWidth(422)
-        self.lineEdit.setPlaceholderText(self.tr("Please input your status"))
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+        self.statusLabel = QLabel(
+            self.tr("Online status you want to change to:"))
+        self.lineEdit = LineEdit()
+
+        self.buttonWidget = QWidget()
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.pushButton = PushButton(self.tr("Apply"), self)
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.statusLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setPlaceholderText(self.tr("Please input your status"))
+
         self.pushButton.setMinimumWidth(100)
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
+        self.pushButton.clicked.connect(self.__onPushButtonClicked)
+
+    def __onPushButtonClicked(self):
+        msg = self.lineEdit.text()
+
+        threading.Thread(
+            target=lambda: connector.setOnlineStatus(msg)).start()
 
     def clear(self):
         self.lineEdit.clear()
