@@ -8,7 +8,7 @@ from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
 from qfluentwidgets.common.icon import FluentIconBase
 
 from ..common.icons import Icon
@@ -167,15 +167,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         return super().setEnabled(a0)
 
     def __connectSignalToSlot(self):
-        self.onlineStatusCard.pushButton.clicked.connect(
-            self.__onSetStatusButtonClicked)
         self.profileBackgroundCard.pushButton.clicked.connect(
             self.__onSetProfileBackgroundButtonClicked)
-
-    def __onSetStatusButtonClicked(self):
-        msg = self.onlineStatusCard.lineEdit.text()
-        threading.Thread(
-            target=lambda: connector.setOnlineStatus(msg)).start()
 
     def __onSetProfileBackgroundButtonClicked(self):
         champion = self.profileBackgroundCard.championEdit.text()
@@ -189,51 +182,120 @@ class AuxiliaryInterface(SmoothScrollArea):
         threading.Thread(target=_).start()
 
 
-class OnlineStatusCard(SettingCard):
-
+class OnlineStatusCard(ExpandGroupSettingCard):
     def __init__(self, title, content, parent=None):
-
         super().__init__(Icon.COMMENT, title, content, parent)
-        self.lineEdit = LineEdit(self)
-        self.lineEdit.setMinimumWidth(422)
-        self.lineEdit.setPlaceholderText(self.tr("Please input your status"))
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+        self.statusLabel = QLabel(
+            self.tr("Online status you want to change to:"))
+        self.lineEdit = LineEdit()
+
+        self.buttonWidget = QWidget()
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.pushButton = PushButton(self.tr("Apply"), self)
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.statusLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setPlaceholderText(self.tr("Please input your status"))
+
         self.pushButton.setMinimumWidth(100)
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
+        self.pushButton.clicked.connect(self.__onPushButtonClicked)
+
+    def __onPushButtonClicked(self):
+        msg = self.lineEdit.text()
+
+        threading.Thread(
+            target=lambda: connector.setOnlineStatus(msg)).start()
 
     def clear(self):
         self.lineEdit.clear()
 
 
-class ProfileBackgroundCard(SettingCard):
+class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
         super().__init__(Icon.VIDEO_PERSON, title, content, parent)
-        self.championEdit = LineEdit(self)
-        self.championEdit.setPlaceholderText(
-            self.tr("Place input champion name"))
-        self.championEdit.setMinimumWidth(140)
-        self.championEdit.setClearButtonEnabled(True)
 
-        self.pushButton = PushButton(self.tr("Apply"), self)
-        self.pushButton.setMinimumWidth(100)
-        self.pushButton.setEnabled(False)
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.championLabel = QLabel(self.tr("Champion's name:"))
+        self.championEdit = LineEdit(self)
+
+        self.skinLabel = QLabel(self.tr("Skin's name:"))
         self.skinComboBox = ComboBox()
-        self.skinComboBox.setEnabled(False)
-        self.skinComboBox.setMinimumWidth(250)
-        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.pushButton = PushButton(self.tr("Apply"))
 
         self.completer = None
 
-        self.hBoxLayout.addWidget(self.championEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.skinComboBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setVerticalSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.championLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.championEdit, 0, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.addWidget(
+            self.skinLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.skinComboBox, 1, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
+        self.championEdit.setPlaceholderText(
+            self.tr("Place input champion name"))
+        self.championEdit.setMinimumWidth(250)
+        self.championEdit.setClearButtonEnabled(True)
+
+        self.pushButton.setMinimumWidth(100)
+        self.pushButton.setEnabled(False)
+
+        self.skinComboBox.setEnabled(False)
+        self.skinComboBox.setMinimumWidth(250)
+        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
 
         self.championEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.skinComboBox.currentTextChanged.connect(
@@ -576,24 +638,51 @@ class CreatePracticeLobbyCard(ExpandGroupSettingCard):
                          create5v5PracticeLobby(name, password)).start()
 
 
-class SpectateCard(SettingCard):
+class SpectateCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, parent=None):
         super().__init__(Icon.EYES, title, content, parent)
 
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.summonerNameLabel = QLabel(
+            self.tr("Summoners's name you want to spectate:"))
         self.lineEdit = LineEdit()
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.button = PushButton(self.tr("Spectate"))
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.summonerNameLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.button, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
         self.lineEdit.setPlaceholderText(
-            self.tr("Summoner's name"))
-        self.lineEdit.setMinimumWidth(190)
+            self.tr("Please input summoner's name"))
+        self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
 
-        self.button = PushButton(self.tr("Spectate"))
         self.button.setMinimumWidth(100)
         self.button.setEnabled(False)
-
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.button)
-        self.hBoxLayout.addSpacing(16)
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.button.clicked.connect(self.__onButtonClicked)
