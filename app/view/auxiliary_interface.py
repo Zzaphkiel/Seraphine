@@ -8,7 +8,7 @@ from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
 from qfluentwidgets.common.icon import FluentIconBase
 
 from ..common.icons import Icon
@@ -235,32 +235,67 @@ class OnlineStatusCard(ExpandGroupSettingCard):
         self.lineEdit.clear()
 
 
-class ProfileBackgroundCard(SettingCard):
+class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
         super().__init__(Icon.VIDEO_PERSON, title, content, parent)
-        self.championEdit = LineEdit(self)
-        self.championEdit.setPlaceholderText(
-            self.tr("Place input champion name"))
-        self.championEdit.setMinimumWidth(140)
-        self.championEdit.setClearButtonEnabled(True)
 
-        self.pushButton = PushButton(self.tr("Apply"), self)
-        self.pushButton.setMinimumWidth(100)
-        self.pushButton.setEnabled(False)
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.championLabel = QLabel(self.tr("Champion's name:"))
+        self.championEdit = LineEdit(self)
+
+        self.skinLabel = QLabel(self.tr("Skin's name:"))
         self.skinComboBox = ComboBox()
-        self.skinComboBox.setEnabled(False)
-        self.skinComboBox.setMinimumWidth(250)
-        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.pushButton = PushButton(self.tr("Apply"))
 
         self.completer = None
 
-        self.hBoxLayout.addWidget(self.championEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.skinComboBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setVerticalSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.championLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.championEdit, 0, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.addWidget(
+            self.skinLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.skinComboBox, 1, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
+        self.championEdit.setPlaceholderText(
+            self.tr("Place input champion name"))
+        self.championEdit.setMinimumWidth(250)
+        self.championEdit.setClearButtonEnabled(True)
+
+        self.pushButton.setMinimumWidth(100)
+        self.pushButton.setEnabled(False)
+
+        self.skinComboBox.setEnabled(False)
+        self.skinComboBox.setMinimumWidth(250)
+        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
 
         self.championEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.skinComboBox.currentTextChanged.connect(
@@ -614,7 +649,7 @@ class SpectateCard(ExpandGroupSettingCard):
             self.tr("Summoners's name you want to spectate:"))
         self.lineEdit = LineEdit()
 
-        self.buttonWidget = QWidget()
+        self.buttonWidget = QWidget(self.view)
         self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.button = PushButton(self.tr("Spectate"))
 
