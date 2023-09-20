@@ -8,7 +8,8 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
                             InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
-                            CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox)
+                            CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
+                            StateToolTip)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -29,6 +30,8 @@ class GamesTab(QFrame):
         super().__init__(parnet)
         self.setFixedWidth(160)
         self.vBoxLayout = QVBoxLayout(self)
+
+        self.stateTooltip = None
 
         self.stackWidget = QStackedWidget()
         self.buttonsLayout = QHBoxLayout()
@@ -124,25 +127,39 @@ class GamesTab(QFrame):
 
         return page < maxPage
 
-    # TODO 信号部分未声明参数
-    def __onNextButtonClicked(self, page=1, queueId=None):
+    # FIXME 信号部分未声明参数
+    def __onNextButtonClicked(self, page: int = 1, queueId=None):
+        """
+
+        @param page: 目标页
+        """
+
+        assert page > 0
 
         def waitLoadPage():
             while not self.questionPage(page, queueId):
                 time.sleep(.5)
+            if self.stateTooltip:
+                self.stateTooltip.setContent(
+                    self.tr('Data loading completed!') + ' 😆')
+                self.stateTooltip.setState(True)
+                self.stateTooltip = None
             self.nextButton.setEnabled(True)
             self.__onNextButtonClicked(page, queueId)
 
         games = self.window().searchInterface.games
         loadThread = self.window().searchInterface.loadGamesThread  # 用于判断还有无获取新数据
 
-        # TODO 页码判断部分封装为方法, 便于复用
         if queueId is None:
             maxPage = int(len(games) / 10)
             if page >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
-                    # TODO 等待加载提示
+                    if not self.stateTooltip:
+                        self.stateTooltip = StateToolTip(
+                            self.tr('Data is loading'), self.tr('Please wait patiently'), self.window())
+                        self.stateTooltip.move(self.stateTooltip.getSuitablePos())
+                        self.stateTooltip.show()
                     threading.Thread(target=waitLoadPage).start()
                     return
                 else:  # 已到最后一页
@@ -156,7 +173,11 @@ class GamesTab(QFrame):
             if page >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
-                    # TODO 等待加载提示
+                    if not self.stateTooltip:
+                        self.stateTooltip = StateToolTip(
+                            self.tr('Data is loading'), self.tr('Please wait patiently'), self.window())
+                        self.stateTooltip.move(self.stateTooltip.getSuitablePos())
+                        self.stateTooltip.show()
                     threading.Thread(target=waitLoadPage).start()
                     return
                 else:
@@ -170,12 +191,12 @@ class GamesTab(QFrame):
                 data.append(games[idx])
 
         self.updateNextPageTabs(data)
-        self.stackWidget.setCurrentIndex(self.currentIndex)
-        self.pageLabel.setText(f"{self.currentIndex}")
+        # self.stackWidget.setCurrentIndex(self.currentIndex)
+        # self.pageLabel.setText(f"{self.currentIndex}")
         # if self.currentIndex == self.maxPage:
         #     self.nextButton.setEnabled(False)
         self.prevButton.setEnabled(True)
-        self.currentIndex += 1
+        self.currentIndex = page
 
         # if len(self.stackWidget) <= self.currentIndex:
         #     self.nextButton.setEnabled(False)
@@ -252,11 +273,11 @@ class GamesTab(QFrame):
         self.stackWidget.setCurrentIndex(self.currentIndex)
         self.pageLabel.setText(f"{self.currentIndex}")
 
-        if self.currentIndex != self.maxPage:
-            self.nextButton.setEnabled(True)
-
-        if self.currentIndex != 1:
-            self.prevButton.setEnabled(True)
+        # if self.currentIndex != self.maxPage:
+        #     self.nextButton.setEnabled(True)
+        #
+        # if self.currentIndex != 1:
+        #     self.prevButton.setEnabled(True)
 
         if self.first and self.triggerByButton:
             gameId = layout.itemAt(0).widget().gameId
@@ -463,7 +484,8 @@ class GameDetailView(QFrame):
                 result = self.tr("4th")
 
         self.titleBar.updateTitleBar(
-            mapIcon, result, game["mapName"], game["modeName"], game["gameDuration"], game["gameCreation"], game["gameId"], color
+            mapIcon, result, game["mapName"], game["modeName"], game["gameDuration"], game["gameCreation"],
+            game["gameId"], color
         )
 
         team1 = game["teams"][100]
@@ -1139,7 +1161,7 @@ class SearchInterface(SmoothScrollArea):
                 self.loadGamesThread.start()
 
                 while len(self.games) < 10 and self.loadGamesThread.is_alive():
-                    ...
+                    time.sleep(.1)
 
                 self.careerButton.setEnabled(True)
                 # self.filterButton.setEnabled(True)
@@ -1154,7 +1176,6 @@ class SearchInterface(SmoothScrollArea):
             # self.summonerPuuidGetted.emit(puuid)
 
         threading.Thread(target=_).start()
-
 
     def loadGames(self, puuid):
         """
