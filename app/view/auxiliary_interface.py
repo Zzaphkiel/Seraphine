@@ -576,24 +576,51 @@ class CreatePracticeLobbyCard(ExpandGroupSettingCard):
                          create5v5PracticeLobby(name, password)).start()
 
 
-class SpectateCard(SettingCard):
+class SpectateCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, parent=None):
         super().__init__(Icon.EYES, title, content, parent)
 
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.summonerNameLabel = QLabel(
+            self.tr("Summoners's name you want to spectate:"))
         self.lineEdit = LineEdit()
+
+        self.buttonWidget = QWidget()
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.button = PushButton(self.tr("Spectate"))
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.summonerNameLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.button, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
         self.lineEdit.setPlaceholderText(
-            self.tr("Summoner's name"))
-        self.lineEdit.setMinimumWidth(190)
+            self.tr("Please input summoner's name"))
+        self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
 
-        self.button = PushButton(self.tr("Spectate"))
         self.button.setMinimumWidth(100)
         self.button.setEnabled(False)
-
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.button)
-        self.hBoxLayout.addSpacing(16)
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.button.clicked.connect(self.__onButtonClicked)
