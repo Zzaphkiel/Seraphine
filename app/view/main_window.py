@@ -1075,10 +1075,8 @@ class MainWindow(FluentWindow):
     def __onCareerInterfaceGameInfoBarClicked(self, gameId):
         name = self.careerInterface.name.text()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.gamesView.gamesTab.triggerByButton = False
-        self.searchInterface.gamesView.gamesTab.updatePuuid(
-            self.careerInterface.puuid)
-        self.searchInterface.gamesView.gamesTab.tabClicked.emit(gameId)
+        self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
+        self.searchInterface.searchButton.click()
 
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(
