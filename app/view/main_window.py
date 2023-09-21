@@ -778,6 +778,8 @@ class MainWindow(FluentWindow):
             summoners = []
             data = connector.getChampSelectSession()
 
+            isRank = bool(data["myTeam"][0]["assignedPosition"])  # 排位会有预选位
+
             def process_item(item):
                 summonerId = item["summonerId"]
 
@@ -796,6 +798,17 @@ class MainWindow(FluentWindow):
 
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
+
+                if cfg.get(cfg.gameInfoFilter) and isRank:
+                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                    begIdx = 15
+                    while len(origGamesInfo["games"]) < 11:
+                        endIdx = begIdx + 5
+                        origGamesInfo["games"].extend([
+                            game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                            if game["queueId"] in (420, 440)
+                        ])
+                        begIdx = endIdx + 1
 
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][:11]]
@@ -937,6 +950,17 @@ class MainWindow(FluentWindow):
                 origGamesInfo = connector.getSummonerGamesByPuuid(
                     puuid, 0, 14)
 
+                if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
+                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                    begIdx = 15
+                    while len(origGamesInfo["games"]) < 11:
+                        endIdx = begIdx + 5
+                        origGamesInfo["games"].extend([
+                            game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                            if game["queueId"] in (420, 440)
+                        ])
+                        begIdx = endIdx + 1
+
                 gamesInfo = [processGameData(game)
                              for game in origGamesInfo["games"][0:11]]
 
@@ -1051,10 +1075,8 @@ class MainWindow(FluentWindow):
     def __onCareerInterfaceGameInfoBarClicked(self, gameId):
         name = self.careerInterface.name.text()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.gamesView.gamesTab.triggerByButton = False
-        self.searchInterface.gamesView.gamesTab.updatePuuid(
-            self.careerInterface.puuid)
-        self.searchInterface.gamesView.gamesTab.tabClicked.emit(gameId)
+        self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
+        self.searchInterface.searchButton.click()
 
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(
