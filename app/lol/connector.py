@@ -1,5 +1,7 @@
 import os
 import json
+import threading
+
 import requests
 import time
 
@@ -37,6 +39,7 @@ class LolClientConnector:
         self.token = None
         self.url = None
 
+        self.flag = threading.Event()
         self.manager = None
 
     def start(self, pid):
@@ -204,7 +207,10 @@ class LolClientConnector:
         return res
 
     @retry()
-    def getSummonerGamesByPuuid(self, puuid, begIndex=0, endIndex=4):
+    def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
+        while self.flag.is_set():
+            time.sleep(.2)
+
         params = {"begIndex": begIndex, "endIndex": endIndex}
         res = self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
@@ -213,6 +219,20 @@ class LolClientConnector:
         if "games" not in res:
             raise SummonerGamesNotFound()
 
+        return res["games"]
+
+    @retry()
+    def getSummonerGamesByPuuid(self, puuid, begIndex=0, endIndex=4):
+        self.flag.set()
+        params = {"begIndex": begIndex, "endIndex": endIndex}
+        res = self.__get(
+            f"/lol-match-history/v1/products/lol/{puuid}/matches", params
+        ).json()
+
+        if "games" not in res:
+            raise SummonerGamesNotFound()
+
+        self.flag.clear()
         return res["games"]
 
     @retry()
