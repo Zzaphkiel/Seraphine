@@ -73,7 +73,8 @@ class SettingInterface(SmoothScrollArea):
         # TODO 逻辑
         self.gameInfoFilterCard = SwitchSettingCard(
             Icon.FILTER, self.tr("Rank filter other mode"),
-            self.tr("When in ranked mode, filter out other modes on the GameInfo page"),
+            self.tr(
+                "Filter out other modes on the Game Information interface when ranking"),
             cfg.gameInfoFilter
         )
 
