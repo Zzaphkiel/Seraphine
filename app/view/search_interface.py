@@ -1077,9 +1077,9 @@ class SearchInterface(SmoothScrollArea):
         self.queueIdBuffer = {}
         gameIdx = 0
         begIdx = 0
-        endIdx = begIdx + 99
+        endIdx = begIdx + 9
         while True:
-            games = connector.getSummonerGamesByPuuid(
+            games = connector.getSummonerGamesByPuuidSlowly(
                 puuid, begIdx, endIdx)
 
             if not games["games"]:  # 所有对局都在一年内, 查完了
@@ -1103,7 +1103,7 @@ class SearchInterface(SmoothScrollArea):
                 gameIdx += 1
 
             begIdx = endIdx + 1
-            endIdx += 99
+            endIdx += 9
 
     def __onSummonerPuuidGetted(self, puuid):
         if puuid != "-1":
