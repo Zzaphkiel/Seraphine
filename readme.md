@@ -116,6 +116,11 @@ pip install pyinstaller
   - https://raw.communitydragon.org/latest/
   - https://github.com/CommunityDragon/Docs/blob/master/assets.md
 
+- Fluent Icons 资源获取请见
+  - https://fluenticons.co/outlined
+  - https://github.com/microsoft/fluentui-system-icons/blob/main/icons_regular.md
+
+
 
 ## 点个 Star 支持我们 ⭐
 <p align='center'>
