@@ -206,7 +206,7 @@ class LolClientConnector:
 
         return res
 
-    @retry()
+    @retry(10, 1)
     def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
         while self.flag.is_set():
             time.sleep(.2)
