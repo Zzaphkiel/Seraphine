@@ -50,10 +50,10 @@ python main.py
 ```
 
 ## 功能一览 （持续更新中）🥰
-- 战绩查询功能
+- 战绩查询功能（不支持云顶之弈）
   - 同大区召唤师战绩查询 ✅
   - 进入 BP 后自动查队友战绩 ✅
-  - 进入游戏后自动查对手战绩 ✅（不支持斗魂竞技场）
+  - 进入游戏后自动查对手战绩 ✅
 
 - 其他辅助功能
   - 游戏功能 
@@ -79,7 +79,7 @@ python main.py
 ## 帮助我们改进 Seraphine 😘
 个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**（如 Python 版本等），最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
 
-如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！PR 也大欢迎！
+如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
 
 发布新 issue 前先请看看之前是否讨论过相关或类似的问题哦~ _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
 
@@ -117,7 +117,7 @@ pip install pyinstaller
   - https://github.com/CommunityDragon/Docs/blob/master/assets.md
 
 
-## 点个 Star 支持作者 ⭐
+## 点个 Star 支持我们 ⭐
 <p align='center'>
   <a href="https://github.com/Zzaphkiel/Seraphine/stargazers">
     <img src="https://api.star-history.com/svg?repos=Zzaphkiel/Seraphine&type=Date">
@@ -135,4 +135,4 @@ pip install pyinstaller
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
 
 ## 许可证 ⚖️
-Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，代码不经允许**不可商用**。宣传或转载时请带上[本页链接](https://github.com/Zzaphkiel/Seraphine)。
+Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，**源代码**以及二**进制文件不可商用**。宣传或转载时请带上[本页链接](https://github.com/Zzaphkiel/Seraphine)。
