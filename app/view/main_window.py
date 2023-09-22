@@ -491,13 +491,13 @@ class MainWindow(FluentWindow):
         summonerName = self.careerInterface.name.text()
 
         self.searchInterface.searchLineEdit.setText(summonerName)
-        self.searchInterface.searchButton.clicked.emit()
+        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
 
         self.checkAndSwitchTo(self.searchInterface)
 
     def __onGameInfoInterfaceGamesSummonerNameClicked(self, name):
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.searchButton.clicked.emit()
+        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
 
         self.checkAndSwitchTo(self.searchInterface)
 
@@ -1076,7 +1076,7 @@ class MainWindow(FluentWindow):
         name = self.careerInterface.name.text()
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
-        self.searchInterface.searchButton.click()
+        self.searchInterface.searchLineEdit.searchButton.click()
 
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(
