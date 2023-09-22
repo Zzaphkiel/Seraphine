@@ -147,6 +147,7 @@ class GamesTab(QFrame):
 
     def __onNextButtonClicked(self):
         self.currentIndex += 1
+
         def waitLoadPage():
             while not self.questionPage() and self.window().searchInterface.loadGamesThread.is_alive():
                 time.sleep(.2)
@@ -170,7 +171,8 @@ class GamesTab(QFrame):
                     self.nextButton.setEnabled(False)
             else:
                 self.nextButton.setEnabled(True)
-                tmpBuf = buffer[(self.currentIndex - 1) * 10: self.currentIndex * 10]
+                tmpBuf = buffer[(self.currentIndex - 1) *
+                                10: self.currentIndex * 10]
 
             data = []
             for idx in tmpBuf:
@@ -188,7 +190,8 @@ class GamesTab(QFrame):
                     self.nextButton.setEnabled(False)
             else:
                 self.nextButton.setEnabled(True)
-                data = games[(self.currentIndex - 1) * 10: self.currentIndex * 10]
+                data = games[(self.currentIndex - 1) *
+                             10: self.currentIndex * 10]
 
         if data:
             self.updateNextPageTabs(data)
@@ -1056,7 +1059,8 @@ class SearchInterface(SmoothScrollArea):
                 summoner = connector.getSummonerByName(targetName)
                 puuid = summoner["puuid"]
                 self.currentSummonerName = targetName
-                self.loadGamesThread = threading.Thread(target=self.loadGames, args=(puuid,))
+                self.loadGamesThread = threading.Thread(
+                    target=self.loadGames, args=(puuid,))
                 self.loadGamesThread.start()
             except:
                 puuid = "-1"
@@ -1123,7 +1127,8 @@ class SearchInterface(SmoothScrollArea):
             self.__onFilterComboBoxChanged)
 
     def __onFilterComboBoxChanged(self):
-        self.gamesView.gamesTab.updateFilter(self.comboBoxQueueId[self.filterComboBox.currentIndex()])
+        self.gamesView.gamesTab.updateFilter(
+            self.comboBoxQueueId[self.filterComboBox.currentIndex()])
 
     def __showSummonerNotFoundMessage(self):
         InfoBar.error(
@@ -1144,6 +1149,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.setEnabled(a0)
         self.searchButton.setEnabled(a0)
 
-        self.filterComboBox.setEnabled(a0)
+        if not a0:
+            self.filterComboBox.setEnabled(a0)
 
         return super().setEnabled(a0)
