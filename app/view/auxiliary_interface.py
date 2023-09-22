@@ -330,15 +330,59 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.pushButton.setEnabled(enable)
 
 
-class ProfileTierCard(SettingCard):
+class ProfileTierCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
         super().__init__(Icon.CERTIFICATE, title, content, parent)
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.rankModeLabel = QLabel(self.tr("Game mode:"))
         self.rankModeBox = ComboBox()
+        self.tierLabel = QLabel(self.tr("Tier:"))
         self.tierBox = ComboBox()
+        self.divisionLabel = QLabel(self.tr("Division:"))
         self.divisionBox = ComboBox()
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.pushButton = PushButton(self.tr("Apply"))
 
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setVerticalSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.rankModeLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.rankModeBox, 0, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.addWidget(
+            self.tierLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.tierBox, 1, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.addWidget(
+            self.divisionLabel, 2, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.divisionBox, 2, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
         self.rankModeBox.addItems([
             self.tr("Teamfight Tactics"),
             self.tr("Ranked solo"),
@@ -359,25 +403,16 @@ class ProfileTierCard(SettingCard):
         ])
         self.divisionBox.addItems(['I', 'II', 'III', 'IV'])
 
-        self.rankModeBox.setPlaceholderText(self.tr("Game mode"))
-        self.tierBox.setPlaceholderText(self.tr("Tier"))
-        self.divisionBox.setPlaceholderText(self.tr("Division"))
+        self.rankModeBox.setPlaceholderText(self.tr("Please select game mode"))
+        self.tierBox.setPlaceholderText(self.tr("Please select Tier"))
+        self.divisionBox.setPlaceholderText(self.tr("Please select Division"))
 
         self.pushButton.setEnabled(False)
 
-        self.rankModeBox.setMinimumWidth(130)
-        self.tierBox.setMinimumWidth(130)
-        self.divisionBox.setMinimumWidth(130)
+        self.rankModeBox.setMinimumWidth(250)
+        self.tierBox.setMinimumWidth(250)
+        self.divisionBox.setMinimumWidth(250)
         self.pushButton.setMinimumWidth(100)
-
-        self.hBoxLayout.addWidget(self.rankModeBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.tierBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.divisionBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
 
         self.rankModeBox.currentTextChanged.connect(
             self.__onRankModeTextChanged)
