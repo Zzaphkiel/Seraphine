@@ -19,6 +19,7 @@ from ..components.mode_filter_widget import ModeFilterWidget
 from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
+from ..lol.exceptions import SummonerGamesNotFound
 from ..lol.tools import processGameData, processGameDetailData
 
 
@@ -987,6 +988,7 @@ class GameTab(QFrame):
 
 class SearchInterface(SmoothScrollArea):
     summonerPuuidGetted = pyqtSignal(str)
+    gamesNotFound = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1096,8 +1098,13 @@ class SearchInterface(SmoothScrollArea):
         begIdx = 0
         endIdx = begIdx + 9
         while True:
-            games = connector.getSummonerGamesByPuuidSlowly(
-                puuid, begIdx, endIdx)
+            try:
+                games = connector.getSummonerGamesByPuuidSlowly(
+                    puuid, begIdx, endIdx)
+            except SummonerGamesNotFound:
+                self.gamesView.gamesTab.loadFinish.emit()
+                self.gamesNotFound.emit()
+                return
 
             if not games["games"]:  # 所有对局都在一年内, 查完了
                 return
@@ -1137,6 +1144,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.searchButton.clicked.connect(self.__onSearchButtonClicked)
         # self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
+        self.gamesNotFound.connect(self.__onShowGamesNotFoundMessage)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onFilterComboBoxChanged)
 
@@ -1148,6 +1156,17 @@ class SearchInterface(SmoothScrollArea):
         InfoBar.error(
             title=self.tr("Summoner not found"),
             content=self.tr("Please check the summoner name and retry"),
+            orient=Qt.Vertical,
+            isClosable=True,
+            position=InfoBarPosition.BOTTOM_RIGHT,
+            duration=5000,
+            parent=self,
+        )
+
+    def __onShowGamesNotFoundMessage(self):
+        InfoBar.error(
+            title=self.tr("Games not found"),
+            content=self.tr("No matches were found for this summoner"),
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
