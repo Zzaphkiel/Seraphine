@@ -583,48 +583,56 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
             rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = connector.getSummonerGamesByPuuid(
-                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
-            games = {
-                "gameCount": gamesInfo["gameCount"],
-                "wins": 0,
-                "losses": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "games": [],
+            try:
+                gamesInfo = connector.getSummonerGamesByPuuid(
+                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            except:
+                champions = []
+                games = {}
+            else:
+                games = {
+                    "gameCount": gamesInfo["gameCount"],
+                    "wins": 0,
+                    "losses": 0,
+                    "kills": 0,
+                    "deaths": 0,
+                    "assists": 0,
+                    "games": [],
+                }
+
+                for game in gamesInfo["games"]:
+                    info = processGameData(game)
+
+                    if not info["remake"] and info["queueId"] != 0:
+                        games["kills"] += info["kills"]
+                        games["deaths"] += info["deaths"]
+                        games["assists"] += info["assists"]
+
+                        if info["win"]:
+                            games["wins"] += 1
+                        else:
+                            games["losses"] += 1
+
+                    games["games"].append(info)
+
+                champions = getRecentChampions(games['games'])
+
+            emitInfo = {
+                'name': name,
+                'icon': icon,
+                'level': level,
+                'xpSinceLastLevel': xpSinceLastLevel,
+                'xpUntilNextLevel': xpUntilNextLevel,
+                'puuid': summoner.puuid,
+                'rankInfo': rankInfo,
+                'games': games,
+                'triggerByUser': True,
             }
+            if champions:
+                emitInfo["champions"] = champions
 
-            for game in gamesInfo["games"]:
-                info = processGameData(game)
-
-                if not info["remake"] and info["queueId"] != 0:
-                    games["kills"] += info["kills"]
-                    games["deaths"] += info["deaths"]
-                    games["assists"] += info["assists"]
-
-                    if info["win"]:
-                        games["wins"] += 1
-                    else:
-                        games["losses"] += 1
-
-                games["games"].append(info)
-
-            champions = getRecentChampions(games['games'])
-
-            self.careerInterface.careerInfoChanged.emit(
-                {'name': name,
-                 'icon': icon,
-                 'level': level,
-                 'xpSinceLastLevel': xpSinceLastLevel,
-                 'xpUntilNextLevel': xpUntilNextLevel,
-                 'puuid': summoner.puuid,
-                 'rankInfo': rankInfo,
-                 'games': games,
-                 'champions': champions,
-                 'triggerByUser': True, }
-            )
+            self.careerInterface.careerInfoChanged.emit(emitInfo)
             self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
