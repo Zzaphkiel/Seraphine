@@ -4,7 +4,8 @@ import sys
 from PyQt5.QtCore import QLocale
 
 from qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
-                            OptionsConfigItem, OptionsValidator, ConfigSerializer, RangeConfigItem, RangeValidator)
+                            OptionsConfigItem, OptionsValidator, ConfigSerializer, RangeConfigItem, RangeValidator,
+                            EnumSerializer)
 
 
 class Language(Enum):
@@ -76,6 +77,15 @@ class Config(QConfig):
 
     enableCloseToTray = ConfigItem(
         "General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
+
+    searchHistory = ConfigItem(
+        "Other", "SearchHistory", ""
+    )
+
+    enableCheckUpdate = ConfigItem("General",
+                                          "EnableCheckUpdate", True,
+                                          BoolValidator())
+
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 

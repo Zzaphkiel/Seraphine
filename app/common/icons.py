@@ -42,6 +42,7 @@ class Icon(FluentIconBase, Enum):
     TEAM = 'Team'
     SETTING = 'Setting'
     FILTER = 'Filter'
+    UPDATE = 'Update'
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

@@ -3,6 +3,7 @@ import os
 import sys
 import traceback
 import time
+import webbrowser
 from collections import Counter
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QAbstractAnimation
@@ -20,10 +21,12 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
+from ..common.util import Github, github
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
-from ..common.config import cfg
+from ..common.config import cfg, VERSION
+from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
@@ -38,6 +41,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 class MainWindow(FluentWindow):
     nameOrIconChanged = pyqtSignal(str, str)
     lolInstallFolderChanged = pyqtSignal(str)
+    showUpdateMessageBox = pyqtSignal(dict)
+    checkUpdateFailed = pyqtSignal()
+    showLcuConnectTimeout = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -71,6 +77,8 @@ class MainWindow(FluentWindow):
         self.__conncetSignalToSlot()
 
         self.splashScreen.finish()
+        threading.Thread(target=self.checkUpdate).start()
+        threading.Thread(target=self.pollingConnectTimeout).start()
 
     def __initInterface(self):
         self.__lockInterface()
@@ -134,6 +142,9 @@ class MainWindow(FluentWindow):
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
+        self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
+        self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
+        self.showLcuConnectTimeout.connect(self.__onShowLcuConnectTimeout)
 
         self.careerInterface.searchButton.clicked.connect(
             self.__onCareerInterfaceHistoryButtonClicked)
@@ -194,6 +205,47 @@ class MainWindow(FluentWindow):
 
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
+
+    def __onShowLcuConnectTimeout(self, api):
+        InfoBar.error(
+            self.tr("LCU request timeout"),
+            self.tr(f"Connect API {api} request timeout."),
+            duration=5000,
+            parent=self,
+            position=InfoBarPosition.BOTTOM_RIGHT
+        )
+
+    def checkUpdate(self):
+        if cfg.get(cfg.enableCheckUpdate):
+            try:
+                releasesInfo = github.checkUpdate()
+            except:
+                self.checkUpdateFailed.emit()
+            else:
+                if releasesInfo:
+                    self.showUpdateMessageBox.emit(releasesInfo)
+
+    def __onCheckUpdateFailed(self):
+        InfoBar.warning(
+            self.tr("Check Update Failed"),
+            self.tr("Failed to check for updates, possibly unable to connect to Github."),
+            duration=5000,
+            parent=self,
+            position=InfoBarPosition.BOTTOM_RIGHT
+        )
+
+    def __onShowUpdateMessageBox(self, info):
+        msgBox = UpdateMessageBox(info, self.window())
+        if msgBox.exec():
+            webbrowser.open(info.get("zipball_url"))
+
+    def pollingConnectTimeout(self):
+        while True:
+            if connector.timeoutApi:
+                self.showLcuConnectTimeout.emit(connector.timeoutApi)
+                connector.timeoutApi = None
+
+            time.sleep(.5)
 
     def __initSystemTray(self):
         self.trayIcon = QSystemTrayIcon(self)
@@ -491,13 +543,13 @@ class MainWindow(FluentWindow):
         summonerName = self.careerInterface.name.text()
 
         self.searchInterface.searchLineEdit.setText(summonerName)
-        self.searchInterface.searchButton.clicked.emit()
+        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
 
         self.checkAndSwitchTo(self.searchInterface)
 
     def __onGameInfoInterfaceGamesSummonerNameClicked(self, name):
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.searchButton.clicked.emit()
+        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
 
         self.checkAndSwitchTo(self.searchInterface)
 
@@ -1076,7 +1128,7 @@ class MainWindow(FluentWindow):
         name = self.careerInterface.name.text()
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
-        self.searchInterface.searchButton.click()
+        self.searchInterface.searchLineEdit.searchButton.click()
 
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(

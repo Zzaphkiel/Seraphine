@@ -3,7 +3,7 @@ import time
 
 import pyperclip
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
-                             QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget)
+                             QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget, QCompleter)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
@@ -16,6 +16,7 @@ from ..common.icons import Icon
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
 from ..components.mode_filter_widget import ModeFilterWidget
+from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
 from ..lol.tools import processGameData, processGameDetailData
@@ -999,8 +1000,9 @@ class SearchInterface(SmoothScrollArea):
         self.vBoxLayout = QVBoxLayout(self)
 
         self.searchLayout = QHBoxLayout()
-        self.searchLineEdit = LineEdit()
-        self.searchButton = PushButton(self.tr("Search 🔍"))
+        # self.searchLineEdit = LineEdit()
+        self.searchLineEdit = SearchLineEdit()
+        # self.searchButton = PushButton(self.tr("Search 🔍"))
         self.careerButton = PushButton(self.tr("Career"))
         self.filterComboBox = ComboBox()
 
@@ -1019,7 +1021,11 @@ class SearchInterface(SmoothScrollArea):
         self.careerButton.setEnabled(False)
         self.filterComboBox.setEnabled(False)
 
-        self.searchButton.setShortcut("Return")
+        # self.searchLineEdit.searchButton.setShortcut("Return")
+        # self.searchLineEdit.searchButton.setShortcut("Key_Enter")
+        # self.searchLineEdit.searchButton.setShortcut(Qt.Key_Return)
+        self.searchLineEdit.searchButton.setShortcut(Qt.Key_Enter)
+        # self.searchButton.setShortcut("Return")
 
         StyleSheet.SEARCH_INTERFACE.apply(self)
 
@@ -1032,10 +1038,11 @@ class SearchInterface(SmoothScrollArea):
         ])
         self.filterComboBox.setCurrentIndex(0)
 
+
     def __initLayout(self):
         self.searchLayout.addWidget(self.searchLineEdit)
         self.searchLayout.addSpacing(5)
-        self.searchLayout.addWidget(self.searchButton)
+        # self.searchLayout.addWidget(self.searchButton)
         self.searchLayout.addWidget(self.careerButton)
         self.searchLayout.addWidget(self.filterComboBox)
 
@@ -1050,6 +1057,12 @@ class SearchInterface(SmoothScrollArea):
         targetName = self.searchLineEdit.text()
         if targetName == "":
             return
+
+        history = cfg.get(cfg.searchHistory).split(",")
+        if targetName in history:
+            history.remove(targetName)
+        history.insert(0, targetName)
+        cfg.set(cfg.searchHistory, ",".join([t for t in history if t])[:10], True)  # 过滤空值, 只存十个
 
         if self.loadGamesThread and self.loadGamesThread.is_alive():
             self.loadGamesThreadStop.set()
@@ -1121,7 +1134,8 @@ class SearchInterface(SmoothScrollArea):
             self.__showSummonerNotFoundMessage()
 
     def __connectSignalToSlot(self):
-        self.searchButton.clicked.connect(self.__onSearchButtonClicked)
+        self.searchLineEdit.searchButton.clicked.connect(self.__onSearchButtonClicked)
+        # self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onFilterComboBoxChanged)
@@ -1147,7 +1161,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.clear()
 
         self.searchLineEdit.setEnabled(a0)
-        self.searchButton.setEnabled(a0)
+        self.searchLineEdit.searchButton.setEnabled(a0)
 
         if not a0:
             self.filterComboBox.setEnabled(a0)
