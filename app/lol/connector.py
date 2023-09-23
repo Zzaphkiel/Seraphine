@@ -12,11 +12,41 @@ from .exceptions import *
 requests.packages.urllib3.disable_warnings()
 
 
+def slowly():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            while connector.tackleFlag.is_set():
+                time.sleep(.2)
+
+            connector.slowlyFlag.set()
+            res = func(*args, **kwargs)
+            connector.slowlyFlag.clear()
+            return res
+        return wrapper
+    return decorator
+
+
+def tackle():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            connector.tackleFlag.set()
+            res = func(*args, **kwargs)
+            connector.tackleFlag.clear()
+            return res
+        return wrapper
+    return decorator
+
+
 def retry(count=5, retry_sep=0.5):
     def decorator(func):
         def wrapper(*args, **kwargs):
             for _ in range(count):
                 try:
+                    # 低优先级请求未结束时, 避免server队列过长
+                    # 若负载过高导致请求失败, 则在触发 retry 间隙为高优先级请求让行
+                    while connector.slowlyFlag.is_set():
+                        time.sleep(.2)
+
                     res = func(*args, **kwargs)
                 except:
                     time.sleep(retry_sep)
@@ -24,6 +54,8 @@ def retry(count=5, retry_sep=0.5):
                 else:
                     break
             else:
+                # FIXME 任何异常都将以 timeout 抛出
+                connector.timeoutApi = func.__name__
                 raise Exception("Exceeded maximum retry attempts.")
 
             return res
@@ -39,8 +71,11 @@ class LolClientConnector:
         self.token = None
         self.url = None
 
-        self.flag = threading.Event()
+        self.tackleFlag = threading.Event()
+        self.slowlyFlag = threading.Event()
         self.manager = None
+
+        self.timeoutApi = None
 
     def start(self, pid):
         process = psutil.Process(pid)
@@ -206,11 +241,9 @@ class LolClientConnector:
 
         return res
 
+    @slowly()
     @retry(10, 1)
     def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
-        while self.flag.is_set():
-            time.sleep(.2)
-
         params = {"begIndex": begIndex, "endIndex": endIndex}
         res = self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
@@ -221,9 +254,9 @@ class LolClientConnector:
 
         return res["games"]
 
+    @tackle()
     @retry()
     def getSummonerGamesByPuuid(self, puuid, begIndex=0, endIndex=4):
-        self.flag.set()
         params = {"begIndex": begIndex, "endIndex": endIndex}
         res = self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
@@ -232,7 +265,6 @@ class LolClientConnector:
         if "games" not in res:
             raise SummonerGamesNotFound()
 
-        self.flag.clear()
         return res["games"]
 
     @retry()

@@ -82,6 +82,10 @@ class Config(QConfig):
         "Other", "SearchHistory", ""
     )
 
+    enableCheckUpdate = ConfigItem("General",
+                                          "EnableCheckUpdate", True,
+                                          BoolValidator())
+
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 

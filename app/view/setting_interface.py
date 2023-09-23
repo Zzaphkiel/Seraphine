@@ -70,7 +70,6 @@ class SettingInterface(SmoothScrollArea):
             tr("Setting the maximum number of games shows in the career interface"
                ), self.functionGroup)
 
-        # TODO 逻辑
         self.gameInfoFilterCard = SwitchSettingCard(
             Icon.FILTER, self.tr("Rank filter other mode"),
             self.tr(
@@ -91,6 +90,14 @@ class SettingInterface(SmoothScrollArea):
                                              self.tr("Client Path"),
                                              cfg.get(cfg.lolFolder),
                                              self.generalGroup)
+
+        self.checkUpdateCard = SwitchSettingCard(
+            Icon.UPDATE, self.tr("Check for updates"),
+            self.tr(
+                "Automatically check for updates when software starts"),
+            cfg.enableCheckUpdate
+        )
+
         # self.enableStartWithComputer = SwitchSettingCard(
         #     Icon.DESKTOPRIGHT,
         #     self.tr("Auto-start on boot"),
@@ -209,6 +216,7 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
+        self.generalGroup.addSettingCard(self.checkUpdateCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
