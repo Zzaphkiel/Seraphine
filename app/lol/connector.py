@@ -48,7 +48,7 @@ def retry(count=5, retry_sep=0.5):
                         time.sleep(.2)
 
                     res = func(*args, **kwargs)
-                except:
+                except Exception as e:
                     time.sleep(retry_sep)
                     continue
                 else:

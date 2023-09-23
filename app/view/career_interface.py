@@ -457,7 +457,9 @@ class CareerInterface(SmoothScrollArea):
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
 
         self.teammatesFlyout.updatePuuid(puuid)
-        self.updateRecentTeammates()
+
+        if self.games:
+            self.updateRecentTeammates()
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
