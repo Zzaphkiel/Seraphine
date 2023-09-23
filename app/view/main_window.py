@@ -28,6 +28,7 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
+from ..lol.exceptions import SummonerGamesNotFound
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
@@ -315,7 +316,7 @@ class MainWindow(FluentWindow):
         try:
             gamesInfo = connector.getSummonerGamesByPuuid(
                 self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
-        except:
+        except SummonerGamesNotFound:
             champions = []
             games = {}
         else:
@@ -587,7 +588,7 @@ class MainWindow(FluentWindow):
             try:
                 gamesInfo = connector.getSummonerGamesByPuuid(
                     summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
-            except:
+            except SummonerGamesNotFound:
                 champions = []
                 games = {}
             else:
