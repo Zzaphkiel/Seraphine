@@ -18,9 +18,7 @@ def slowly():
             while connector.tackleFlag.is_set():
                 time.sleep(.2)
 
-            connector.slowlyFlag.set()
             res = func(*args, **kwargs)
-            connector.slowlyFlag.clear()
             return res
         return wrapper
     return decorator
@@ -42,13 +40,8 @@ def retry(count=5, retry_sep=0.5):
         def wrapper(*args, **kwargs):
             for _ in range(count):
                 try:
-                    # 低优先级请求未结束时, 避免server队列过长
-                    # 若负载过高导致请求失败, 则在触发 retry 间隙为高优先级请求让行
-                    while connector.slowlyFlag.is_set():
-                        time.sleep(.2)
-
                     res = func(*args, **kwargs)
-                except:
+                except Exception as e:
                     time.sleep(retry_sep)
                     continue
                 else:
@@ -72,7 +65,6 @@ class LolClientConnector:
         self.url = None
 
         self.tackleFlag = threading.Event()
-        self.slowlyFlag = threading.Event()
         self.manager = None
 
         self.timeoutApi = None

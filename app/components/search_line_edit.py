@@ -20,8 +20,10 @@ class MyCompleterMenu(CompleterMenu):
         if e.key() == Qt.Key_Escape:
             self.close()
         if e.key() in [Qt.Key_Enter, Qt.Key_Return]:
+            if self.isVisible():
+                self.close()
+
             self.lineEdit.searchButton.click()
-            self.close()
 
         return True
 

@@ -28,6 +28,7 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
+from ..lol.exceptions import SummonerGamesNotFound
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
@@ -311,49 +312,57 @@ class MainWindow(FluentWindow):
 
         rankInfo = connector.getRankedStatsByPuuid(
             self.currentSummoner.puuid)
-        gamesInfo = connector.getSummonerGamesByPuuid(
-            self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
-        games = {
-            "gameCount": gamesInfo["gameCount"],
-            "wins": 0,
-            "losses": 0,
-            "kills": 0,
-            "deaths": 0,
-            "assists": 0,
-            "games": [],
-        }
+        try:
+            gamesInfo = connector.getSummonerGamesByPuuid(
+                self.currentSummoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+        except SummonerGamesNotFound:
+            champions = []
+            games = {}
+        else:
+            games = {
+                "gameCount": gamesInfo["gameCount"],
+                "wins": 0,
+                "losses": 0,
+                "kills": 0,
+                "deaths": 0,
+                "assists": 0,
+                "games": [],
+            }
 
-        for game in gamesInfo["games"]:
-            info = processGameData(game)
-            if not info["remake"] and info["queueId"] != 0:
-                games["kills"] += info["kills"]
-                games["deaths"] += info["deaths"]
-                games["assists"] += info["assists"]
+            for game in gamesInfo["games"]:
+                info = processGameData(game)
+                if not info["remake"] and info["queueId"] != 0:
+                    games["kills"] += info["kills"]
+                    games["deaths"] += info["deaths"]
+                    games["assists"] += info["assists"]
 
-                if info["win"]:
-                    games["wins"] += 1
-                else:
-                    games["losses"] += 1
+                    if info["win"]:
+                        games["wins"] += 1
+                    else:
+                        games["losses"] += 1
 
-            games["games"].append(info)
+                games["games"].append(info)
+
+            champions = getRecentChampions(games['games'])
 
         self.nameOrIconChanged.emit(icon, name)
+        emitInfo = {
+            'name': name,
+            'icon': icon,
+            'level': level,
+            'xpSinceLastLevel': xpSinceLastLevel,
+            'xpUntilNextLevel': xpUntilNextLevel,
+            'puuid': self.currentSummoner.puuid,
+            'rankInfo': rankInfo,
+            'games': games,
+            'champions': champions,
+            'triggerByUser': True,
+        }
+        if champions:
+            emitInfo["champions"] = champions
 
-        champions = getRecentChampions(games['games'])
-
-        self.careerInterface.careerInfoChanged.emit(
-            {'name': name,
-             'icon': icon,
-             'level': level,
-             'xpSinceLastLevel': xpSinceLastLevel,
-             'xpUntilNextLevel': xpUntilNextLevel,
-             'puuid': self.currentSummoner.puuid,
-             'rankInfo': rankInfo,
-             'games': games,
-             'champions': champions,
-             'triggerByUser': True, }
-        )
+        self.careerInterface.careerInfoChanged.emit(emitInfo)
         self.careerInterface.hideLoadingPage.emit()
 
     def __onLolClientStarted(self, pid):
@@ -575,48 +584,56 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
             rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = connector.getSummonerGamesByPuuid(
-                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
 
-            games = {
-                "gameCount": gamesInfo["gameCount"],
-                "wins": 0,
-                "losses": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "games": [],
+            try:
+                gamesInfo = connector.getSummonerGamesByPuuid(
+                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            except SummonerGamesNotFound:
+                champions = []
+                games = {}
+            else:
+                games = {
+                    "gameCount": gamesInfo["gameCount"],
+                    "wins": 0,
+                    "losses": 0,
+                    "kills": 0,
+                    "deaths": 0,
+                    "assists": 0,
+                    "games": [],
+                }
+
+                for game in gamesInfo["games"]:
+                    info = processGameData(game)
+
+                    if not info["remake"] and info["queueId"] != 0:
+                        games["kills"] += info["kills"]
+                        games["deaths"] += info["deaths"]
+                        games["assists"] += info["assists"]
+
+                        if info["win"]:
+                            games["wins"] += 1
+                        else:
+                            games["losses"] += 1
+
+                    games["games"].append(info)
+
+                champions = getRecentChampions(games['games'])
+
+            emitInfo = {
+                'name': name,
+                'icon': icon,
+                'level': level,
+                'xpSinceLastLevel': xpSinceLastLevel,
+                'xpUntilNextLevel': xpUntilNextLevel,
+                'puuid': summoner.puuid,
+                'rankInfo': rankInfo,
+                'games': games,
+                'triggerByUser': True,
             }
+            if champions:
+                emitInfo["champions"] = champions
 
-            for game in gamesInfo["games"]:
-                info = processGameData(game)
-
-                if not info["remake"] and info["queueId"] != 0:
-                    games["kills"] += info["kills"]
-                    games["deaths"] += info["deaths"]
-                    games["assists"] += info["assists"]
-
-                    if info["win"]:
-                        games["wins"] += 1
-                    else:
-                        games["losses"] += 1
-
-                games["games"].append(info)
-
-            champions = getRecentChampions(games['games'])
-
-            self.careerInterface.careerInfoChanged.emit(
-                {'name': name,
-                 'icon': icon,
-                 'level': level,
-                 'xpSinceLastLevel': xpSinceLastLevel,
-                 'xpUntilNextLevel': xpUntilNextLevel,
-                 'puuid': summoner.puuid,
-                 'rankInfo': rankInfo,
-                 'games': games,
-                 'champions': champions,
-                 'triggerByUser': True, }
-            )
+            self.careerInterface.careerInfoChanged.emit(emitInfo)
             self.careerInterface.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
@@ -957,7 +974,7 @@ class MainWindow(FluentWindow):
             queueId = data['queue']['id']
             # 特判一下斗魂竞技场
 
-            if queueId == 1700:
+            if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配(排位)
                 return
 
             team1 = data['teamOne']

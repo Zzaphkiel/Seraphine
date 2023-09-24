@@ -19,6 +19,7 @@ from ..components.mode_filter_widget import ModeFilterWidget
 from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
+from ..lol.exceptions import SummonerGamesNotFound
 from ..lol.tools import processGameData, processGameDetailData
 
 
@@ -95,8 +96,10 @@ class GamesTab(QFrame):
                 self.tr('Data loading completed!') + ' 😆')
             self.stateTooltip.setState(True)
             self.stateTooltip = None
-        self.nextButton.setEnabled(True)
-        self.__onNextButtonClicked()
+
+        if self.window().searchInterface.games:  # 避免召唤师一年都没打游戏, 查了个空
+            self.nextButton.setEnabled(True)
+            self.__onNextButtonClicked()
 
     def __onTabClicked(self, gameId):
 
@@ -987,6 +990,7 @@ class GameTab(QFrame):
 
 class SearchInterface(SmoothScrollArea):
     summonerPuuidGetted = pyqtSignal(str)
+    gamesNotFound = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1000,9 +1004,7 @@ class SearchInterface(SmoothScrollArea):
         self.vBoxLayout = QVBoxLayout(self)
 
         self.searchLayout = QHBoxLayout()
-        # self.searchLineEdit = LineEdit()
         self.searchLineEdit = SearchLineEdit()
-        # self.searchButton = PushButton(self.tr("Search 🔍"))
         self.careerButton = PushButton(self.tr("Career"))
         self.filterComboBox = ComboBox()
 
@@ -1021,11 +1023,7 @@ class SearchInterface(SmoothScrollArea):
         self.careerButton.setEnabled(False)
         self.filterComboBox.setEnabled(False)
 
-        # self.searchLineEdit.searchButton.setShortcut("Return")
-        # self.searchLineEdit.searchButton.setShortcut("Key_Enter")
-        # self.searchLineEdit.searchButton.setShortcut(Qt.Key_Return)
         self.searchLineEdit.searchButton.setShortcut(Qt.Key_Enter)
-        # self.searchButton.setShortcut("Return")
 
         StyleSheet.SEARCH_INTERFACE.apply(self)
 
@@ -1042,7 +1040,6 @@ class SearchInterface(SmoothScrollArea):
     def __initLayout(self):
         self.searchLayout.addWidget(self.searchLineEdit)
         self.searchLayout.addSpacing(5)
-        # self.searchLayout.addWidget(self.searchButton)
         self.searchLayout.addWidget(self.careerButton)
         self.searchLayout.addWidget(self.filterComboBox)
 
@@ -1062,7 +1059,7 @@ class SearchInterface(SmoothScrollArea):
         if targetName in history:
             history.remove(targetName)
         history.insert(0, targetName)
-        cfg.set(cfg.searchHistory, ",".join([t for t in history if t])[:10], True)  # 过滤空值, 只存十个
+        cfg.set(cfg.searchHistory, ",".join([t for t in history if t][:10]), True)  # 过滤空值, 只存十个
 
         if self.loadGamesThread and self.loadGamesThread.is_alive():
             self.loadGamesThreadStop.set()
@@ -1096,10 +1093,15 @@ class SearchInterface(SmoothScrollArea):
         begIdx = 0
         endIdx = begIdx + 9
         while True:
-            games = connector.getSummonerGamesByPuuidSlowly(
-                puuid, begIdx, endIdx)
+            try:
+                games = connector.getSummonerGamesByPuuidSlowly(
+                    puuid, begIdx, endIdx)
+            except SummonerGamesNotFound:
+                self.gamesNotFound.emit()
+                return
 
             if not games["games"]:  # 所有对局都在一年内, 查完了
+                self.gamesNotFound.emit()
                 return
 
             for game in games["games"]:
@@ -1137,6 +1139,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.searchButton.clicked.connect(self.__onSearchButtonClicked)
         # self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
+        self.gamesNotFound.connect(self.__onShowGamesNotFoundMessage)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onFilterComboBoxChanged)
 
@@ -1148,6 +1151,17 @@ class SearchInterface(SmoothScrollArea):
         InfoBar.error(
             title=self.tr("Summoner not found"),
             content=self.tr("Please check the summoner name and retry"),
+            orient=Qt.Vertical,
+            isClosable=True,
+            position=InfoBarPosition.BOTTOM_RIGHT,
+            duration=5000,
+            parent=self,
+        )
+
+    def __onShowGamesNotFoundMessage(self):
+        InfoBar.error(
+            title=self.tr("Games not found"),
+            content=self.tr("No matches were found for this summoner"),
             orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
