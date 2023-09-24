@@ -40,15 +40,22 @@ def retry(count=5, retry_sep=0.5):
         def wrapper(*args, **kwargs):
             exce = None
             for _ in range(count):
+                while connector.ref_cnt >= 3:
+                    time.sleep(.2)
+
+                connector.ref_cnt += 1
                 try:
                     res = func(*args, **kwargs)
                 except BaseException as e:
+                    connector.ref_cnt -= 1
                     time.sleep(retry_sep)
                     exce = e
                     continue
                 else:
+                    connector.ref_cnt -= 1
                     break
             else:
+                connector.ref_cnt -= 1
                 connector.timeoutApi = func.__name__
                 raise exce
                 # raise Exception("Exceeded maximum retry attempts.")
@@ -66,6 +73,9 @@ class LolClientConnector:
         self.token = None
         self.url = None
 
+        # 并发数过高时会导致LCU闪退
+        # 通过引用计数避免 (不大于3个并发)
+        self.ref_cnt = 0
         self.tackleFlag = threading.Event()
         self.manager = None
 
