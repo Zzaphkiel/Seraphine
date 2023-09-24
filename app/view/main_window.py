@@ -801,6 +801,7 @@ class MainWindow(FluentWindow):
             isGaming = True
         elif status == 'InProgress':
             title = self.tr("Gaming")
+            # 重连或正常进入游戏(走GameStart), 不需要更新数据
             if not self.isGaming:
                 self.__onGameStart()
             isGaming = True
