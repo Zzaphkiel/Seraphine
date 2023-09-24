@@ -802,10 +802,7 @@ class MainWindow(FluentWindow):
         elif status == 'InProgress':
             title = self.tr("Gaming")
             if not self.isGaming:
-                print("update gameinfo")
                 self.__onGameStart()
-            else:
-                print("重连")
             isGaming = True
         elif status == 'WaitingForStatus':
             title = self.tr("Waiting for status")
