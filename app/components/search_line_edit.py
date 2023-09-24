@@ -59,7 +59,6 @@ class SearchLineEdit(QSearchLineEdit):
         completer = QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         completer.setMaxVisibleItems(10)
-        completer.setFilterMode(Qt.MatchFlag.MatchFixedString)
         completer.setCompletionRole(Qt.DisplayRole)
         completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.setCompleter(completer)
