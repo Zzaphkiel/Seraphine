@@ -278,13 +278,14 @@ class GamesTab(QFrame):
         self.stackWidget.setCurrentIndex(self.currentIndex)
         self.pageLabel.setText(f"{self.currentIndex}")
 
-        if self.first:
+        if self.triggerGameId:
+            self.tabClicked.emit(str(self.triggerGameId))
+            self.triggerGameId = 0
+        elif self.first:
             gameId = layout.itemAt(0).widget().gameId
             self.tabClicked.emit(str(gameId))
             self.first = False
-        elif self.triggerGameId:
-            self.tabClicked.emit(str(self.triggerGameId))
-            self.triggerGameId = 0
+
 
         mainWindow = self.window()
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
