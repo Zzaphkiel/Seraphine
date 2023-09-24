@@ -38,18 +38,20 @@ def tackle():
 def retry(count=5, retry_sep=0.5):
     def decorator(func):
         def wrapper(*args, **kwargs):
+            exce = None
             for _ in range(count):
                 try:
                     res = func(*args, **kwargs)
-                except Exception as e:
+                except BaseException as e:
                     time.sleep(retry_sep)
+                    exce = e
                     continue
                 else:
                     break
             else:
-                # FIXME 任何异常都将以 timeout 抛出
                 connector.timeoutApi = func.__name__
-                raise Exception("Exceeded maximum retry attempts.")
+                raise exce
+                # raise Exception("Exceeded maximum retry attempts.")
 
             return res
 

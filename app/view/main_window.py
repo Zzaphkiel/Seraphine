@@ -79,7 +79,7 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
         threading.Thread(target=self.checkUpdate).start()
-        threading.Thread(target=self.pollingConnectTimeout).start()
+        threading.Thread(target=self.pollingConnectTimeout, daemon=True).start()
 
     def __initInterface(self):
         self.__lockInterface()

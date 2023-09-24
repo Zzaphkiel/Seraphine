@@ -1101,7 +1101,9 @@ class SearchInterface(SmoothScrollArea):
                 return
 
             if not games["games"]:  # 所有对局都在一年内, 查完了
-                self.gamesNotFound.emit()
+                if not self.games:  # 未能查到任何一盘对局, 提示一下
+                    self.gamesNotFound.emit()
+
                 return
 
             for game in games["games"]:
