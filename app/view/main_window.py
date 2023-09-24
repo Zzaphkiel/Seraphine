@@ -775,7 +775,6 @@ class MainWindow(FluentWindow):
     def __onChampSelectChanged(self, data):
         for t in data["myTeam"]:
             if t['championId']:
-
                 # 控件可能未绘制, 判断一下避免报错
                 summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(
                     t["summonerId"])
