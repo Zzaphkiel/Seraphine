@@ -974,7 +974,7 @@ class MainWindow(FluentWindow):
             queueId = data['queue']['id']
             # 特判一下斗魂竞技场
 
-            if queueId == 1700:
+            if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配(排位)
                 return
 
             team1 = data['teamOne']
