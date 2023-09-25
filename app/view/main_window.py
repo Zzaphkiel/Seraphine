@@ -79,7 +79,8 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
         threading.Thread(target=self.checkUpdate).start()
-        threading.Thread(target=self.pollingConnectTimeout, daemon=True).start()
+        threading.Thread(target=self.pollingConnectTimeout,
+                         daemon=True).start()
 
     def __initInterface(self):
         self.__lockInterface()
@@ -210,7 +211,7 @@ class MainWindow(FluentWindow):
     def __onShowLcuConnectTimeout(self, api):
         InfoBar.error(
             self.tr("LCU request timeout"),
-            self.tr(f"Connect API {api} request timeout."),
+            self.tr(f"Connect API") + f" {api} " + self.tr("request timeout."),
             duration=5000,
             parent=self,
             position=InfoBarPosition.BOTTOM_RIGHT
@@ -229,7 +230,8 @@ class MainWindow(FluentWindow):
     def __onCheckUpdateFailed(self):
         InfoBar.warning(
             self.tr("Check Update Failed"),
-            self.tr("Failed to check for updates, possibly unable to connect to Github."),
+            self.tr(
+                "Failed to check for updates, possibly unable to connect to Github."),
             duration=5000,
             parent=self,
             position=InfoBarPosition.BOTTOM_RIGHT
@@ -868,7 +870,8 @@ class MainWindow(FluentWindow):
                     puuid, 0, 14)
 
                 if cfg.get(cfg.gameInfoFilter) and isRank:
-                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                    origGamesInfo["games"] = [
+                        game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                     begIdx = 15
                     while len(origGamesInfo["games"]) < 11:
                         endIdx = begIdx + 5
@@ -1019,7 +1022,8 @@ class MainWindow(FluentWindow):
                     puuid, 0, 14)
 
                 if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
-                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                    origGamesInfo["games"] = [
+                        game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                     begIdx = 15
                     while len(origGamesInfo["games"]) < 11:
                         endIdx = begIdx + 5
