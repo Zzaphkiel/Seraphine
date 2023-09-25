@@ -803,7 +803,9 @@ class MainWindow(FluentWindow):
             isGaming = True
         elif status == 'InProgress':
             title = self.tr("Gaming")
-            self.__onGameStart()
+            # 重连或正常进入游戏(走GameStart), 不需要更新数据
+            if not self.isGaming:
+                self.__onGameStart()
             isGaming = True
         elif status == 'WaitingForStatus':
             title = self.tr("Waiting for status")
@@ -812,6 +814,7 @@ class MainWindow(FluentWindow):
         elif status == 'Lobby':
             title = self.tr("Lobby")
             self.__onGameEnd()
+            self.switchTo(self.careerInterface)
         elif status == 'ReadyCheck':
             title = self.tr("Ready check")
             self.__onMatchMade()
