@@ -91,6 +91,7 @@ class GameInfoInterface(SmoothScrollArea):
         self.allySummonerGamesView.clear()
         self.enemySummonerGamesView.clear()
 
+        self.summonersGamesView.setCurrentIndex(0)
         self.summonersView.allyButton.setVisible(False)
         self.summonersView.enemyButton.setVisible(False)
 
