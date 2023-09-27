@@ -643,10 +643,6 @@ class MainWindow(FluentWindow):
         self.checkAndSwitchTo(self.careerInterface)
 
     def __onTeammateFlyoutSummonerNameClicked(self, name):
-        f"""
-        # FIXME 此方法未使用
-        @see : {self.__onSearchInterfaceSummonerNameClicked}
-        """
         self.careerInterface.w.close()
         self.careerInterface.showLoadingPage.emit()
 
@@ -660,35 +656,39 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
             rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = connector.getSummonerGamesByPuuid(
-                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            try:
+                gamesInfo = connector.getSummonerGamesByPuuid(
+                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            except SummonerGamesNotFound:
+                champions = []
+                games = {}
+            else:
+                games = {
+                    "gameCount": gamesInfo["gameCount"],
+                    "wins": 0,
+                    "losses": 0,
+                    "kills": 0,
+                    "deaths": 0,
+                    "assists": 0,
+                    "games": [],
+                }
 
-            games = {
-                "gameCount": gamesInfo["gameCount"],
-                "wins": 0,
-                "losses": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "games": [],
-            }
+                for game in gamesInfo["games"]:
+                    info = processGameData(game)
 
-            for game in gamesInfo["games"]:
-                info = processGameData(game)
+                    if not info["remake"] and info["queueId"] != 0:
+                        games["kills"] += info["kills"]
+                        games["deaths"] += info["deaths"]
+                        games["assists"] += info["assists"]
 
-                if not info["remake"] and info["queueId"] != 0:
-                    games["kills"] += info["kills"]
-                    games["deaths"] += info["deaths"]
-                    games["assists"] += info["assists"]
+                        if info["win"]:
+                            games["wins"] += 1
+                        else:
+                            games["losses"] += 1
 
-                    if info["win"]:
-                        games["wins"] += 1
-                    else:
-                        games["losses"] += 1
+                    games["games"].append(info)
 
-                games["games"].append(info)
-
-            champions = getRecentChampions(games['games'])
+                champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
                 {'name': name,
