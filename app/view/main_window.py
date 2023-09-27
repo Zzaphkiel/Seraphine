@@ -28,7 +28,7 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
-from ..lol.exceptions import SummonerGamesNotFound
+from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
@@ -44,7 +44,7 @@ class MainWindow(FluentWindow):
     lolInstallFolderChanged = pyqtSignal(str)
     showUpdateMessageBox = pyqtSignal(dict)
     checkUpdateFailed = pyqtSignal()
-    showLcuConnectError = pyqtSignal(str, str)
+    showLcuConnectError = pyqtSignal(str, BaseException)
 
     def __init__(self):
         super().__init__()
@@ -208,7 +208,13 @@ class MainWindow(FluentWindow):
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
 
-    def __onShowLcuConnectError(self, api, msg):
+    def __onShowLcuConnectError(self, api, obj):
+        if type(obj) is SummonerGamesNotFound:
+            msg = self.tr("The server returned abnormal content, which may be under maintenance.")
+        elif type(obj) is RetryMaximumAttempts:
+            msg = self.tr("Exceeded maximum retry attempts.")
+        else:
+            msg = repr(obj)
         InfoBar.error(
             self.tr("LCU request error"),
             self.tr(f"Connect API") + f" {api}: {msg}",
@@ -245,9 +251,9 @@ class MainWindow(FluentWindow):
     def pollingConnectTimeout(self):
         while True:
             if connector.exceptApi:
-                self.showLcuConnectError.emit(connector.exceptApi, connector.exceptMsg)
+                self.showLcuConnectError.emit(connector.exceptApi, connector.exceptObj)
                 connector.exceptApi = None
-                connector.exceptMsg = None
+                connector.exceptObj = None
 
             time.sleep(.5)
 

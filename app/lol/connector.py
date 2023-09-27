@@ -35,7 +35,7 @@ def tackle():
     return decorator
 
 
-def retry(count=5, retry_sep=0.5):
+def retry(count=5, retry_sep=0):
     def decorator(func):
         def wrapper(*args, **kwargs):
             exce = None
@@ -59,7 +59,7 @@ def retry(count=5, retry_sep=0.5):
                 exce = exce if exce else RetryMaximumAttempts("Exceeded maximum retry attempts.")
                 connector.ref_cnt -= 1
                 connector.exceptApi = func.__name__
-                connector.exceptMsg = repr(exce)
+                connector.exceptObj = exce
                 raise exce
 
             return res
@@ -82,7 +82,7 @@ class LolClientConnector:
         self.manager = None
 
         self.exceptApi = None
-        self.exceptMsg = None
+        self.exceptObj = None
 
     def start(self, pid):
         process = psutil.Process(pid)
