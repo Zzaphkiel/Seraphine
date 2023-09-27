@@ -900,10 +900,10 @@ class MainWindow(FluentWindow):
                             ])
                             begIdx = endIdx + 1
                 except SummonerGamesNotFound:
-                    return None
-
-                gamesInfo = [processGameData(game)
-                             for game in origGamesInfo["games"][:11]]
+                    gamesInfo = []
+                else:
+                    gamesInfo = [processGameData(game)
+                                 for game in origGamesInfo["games"][:11]]
 
                 _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
 
