@@ -527,13 +527,26 @@ class ProfileTierCard(ExpandGroupSettingCard):
             queue, tier, division)).start()
 
 
-class OnlineAvailabilityCard(SettingCard):
+class OnlineAvailabilityCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
         super().__init__(Icon.PERSONAVAILABLE, title, content, parent)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.availabilityLabel = QLabel(
+            self.tr("Your online availability will be shown:"))
         self.comboBox = ComboBox()
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.pushButton = PushButton(self.tr("Apply"))
 
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initWidget(self):
         self.comboBox.setMinimumWidth(130)
         self.pushButton.setMinimumWidth(100)
 
@@ -541,16 +554,31 @@ class OnlineAvailabilityCard(SettingCard):
             [self.tr("chat"),
              self.tr("away"),
              self.tr("offline")])
+
         self.comboBox.setPlaceholderText(self.tr("Availability"))
         self.pushButton.setEnabled(False)
 
-        self.hBoxLayout.addWidget(self.comboBox)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
-
         self.comboBox.currentTextChanged.connect(self.__onComboBoxTextChanged)
         self.pushButton.clicked.connect(self.__onPushButttonClicked)
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.availabilityLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.comboBox, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
 
     def clear(self):
         self.comboBox.setPlaceholderText(self.tr("Availability"))
