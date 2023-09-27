@@ -230,6 +230,7 @@ class LolClientConnector:
 
         return icon
 
+    @retry()
     def getSummonerByName(self, name):
         params = {"name": name}
         res = self.__get(f"/lol-summoner/v1/summoners", params).json()
@@ -302,12 +303,14 @@ class LolClientConnector:
 
         return res["games"]
 
+    @tackle()
     @retry()
     def getGameDetailByGameId(self, gameId):
         res = self.__get(f"/lol-match-history/v1/games/{gameId}").json()
 
         return res
 
+    @tackle()
     @retry()
     def getRankedStatsByPuuid(self, puuid):
         res = self.__get(f"/lol-ranked/v1/ranked-stats/{puuid}").json()
