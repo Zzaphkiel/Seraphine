@@ -1092,7 +1092,7 @@ class SearchInterface(SmoothScrollArea):
         self.queueIdBuffer = {}
         gameIdx = 0
         begIdx = 0
-        endIdx = begIdx + 9
+        endIdx = begIdx + 19
         while True:
             try:
                 games = connector.getSummonerGamesByPuuidSlowly(
@@ -1125,7 +1125,8 @@ class SearchInterface(SmoothScrollArea):
                 gameIdx += 1
 
             begIdx = endIdx + 1
-            endIdx += 9
+            endIdx += 19
+            time.sleep(.2)
 
     def __onSummonerPuuidGetted(self, puuid):
         if puuid != "-1":

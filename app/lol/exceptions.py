@@ -8,3 +8,7 @@ class SummonerGamesNotFound(BaseException):
 
 class SummonerNotInGame(BaseException):
     pass
+
+
+class RetryMaximumAttempts(BaseException):
+    pass
