@@ -284,8 +284,7 @@ class GamesTab(QFrame):
         elif self.first:
             gameId = layout.itemAt(0).widget().gameId
             self.tabClicked.emit(str(gameId))
-            self.first = False
-
+        self.first = False
 
         mainWindow = self.window()
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
