@@ -290,9 +290,9 @@ def processGameDetailData(puuid, game):
 
                 if getRankInfo:
                     rank = connector.getRankedStatsByPuuid(
-                        summonerPuuid)['queueMap']
+                        summonerPuuid).get('queueMap')
 
-                    if queueId != 1700:
+                    if queueId != 1700 and rank:
                         rankInfo = rank[
                             'RANKED_FLEX_SR'] if queueId == 440 else rank[
                                 'RANKED_SOLO_5x5']
