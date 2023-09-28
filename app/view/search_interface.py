@@ -111,9 +111,11 @@ class GamesTab(QFrame):
             self.parent().gameDetailView.showLoadingPage.emit()
             while True:
                 nowGameId = self.gameId
+                nowPuuid = self.puuid
                 game = connector.getGameDetailByGameId(self.gameId)
-                game = processGameDetailData(self.puuid, game)
-                self.gameDetailReady.emit(game)
+                if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
+                    game = processGameDetailData(self.puuid, game)
+                    self.gameDetailReady.emit(game)
                 if nowGameId == self.gameId:
                     break
             self.parent().gameDetailView.hideLoadingPage.emit()
