@@ -47,6 +47,7 @@ class GamesTab(QFrame):
         self.queueId = 0
         self.gamesNumberPerPage = 10
         self.maxPage = None
+        self.gameId = 0
 
         self.puuid = None
         self.games = []
@@ -102,12 +103,19 @@ class GamesTab(QFrame):
             self.__onNextButtonClicked()
 
     def __onTabClicked(self, gameId):
+        self.gameId = gameId
+        if self.parent().gameDetailView.processRing.isVisible():
+            return
 
         def _():
             self.parent().gameDetailView.showLoadingPage.emit()
-            game = connector.getGameDetailByGameId(gameId)
-            game = processGameDetailData(self.puuid, game)
-            self.gameDetailReady.emit(game)
+            while True:
+                nowGameId = self.gameId
+                game = connector.getGameDetailByGameId(self.gameId)
+                game = processGameDetailData(self.puuid, game)
+                self.gameDetailReady.emit(game)
+                if nowGameId == self.gameId:
+                    break
             self.parent().gameDetailView.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
@@ -435,6 +443,7 @@ class GameDetailView(QFrame):
             self.extraTeamView2.setVisible(not enable)
 
         self.processRing.setVisible(enable)
+        self.processRing.isVisible()
 
 
 class TeamView(QFrame):
