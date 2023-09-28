@@ -288,33 +288,33 @@ def processGameDetailData(puuid, game):
 
                 getRankInfo = cfg.get(cfg.showTierInGameInfo)
 
+                tier, division, lp, rankIcon = None, None, None, None
                 if getRankInfo:
                     rank = connector.getRankedStatsByPuuid(
                         summonerPuuid).get('queueMap')
 
-                    if queueId != 1700 and rank:
-                        rankInfo = rank[
-                            'RANKED_FLEX_SR'] if queueId == 440 else rank[
-                                'RANKED_SOLO_5x5']
+                    try:
+                        if queueId != 1700 and rank:
+                            rankInfo = rank[
+                                'RANKED_FLEX_SR'] if queueId == 440 else rank['RANKED_SOLO_5x5']
 
-                        tier: str = rankInfo['tier']
-                        division = rankInfo['division']
-                        lp = rankInfo['leaguePoints']
+                            tier = rankInfo['tier']
+                            division = rankInfo['division']
+                            lp = rankInfo['leaguePoints']
 
-                        if tier == '':
-                            rankIcon = 'app/resource/images/unranked.png'
+                            if tier == '':
+                                rankIcon = 'app/resource/images/unranked.png'
+                            else:
+                                rankIcon = f'app/resource/images/{tier.lower()}.png'
+                                tier = translateTier(tier, True)
+
+                            if division == 'NA':
+                                division = ''
                         else:
-                            rankIcon = f'app/resource/images/{tier.lower()}.png'
-                            tier = translateTier(tier, True)
-
-                        if division == 'NA':
-                            division = ''
-                    else:
-                        rankInfo = rank["CHERRY"]
-                        lp = rankInfo['ratedRating']
-                        tier, division, rankIcon = None, None, None
-                else:
-                    tier, division, lp, rankIcon = None, None, None, None
+                            rankInfo = rank["CHERRY"]
+                            lp = rankInfo['ratedRating']
+                    except KeyError:
+                        ...
 
                 item = {
                     'summonerName': summonerName,
