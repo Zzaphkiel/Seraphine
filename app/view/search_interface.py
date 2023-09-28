@@ -1058,6 +1058,7 @@ class SearchInterface(SmoothScrollArea):
         self.vBoxLayout.setContentsMargins(30, 32, 30, 30)
 
     def __onSearchButtonClicked(self):
+        self.searchLineEdit.searchButton.setFocus()
         self.filterComboBox.setCurrentIndex(0)
 
         targetName = self.searchLineEdit.text()
