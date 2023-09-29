@@ -35,7 +35,7 @@ def tackle():
     return decorator
 
 
-def retry(count=5, retry_sep=0.5):
+def retry(count=5, retry_sep=0):
     def decorator(func):
         def wrapper(*args, **kwargs):
             exce = None
@@ -55,10 +55,12 @@ def retry(count=5, retry_sep=0.5):
                     connector.ref_cnt -= 1
                     break
             else:
+                # 有异常抛异常, 没异常抛 RetryMaximumAttempts
+                exce = exce if exce else RetryMaximumAttempts("Exceeded maximum retry attempts.")
                 connector.ref_cnt -= 1
-                connector.timeoutApi = func.__name__
+                connector.exceptApi = func.__name__
+                connector.exceptObj = exce
                 raise exce
-                # raise Exception("Exceeded maximum retry attempts.")
 
             return res
 
@@ -79,7 +81,8 @@ class LolClientConnector:
         self.tackleFlag = threading.Event()
         self.manager = None
 
-        self.timeoutApi = None
+        self.exceptApi = None
+        self.exceptObj = None
 
     def start(self, pid):
         process = psutil.Process(pid)
@@ -227,6 +230,7 @@ class LolClientConnector:
 
         return icon
 
+    @retry()
     def getSummonerByName(self, name):
         params = {"name": name}
         res = self.__get(f"/lol-summoner/v1/summoners", params).json()
@@ -246,8 +250,22 @@ class LolClientConnector:
         return res
 
     @slowly()
-    @retry(10, 1)
+    @retry(5, 1)
     def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
+        """
+        Retrieves a list of summoner games by puuid using a slow and retry mechanism.
+
+        Parameters:
+            puuid (str): The puuid of the summoner.
+            begIndex (int): The beginning index of the games to retrieve. Default is 0.
+            endIndex (int): The ending index of the games to retrieve. Default is 4.
+
+        Returns:
+            list: A list of summoner games.
+
+        Raises:
+            SummonerGamesNotFound: If the summoner games are not found.
+        """
         params = {"begIndex": begIndex, "endIndex": endIndex}
         res = self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
@@ -261,6 +279,20 @@ class LolClientConnector:
     @tackle()
     @retry()
     def getSummonerGamesByPuuid(self, puuid, begIndex=0, endIndex=4):
+        """
+        Retrieves a list of summoner games by PUUID.
+
+        Args:
+            puuid (str): The PUUID of the summoner.
+            begIndex (int, optional): The starting index of the games to retrieve. Defaults to 0.
+            endIndex (int, optional): The ending index of the games to retrieve. Defaults to 4.
+
+        Returns:
+            list: A list of summoner games.
+
+        Raises:
+            SummonerGamesNotFound: If the summoner games are not found.
+        """
         params = {"begIndex": begIndex, "endIndex": endIndex}
         res = self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
@@ -271,12 +303,14 @@ class LolClientConnector:
 
         return res["games"]
 
+    @tackle()
     @retry()
     def getGameDetailByGameId(self, gameId):
         res = self.__get(f"/lol-match-history/v1/games/{gameId}").json()
 
         return res
 
+    @tackle()
     @retry()
     def getRankedStatsByPuuid(self, puuid):
         res = self.__get(f"/lol-ranked/v1/ranked-stats/{puuid}").json()

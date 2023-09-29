@@ -28,7 +28,7 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
-from ..lol.exceptions import SummonerGamesNotFound
+from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
@@ -44,7 +44,7 @@ class MainWindow(FluentWindow):
     lolInstallFolderChanged = pyqtSignal(str)
     showUpdateMessageBox = pyqtSignal(dict)
     checkUpdateFailed = pyqtSignal()
-    showLcuConnectTimeout = pyqtSignal(str)
+    showLcuConnectError = pyqtSignal(str, BaseException)
 
     def __init__(self):
         super().__init__()
@@ -146,7 +146,7 @@ class MainWindow(FluentWindow):
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
         self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
-        self.showLcuConnectTimeout.connect(self.__onShowLcuConnectTimeout)
+        self.showLcuConnectError.connect(self.__onShowLcuConnectError)
 
         self.careerInterface.searchButton.clicked.connect(
             self.__onCareerInterfaceHistoryButtonClicked)
@@ -208,10 +208,16 @@ class MainWindow(FluentWindow):
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
 
-    def __onShowLcuConnectTimeout(self, api):
+    def __onShowLcuConnectError(self, api, obj):
+        if type(obj) is SummonerGamesNotFound:
+            msg = self.tr("The server returned abnormal content, which may be under maintenance.")
+        elif type(obj) is RetryMaximumAttempts:
+            msg = self.tr("Exceeded maximum retry attempts.")
+        else:
+            msg = repr(obj)
         InfoBar.error(
-            self.tr("LCU request timeout"),
-            self.tr(f"Connect API") + f" {api} " + self.tr("request timeout."),
+            self.tr("LCU request error"),
+            self.tr(f"Connect API") + f" {api}: {msg}",
             duration=5000,
             parent=self,
             position=InfoBarPosition.BOTTOM_RIGHT
@@ -244,9 +250,10 @@ class MainWindow(FluentWindow):
 
     def pollingConnectTimeout(self):
         while True:
-            if connector.timeoutApi:
-                self.showLcuConnectTimeout.emit(connector.timeoutApi)
-                connector.timeoutApi = None
+            if connector.exceptApi:
+                self.showLcuConnectError.emit(connector.exceptApi, connector.exceptObj)
+                connector.exceptApi = None
+                connector.exceptObj = None
 
             time.sleep(.5)
 
@@ -655,35 +662,39 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
             rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = connector.getSummonerGamesByPuuid(
-                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            try:
+                gamesInfo = connector.getSummonerGamesByPuuid(
+                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            except SummonerGamesNotFound:
+                champions = []
+                games = {}
+            else:
+                games = {
+                    "gameCount": gamesInfo["gameCount"],
+                    "wins": 0,
+                    "losses": 0,
+                    "kills": 0,
+                    "deaths": 0,
+                    "assists": 0,
+                    "games": [],
+                }
 
-            games = {
-                "gameCount": gamesInfo["gameCount"],
-                "wins": 0,
-                "losses": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "games": [],
-            }
+                for game in gamesInfo["games"]:
+                    info = processGameData(game)
 
-            for game in gamesInfo["games"]:
-                info = processGameData(game)
+                    if not info["remake"] and info["queueId"] != 0:
+                        games["kills"] += info["kills"]
+                        games["deaths"] += info["deaths"]
+                        games["assists"] += info["assists"]
 
-                if not info["remake"] and info["queueId"] != 0:
-                    games["kills"] += info["kills"]
-                    games["deaths"] += info["deaths"]
-                    games["assists"] += info["assists"]
+                        if info["win"]:
+                            games["wins"] += 1
+                        else:
+                            games["losses"] += 1
 
-                    if info["win"]:
-                        games["wins"] += 1
-                    else:
-                        games["losses"] += 1
+                    games["games"].append(info)
 
-                games["games"].append(info)
-
-            champions = getRecentChampions(games['games'])
+                champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
                 {'name': name,
@@ -725,35 +736,39 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = summoner.xpUntilNextLevel
 
             rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            gamesInfo = connector.getSummonerGamesByPuuid(
-                summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            try:
+                gamesInfo = connector.getSummonerGamesByPuuid(
+                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
+            except SummonerGamesNotFound:
+                champions = []
+                games = {}
+            else:
+                games = {
+                    "gameCount": gamesInfo["gameCount"],
+                    "wins": 0,
+                    "losses": 0,
+                    "kills": 0,
+                    "deaths": 0,
+                    "assists": 0,
+                    "games": [],
+                }
 
-            games = {
-                "gameCount": gamesInfo["gameCount"],
-                "wins": 0,
-                "losses": 0,
-                "kills": 0,
-                "deaths": 0,
-                "assists": 0,
-                "games": [],
-            }
+                for game in gamesInfo["games"]:
+                    info = processGameData(game)
 
-            for game in gamesInfo["games"]:
-                info = processGameData(game)
+                    if not info["remake"] and info["queueId"] != 0:
+                        games["kills"] += info["kills"]
+                        games["deaths"] += info["deaths"]
+                        games["assists"] += info["assists"]
 
-                if not info["remake"] and info["queueId"] != 0:
-                    games["kills"] += info["kills"]
-                    games["deaths"] += info["deaths"]
-                    games["assists"] += info["assists"]
+                        if info["win"]:
+                            games["wins"] += 1
+                        else:
+                            games["losses"] += 1
 
-                    if info["win"]:
-                        games["wins"] += 1
-                    else:
-                        games["losses"] += 1
+                    games["games"].append(info)
 
-                games["games"].append(info)
-
-            champions = getRecentChampions(games['games'])
+                champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
                 {'name': summoner.name,
@@ -869,23 +884,26 @@ class MainWindow(FluentWindow):
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 rankInfo = processRankInfo(origRankInfo)
 
-                origGamesInfo = connector.getSummonerGamesByPuuid(
-                    puuid, 0, 14)
+                try:
+                    origGamesInfo = connector.getSummonerGamesByPuuid(
+                        puuid, 0, 14)
 
-                if cfg.get(cfg.gameInfoFilter) and isRank:
-                    origGamesInfo["games"] = [
-                        game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
-                    begIdx = 15
-                    while len(origGamesInfo["games"]) < 11:
-                        endIdx = begIdx + 5
-                        origGamesInfo["games"].extend([
-                            game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
-                            if game["queueId"] in (420, 440)
-                        ])
-                        begIdx = endIdx + 1
-
-                gamesInfo = [processGameData(game)
-                             for game in origGamesInfo["games"][:11]]
+                    if cfg.get(cfg.gameInfoFilter) and isRank:
+                        origGamesInfo["games"] = [
+                            game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                        begIdx = 15
+                        while len(origGamesInfo["games"]) < 11:
+                            endIdx = begIdx + 5
+                            origGamesInfo["games"].extend([
+                                game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                                if game["queueId"] in (420, 440)
+                            ])
+                            begIdx = endIdx + 1
+                except SummonerGamesNotFound:
+                    gamesInfo = []
+                else:
+                    gamesInfo = [processGameData(game)
+                                 for game in origGamesInfo["games"][:11]]
 
                 _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
 
@@ -1021,23 +1039,26 @@ class MainWindow(FluentWindow):
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 rankInfo = processRankInfo(origRankInfo)
 
-                origGamesInfo = connector.getSummonerGamesByPuuid(
-                    puuid, 0, 14)
+                try:
+                    origGamesInfo = connector.getSummonerGamesByPuuid(
+                        puuid, 0, 14)
 
-                if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
-                    origGamesInfo["games"] = [
-                        game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
-                    begIdx = 15
-                    while len(origGamesInfo["games"]) < 11:
-                        endIdx = begIdx + 5
-                        origGamesInfo["games"].extend([
-                            game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
-                            if game["queueId"] in (420, 440)
-                        ])
-                        begIdx = endIdx + 1
-
-                gamesInfo = [processGameData(game)
-                             for game in origGamesInfo["games"][0:11]]
+                    if cfg.get(cfg.gameInfoFilter) and queueId in (420, 440):
+                        origGamesInfo["games"] = [
+                            game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                        begIdx = 15
+                        while len(origGamesInfo["games"]) < 11:
+                            endIdx = begIdx + 5
+                            origGamesInfo["games"].extend([
+                                game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                                if game["queueId"] in (420, 440)
+                            ])
+                            begIdx = endIdx + 1
+                except SummonerGamesNotFound:
+                    gamesInfo = []
+                else:
+                    gamesInfo = [processGameData(game)
+                                 for game in origGamesInfo["games"][0:11]]
 
                 _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
 

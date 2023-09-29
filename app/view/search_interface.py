@@ -47,6 +47,7 @@ class GamesTab(QFrame):
         self.queueId = 0
         self.gamesNumberPerPage = 10
         self.maxPage = None
+        self.gameId = 0
 
         self.puuid = None
         self.games = []
@@ -102,12 +103,21 @@ class GamesTab(QFrame):
             self.__onNextButtonClicked()
 
     def __onTabClicked(self, gameId):
+        self.gameId = gameId
+        if self.parent().gameDetailView.processRing.isVisible():
+            return
 
         def _():
             self.parent().gameDetailView.showLoadingPage.emit()
-            game = connector.getGameDetailByGameId(gameId)
-            game = processGameDetailData(self.puuid, game)
-            self.gameDetailReady.emit(game)
+            while True:
+                nowGameId = self.gameId
+                nowPuuid = self.puuid
+                game = connector.getGameDetailByGameId(self.gameId)
+                if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
+                    game = processGameDetailData(self.puuid, game)
+                    self.gameDetailReady.emit(game)
+                if nowGameId == self.gameId:
+                    break
             self.parent().gameDetailView.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
@@ -284,8 +294,7 @@ class GamesTab(QFrame):
         elif self.first:
             gameId = layout.itemAt(0).widget().gameId
             self.tabClicked.emit(str(gameId))
-            self.first = False
-
+        self.first = False
 
         mainWindow = self.window()
         mainWindow.checkAndSwitchTo(mainWindow.searchInterface)
@@ -436,6 +445,7 @@ class GameDetailView(QFrame):
             self.extraTeamView2.setVisible(not enable)
 
         self.processRing.setVisible(enable)
+        self.processRing.isVisible()
 
 
 class TeamView(QFrame):
@@ -1050,6 +1060,7 @@ class SearchInterface(SmoothScrollArea):
         self.vBoxLayout.setContentsMargins(30, 32, 30, 30)
 
     def __onSearchButtonClicked(self):
+        self.searchLineEdit.searchButton.setFocus()
         self.filterComboBox.setCurrentIndex(0)
 
         targetName = self.searchLineEdit.text()
@@ -1092,7 +1103,7 @@ class SearchInterface(SmoothScrollArea):
         self.queueIdBuffer = {}
         gameIdx = 0
         begIdx = 0
-        endIdx = begIdx + 9
+        endIdx = begIdx + 19
         while True:
             try:
                 games = connector.getSummonerGamesByPuuidSlowly(
@@ -1125,7 +1136,8 @@ class SearchInterface(SmoothScrollArea):
                 gameIdx += 1
 
             begIdx = endIdx + 1
-            endIdx += 9
+            endIdx += 19
+            time.sleep(.2)
 
     def __onSummonerPuuidGetted(self, puuid):
         if puuid != "-1":
