@@ -517,6 +517,16 @@ class LolClientConnector:
 
 
 class JsonManager:
+
+    # 曾经奥恩可以升级的杰作装备
+    masterpieceItemsMap = {
+        7003: 6664,  # 涡轮炼金罐
+        7004: 3068,  # 日炎圣盾
+        7007: 6672,  # 海妖杀手
+        7008: 6673,  # 不朽盾弓
+        7022: 4005,  # 帝国指令
+    }
+
     def __init__(self, itemData, spellData, runeData, queueData, champions, skins):
         self.items = {item["id"]: item["iconPath"] for item in itemData}
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
@@ -536,6 +546,9 @@ class JsonManager:
             self.champions[champs[championId]
                            ]["skins"][item["name"]] = item["id"]
             self.champions[champs[championId]]["id"] = championId
+
+        for oldId, nowId in JsonManager.masterpieceItemsMap.items():
+            self.items[oldId] = self.items[nowId]
 
     def getItemIconPath(self, iconId):
         if iconId != 0:
