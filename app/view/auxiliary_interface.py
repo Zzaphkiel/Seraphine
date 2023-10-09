@@ -60,6 +60,12 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Make your game config unchangeable"),
             cfg.lockConfig, self.gameGroup)
 
+        self.forceDisconnectionCard = SwitchSettingCard(
+            Icon.DISCONNECTION,
+            self.tr("Force disconnection (UAC privileges required)"),
+            self.tr('Press "Alt+F4" to exit LOL immediately, no wait.'),
+            cfg.forceDisconnection, self.gameGroup)
+
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
             self.tr("Only bots can be added to the lobby"),
@@ -121,6 +127,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.gameGroup.addSettingCard(self.spectateCard)
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
+        self.gameGroup.addSettingCard(self.forceDisconnectionCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -163,6 +170,7 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.autoSelectChampionCard.switchButton.setEnabled(True)
 
         self.lockConfigCard.setEnabled(a0)
+        self.forceDisconnectionCard.setEnabled(a0)
 
         return super().setEnabled(a0)
 

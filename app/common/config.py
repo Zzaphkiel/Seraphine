@@ -75,6 +75,8 @@ class Config(QConfig):
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
 
+    forceDisconnection = ConfigItem("Functions", "ForceDisconnection", False, BoolValidator())
+
     enableCloseToTray = ConfigItem(
         "General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
 
