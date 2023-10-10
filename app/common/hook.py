@@ -1,16 +1,18 @@
 import ctypes
-import sys
+import json
+import os
+import threading
 import time
 from ctypes import wintypes
 import pygetwindow as gw
 import psutil
-import win32con
-from pyuac import main_requires_admin
+import argparse
 
-# if not ctypes.windll.shell32.IsUserAnAdmin():
-#     # 如果当前的 Python 进程不是以管理员权限运行，那么以管理员权限重新启动它
-#     ctypes.windll.shell32.ShellExecuteW(win32con.SW_HIDE, "runas", sys.executable, __file__, None, 1)
-#     sys.exit()
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-p", "--pid", help="master process PID")
+
+args = parser.parse_args()
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
@@ -36,34 +38,22 @@ def LowLevelKeyboardProc(nCode, wParam, lParam):
     if nCode == 0:  # HC_ACTION
         KBDLLHOOKSTRUCT_p = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT))
         vkCode = KBDLLHOOKSTRUCT_p.contents.vkCode
-        # print("hook")
-        # print(f"0x{wParam:X}")
         if wParam in [0x104, 0x100]:  # WM_KEYDOWN
-            print(f"0x{vkCode:X} Down")
             keys_pressed.add(vkCode)
         elif wParam == 0x101:  # WM_KEYUP
-            print(f"0x{vkCode:X} Up")
             keys_pressed.discard(vkCode)
         if 0xA4 in keys_pressed and 0x73 in keys_pressed:  # Alt and F4
-        # if 0xA4 in keys_pressed and 0x74 in keys_pressed:  # Alt and F5  debug
-            print('Alt and F4 keys pressed together')
             keys_pressed.discard(0xA4)
             keys_pressed.discard(0x73)  # F4
             active_window_title = gw.getActiveWindow().title
-            print(active_window_title)
             if active_window_title != "League of Legends (TM) Client":
                 return user32.CallNextHookEx(None, ctypes.c_int(nCode), wintypes.WPARAM(wParam), wintypes.LPARAM(lParam))
 
             # 检查进程是否存在并且窗口标题匹配
-            print("active hit")
             for proc in psutil.process_iter():
-                # print(f"{proc.name()}:::{proc.pid}")
                 if proc.name() == "League of Legends.exe":
-                    print("proc found")
-                    time.sleep(.2)
                     proc.kill()
-                    # break
-                    return
+                    return -1
     return user32.CallNextHookEx(None, ctypes.c_int(nCode), wintypes.WPARAM(wParam), wintypes.LPARAM(lParam))
 
 
@@ -71,7 +61,6 @@ LowLevelKeyboardProc = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_int, wintypes.
     LowLevelKeyboardProc)
 
 
-@main_requires_admin
 def start_hook():
     hHook = user32.SetWindowsHookExW(idHook, LowLevelKeyboardProc, None, 0)
     if not hHook:
@@ -83,4 +72,21 @@ def start_hook():
 
 
 if __name__ == '__main__':
+    def _():
+        while True:
+            with open(fr"{os.getcwd()}\app\config\config.json", "r", encoding="utf-8") as f:
+                js = json.loads(f.read())
+                if not js.get("Functions", {}).get("ForceDisconnection"):  # 关闭了设置
+                    os._exit(0)
+
+            for proc in psutil.process_iter():
+                if proc.pid == int(args.pid):
+                    break
+            else:
+                os._exit(0)  # 随主进程退出
+            time.sleep(.5)
+
+    threading.Thread(target=_, daemon=True).start()
+
     start_hook()
+
