@@ -1,3 +1,4 @@
+import ctypes
 import json
 import os
 import sys
@@ -6,6 +7,7 @@ import time
 import webbrowser
 from collections import Counter
 
+import win32con
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QAbstractAnimation
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
@@ -81,6 +83,11 @@ class MainWindow(FluentWindow):
         threading.Thread(target=self.checkUpdate).start()
         threading.Thread(target=self.pollingConnectTimeout,
                          daemon=True).start()
+        threading.Thread(target=self.hookManager,
+                         daemon=True).start()
+
+        hookPath = rf"{os.getcwd()}\app\common\hook.py"
+        print(hookPath)
 
     def __initInterface(self):
         self.__lockInterface()
@@ -232,6 +239,11 @@ class MainWindow(FluentWindow):
             else:
                 if releasesInfo:
                     self.showUpdateMessageBox.emit(releasesInfo)
+
+    def hookManager(self):
+        if cfg.get(cfg.forceDisconnection):
+            ctypes.windll.shell32.ShellExecuteW(
+                win32con.SW_HIDE, "runas", sys.executable, rf"{os.getcwd()}\app\common\hook.py", None, 1)
 
     def __onCheckUpdateFailed(self):
         InfoBar.warning(
