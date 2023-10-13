@@ -855,6 +855,9 @@ class MainWindow(FluentWindow):
         elif status == 'Matchmaking':
             title = self.tr("Match making")
             self.__onGameEnd()
+        elif status == "Reconnect":  # 等待重连
+            title = self.tr("Waiting reconnect")
+            self.__onReconnect()
 
         if not isGaming and self.isGaming:
             self.__updateCareerGames()
@@ -875,6 +878,19 @@ class MainWindow(FluentWindow):
 
                 if not status['playerResponse'] == 'Declined':
                     connector.acceptMatchMaking()
+
+            threading.Thread(target=_).start()
+
+    def __onReconnect(self):
+        """
+        自动重连
+        @return:
+        """
+        if cfg.get(cfg.enableAutoReconnect):
+            def _():
+                while connector.getGameStatus() == "Reconnect":
+                    time.sleep(.3)  # 掉线立刻重连会无效;
+                    connector.reconnect()
 
             threading.Thread(target=_).start()
 

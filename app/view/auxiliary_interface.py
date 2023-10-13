@@ -77,6 +77,11 @@ class AuxiliaryInterface(SmoothScrollArea):
                 "Accept match making automatically after the number of seconds you set"),
             cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
             self.gameGroup)
+        self.autoReconnectCard = SwitchSettingCard(
+            Icon.CONNECTION,
+            self.tr("Auto reconnect"),
+            self.tr("Automatically reconnect when disconnected"),
+            cfg.enableAutoReconnect, self.gameGroup)
         self.spectateCard = SpectateCard(
             self.tr("Spectate"),
             self.tr("Spectate live game of summoner in the same environment"),
@@ -121,6 +126,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
+        self.gameGroup.addSettingCard(self.autoReconnectCard)
         self.gameGroup.addSettingCard(self.autoSelectChampionCard)
         # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
@@ -171,6 +177,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         self.lockConfigCard.setEnabled(a0)
         self.forceDisconnectionCard.setEnabled(a0)
+        self.autoReconnectCard.setEnabled(a0)
 
         return super().setEnabled(a0)
 

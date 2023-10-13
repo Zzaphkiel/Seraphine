@@ -351,6 +351,15 @@ class LolClientConnector:
         return res
 
     @retry()
+    def reconnect(self):
+        """
+        重新连接
+
+        @return:
+        """
+        return self.__post("/lol-gameflow/v1/reconnect")
+
+    @retry()
     def removeTokens(self):
         reference = self.__get("/lol-chat/v1/me").json()
         banner = reference['lol']['bannerIdSelected']

@@ -63,6 +63,10 @@ class Config(QConfig):
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,
                                           BoolValidator())
+    enableAutoReconnect = ConfigItem("Functions",
+                                     "EnableAutoReconnect", False,
+                                     BoolValidator())
+
     autoAcceptMatchingDelay = RangeConfigItem(
         "Functions", "AutoAcceptMatchingDelay", 0, RangeValidator(0, 11))
 
@@ -85,8 +89,8 @@ class Config(QConfig):
     )
 
     enableCheckUpdate = ConfigItem("General",
-                                          "EnableCheckUpdate", True,
-                                          BoolValidator())
+                                   "EnableCheckUpdate", True,
+                                   BoolValidator())
 
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
