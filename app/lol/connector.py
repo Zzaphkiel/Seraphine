@@ -20,7 +20,9 @@ def slowly():
 
             res = func(*args, **kwargs)
             return res
+
         return wrapper
+
     return decorator
 
 
@@ -31,7 +33,9 @@ def tackle():
             res = func(*args, **kwargs)
             connector.tackleFlag.clear()
             return res
+
         return wrapper
+
     return decorator
 
 
@@ -57,9 +61,14 @@ def retry(count=5, retry_sep=0):
             else:
                 # 有异常抛异常, 没异常抛 RetryMaximumAttempts
                 exce = exce if exce else RetryMaximumAttempts("Exceeded maximum retry attempts.")
-                connector.ref_cnt -= 1
-                connector.exceptApi = func.__name__
-                connector.exceptObj = exce
+
+                # ReferenceError为LCU未就绪仍有请求发送时抛出, 直接吞掉不用提示
+                # 其余异常弹一个提示
+                if type(exce) is not ReferenceError:
+                    connector.ref_cnt -= 1
+                    connector.exceptApi = func.__name__
+                    connector.exceptObj = exce
+
                 raise exce
 
             return res
@@ -69,8 +78,22 @@ def retry(count=5, retry_sep=0):
     return decorator
 
 
+def needLcu():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if connector.sess is None:
+                raise ReferenceError
+            res = func(*args, **kwargs)
+            return res
+
+        return wrapper
+
+    return decorator
+
+
 class LolClientConnector:
     def __init__(self):
+        self.sess = None
         self.port = None
         self.token = None
         self.url = None
@@ -85,6 +108,7 @@ class LolClientConnector:
         self.exceptObj = None
 
     def start(self, pid):
+        self.sess = requests.session()
         process = psutil.Process(pid)
         cmdline = process.cmdline()
 
@@ -106,6 +130,7 @@ class LolClientConnector:
         self.__initFolder()
 
     def close(self):
+        self.sess.close()
         self.__init__()
 
     def __initFolder(self):
@@ -125,17 +150,48 @@ class LolClientConnector:
 
     @retry()
     def __initManager(self):
-        items = self.__get("/lol-game-data/assets/v1/items.json").json()
-        spells = self.__get(
-            "/lol-game-data/assets/v1/summoner-spells.json").json()
-        runes = self.__get("/lol-game-data/assets/v1/perks.json").json()
-        queues = self.__get("/lol-game-queues/v1/queues").json()
-        champions = self.__get(
-            "/lol-game-data/assets/v1/champion-summary.json").json()
-        skins = self.__get("/lol-game-data/assets/v1/skins.json").json()
+        items = self.__json_retry_get("/lol-game-data/assets/v1/items.json")
+        spells = self.__json_retry_get(
+            "/lol-game-data/assets/v1/summoner-spells.json")
+        runes = self.__json_retry_get("/lol-game-data/assets/v1/perks.json")
+        queues = self.__json_retry_get("/lol-game-queues/v1/queues")
+        champions = self.__json_retry_get(
+            "/lol-game-data/assets/v1/champion-summary.json")
+        skins = self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
 
         self.manager = JsonManager(
             items, spells, runes, queues, champions, skins)
+
+    def __json_retry_get(self, url, max_retries=5):
+        """
+        根据 httpStatus 字段值, retry 获取数据
+
+        用于软件初始化阶段
+
+        @param url:
+        @param max_retries:
+        @return: json
+        @rtype: dict
+        """
+        retries = 0
+        while retries < max_retries:
+            try:
+                result = self.__get(url).json()
+            except ConnectionError:  # 客户端刚打开, Service正在初始化, 有部分请求可能会ConnectionError, 直接忽略重试
+                retries += 1
+                time.sleep(.5)
+                continue
+
+            if type(result) is list:
+                return result
+            elif result.get("httpStatus") and result.get("httpStatus") != 200:  # 如果有才判定, 有部分相应成功时没有httpStatus
+                time.sleep(.5)
+                retries += 1
+            else:
+                return result
+
+        # 最大重试次数, 抛异常
+        raise RetryMaximumAttempts("Exceeded maximum retry attempts.")
 
     @retry()
     def getRuneIcon(self, runeId):
@@ -498,26 +554,29 @@ class LolClientConnector:
 
         return res
 
+    @needLcu()
     def __get(self, path, params=None):
         url = self.url + path
-        return requests.get(url, params=params, verify=False)
+        return self.sess.get(url, params=params, verify=False)
 
+    @needLcu()
     def __post(self, path, data=None):
         url = self.url + path
         headers = {"Content-type": "application/json"}
-        return requests.post(url, json=data, headers=headers, verify=False)
+        return self.sess.post(url, json=data, headers=headers, verify=False)
 
+    @needLcu()
     def __put(self, path, data=None):
         url = self.url + path
-        return requests.put(url, json=data, verify=False)
+        return self.sess.put(url, json=data, verify=False)
 
+    @needLcu()
     def __patch(self, path, data=None):
         url = self.url + path
-        return requests.patch(url, json=data, verify=False)
+        return self.sess.patch(url, json=data, verify=False)
 
 
 class JsonManager:
-
     # 曾经奥恩可以升级的杰作装备
     masterpieceItemsMap = {
         7003: 6664,  # 涡轮炼金罐
@@ -535,7 +594,6 @@ class JsonManager:
         champs = {item["id"]: item["name"] for item in champions}
 
         self.champions = {item: {"skins": {}} for item in champs.values()}
-
         self.queues = {
             item["id"]: {"mapId": item["mapId"], "name": item["name"]}
             for item in queueData
@@ -544,7 +602,7 @@ class JsonManager:
         for item in skins.values():
             championId = item["id"] // 1000
             self.champions[champs[championId]
-                           ]["skins"][item["name"]] = item["id"]
+            ]["skins"][item["name"]] = item["id"]
             self.champions[champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():
