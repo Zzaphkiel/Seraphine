@@ -1059,7 +1059,7 @@ class MainWindow(FluentWindow):
 
             summoners = []
 
-            def process_item(item):
+            def process_item(item, isAllys=False):
                 # 跟 __onChampionSelectBegin 函数里面的处理方法一样，这里使用 puuid
                 puuid = item.get("puuid")
 
@@ -1135,10 +1135,11 @@ class MainWindow(FluentWindow):
                     ...
                 ]
                 """
+                teamMember = allys if isAllys else enemies
                 teammatesMarker = [
                     {'summonerId': sId, 'cnt': cnt, 'name': name}
                     for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x.get('summonerId') for x in enemies] and cnt >= cfg.get(cfg.teamGamesNumber)
+                    if sId in [x.get('summonerId') for x in teamMember] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
                 return {
@@ -1172,7 +1173,7 @@ class MainWindow(FluentWindow):
             if not self.isChampSelected:
                 summoners = []
                 with ThreadPoolExecutor() as executor:
-                    futures = [executor.submit(process_item, item)
+                    futures = [executor.submit(process_item, item, True)
                                for item in allys]
 
                 for future in as_completed(futures):
