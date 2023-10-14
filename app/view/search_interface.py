@@ -1125,7 +1125,6 @@ class SearchInterface(SmoothScrollArea):
                     return
 
                 if self.loadGamesThreadStop.isSet():
-                    print("stop ---------------------")
                     self.loadGamesThreadStop.clear()
                     return
 
