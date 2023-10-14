@@ -1111,6 +1111,8 @@ class SearchInterface(SmoothScrollArea):
             except SummonerGamesNotFound:
                 self.gamesNotFound.emit()
                 return
+            except ReferenceError:  # LCU 关闭了
+                return
 
             if not games["games"]:  # 所有对局都在一年内, 查完了
                 if not self.games:  # 未能查到任何一盘对局, 提示一下
@@ -1123,6 +1125,7 @@ class SearchInterface(SmoothScrollArea):
                     return
 
                 if self.loadGamesThreadStop.isSet():
+                    print("stop ---------------------")
                     self.loadGamesThreadStop.clear()
                     return
 

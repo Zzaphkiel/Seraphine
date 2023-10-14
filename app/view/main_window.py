@@ -404,6 +404,8 @@ class MainWindow(FluentWindow):
 
     def __onLolClientEnded(self):
         def _():
+            self.searchInterface.loadGamesThreadStop.set()  # 停掉战绩查询加载
+
             connector.close()
             self.isClientProcessRunning = False
 
@@ -573,10 +575,8 @@ class MainWindow(FluentWindow):
 
     def __onGameInfoPageSwitch(self):
         if self.gameInfoInterface.pageState == 1:
-            # TODO 动画 行为
             self.gameInfoInterface.pageState = 2
         else:
-            # TODO 动画 行为
             self.gameInfoInterface.pageState = 1
 
     def __onSearchInterfaceCareerButtonClicked(self):
