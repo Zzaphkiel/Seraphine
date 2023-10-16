@@ -226,6 +226,7 @@ class CareerInterface(SmoothScrollArea):
         self.__setLoadingPageEnabled(True)
 
     def __setLoadingPageEnabled(self, enable):
+        self.gameInfoArea.delegate.vScrollBar.resetValue(0)
         self.gameInfoArea.verticalScrollBar().setSliderPosition(0)
 
         self.icon.setVisible(not enable)
