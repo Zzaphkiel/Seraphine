@@ -745,17 +745,17 @@
     <message>
         <location filename="../../view/main_window.py" line="213"/>
         <source>The server returned abnormal content, which may be under maintenance.</source>
-        <translation type="unfinished"></translation>
+        <translation>服务器返回了不正常内容，可能其正在维护中</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="215"/>
         <source>Exceeded maximum retry attempts.</source>
-        <translation type="unfinished"></translation>
+        <translation>超出最大尝试次数</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="218"/>
         <source>LCU request error</source>
-        <translation type="unfinished"></translation>
+        <translation>客户端信息请求失败</translation>
     </message>
 </context>
 <context>
