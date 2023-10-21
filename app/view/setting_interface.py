@@ -7,7 +7,7 @@ from qfluentwidgets import (
     ExpandLayout, Theme, CustomColorSettingCard, InfoBar, setTheme,
     setThemeColor, SmoothScrollArea, SettingCard, FluentIconBase, SpinBox,
     PushButton, PrimaryPushSettingCard, HyperlinkCard, FlyoutView, Flyout,
-    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon, InfoBarPosition)
+    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon, InfoBarPosition, ExpandGroupSettingCard)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout
@@ -19,28 +19,68 @@ from ..common.style_sheet import StyleSheet
 from ..components.loose_switch_setting_card import LooseSwitchSettingCard
 
 
-class LineEditSettingCard(SettingCard):
+class LineEditSettingCard(ExpandGroupSettingCard):
 
-    def __init__(self, configItem, text, title, step,
+    def __init__(self, configItem, title, hintContent, step,
                  icon: Union[str, QIcon, FluentIconBase],
                  content=None, parent=None):
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.hintLabel = QLabel(hintContent)
         self.lineEdit = SpinBox(self)
-        self.lineEdit.setRange(1, 999)
-        self.lineEdit.setValue(cfg.get(self.configItem))
-        self.lineEdit.setSingleStep(step)
-        self.pushButton = PushButton(text, self)
-        self.pushButton.setMinimumWidth(100)
-        self.hBoxLayout.addWidget(self.lineEdit)
-        self.hBoxLayout.addSpacing(16)
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
-        self.pushButton.clicked.connect(self.__onValueChanged)
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.pushButton = PushButton(self.tr("Apply"))
+
+        self.statusLabel = QLabel(self)
+
+        self.__initLayout()
+        self.__initWidget(step)
 
     def __onValueChanged(self):
         value = self.lineEdit.value()
         cfg.set(self.configItem, value)
+        self.__setStatusLabelText(value)
+
+    def __initWidget(self, step):
+        self.lineEdit.setRange(1, 999)
+        value = cfg.get(self.configItem)
+        self.__setStatusLabelText(value)
+
+        self.lineEdit.setValue(value)
+        self.lineEdit.setSingleStep(step)
+        self.lineEdit.setMinimumWidth(250)
+        self.pushButton.setMinimumWidth(100)
+        self.pushButton.clicked.connect(self.__onValueChanged)
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.hintLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __setStatusLabelText(self, value):
+        self.statusLabel.setText(self.tr("Now: ") + str(value))
 
 
 class SettingInterface(SmoothScrollArea):
@@ -59,13 +99,14 @@ class SettingInterface(SmoothScrollArea):
                                               self.scrollWidget)
 
         self.teamGamesNumberCard = LineEditSettingCard(
-            cfg.teamGamesNumber, self.tr("Apply"),
-            self.tr("Pre-team threshold"), 1, Icon.TEAM,
+            cfg.teamGamesNumber,
+            self.tr("Pre-team threshold"), self.tr("Threshold value:"), 1, Icon.TEAM,
             self.tr("Pre-team threshold for common game rounds"), self.functionGroup)
 
         self.careerGamesCount = LineEditSettingCard(
-            cfg.careerGamesNumber, self.tr("Apply"),
-            self.tr("Default games number"), 10, Icon.SLIDESEARCH,
+            cfg.careerGamesNumber,
+            self.tr("Default games number"), self.tr(
+                "Number of games:"), 10, Icon.SLIDESEARCH,
             self.
             tr("Setting the maximum number of games shows in the career interface"
                ), self.functionGroup)

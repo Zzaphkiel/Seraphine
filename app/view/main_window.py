@@ -218,7 +218,8 @@ class MainWindow(FluentWindow):
 
     def __onShowLcuConnectError(self, api, obj):
         if type(obj) is SummonerGamesNotFound:
-            msg = self.tr("The server returned abnormal content, which may be under maintenance.")
+            msg = self.tr(
+                "The server returned abnormal content, which may be under maintenance.")
         elif type(obj) is RetryMaximumAttempts:
             msg = self.tr("Exceeded maximum retry attempts.")
         else:
@@ -270,7 +271,8 @@ class MainWindow(FluentWindow):
     def pollingConnectTimeout(self):
         while True:
             if connector.exceptApi:
-                self.showLcuConnectError.emit(connector.exceptApi, connector.exceptObj)
+                self.showLcuConnectError.emit(
+                    connector.exceptApi, connector.exceptObj)
                 connector.exceptApi = None
                 connector.exceptObj = None
 

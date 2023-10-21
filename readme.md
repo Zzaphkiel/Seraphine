@@ -22,12 +22,12 @@
 </p>
 
 <p align='center'>
-  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071">
+  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/2c053134-25e1-4a1b-aa9c-4f77cf9522f2">
 </p>
 
 ## 快速上手 🤗
 ### 直接使用打包好的程序
-在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压至本地，运行 `Seraphine.exe` 开始使用。
+在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压，运行文件夹内 `Seraphine.exe` 开始使用。
 
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
@@ -71,9 +71,20 @@ python main.py
     - 一键卸下勋章 ✅
 
 
-## 我会因为使用 Seraphine 而被封号吗 😨？
-
+## 常见问题 FAQ 🧐
+### Q：我会因为使用 Seraphine 而被封号吗 😨？
 由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，但**并不保证**一定不会封号。
+
+在当前 Release 版本的使用过程中，发现了存在封号现象（见 [#104](https://github.com/Zzaphkiel/Seraphine/issues/104)），具体原因不明。请您尽量避免在游戏过程中打开 Seraphine 🥹。
+
+### Q：为什么客户端无法连接 / 功能无法使用 / 生涯界面无限转圈 / 最新战绩更新有延迟？
+Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户端接口所提供的，程序只是负责将它们显示出来。所以如果遇到功能无法使用或数据更新由延迟的情况，原因基本出在英雄联盟服务器本身，与 Seraphine 大概率没啥关系~
+
+### Q：从本地直接运行代码报错怎么办？
+换 Python `3.8` 试试。
+
+### Q：为什么不提供具体某模式 / 某英雄总场次以及总胜率？
+英雄联盟客户端没有提供相关数据接口，我们做不到哇~
 
 
 ## 帮助我们改进 Seraphine 😘
