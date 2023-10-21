@@ -812,13 +812,6 @@ class MainWindow(FluentWindow):
             self.__onGameEnd()
         elif status == 'ChampSelect':
             title = self.tr("Selecting Champions")
-
-            # 在标题添加所处队伍
-            mapSide = connector.getMapSide()
-            if mapSide:
-                mapSide = self.tr("Blue Team") if mapSide == "blue" else self.tr("Red Team")
-                title = title + " - " + mapSide
-
             self.__onChampionSelectBegin()
             self.isChampSelected = True
         elif status == 'GameStart':

@@ -508,12 +508,6 @@ class LolClientConnector:
         return res
 
     @retry()
-    def getMapSide(self):
-        js = self.__get("/lol-champ-select/v1/pin-drop-notification").json()
-
-        return js.get("mapSide", "")
-
-    @retry()
     def getReadyCheckStatus(self):
         res = self.__get("/lol-matchmaking/v1/ready-check").json()
 
