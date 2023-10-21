@@ -47,7 +47,6 @@ class MainWindow(FluentWindow):
     showUpdateMessageBox = pyqtSignal(dict)
     checkUpdateFailed = pyqtSignal()
     showLcuConnectError = pyqtSignal(str, BaseException)
-    forceDisconnectionSwitch = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -84,8 +83,11 @@ class MainWindow(FluentWindow):
         threading.Thread(target=self.checkUpdate).start()
         threading.Thread(target=self.pollingConnectTimeout,
                          daemon=True).start()
+        threading.Thread(target=self.hookManager,
+                         daemon=True).start()
 
-        self.__onHookSwitchChange()
+        hookPath = rf"{os.getcwd()}\app\common\hook.py"
+        print(hookPath)
 
     def __initInterface(self):
         self.__lockInterface()
@@ -179,9 +181,6 @@ class MainWindow(FluentWindow):
             self.setMicaEffectEnabled)
         self.stackedWidget.currentChanged.connect(
             self.__onCurrentStackedChanged)
-        self.auxiliaryFuncInterface.forceDisconnectionCard.switchButton.checkedChanged.connect(
-            self.__onHookSwitchChange
-        )
 
     def __initWindow(self):
         self.resize(1134, 826)
@@ -242,16 +241,10 @@ class MainWindow(FluentWindow):
                 if releasesInfo:
                     self.showUpdateMessageBox.emit(releasesInfo)
 
-    def __onHookSwitchChange(self):
+    def hookManager(self):
         if cfg.get(cfg.forceDisconnection):
-            if "python.exe" in sys.executable:  # 未打包
-                ctypes.windll.shell32.ShellExecuteW(
-                    win32con.SW_HIDE, "runas", sys.executable, rf"{os.getcwd()}\app\common\hook.py -p {os.getpid()}",
-                    None, 0)
-            else:  # 已打包
-                ctypes.windll.shell32.ShellExecuteW(
-                    win32con.SW_HIDE, "runas", sys.executable, rf"-p {os.getpid()}",
-                    None, 0)
+            ctypes.windll.shell32.ShellExecuteW(
+                win32con.SW_HIDE, "runas", sys.executable, rf"{os.getcwd()}\app\common\hook.py", None, 1)
 
     def __onCheckUpdateFailed(self):
         InfoBar.warning(
