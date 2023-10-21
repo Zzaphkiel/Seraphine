@@ -43,7 +43,6 @@ class Icon(FluentIconBase, Enum):
     SETTING = 'Setting'
     FILTER = 'Filter'
     UPDATE = 'Update'
-    DISCONNECTION = 'Disconnection'
     CONNECTION = "Connection"
 
     def path(self, theme=Theme.AUTO):
