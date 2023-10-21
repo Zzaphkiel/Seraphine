@@ -49,16 +49,22 @@ jobs:
         echo "UPDATED=$UPDATED" >> $GITHUB_ENV
     - name: Download artifact
       uses: actions/download-artifact@v3
-      if: env.UPDATED == 'true'
+      if: env.UPDATED == 'true' && endsWith(env.VERSION, 'beta')
       with:
         name: Seraphine
         path: ./
     - name: Push to release
       uses: ncipollo/release-action@v1
-      if: env.UPDATED == 'true'
+      if: env.UPDATED == 'true' && endsWith(env.VERSION, 'beta')
       with:
         name: ${{ env.VERSION }}
         tag: ${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
-        replacesArtifacts: false
+        replacesArtifacts: true
+        prerelease: true
+        skipIfReleaseExists: true
         artifacts: Seraphine.zip
+        body: |
+          **声明**：该版本 **不是** 正式发布版本，由脚本自动打包发布。我们不对该版本的稳定性负责！请知悉！
+          
+          如果您有意向参与测试，欢迎下载使用并在 Issues 中留下宝贵意见。
