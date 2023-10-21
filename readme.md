@@ -22,7 +22,7 @@
 </p>
 
 <p align='center'>
-  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/aea50a9d-09a6-46a9-9385-377019f2d071">
+  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/2c053134-25e1-4a1b-aa9c-4f77cf9522f2">
 </p>
 
 ## 快速上手 🤗
