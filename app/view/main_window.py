@@ -1035,8 +1035,10 @@ class MainWindow(FluentWindow):
                 # iconId = summoner["profileIconId"]
                 # icon = connector.getProfileIcon(iconId)
 
-                iconId = item["championId"]
-                icon = connector.getChampionIcon(iconId)
+                championId = item.get("championId")
+                championId = championId if championId != None else -1
+
+                icon = connector.getChampionIcon(championId)
 
                 origRankInfo = connector.getRankedStatsByPuuid(puuid)
                 rankInfo = processRankInfo(origRankInfo)
