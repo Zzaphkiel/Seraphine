@@ -5,5 +5,3 @@ PyQt5-sip==12.12.1
 PyQt-Fluent-Widgets==1.2.0
 Requests==2.31.0
 willump==1.4.0
-pygetwindow==0.0.9
-pyuac==0.0.3
