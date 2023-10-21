@@ -1129,11 +1129,8 @@ class MainWindow(FluentWindow):
 
             assignTeamId(summoners)
 
-            self.gameInfoInterface.enemySummonerInfoReady.emit(
-                {'summoners': summoners, 'queueId': queueId})
-
             if not self.isChampSelected:
-                summoners = []
+                allySummoners = []
                 with ThreadPoolExecutor() as executor:
                     futures = [executor.submit(process_item, item, True)
                                for item in allys]
@@ -1141,12 +1138,15 @@ class MainWindow(FluentWindow):
                 for future in as_completed(futures):
                     result = future.result()
                     if result is not None:
-                        summoners.append(result)
+                        allySummoners.append(result)
 
-                assignTeamId(summoners)
+                assignTeamId(allySummoners)
 
                 self.gameInfoInterface.allySummonersInfoReady.emit(
-                    {'summoners': summoners})
+                    {'summoners': allySummoners})
+
+            self.gameInfoInterface.enemySummonerInfoReady.emit(
+                {'summoners': summoners, 'queueId': queueId})
 
             if callback:
                 callback()
