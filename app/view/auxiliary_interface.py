@@ -60,12 +60,6 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Make your game config unchangeable"),
             cfg.lockConfig, self.gameGroup)
 
-        self.forceDisconnectionCard = SwitchSettingCard(
-            Icon.DISCONNECTION,
-            self.tr("Force disconnection (UAC privileges required)"),
-            self.tr('Press "Alt+F4" to exit LOL immediately, no wait.'),
-            cfg.forceDisconnection, self.gameGroup)
-
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
             self.tr("Only bots can be added to the lobby"),
@@ -77,11 +71,6 @@ class AuxiliaryInterface(SmoothScrollArea):
                 "Accept match making automatically after the number of seconds you set"),
             cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
             self.gameGroup)
-        self.autoReconnectCard = SwitchSettingCard(
-            Icon.CONNECTION,
-            self.tr("Auto reconnect"),
-            self.tr("Automatically reconnect when disconnected"),
-            cfg.enableAutoReconnect, self.gameGroup)
         self.spectateCard = SpectateCard(
             self.tr("Spectate"),
             self.tr("Spectate live game of summoner in the same environment"),
@@ -126,14 +115,12 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
-        self.gameGroup.addSettingCard(self.autoReconnectCard)
         self.gameGroup.addSettingCard(self.autoSelectChampionCard)
         # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
-        self.gameGroup.addSettingCard(self.forceDisconnectionCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -176,8 +163,6 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.autoSelectChampionCard.switchButton.setEnabled(True)
 
         self.lockConfigCard.setEnabled(a0)
-        self.forceDisconnectionCard.setEnabled(a0)
-        self.autoReconnectCard.setEnabled(a0)
 
         return super().setEnabled(a0)
 
