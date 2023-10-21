@@ -73,7 +73,7 @@ class RoundLevelAvatar(QWidget):
 
     def paintEvent(self, event):
         self.progressRing.setVal(self.xpSinceLastLevel * 100 //
-                                 self.xpUntilNextLevel)
+                                 self.xpUntilNextLevel if self.xpSinceLastLevel != 0 else 1)
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
