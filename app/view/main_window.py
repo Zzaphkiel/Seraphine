@@ -220,6 +220,7 @@ class MainWindow(FluentWindow):
             self.tr("LCU request error"),
             self.tr(f"Connect API") + f" {api}: {msg}",
             duration=5000,
+            orient=Qt.Vertical,
             parent=self,
             position=InfoBarPosition.BOTTOM_RIGHT
         )
@@ -240,6 +241,7 @@ class MainWindow(FluentWindow):
             self.tr(
                 "Failed to check for updates, possibly unable to connect to Github."),
             duration=5000,
+            orient=Qt.Vertical,
             parent=self,
             position=InfoBarPosition.BOTTOM_RIGHT
         )
