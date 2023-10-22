@@ -115,6 +115,8 @@ class GamesTab(QFrame):
                 game = connector.getGameDetailByGameId(self.gameId)
                 if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
                     game = processGameDetailData(self.puuid, game)
+                    if not game:
+                        continue  # 其余线程切换的查询目标, 上述条件没有过滤出来, 将数据舍弃重新请求
                     self.gameDetailReady.emit(game)
                 if nowGameId == self.gameId:
                     break
@@ -1082,14 +1084,14 @@ class SearchInterface(SmoothScrollArea):
                 puuid = summoner["puuid"]
                 self.currentSummonerName = targetName
                 self.loadGamesThread = threading.Thread(
-                    target=self.loadGames, args=(puuid,))
+                    target=self.loadGames, args=(puuid,), daemon=True)
                 self.loadGamesThread.start()
             except:
                 puuid = "-1"
 
             self.summonerPuuidGetted.emit(puuid)
 
-        threading.Thread(target=_).start()
+        threading.Thread(target=_, daemon=True).start()
 
     def loadGames(self, puuid):
         """
