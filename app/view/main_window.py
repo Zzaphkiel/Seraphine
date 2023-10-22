@@ -28,7 +28,7 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
-from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts
+from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts, SummonerNotFound, SummonerNotInGame
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid)
 from ..lol.connector import connector
@@ -214,8 +214,11 @@ class MainWindow(FluentWindow):
                 "The server returned abnormal content, which may be under maintenance.")
         elif type(obj) is RetryMaximumAttempts:
             msg = self.tr("Exceeded maximum retry attempts.")
+        elif type(obj) in [SummonerNotFound, SummonerNotInGame]:
+            return
         else:
             msg = repr(obj)
+
         InfoBar.error(
             self.tr("LCU request error"),
             self.tr(f"Connect API") + f" {api}: {msg}",
