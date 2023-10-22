@@ -94,6 +94,7 @@ def needLcu():
 class LolClientConnector:
     def __init__(self):
         self.sess = None
+        self.slowlySess = None
         self.port = None
         self.token = None
         self.url = None
@@ -323,7 +324,7 @@ class LolClientConnector:
             SummonerGamesNotFound: If the summoner games are not found.
         """
         params = {"begIndex": begIndex, "endIndex": endIndex}
-        res = self.__get(
+        res = self.__slowlyGet(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
         ).json()
 
@@ -559,6 +560,12 @@ class LolClientConnector:
         url = self.url + path
         return self.sess.get(url, params=params, verify=False)
 
+    @needLcu()
+    def __slowlyGet(self, path, params=None):
+        url = self.url + path
+        if not self.slowlySess:
+            self.slowlySess = requests.session()
+        return self.slowlySess.get(url, params=params, verify=False)
     @needLcu()
     def __post(self, path, data=None):
         url = self.url + path

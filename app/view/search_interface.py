@@ -19,7 +19,7 @@ from ..components.mode_filter_widget import ModeFilterWidget
 from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
-from ..lol.exceptions import SummonerGamesNotFound
+from ..lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from ..lol.tools import processGameData, processGameDetailData
 
 
@@ -1074,6 +1074,7 @@ class SearchInterface(SmoothScrollArea):
         cfg.set(cfg.searchHistory, ",".join([t for t in history if t][:10]), True)  # 过滤空值, 只存十个
 
         if self.loadGamesThread and self.loadGamesThread.is_alive():
+            connector.slowlySess.close()
             self.loadGamesThreadStop.set()
 
         def _():
@@ -1081,15 +1082,17 @@ class SearchInterface(SmoothScrollArea):
                 summoner = connector.getSummonerByName(targetName)
                 puuid = summoner["puuid"]
                 self.currentSummonerName = targetName
+                while self.loadGamesThread and self.loadGamesThread.is_alive():
+                    time.sleep(.3)
                 self.loadGamesThread = threading.Thread(
-                    target=self.loadGames, args=(puuid,))
+                    target=self.loadGames, args=(puuid,), daemon=True)
                 self.loadGamesThread.start()
-            except:
+            except SummonerNotFound:
                 puuid = "-1"
 
             self.summonerPuuidGetted.emit(puuid)
 
-        threading.Thread(target=_).start()
+        threading.Thread(target=_, daemon=True).start()
 
     def loadGames(self, puuid):
         """
@@ -1121,6 +1124,11 @@ class SearchInterface(SmoothScrollArea):
                 return
 
             for game in games["games"]:
+                # 用户在查询过程中切换了查询目标
+                if self.gamesView.gamesTab.puuid != puuid:
+                    print(f"{self.gamesView.gamesTab.puuid} != {puuid}")
+                    return
+
                 if time.time() - game['gameCreation'] / 1000 > 60 * 60 * 24 * 365:
                     return
 
