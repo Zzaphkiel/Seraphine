@@ -122,7 +122,6 @@ def processGameData(game):
 def processGameDetailData(puuid, game):
     queueId = game['queueId']
     mapId = game['mapId']
-    win = None
 
     names = connector.manager.getNameMapByQueueId(queueId)
     modeName = names['name']
@@ -343,10 +342,6 @@ def processGameDetailData(puuid, game):
                 teams[tid]['summoners'].append(item)
 
                 break
-
-    if win is None:
-        # TODO Warning Log !
-        return None
 
     mapIcon = connector.manager.getMapIconByMapId(mapId, win)
 
