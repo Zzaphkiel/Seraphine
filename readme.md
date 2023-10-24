@@ -88,7 +88,7 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 
 
 ## 帮助我们改进 Seraphine 😘
-个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**（如 Python 版本等），最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
+个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**（如 Python 版本等），以及问题的**复现过程**；若程序报错请带上**错误信息**。
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
 
@@ -111,7 +111,7 @@ pip install pyinstaller
 
 
 ## 引用以及参考资料 👀
-- GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widget](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
+- GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
 - 部分与 LOL 客户端的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
