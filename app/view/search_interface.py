@@ -171,10 +171,10 @@ class GamesTab(QFrame):
         games = self.window().searchInterface.games
         loadThread = self.window().searchInterface.loadGamesThread  # 用于判断还有无获取新数据
 
-        if self.queueId:
+        if self.queueId:  # 开筛选了
             buffer = self.window().searchInterface.queueIdBuffer.get(self.queueId, [])
             maxPage = int(len(buffer) / 10)
-            if self.currentIndex > maxPage:
+            if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
                     self.__showStateTooltip()
@@ -193,7 +193,7 @@ class GamesTab(QFrame):
                 data.append(games[idx])
         else:
             maxPage = int(len(games) / 10)
-            if self.currentIndex > maxPage:
+            if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
                     self.__showStateTooltip()
@@ -1126,7 +1126,6 @@ class SearchInterface(SmoothScrollArea):
             for game in games["games"]:
                 # 用户在查询过程中切换了查询目标
                 if self.gamesView.gamesTab.puuid != puuid:
-                    print(f"{self.gamesView.gamesTab.puuid} != {puuid}")
                     return
 
                 if time.time() - game['gameCreation'] / 1000 > 60 * 60 * 24 * 365:
