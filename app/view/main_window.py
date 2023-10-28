@@ -401,6 +401,7 @@ class MainWindow(FluentWindow):
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
+            self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
             status = connector.getGameStatus()
             self.eventListener.gameStatusChanged.emit(status)
