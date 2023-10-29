@@ -408,6 +408,15 @@ class LolClientConnector:
         return res
 
     @retry()
+    def reconnect(self):
+        """
+        重新连接
+
+        @return:
+        """
+        return self.__post("/lol-gameflow/v1/reconnect")
+
+    @retry()
     def removeTokens(self):
         reference = self.__get("/lol-chat/v1/me").json()
         banner = reference['lol']['bannerIdSelected']
@@ -498,6 +507,12 @@ class LolClientConnector:
         res = self.__get("/lol-gameflow/v1/gameflow-phase").text[1:-1]
 
         return res
+
+    @retry()
+    def getMapSide(self):
+        js = self.__get("/lol-champ-select/v1/pin-drop-notification").json()
+
+        return js.get("mapSide", "")
 
     @retry()
     def getReadyCheckStatus(self):

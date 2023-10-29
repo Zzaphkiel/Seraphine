@@ -64,6 +64,10 @@ class Config(QConfig):
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,
                                           BoolValidator())
+    enableAutoReconnect = ConfigItem("Functions",
+                                     "EnableAutoReconnect", False,
+                                     BoolValidator())
+
     autoAcceptMatchingDelay = RangeConfigItem(
         "Functions", "AutoAcceptMatchingDelay", 0, RangeValidator(0, 11))
 
