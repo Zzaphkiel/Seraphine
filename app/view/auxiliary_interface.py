@@ -1,5 +1,6 @@
 import threading
 import os
+import stat
 from typing import Union
 from PyQt5.QtGui import QIcon
 
@@ -7,7 +8,7 @@ from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
 from qfluentwidgets.common.icon import FluentIconBase
 
@@ -984,6 +985,8 @@ class DodgeCard(SettingCard):
 
 
 class LockConfigCard(SettingCard):
+    loadNowMode = pyqtSignal()
+
     def __init__(self, title, content, configItem: ConfigItem, parent):
         super().__init__(Icon.LOCK, title, content, parent)
 
@@ -995,6 +998,15 @@ class LockConfigCard(SettingCard):
         self.hBoxLayout.addSpacing(16)
 
         self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
+        self.loadNowMode.connect(self.__onLoadNowMode)
+
+    def __onLoadNowMode(self):
+        path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
+
+        if os.path.exists(path):
+            current_mode = stat.S_IMODE(os.lstat(path).st_mode)
+            if current_mode == 0o444:
+                self.switchButton.setChecked(True)
 
     def setValue(self, isChecked: bool):
         qconfig.set(self.configItem, isChecked)
@@ -1003,13 +1015,29 @@ class LockConfigCard(SettingCard):
     def __onCheckedChanged(self, isChecked: bool):
         self.setValue(isChecked)
 
-        self.setConfigFileReadOnlyEnabled(isChecked)
+        if not self.setConfigFileReadOnlyEnabled(isChecked):
+            InfoBar.error(
+                title=self.tr("Error"),
+                content=self.tr("Failed to set file permissions"),
+                orient=Qt.Vertical,
+                isClosable=True,
+                position=InfoBarPosition.BOTTOM_RIGHT,
+                duration=5000,
+                parent=self,
+            )
+            self.setValue(not isChecked)
 
     def setConfigFileReadOnlyEnabled(self, enable):
         path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
 
         if not os.path.exists(path):
-            return
+            return False
 
         mode = 0o444 if enable else 0o666
         os.chmod(path, mode)
+
+        current_mode = stat.S_IMODE(os.lstat(path).st_mode)
+        if current_mode != mode:
+            return False
+
+        return True
