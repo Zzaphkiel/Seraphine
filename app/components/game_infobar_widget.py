@@ -208,11 +208,12 @@ class ItemsKdaCsGold(QFrame):
 
 
 class MapTime(QFrame):
-    def __init__(self, map, time, duration, parent=None):
+    def __init__(self, map, position, time, duration, parent=None):
         super().__init__(parent)
         self.vBoxLayout = QVBoxLayout(self)
 
-        self.mapLabel = QLabel(map)
+        self.mapLabel = QLabel(
+            f'{map} - {position}' if position != None else f'{map}')
         self.timeLabel = QLabel(f"{duration} · {time}")
 
         self.__initLayout()
@@ -261,7 +262,8 @@ class GameInfoBar(QFrame):
             game["cs"],
             game["gold"],
         )
-        self.mapTime = MapTime(game["map"], game["time"], game["duration"])
+        self.mapTime = MapTime(
+            game["map"], game['position'], game["time"], game["duration"])
 
         self.__setColor(game["remake"], game["win"])
 

@@ -5,6 +5,7 @@ import traceback
 import time
 import webbrowser
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize, QAbstractAnimation
 from PyQt5.QtGui import QIcon, QImage, QCursor
@@ -36,7 +37,6 @@ from ..lol.tools import (processGameData, translateTier, getRecentChampions,
                          processRankInfo, getTeammates, assignTeamId, parseGames)
 
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class MainWindow(FluentWindow):

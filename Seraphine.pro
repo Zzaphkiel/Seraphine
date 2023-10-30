@@ -8,5 +8,6 @@ SOURCES += app/view/main_window.py \
            app/components/game_infobar_widget.py \
            app/components/loose_switch_setting_card.py \
            app/components/mode_filter_widget.py \
+           app/lol/tools.py \
 
 TRANSLATIONS += app/resource/i18n/Seraphine.zh_CN.ts
