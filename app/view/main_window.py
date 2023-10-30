@@ -985,7 +985,8 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summonerId,
                     "teammatesMarker": teammatesMarker,
-                    "kda": [kill, deaths, assists]
+                    "kda": [kill, deaths, assists],
+                    "cellId": item["cellId"]
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -998,6 +999,8 @@ class MainWindow(FluentWindow):
                     summoners.append(result)
 
             assignTeamId(summoners)
+
+            sorted(summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
 
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
@@ -1034,6 +1037,7 @@ class MainWindow(FluentWindow):
             team1 = data['teamOne']
             team2 = data['teamTwo']
             enemies = None
+            allys = None
 
             # 判断哪边是敌方队伍
             for summoner in team1:
@@ -1133,6 +1137,7 @@ class MainWindow(FluentWindow):
                     if sId in [x.get('summonerId') for x in teamMember] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
+                # FIXME 非排位模式中, selectedPosition 值为 "NONE"
                 return {
                     "name": summoner["displayName"],
                     "icon": icon,
@@ -1144,7 +1149,8 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
-                    "kda": [kill, deaths, assists]
+                    "kda": [kill, deaths, assists],
+                    "order": ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM").index(item['selectedPosition'])  # 上野中辅下
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1157,6 +1163,8 @@ class MainWindow(FluentWindow):
                     summoners.append(result)
 
             assignTeamId(summoners)
+
+            sorted(summoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
             if not self.isChampSelected:
                 allySummoners = []
@@ -1171,8 +1179,21 @@ class MainWindow(FluentWindow):
 
                 assignTeamId(allySummoners)
 
+                sorted(allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
+
                 self.gameInfoInterface.allySummonersInfoReady.emit(
                     {'summoners': allySummoners})
+            else:
+                res = {
+                    item["summonerId"]: ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM").index(item['selectedPosition'])
+                    for item in allys
+                }
+                # TODO
+                #  给队友页发信号重新绘制排序后的页面
+                #  信号: dict[SummonerId,order]
+                #  槽函数接收到信号后重新绘制页面
+                #  该信号槽与BP阶段交换位置所触发的事件共用
+                #
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})
