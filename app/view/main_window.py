@@ -29,7 +29,7 @@ from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
 from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts, SummonerNotFound, SummonerNotInGame
-from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
+from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener, StoppableThread,
                             getLolProcessPid)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
@@ -66,6 +66,11 @@ class MainWindow(FluentWindow):
         self.processListener = LolProcessExistenceListener(self)
         self.eventListener = LolClientEventListener(self)
 
+        self.checkUpdateThread = StoppableThread(
+            target=self.checkUpdate, parent=self)
+        self.pollingConnectTimeoutThread = StoppableThread(
+            self.pollingConnectTimeout, parent=self)
+
         self.currentSummoner: Summoner = None
 
         self.isGaming = False
@@ -78,9 +83,6 @@ class MainWindow(FluentWindow):
         self.__conncetSignalToSlot()
 
         self.splashScreen.finish()
-        threading.Thread(target=self.checkUpdate).start()
-        threading.Thread(target=self.pollingConnectTimeout,
-                         daemon=True).start()
 
     def __initInterface(self):
         self.__lockInterface()
@@ -312,6 +314,8 @@ class MainWindow(FluentWindow):
 
     def __initListener(self):
         self.processListener.start()
+        self.checkUpdateThread.start()
+        self.pollingConnectTimeoutThread.start()
 
     def __changeCareerToCurrentSummoner(self):
         self.careerInterface.showLoadingPage.emit()
@@ -562,6 +566,9 @@ class MainWindow(FluentWindow):
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.processListener.terminate()
             self.eventListener.terminate()
+            self.checkUpdateThread.terminate()
+            self.pollingConnectTimeoutThread.terminate()
+
             return super().closeEvent(a0)
         else:
             a0.ignore()
@@ -822,7 +829,8 @@ class MainWindow(FluentWindow):
             # 在标题添加所处队伍
             mapSide = connector.getMapSide()
             if mapSide:
-                mapSide = self.tr("Blue Team") if mapSide == "blue" else self.tr("Red Team")
+                mapSide = self.tr(
+                    "Blue Team") if mapSide == "blue" else self.tr("Red Team")
                 title = title + " - " + mapSide
 
             self.__onChampionSelectBegin()
