@@ -1000,7 +1000,7 @@ class MainWindow(FluentWindow):
 
             assignTeamId(summoners)
 
-            sorted(summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
+            summoners = sorted(summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
 
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
@@ -1025,6 +1025,8 @@ class MainWindow(FluentWindow):
             threading.Thread(target=selectChampion).start()
 
     def __onGameStart(self):
+        pos = ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM")
+
         def _(callback=None):
             session = connector.getGameflowSession()
             data = session['gameData']
@@ -1137,7 +1139,6 @@ class MainWindow(FluentWindow):
                     if sId in [x.get('summonerId') for x in teamMember] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
-                # FIXME 非排位模式中, selectedPosition 值为 "NONE"
                 return {
                     "name": summoner["displayName"],
                     "icon": icon,
@@ -1150,7 +1151,7 @@ class MainWindow(FluentWindow):
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
-                    "order": ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM").index(item['selectedPosition'])  # 上野中辅下
+                    "order": pos.index(item['selectedPosition']) if item["selectedPosition"] in pos else len(pos)  # 上野中辅下
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1164,7 +1165,7 @@ class MainWindow(FluentWindow):
 
             assignTeamId(summoners)
 
-            sorted(summoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
+            summoners = sorted(summoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
             if not self.isChampSelected:
                 allySummoners = []
@@ -1179,20 +1180,24 @@ class MainWindow(FluentWindow):
 
                 assignTeamId(allySummoners)
 
-                sorted(allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
+                allySummoners = sorted(allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
                 self.gameInfoInterface.allySummonersInfoReady.emit(
                     {'summoners': allySummoners})
             else:
-                res = {
-                    item["summonerId"]: ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM").index(item['selectedPosition'])
-                    for item in allys
-                }
+                # 按照selectedPosition排序
+                sorted_allys = sorted(
+                    allys, key=lambda x: pos.index(x['selectedPosition']) if x['selectedPosition'] in pos else len(pos))
+
+                # 取出summonerId
+                result = (player['summonerId'] for player in sorted_allys)
+
+                self.gameInfoInterface.allyOrderUpdate.emit(result)
                 # TODO
                 #  给队友页发信号重新绘制排序后的页面
-                #  信号: dict[SummonerId,order]
+                #  信号: list[SummonerId]
                 #  槽函数接收到信号后重新绘制页面
-                #  该信号槽与BP阶段交换位置所触发的事件共用
+                #  未完成: 该信号槽与BP阶段交换位置所触发的事件共用
                 #
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
