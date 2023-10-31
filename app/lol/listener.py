@@ -100,3 +100,12 @@ class LolClientEventListener(QThread):
             asyncio.run(main())
         except:
             return
+
+
+class StoppableThread(QThread):
+    def __init__(self, target, parent) -> None:
+        self.target = target
+        super().__init__(parent)
+
+    def run(self):
+        self.target()
