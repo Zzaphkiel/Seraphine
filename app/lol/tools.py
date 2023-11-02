@@ -1,7 +1,20 @@
 import time
 
+from PyQt5.QtCore import QObject
+
 from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector, connector
+
+
+class PositionTranslator(QObject):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.top = self.tr("TOP")
+        self.jungle = self.tr("JUG")
+        self.middle = self.tr("MID")
+        self.bottom = self.tr("BOT")
+        self.support = self.tr("SUP")
 
 
 def translateTier(orig: str, short=False) -> str:
@@ -47,6 +60,8 @@ def secsToStr(secs):
 
 
 def processGameData(game):
+    # print(game)
+
     timeStamp = game["gameCreation"]  # 毫秒级时间戳
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
@@ -93,6 +108,26 @@ def processGameData(game):
     remake = stats['gameEndedInEarlySurrender']
     win = stats['win']
 
+    timeline = participant['timeline']
+    lane = timeline['lane']
+    role = timeline['role']
+
+    position = None
+
+    pt = PositionTranslator()
+
+    if queueId in [420, 440]:
+        if lane == 'TOP':
+            position = pt.top
+        elif lane == "JUNGLE":
+            position = pt.jungle
+        elif lane == 'MIDDLE':
+            position = pt.middle
+        elif role == 'SUPPORT':
+            position = pt.support
+        elif lane == 'BOTTOM' and role == 'CARRY':
+            position = pt.bottom
+
     return {
         'queueId': queueId,
         'gameId': gameId,
@@ -116,6 +151,7 @@ def processGameData(game):
         'cs': cs,
         'gold': gold,
         'timeStamp': timeStamp,
+        'position': position,
     }
 
 

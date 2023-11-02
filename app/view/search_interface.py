@@ -51,6 +51,7 @@ class GamesTab(QFrame):
 
         self.puuid = None
         self.games = []
+        self.tabGroup = []
 
         self.begIndex = 0
 
@@ -113,11 +114,14 @@ class GamesTab(QFrame):
                 nowGameId = self.gameId
                 nowPuuid = self.puuid
                 game = connector.getGameDetailByGameId(self.gameId)
+
                 if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
                     game = processGameDetailData(self.puuid, game)
                     self.gameDetailReady.emit(game)
+
                 if nowGameId == self.gameId:
                     break
+
             self.parent().gameDetailView.hideLoadingPage.emit()
 
         threading.Thread(target=_).start()
@@ -225,6 +229,7 @@ class GamesTab(QFrame):
 
         self.stackWidget.setCurrentIndex(0)
         self.pageLabel.setText(" ")
+        self.tabGroup.clear()
 
     def backToDefaultPage(self):
         self.currentIndex = 0
@@ -277,6 +282,8 @@ class GamesTab(QFrame):
 
         for game in data:
             tab = GameTab(game)
+
+            self.tabGroup.append(tab)
             layout.addWidget(tab)
 
         if len(data) < self.gamesNumberPerPage:
@@ -916,7 +923,9 @@ class GameTab(QFrame):
         super().__init__(parent)
         self.setFixedHeight(54)
         self.setFixedWidth(141)
+
         self.setProperty("pressed", False)
+        self.setProperty("selected", False)
 
         self.vBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
@@ -968,8 +977,8 @@ class GameTab(QFrame):
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
         r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
-        self.setStyleSheet(
-            f""" GameTab {{
+        self.setStyleSheet(f""" 
+        GameTab {{
             border-radius: 6px;
             border: 1px solid rgb({r}, {g}, {b});
             background-color: rgba({r}, {g}, {b}, 0.15);
@@ -983,8 +992,13 @@ class GameTab(QFrame):
             border-radius: 6px;
             border: 1px solid rgb({r2}, {g2}, {b2});
             background-color: rgba({r2}, {g2}, {b2}, 0.25);
+        }}
+        GameTab[selected = true] {{
+            border-radius: 6px;
+            border: 3px solid rgb({r}, {g}, {b});
+            background-color: rgba({r}, {g}, {b}, 0.15);
         }}"""
-        )
+                           )
 
     def mousePressEvent(self, a0) -> None:
         self.setProperty("pressed", True)
@@ -993,6 +1007,18 @@ class GameTab(QFrame):
 
     def mouseReleaseEvent(self, a0) -> None:
         self.setProperty("pressed", False)
+
+        gamesTab: GamesTab = self.parent().parent().parent()
+
+        for tab in gamesTab.tabGroup:
+            tab: GameTab
+
+            if tab.property("selected"):
+                tab.setProperty("selected", False)
+                tab.style().polish(tab)
+                break
+
+        self.setProperty("selected", True)
         self.style().polish(self)
 
         self.parent().parent().parent().tabClicked.emit(str(self.gameId))
@@ -1047,7 +1073,6 @@ class SearchInterface(SmoothScrollArea):
         ])
         self.filterComboBox.setCurrentIndex(0)
 
-
     def __initLayout(self):
         self.searchLayout.addWidget(self.searchLineEdit)
         self.searchLayout.addSpacing(5)
@@ -1071,7 +1096,8 @@ class SearchInterface(SmoothScrollArea):
         if targetName in history:
             history.remove(targetName)
         history.insert(0, targetName)
-        cfg.set(cfg.searchHistory, ",".join([t for t in history if t][:10]), True)  # 过滤空值, 只存十个
+        cfg.set(cfg.searchHistory, ",".join(
+            [t for t in history if t][:10]), True)  # 过滤空值, 只存十个
 
         if self.loadGamesThread and self.loadGamesThread.is_alive():
             connector.slowlySess.close()
@@ -1160,7 +1186,8 @@ class SearchInterface(SmoothScrollArea):
             self.__showSummonerNotFoundMessage()
 
     def __connectSignalToSlot(self):
-        self.searchLineEdit.searchButton.clicked.connect(self.__onSearchButtonClicked)
+        self.searchLineEdit.searchButton.clicked.connect(
+            self.__onSearchButtonClicked)
         # self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
         self.gamesNotFound.connect(self.__onShowGamesNotFoundMessage)
