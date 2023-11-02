@@ -19,6 +19,7 @@ from ..lol.tools import parseGames
 
 
 class GameInfoInterface(SmoothScrollArea):
+    allyOrderUpdate = pyqtSignal(tuple)
     allySummonersInfoReady = pyqtSignal(dict)
     enemySummonerInfoReady = pyqtSignal(dict)
     summonerViewClicked = pyqtSignal(str)
@@ -28,13 +29,16 @@ class GameInfoInterface(SmoothScrollArea):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self.allySummonersInfo = {}
+        self.swapBuffer = {}
+
         self.pageState = 1
 
         self.hBoxLayout = QHBoxLayout(self)
 
         self.summonersView = SummonersView()
         self.summonersGamesView = QStackedWidget()
-        # TODO 动画 行为
 
         self.allySummonerGamesView = SummonersGamesView()
         self.enemySummonerGamesView = SummonersGamesView()
@@ -66,15 +70,32 @@ class GameInfoInterface(SmoothScrollArea):
             self.__onCurrentTeamChanged)
         self.allySummonersInfoReady.connect(self.__onAllySummonerInfoReady)
         self.enemySummonerInfoReady.connect(self.__onEnemiesSummonerInfoReady)
+        self.allyOrderUpdate.connect(self.__onAllyOrderUpdate)
 
         self.gameEnd.connect(self.__onGameEnd)
 
+    def __onAllyOrderUpdate(self, order: tuple):
+        """
+        更新队友页排序
+
+        @param order: (summonerId,)
+        @return:
+        """
+        if self.allySummonersInfo:
+            self.allySummonersInfo["summoners"] = sorted(
+                self.allySummonersInfo["summoners"], key=lambda x: order.index(x) if x in order else 5
+            )
+            self.__onAllySummonerInfoReady(self.allySummonersInfo)
+
+
     def __onAllySummonerInfoReady(self, info):
+        self.allySummonersInfo = info
         self.summonersView.allySummoners.updateSummoners(info['summoners'])
         self.allySummonerGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
+        self.summonersView.allyButton.setEnabled(True)
 
     def __onEnemiesSummonerInfoReady(self, info):
         self.queueId = info['queueId']
@@ -84,8 +105,12 @@ class GameInfoInterface(SmoothScrollArea):
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
+        self.summonersView.enemyButton.setEnabled(True)
 
     def __onGameEnd(self):
+        self.allySummonersInfo = {}
+        self.swapBuffer = {}
+
         self.summonersView.allySummoners.clear()
         self.summonersView.enemySummoners.clear()
         self.allySummonerGamesView.clear()
@@ -94,6 +119,8 @@ class GameInfoInterface(SmoothScrollArea):
         self.summonersView.allyButton.click()
         self.summonersView.allyButton.setVisible(False)
         self.summonersView.enemyButton.setVisible(False)
+        self.summonersView.allyButton.setEnabled(False)
+        self.summonersView.enemyButton.setEnabled(False)
 
     def __onCurrentTeamChanged(self, ally: bool):
         index = 0 if ally else 1
@@ -161,6 +188,9 @@ class SummonersView(QFrame):
         self.__initLayout()
 
     def __initWidget(self):
+        self.allyButton.setEnabled(False)
+        self.enemyButton.setEnabled(False)
+
         self.allyButton.setVisible(False)
         self.enemyButton.setVisible(False)
 

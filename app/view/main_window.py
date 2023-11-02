@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import sys
@@ -142,6 +143,10 @@ class MainWindow(FluentWindow):
 
         self.eventListener.champSelectChanged.connect(
             self.__onChampSelectChanged
+        )
+
+        self.eventListener.goingSwap.connect(
+            self.__onGoingSwap
         )
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
@@ -804,7 +809,39 @@ class MainWindow(FluentWindow):
         if switch:
             self.checkAndSwitchTo(self.careerInterface)
 
+    def __onGoingSwap(self, info: dict):
+        """
+        bp阶段交换选用位置事件
+        @param info:
+        @return:
+        """
+        data = info.get("data")
+        event = info.get("eventType")
+
+        if not event:
+            return
+
+        if event == "Create":
+            self.gameInfoInterface.swapBuffer[data["id"]] = {
+                'src': data["requestorIndex"],
+                'dst': data["responderIndex"]
+            }
+        elif event == "Update" and data["state"] == "ACCEPTED":
+
+            # 必须deepcopy, 否则操作的实例仍是allySummonersInfo, 通过信号传递到实例赋值后, 随着tmp释放, 会变为空列表!!
+            # 这应该算是python的bug... 也或者是pyqt的?
+            tmp = copy.deepcopy(self.gameInfoInterface.allySummonersInfo["summoners"])
+            buf = self.gameInfoInterface.swapBuffer.get(data["id"])
+            if not buf:
+                return
+
+            tmp[buf["src"]], tmp[buf["dst"]] = tmp[buf["dst"]], tmp[buf["src"]]
+            self.gameInfoInterface.allySummonersInfoReady.emit({"summoners": tmp})
+
     def __onChampSelectChanged(self, data):
+        # FIXME
+        #  # 129
+        #  若在BP进行到一半才打开软件, 进入游戏后仍会有部分队友的头像不是英雄头像
         for t in data["myTeam"]:
             if t['championId']:
                 # 控件可能未绘制, 判断一下避免报错
@@ -834,7 +871,6 @@ class MainWindow(FluentWindow):
                 title = title + " - " + mapSide
 
             self.__onChampionSelectBegin()
-            self.isChampSelected = True
         elif status == 'GameStart':
             title = self.tr("Gaming")
             self.__onGameStart()
@@ -993,7 +1029,8 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summonerId,
                     "teammatesMarker": teammatesMarker,
-                    "kda": [kill, deaths, assists]
+                    "kda": [kill, deaths, assists],
+                    "cellId": item["cellId"]
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1007,11 +1044,15 @@ class MainWindow(FluentWindow):
 
             assignTeamId(summoners)
 
+            summoners = sorted(summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
+
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
 
             if callback:
                 callback()
+
+            self.isChampSelected = True
 
             # if cfg.get(cfg.enableCopyPlayersInfo):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
@@ -1030,6 +1071,8 @@ class MainWindow(FluentWindow):
             threading.Thread(target=selectChampion).start()
 
     def __onGameStart(self):
+        pos = ("TOP", "JUNGLE", "MIDDLE", "UTILITY", "BOTTOM")
+
         def _(callback=None):
             session = connector.getGameflowSession()
             data = session['gameData']
@@ -1042,6 +1085,7 @@ class MainWindow(FluentWindow):
             team1 = data['teamOne']
             team2 = data['teamTwo']
             enemies = None
+            allys = None
 
             # 判断哪边是敌方队伍
             for summoner in team1:
@@ -1152,7 +1196,8 @@ class MainWindow(FluentWindow):
                     "puuid": puuid,
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
-                    "kda": [kill, deaths, assists]
+                    "kda": [kill, deaths, assists],
+                    "order": pos.index(item['selectedPosition']) if item["selectedPosition"] in pos else len(pos)  # 上野中辅下
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1165,6 +1210,8 @@ class MainWindow(FluentWindow):
                     summoners.append(result)
 
             assignTeamId(summoners)
+
+            summoners = sorted(summoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
             if not self.isChampSelected:
                 allySummoners = []
@@ -1179,8 +1226,19 @@ class MainWindow(FluentWindow):
 
                 assignTeamId(allySummoners)
 
+                allySummoners = sorted(allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
+
                 self.gameInfoInterface.allySummonersInfoReady.emit(
                     {'summoners': allySummoners})
+            else:
+                # 按照selectedPosition排序
+                sorted_allys = sorted(
+                    allys, key=lambda x: pos.index(x['selectedPosition']) if x['selectedPosition'] in pos else len(pos))
+
+                # 取出summonerId
+                result = tuple((player['summonerId'] for player in sorted_allys))
+
+                self.gameInfoInterface.allyOrderUpdate.emit(result)
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})
