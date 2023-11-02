@@ -210,7 +210,8 @@ class TeamSummoners(QFrame):
 
         for summoner in summoners:
             summonerView = SummonerInfoView(summoner)
-            self.items[summoner["summonerId"]] = summonerView  # 用 summonerId 避免空字符串
+            # 用 summonerId 避免空字符串
+            self.items[summoner["summonerId"]] = summonerView
             self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
@@ -495,16 +496,16 @@ class Games(QFrame):
             tab = GameTab(game)
             self.vBoxLayout.addWidget(tab)
 
-        # if len(games) < 11:
-        #     self.vBoxLayout.addSpacerItem(QSpacerItem(
-        #         1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        if len(games) < 11:
+            self.vBoxLayout.addSpacerItem(QSpacerItem(
+                1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
 
 class GameTab(QFrame):
 
     def __init__(self, game=None, parent=None):
         super().__init__(parent)
-        # self.setFixedHeight(54)
+        self.setMinimumHeight(54)
         # self.setFixedWidth(129)
 
         self.hBoxLayout = QHBoxLayout(self)
