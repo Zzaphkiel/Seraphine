@@ -31,6 +31,7 @@ class GameInfoInterface(SmoothScrollArea):
         super().__init__(parent)
 
         self.allySummonersInfo = {}
+        self.swapBuffer = {}
 
         self.pageState = 1
 
@@ -87,7 +88,6 @@ class GameInfoInterface(SmoothScrollArea):
             self.__onAllySummonerInfoReady(self.allySummonersInfo)
 
 
-
     def __onAllySummonerInfoReady(self, info):
         self.allySummonersInfo = info
         self.summonersView.allySummoners.updateSummoners(info['summoners'])
@@ -109,6 +109,7 @@ class GameInfoInterface(SmoothScrollArea):
 
     def __onGameEnd(self):
         self.allySummonersInfo = {}
+        self.swapBuffer = {}
 
         self.summonersView.allySummoners.clear()
         self.summonersView.enemySummoners.clear()

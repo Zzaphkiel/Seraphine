@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import sys
@@ -142,6 +143,10 @@ class MainWindow(FluentWindow):
 
         self.eventListener.champSelectChanged.connect(
             self.__onChampSelectChanged
+        )
+
+        self.eventListener.goingSwap.connect(
+            self.__onGoingSwap
         )
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
@@ -804,7 +809,39 @@ class MainWindow(FluentWindow):
         if switch:
             self.checkAndSwitchTo(self.careerInterface)
 
+    def __onGoingSwap(self, info: dict):
+        """
+        bp阶段交换选用位置事件
+        @param info:
+        @return:
+        """
+        data = info.get("data")
+        event = info.get("eventType")
+
+        if not event:
+            return
+
+        if event == "Create":
+            self.gameInfoInterface.swapBuffer[data["id"]] = {
+                'src': data["requestorIndex"],
+                'dst': data["responderIndex"]
+            }
+        elif event == "Update" and data["state"] == "ACCEPTED":
+
+            # 必须deepcopy, 否则操作的实例仍是allySummonersInfo, 通过信号传递到实例赋值后, 随着tmp释放, 会变为空列表!!
+            # 这应该算是python的bug... 也或者是pyqt的?
+            tmp = copy.deepcopy(self.gameInfoInterface.allySummonersInfo["summoners"])
+            buf = self.gameInfoInterface.swapBuffer.get(data["id"])
+            if not buf:
+                return
+
+            tmp[buf["src"]], tmp[buf["dst"]] = tmp[buf["dst"]], tmp[buf["src"]]
+            self.gameInfoInterface.allySummonersInfoReady.emit({"summoners": tmp})
+
     def __onChampSelectChanged(self, data):
+        # FIXME
+        #  # 129
+        #  若在BP进行到一半才打开软件, 进入游戏后仍会有部分队友的头像不是英雄头像
         for t in data["myTeam"]:
             if t['championId']:
                 # 控件可能未绘制, 判断一下避免报错
@@ -834,7 +871,6 @@ class MainWindow(FluentWindow):
                 title = title + " - " + mapSide
 
             self.__onChampionSelectBegin()
-            self.isChampSelected = True
         elif status == 'GameStart':
             title = self.tr("Gaming")
             self.__onGameStart()
@@ -1015,6 +1051,8 @@ class MainWindow(FluentWindow):
 
             if callback:
                 callback()
+
+            self.isChampSelected = True
 
             # if cfg.get(cfg.enableCopyPlayersInfo):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
@@ -1198,15 +1236,9 @@ class MainWindow(FluentWindow):
                     allys, key=lambda x: pos.index(x['selectedPosition']) if x['selectedPosition'] in pos else len(pos))
 
                 # 取出summonerId
-                result = (player['summonerId'] for player in sorted_allys)
+                result = tuple((player['summonerId'] for player in sorted_allys))
 
                 self.gameInfoInterface.allyOrderUpdate.emit(result)
-                # TODO
-                #  给队友页发信号重新绘制排序后的页面
-                #  信号: list[SummonerId]
-                #  槽函数接收到信号后重新绘制页面
-                #  未完成: 该信号槽与BP阶段交换位置所触发的事件共用
-                #
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})
