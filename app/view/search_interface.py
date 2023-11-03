@@ -51,7 +51,7 @@ class GamesTab(QFrame):
 
         self.puuid = None
         self.games = []
-        self.tabGroup = []
+        self.currentTabSelected = None
 
         self.begIndex = 0
 
@@ -229,7 +229,7 @@ class GamesTab(QFrame):
 
         self.stackWidget.setCurrentIndex(0)
         self.pageLabel.setText(" ")
-        self.tabGroup.clear()
+        self.currentTabSelected = None
 
     def backToDefaultPage(self):
         self.currentIndex = 0
@@ -282,8 +282,6 @@ class GamesTab(QFrame):
 
         for game in data:
             tab = GameTab(game)
-
-            self.tabGroup.append(tab)
             layout.addWidget(tab)
 
         if len(data) < self.gamesNumberPerPage:
@@ -299,8 +297,10 @@ class GamesTab(QFrame):
             self.tabClicked.emit(str(self.triggerGameId))
             self.triggerGameId = 0
         elif self.first:
-            gameId = layout.itemAt(0).widget().gameId
-            self.tabClicked.emit(str(gameId))
+            widget = layout.itemAt(0).widget()
+            widget.setProperty("selected", True)
+            widget.style().polish(widget)
+            self.tabClicked.emit(str(widget.gameId))
         self.first = False
 
         mainWindow = self.window()
@@ -1007,21 +1007,17 @@ class GameTab(QFrame):
 
     def mouseReleaseEvent(self, a0) -> None:
         self.setProperty("pressed", False)
-
         gamesTab: GamesTab = self.parent().parent().parent()
 
-        for tab in gamesTab.tabGroup:
-            tab: GameTab
-
-            if tab.property("selected"):
-                tab.setProperty("selected", False)
-                tab.style().polish(tab)
-                break
+        if gamesTab.currentTabSelected:
+            gamesTab.currentTabSelected.setProperty("selected", False)
+            gamesTab.currentTabSelected.style().polish(gamesTab.currentTabSelected)
 
         self.setProperty("selected", True)
         self.style().polish(self)
+        gamesTab.currentTabSelected = self
 
-        self.parent().parent().parent().tabClicked.emit(str(self.gameId))
+        gamesTab.tabClicked.emit(str(self.gameId))
         return super().mouseReleaseEvent(a0)
 
 
