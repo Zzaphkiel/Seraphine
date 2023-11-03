@@ -300,6 +300,7 @@ class GamesTab(QFrame):
             widget = layout.itemAt(0).widget()
             widget.setProperty("selected", True)
             widget.style().polish(widget)
+            self.currentTabSelected = widget
             self.tabClicked.emit(str(widget.gameId))
         self.first = False
 
