@@ -853,6 +853,13 @@ class MainWindow(FluentWindow):
                         championIconPath = connector.getChampionIcon(
                             t['championId'])
                         summonersView.updateIcon(championIconPath)
+                        summoners = self.gameInfoInterface.allySummonersInfo["summoners"]
+
+                        # 找对应召唤师的缓冲区, 更新头像, 复杂度 O(n)
+                        for summoner in summoners:
+                            if summoner.get("summonerId") == t["summonerId"]:
+                                summoner["icon"] = championIconPath
+                                break
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -1198,7 +1205,7 @@ class MainWindow(FluentWindow):
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
-                    "order": pos.index(item['selectedPosition']) if item["selectedPosition"] in pos else len(pos)  # 上野中辅下
+                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos)  # 上野中辅下
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1234,7 +1241,10 @@ class MainWindow(FluentWindow):
             else:
                 # 按照selectedPosition排序
                 sorted_allys = sorted(
-                    allys, key=lambda x: pos.index(x['selectedPosition']) if x['selectedPosition'] in pos else len(pos))
+                    allys,
+                    key=lambda x: pos.index(x.get('selectedPosition'))
+                    if x.get('selectedPosition') in pos else len(pos)
+                )
 
                 # 取出summonerId
                 result = tuple((player['summonerId'] for player in sorted_allys))
