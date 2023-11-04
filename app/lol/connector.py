@@ -463,6 +463,8 @@ class LolClientConnector:
 
     @retry()
     def getGameflowSession(self):
+        # FIXME
+        #  若刚进行完一场对局, 随后开启一盘自定义, 玩家在红色方且蓝色方没人时, 该接口会返回上一局中蓝色方的队员信息(teamOne or teamTwo)
         res = self.__get("/lol-gameflow/v1/session").json()
         return res
 

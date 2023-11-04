@@ -1285,7 +1285,7 @@ class MainWindow(FluentWindow):
                 )
 
                 # 取出summonerId
-                result = tuple((player['summonerId'] for player in sorted_allys))
+                result = tuple(player['summonerId'] for player in sorted_allys)
 
                 self.gameInfoInterface.allyOrderUpdate.emit(result)
 

@@ -81,12 +81,11 @@ class GameInfoInterface(SmoothScrollArea):
         @return:
         """
         if self.allySummonersInfo:
-            # 必须deepcopy
-            tmp = copy.deepcopy(self.allySummonersInfo["summoners"])
-            tmp = sorted(
-                tmp, key=lambda x: order.index(x) if x in order else 5
+            self.allySummonersInfo["summoners"] = sorted(
+                self.allySummonersInfo["summoners"],
+                key=lambda x: order.index(x["summonerId"]) if x["summonerId"] in order else len(order)
             )
-            self.__onAllySummonerInfoReady({"summoners": tmp})
+            self.__onAllySummonerInfoReady(self.allySummonersInfo)
 
 
     def __onAllySummonerInfoReady(self, info):
