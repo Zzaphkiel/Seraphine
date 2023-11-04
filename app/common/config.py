@@ -87,6 +87,10 @@ class Config(QConfig):
         "Other", "SearchHistory", ""
     )
 
+    enableGameStartMinimize = ConfigItem("General",
+                                   "EnableGameStartMinimize", False,
+                                   BoolValidator())
+
     enableCheckUpdate = ConfigItem("General",
                                    "EnableCheckUpdate", True,
                                    BoolValidator())

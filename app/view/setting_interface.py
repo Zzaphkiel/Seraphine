@@ -132,6 +132,13 @@ class SettingInterface(SmoothScrollArea):
                                              cfg.get(cfg.lolFolder),
                                              self.generalGroup)
 
+        self.gameStartMinimizeCard = SwitchSettingCard(
+            Icon.PAGE, self.tr("Minimize windows during game activities"),
+            self.tr(
+                "Reduce CPU usage for rendering UI during gaming"),
+            cfg.enableGameStartMinimize
+        )
+
         self.checkUpdateCard = SwitchSettingCard(
             Icon.UPDATE, self.tr("Check for updates"),
             self.tr(
@@ -257,6 +264,7 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
+        self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
         self.generalGroup.addSettingCard(self.checkUpdateCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
