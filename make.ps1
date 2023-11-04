@@ -17,4 +17,4 @@ rm -Path .\dist\Seraphine\app\resource\game* -r
 rm -r .\dist\Seraphine\app\resource\i18n\Seraphine.zh_CN.ts
 rm -r .\dist\Seraphine\app\view
 7z a $dest\Seraphine.zip .\dist\Seraphine\* -r
-# rm -r .\dist
+rm -r .\dist
