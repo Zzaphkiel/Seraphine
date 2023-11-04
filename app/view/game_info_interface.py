@@ -33,8 +33,6 @@ class GameInfoInterface(SmoothScrollArea):
         self.allySummonersInfo = {}
         self.swapBuffer = {}
 
-        self.pageState = 1
-
         self.hBoxLayout = QHBoxLayout(self)
 
         self.summonersView = SummonersView()

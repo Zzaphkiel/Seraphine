@@ -173,8 +173,6 @@ class MainWindow(FluentWindow):
             self.__onSearchInterfaceSummonerNameClicked)
         self.gameInfoInterface.summonerGamesClicked.connect(
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
-        self.gameInfoInterface.pageSwitchSignal.connect(
-            self.__onGameInfoPageSwitch)
         self.settingInterface.careerGamesCount.pushButton.clicked.connect(
             self.__onCareerInterfaceRefreshButtonClicked)
         self.settingInterface.micaCard.checkedChanged.connect(
@@ -357,6 +355,9 @@ class MainWindow(FluentWindow):
 
             for game in gamesInfo["games"]:
                 info = processGameData(game)
+                if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                    continue
+
                 if not info["remake"] and info["queueId"] != 0:
                     games["kills"] += info["kills"]
                     games["deaths"] += info["deaths"]
@@ -593,12 +594,6 @@ class MainWindow(FluentWindow):
 
         self.checkAndSwitchTo(self.searchInterface)
 
-    def __onGameInfoPageSwitch(self):
-        if self.gameInfoInterface.pageState == 1:
-            self.gameInfoInterface.pageState = 2
-        else:
-            self.gameInfoInterface.pageState = 1
-
     def __onSearchInterfaceCareerButtonClicked(self):
         self.careerInterface.showLoadingPage.emit()
         name = self.searchInterface.currentSummonerName
@@ -633,6 +628,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
@@ -701,6 +698,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
@@ -775,6 +774,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
