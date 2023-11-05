@@ -56,6 +56,7 @@ class GamesTab(QFrame):
         self.begIndex = 0
 
         self.triggerGameId = 0
+        self.waitingForSelected = 0
 
         self.__initWidget()
         self.__initLayout()
@@ -177,7 +178,8 @@ class GamesTab(QFrame):
 
         if self.queueId:  # 开筛选了
             buffer = self.window().searchInterface.queueIdBuffer.get(self.queueId, [])
-            maxPage = int(len(buffer) / 10) + 1 if len(buffer) % 10 else int(len(buffer) / 10)  # 如果不是整除要加一
+            maxPage = int(len(buffer) / 10) + \
+                1 if len(buffer) % 10 else int(len(buffer) / 10)  # 如果不是整除要加一
             if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
@@ -196,7 +198,8 @@ class GamesTab(QFrame):
             for idx in tmpBuf:
                 data.append(games[idx])
         else:
-            maxPage = int(len(games) / 10) + 1 if len(games) % 10 else int(len(games) / 10)  # 如果不是整除要加一
+            maxPage = int(len(games) / 10) + \
+                1 if len(games) % 10 else int(len(games) / 10)  # 如果不是整除要加一
             if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
@@ -283,6 +286,12 @@ class GamesTab(QFrame):
         for game in data:
             tab = GameTab(game)
             layout.addWidget(tab)
+
+            if int(self.waitingForSelected) == game['gameId']:
+                tab.setProperty("selected", True)
+                tab.style().polish(tab)
+                self.currentTabSelected = tab
+                self.waitingForSelected = 0
 
         if len(data) < self.gamesNumberPerPage:
             layout.addSpacerItem(QSpacerItem(

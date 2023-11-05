@@ -1328,6 +1328,7 @@ class MainWindow(FluentWindow):
         name = self.careerInterface.name.text()
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
+        self.searchInterface.gamesView.gamesTab.waitingForSelected = gameId
         self.searchInterface.searchLineEdit.searchButton.click()
 
     def __onCareerInterfaceRefreshButtonClicked(self):
