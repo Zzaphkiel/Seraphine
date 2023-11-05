@@ -70,10 +70,15 @@ class RoundLevelAvatar(QWidget):
 
         self.setToolTip(f"Exp: {xpSinceLastLevel} / {xpUntilNextLevel}")
         self.installEventFilter(ToolTipFilter(self, 250, ToolTipPosition.TOP))
+        self.paintXpSinceLastLevel = None
+        self.paintXpUntilNextLevel = None
 
     def paintEvent(self, event):
-        self.progressRing.setVal(self.xpSinceLastLevel * 100 //
-                                 self.xpUntilNextLevel if self.xpSinceLastLevel != 0 else 1)
+        if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel:
+            self.progressRing.setVal(self.xpSinceLastLevel * 100 //
+                                     self.xpUntilNextLevel if self.xpSinceLastLevel != 0 else 1)
+            self.paintXpUntilNextLevel = self.xpUntilNextLevel
+            self.paintXpSinceLastLevel = self.xpSinceLastLevel
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
