@@ -5,6 +5,8 @@ import sys
 import traceback
 import time
 import webbrowser
+import pygetwindow as gw
+
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -41,6 +43,7 @@ import threading
 
 
 class MainWindow(FluentWindow):
+    mainWindowHide = pyqtSignal(bool)
     nameOrIconChanged = pyqtSignal(str, str)
     lolInstallFolderChanged = pyqtSignal(str)
     showUpdateMessageBox = pyqtSignal(dict)
@@ -71,6 +74,9 @@ class MainWindow(FluentWindow):
             target=self.checkUpdate, parent=self)
         self.pollingConnectTimeoutThread = StoppableThread(
             self.pollingConnectTimeout, parent=self)
+        self.minimizeThread = StoppableThread(
+            target=self.gameStartMinimize, parent=self
+        )
 
         self.currentSummoner: Summoner = None
 
@@ -173,14 +179,14 @@ class MainWindow(FluentWindow):
             self.__onSearchInterfaceSummonerNameClicked)
         self.gameInfoInterface.summonerGamesClicked.connect(
             self.__onGameInfoInterfaceGamesSummonerNameClicked)
-        self.gameInfoInterface.pageSwitchSignal.connect(
-            self.__onGameInfoPageSwitch)
         self.settingInterface.careerGamesCount.pushButton.clicked.connect(
             self.__onCareerInterfaceRefreshButtonClicked)
         self.settingInterface.micaCard.checkedChanged.connect(
             self.setMicaEffectEnabled)
         self.stackedWidget.currentChanged.connect(
             self.__onCurrentStackedChanged)
+
+        self.mainWindowHide.connect(self.__onWindowHide)
 
     def __initWindow(self):
         self.resize(1134, 826)
@@ -235,6 +241,18 @@ class MainWindow(FluentWindow):
             position=InfoBarPosition.BOTTOM_RIGHT
         )
 
+    def __onWindowHide(self, hide):
+        """
+
+        @param hide: True -> 隐藏, False -> 显示
+        @return:
+        """
+        if hide:
+            self.hide()
+        else:
+            self.showNormal()
+            self.activateWindow()
+
     def checkUpdate(self):
         if cfg.get(cfg.enableCheckUpdate):
             try:
@@ -260,6 +278,22 @@ class MainWindow(FluentWindow):
         msgBox = UpdateMessageBox(info, self.window())
         if msgBox.exec():
             webbrowser.open(info.get("zipball_url"))
+
+    def gameStartMinimize(self):
+        src_window = None
+        while True:
+            time.sleep(.5)
+            if cfg.get(cfg.enableGameStartMinimize):
+                active_window_title = gw.getActiveWindow().title
+                # 有窗口切换发生, 并且与LOL有关
+                if (src_window != active_window_title
+                        and "League of Legends (TM) Client" in (active_window_title, src_window)):
+                    if src_window == "League of Legends (TM) Client":  # 进入游戏窗口, 隐藏Seraphine
+                        self.mainWindowHide.emit(False)
+                    else:  # 切出游戏窗口, 显示Seraphine
+                        self.mainWindowHide.emit(True)
+                        # self.activateWindow()
+                src_window = active_window_title
 
     def pollingConnectTimeout(self):
         while True:
@@ -321,6 +355,7 @@ class MainWindow(FluentWindow):
         self.processListener.start()
         self.checkUpdateThread.start()
         self.pollingConnectTimeoutThread.start()
+        self.minimizeThread.start()
 
     def __changeCareerToCurrentSummoner(self):
         self.careerInterface.showLoadingPage.emit()
@@ -357,6 +392,9 @@ class MainWindow(FluentWindow):
 
             for game in gamesInfo["games"]:
                 info = processGameData(game)
+                if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                    continue
+
                 if not info["remake"] and info["queueId"] != 0:
                     games["kills"] += info["kills"]
                     games["deaths"] += info["deaths"]
@@ -573,6 +611,7 @@ class MainWindow(FluentWindow):
             self.eventListener.terminate()
             self.checkUpdateThread.terminate()
             self.pollingConnectTimeoutThread.terminate()
+            self.minimizeThread.terminate()
 
             return super().closeEvent(a0)
         else:
@@ -592,12 +631,6 @@ class MainWindow(FluentWindow):
         self.searchInterface.searchLineEdit.searchButton.clicked.emit()
 
         self.checkAndSwitchTo(self.searchInterface)
-
-    def __onGameInfoPageSwitch(self):
-        if self.gameInfoInterface.pageState == 1:
-            self.gameInfoInterface.pageState = 2
-        else:
-            self.gameInfoInterface.pageState = 1
 
     def __onSearchInterfaceCareerButtonClicked(self):
         self.careerInterface.showLoadingPage.emit()
@@ -633,6 +666,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
@@ -701,6 +736,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
@@ -775,6 +812,8 @@ class MainWindow(FluentWindow):
 
                 for game in gamesInfo["games"]:
                     info = processGameData(game)
+                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                        continue
 
                     if not info["remake"] and info["queueId"] != 0:
                         games["kills"] += info["kills"]
@@ -852,6 +891,13 @@ class MainWindow(FluentWindow):
                         championIconPath = connector.getChampionIcon(
                             t['championId'])
                         summonersView.updateIcon(championIconPath)
+                        summoners = self.gameInfoInterface.allySummonersInfo["summoners"]
+
+                        # 找对应召唤师的缓冲区, 更新头像, 复杂度 O(n)
+                        for summoner in summoners:
+                            if summoner.get("summonerId") == t["summonerId"]:
+                                summoner["icon"] = championIconPath
+                                break
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -1197,7 +1243,7 @@ class MainWindow(FluentWindow):
                     "summonerId": summoner["summonerId"],
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
-                    "order": pos.index(item['selectedPosition']) if item["selectedPosition"] in pos else len(pos)  # 上野中辅下
+                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos)  # 上野中辅下
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1233,10 +1279,13 @@ class MainWindow(FluentWindow):
             else:
                 # 按照selectedPosition排序
                 sorted_allys = sorted(
-                    allys, key=lambda x: pos.index(x['selectedPosition']) if x['selectedPosition'] in pos else len(pos))
+                    allys,
+                    key=lambda x: pos.index(x.get('selectedPosition'))
+                    if x.get('selectedPosition') in pos else len(pos)
+                )
 
                 # 取出summonerId
-                result = tuple((player['summonerId'] for player in sorted_allys))
+                result = tuple(player['summonerId'] for player in sorted_allys)
 
                 self.gameInfoInterface.allyOrderUpdate.emit(result)
 

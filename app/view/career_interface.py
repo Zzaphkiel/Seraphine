@@ -437,7 +437,7 @@ class CareerInterface(SmoothScrollArea):
 
         if 'gameCount' in games:
             self.recent20GamesLabel.setText(
-                f"{self.tr('Recent matches')} {self.tr('(Last')} {games['gameCount']} {self.tr('games)')}"
+                f"{self.tr('Recent matches')} {self.tr('(Last')} {len(games['games'])} {self.tr('games)')}"
             )
             self.winsLabel.setText(f"{self.tr('Wins:')} {games['wins']}")
             self.lossesLabel.setText(f"{self.tr('Losses:')} {games['losses']}")
@@ -448,9 +448,9 @@ class CareerInterface(SmoothScrollArea):
             self.recent20GamesLabel.setText(
                 f"{self.tr('Recent matches')} {self.tr('(Last')} None {self.tr('games)')}"
             )
-            self.winsLabel.setText(f"{self.tr('Wins:')} None")
-            self.lossesLabel.setText(f"{self.tr('Losses:')} None")
-            self.kdaLabel.setText(f"{self.tr('KDA:')} None / None / None")
+            self.winsLabel.setText(f"{self.tr('Wins:')} 0")
+            self.lossesLabel.setText(f"{self.tr('Losses:')} 0")
+            self.kdaLabel.setText(f"{self.tr('KDA:')} 0 / 0 / 0")
         self.games = games
 
         self.__updateGameInfo()

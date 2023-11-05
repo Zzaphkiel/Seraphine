@@ -14,6 +14,7 @@ class RoundLevel(QFrame):
         self.level = str(level)
         self.setFixedSize(diameter, diameter)
         self.setStyleSheet("RoundLevel{border: 1px solid black}")
+        self.setStyleSheet("RoundLevel {font: bold 11px 'Segoe UI'}")
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -34,7 +35,6 @@ class RoundLevel(QFrame):
             painter.setPen(QColor(1, 10, 19))
             painter.drawText(QRect(0, -1, 22, 22), Qt.AlignCenter, self.level)
 
-        self.setStyleSheet("RoundLevel {font: bold 11px 'Segoe UI'}")
 
 
 class RoundIconWithLevel(QWidget):

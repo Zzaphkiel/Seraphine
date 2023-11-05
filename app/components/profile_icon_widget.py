@@ -31,8 +31,14 @@ class RoundAvatar(QWidget):
 
         self.setToolTip(f"Exp: {xpSinceLastLevel} / {xpUntilNextLevel}")
         self.installEventFilter(ToolTipFilter(self, 250, ToolTipPosition.TOP))
+        raise DeprecationWarning(
+            "The Widget is deprecated due to abnormal recursion causing high CPU usage. Please use the "
+            "RoundLevelAvatar class instead."
+        )
 
     def paintEvent(self, event):
+        # FIXME
+        #  setVal 会触发当前控件重绘, 导致无限递归paintEvent
         self.progressRing.setVal(self.xpSinceLastLevel * 100 //
                                  self.xpUntilNextLevel if self.xpUntilNextLevel != 0 else 1)
 

@@ -1,3 +1,4 @@
+import copy
 from typing import Dict
 
 from PyQt5.QtCore import pyqtSignal, Qt, QPropertyAnimation, QRect
@@ -32,8 +33,6 @@ class GameInfoInterface(SmoothScrollArea):
 
         self.allySummonersInfo = {}
         self.swapBuffer = {}
-
-        self.pageState = 1
 
         self.hBoxLayout = QHBoxLayout(self)
 
@@ -83,7 +82,8 @@ class GameInfoInterface(SmoothScrollArea):
         """
         if self.allySummonersInfo:
             self.allySummonersInfo["summoners"] = sorted(
-                self.allySummonersInfo["summoners"], key=lambda x: order.index(x) if x in order else 5
+                self.allySummonersInfo["summoners"],
+                key=lambda x: order.index(x["summonerId"]) if x["summonerId"] in order else len(order)
             )
             self.__onAllySummonerInfoReady(self.allySummonersInfo)
 

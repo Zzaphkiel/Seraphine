@@ -177,7 +177,7 @@ class GamesTab(QFrame):
 
         if self.queueId:  # 开筛选了
             buffer = self.window().searchInterface.queueIdBuffer.get(self.queueId, [])
-            maxPage = int(len(buffer) / 10)
+            maxPage = int(len(buffer) / 10) + 1 if len(buffer) % 10 else int(len(buffer) / 10)  # 如果不是整除要加一
             if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
@@ -196,7 +196,7 @@ class GamesTab(QFrame):
             for idx in tmpBuf:
                 data.append(games[idx])
         else:
-            maxPage = int(len(games) / 10)
+            maxPage = int(len(games) / 10) + 1 if len(games) % 10 else int(len(games) / 10)  # 如果不是整除要加一
             if self.currentIndex >= maxPage:
                 if loadThread.is_alive():
                     self.nextButton.setEnabled(False)
@@ -1143,7 +1143,6 @@ class SearchInterface(SmoothScrollArea):
             if not games["games"]:  # 所有对局都在一年内, 查完了
                 if not self.games:  # 未能查到任何一盘对局, 提示一下
                     self.gamesNotFound.emit()
-
                 return
 
             for game in games["games"]:
