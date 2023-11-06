@@ -4,8 +4,8 @@ from typing import Dict
 from PyQt5.QtCore import pyqtSignal, Qt, QPropertyAnimation, QRect
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QSpacerItem, QSizePolicy, QStackedWidget,
-                             QGridLayout, QSplitter, QApplication)
-from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage
+                             QGridLayout, QSplitter, QApplication, QWidget)
+from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFontMetrics
 
 from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
@@ -83,10 +83,10 @@ class GameInfoInterface(SmoothScrollArea):
         if self.allySummonersInfo:
             self.allySummonersInfo["summoners"] = sorted(
                 self.allySummonersInfo["summoners"],
-                key=lambda x: order.index(x["summonerId"]) if x["summonerId"] in order else len(order)
+                key=lambda x: order.index(
+                    x["summonerId"]) if x["summonerId"] in order else len(order)
             )
             self.__onAllySummonerInfoReady(self.allySummonersInfo)
-
 
     def __onAllySummonerInfoReady(self, info):
         self.allySummonersInfo = info
@@ -275,9 +275,16 @@ class SummonerInfoView(QFrame):
                 ToolTipFilter(self, 0, ToolTipPosition.TOP))
 
         self.infoVBoxLayout = QVBoxLayout()
-        self.summonerName = SummonerName(info['name'])
+
+        name = info['name']
+        self.summonerName = SummonerName(name)
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
+
+        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 48:
+            pos = (len(name)+1) // 2
+            name = name[:pos] + "\n" + name[pos:]
+            self.summonerName.setText(name)
 
         self.gridHBoxLayout = QHBoxLayout()
         self.kdaHBoxLayout = QHBoxLayout()
@@ -510,10 +517,16 @@ class Games(QFrame):
         self.setSizePolicy(QSizePolicy.Policy.Expanding,
                            QSizePolicy.Policy.Expanding)
 
-        self.summonerName = SummonerName(summoner['name'])
+        name: str = summoner['name']
+        self.summonerName = SummonerName(name)
         self.summonerName.setObjectName("summonerName")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))
+
+        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 48:
+            pos = (len(name)+1) // 2
+            name = name[:pos] + "\n" + name[pos:]
+            self.summonerName.setText(name)
 
         # self.vBoxLayout.setContentsMargins(4, 4, 4, 4)
         self.vBoxLayout.addSpacing(5)
