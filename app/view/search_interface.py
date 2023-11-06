@@ -1183,6 +1183,7 @@ class SearchInterface(SmoothScrollArea):
         if puuid != "-1":
             self.careerButton.setEnabled(True)
             self.filterComboBox.setEnabled(True)
+            self.gamesView.gamesTab.currentTabSelected = None
             self.gamesView.gameDetailView.clear()
             self.gamesView.gamesTab.updatePuuid(
                 puuid, self.comboBoxQueueId[self.filterComboBox.currentIndex()]
