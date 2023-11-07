@@ -245,6 +245,7 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
+            self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
             self.vBoxLayout.addStretch(5 - len(summoners))
 
     def clear(self):
@@ -512,7 +513,8 @@ class Games(QFrame):
 
         self.vBoxLayout = QVBoxLayout(self)
         self.vBoxLayout.setSpacing(5)
-        # self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.gamesLayout = QVBoxLayout()
 
         self.setSizePolicy(QSizePolicy.Policy.Expanding,
                            QSizePolicy.Policy.Expanding)
@@ -528,20 +530,21 @@ class Games(QFrame):
             name = name[:pos] + "\n" + name[pos:]
             self.summonerName.setText(name)
 
-        # self.vBoxLayout.setContentsMargins(4, 4, 4, 4)
         self.vBoxLayout.addSpacing(5)
         self.vBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignCenter)
         self.vBoxLayout.addSpacing(10)
+        self.vBoxLayout.addLayout(self.gamesLayout)
+        self.gamesLayout.setContentsMargins(0, 0, 0, 0)
 
         games = summoner['gamesInfo']
 
         for game in games:
             tab = GameTab(game)
-            self.vBoxLayout.addWidget(tab)
+            self.gamesLayout.addWidget(tab, stretch=1)
 
         if len(games) < 11:
-            self.vBoxLayout.addSpacerItem(QSpacerItem(
-                1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            self.gamesLayout.addSpacing(5)
+            self.gamesLayout.addStretch(11-len(games))
 
 
 class GameTab(QFrame):
