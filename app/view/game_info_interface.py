@@ -489,7 +489,7 @@ class SummonersGamesView(QFrame):
 
             if i == 0:
                 games.setProperty("isFirst", True)
-            elif i == len(summoners) - 1:
+            elif i == 4:
                 games.setProperty("isLast", True)
 
         if len(summoners) < 5:
