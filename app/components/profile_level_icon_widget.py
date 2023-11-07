@@ -74,6 +74,8 @@ class RoundLevelAvatar(QWidget):
         self.paintXpUntilNextLevel = None
         self.callUpdate = False
 
+        self.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, text)
+
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
             self.progressRing.setVal(self.xpSinceLastLevel * 100 //
