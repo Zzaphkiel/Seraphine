@@ -525,14 +525,22 @@ class Games(QFrame):
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))
 
+        # self.summonerName.setFixedHeight(35)
+
+        warped = False
+
         if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 50 and len(name) > 8:
             pos = (len(name)+1) // 2
             name = name[:pos] + "\n" + name[pos:]
             self.summonerName.setText(name)
+            warped = True
 
-        self.vBoxLayout.addSpacing(5)
+        sp1, sp2 = (-2, 2) if warped else (8, 11)
+
+        self.vBoxLayout.addSpacing(sp1)
         self.vBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignCenter)
-        self.vBoxLayout.addSpacing(10)
+        self.vBoxLayout.addSpacing(sp2)
+
         self.vBoxLayout.addLayout(self.gamesLayout)
         self.gamesLayout.setContentsMargins(0, 0, 0, 0)
 
@@ -543,8 +551,8 @@ class Games(QFrame):
             self.gamesLayout.addWidget(tab, stretch=1)
 
         if len(games) < 11:
-            self.gamesLayout.addSpacing(5)
             self.gamesLayout.addStretch(11-len(games))
+            self.gamesLayout.addSpacing(5)
 
 
 class GameTab(QFrame):
