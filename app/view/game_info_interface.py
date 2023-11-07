@@ -281,7 +281,7 @@ class SummonerInfoView(QFrame):
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
-        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 48:
+        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 50 and len(name) > 8:
             pos = (len(name)+1) // 2
             name = name[:pos] + "\n" + name[pos:]
             self.summonerName.setText(name)
@@ -523,7 +523,7 @@ class Games(QFrame):
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))
 
-        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 48:
+        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 50 and len(name) > 8:
             pos = (len(name)+1) // 2
             name = name[:pos] + "\n" + name[pos:]
             self.summonerName.setText(name)
