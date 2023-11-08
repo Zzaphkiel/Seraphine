@@ -25,6 +25,7 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
+from .test_interface import TestInterface
 from ..common.util import Github, github
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
@@ -63,6 +64,7 @@ class MainWindow(FluentWindow):
         self.gameInfoInterface = GameInfoInterface(self)
         self.auxiliaryFuncInterface = AuxiliaryInterface(self)
         self.settingInterface = SettingInterface(self)
+        self.testInterface = TestInterface(self)
 
         # crate listener
 
@@ -100,6 +102,7 @@ class MainWindow(FluentWindow):
         self.gameInfoInterface.setObjectName("gameInfoInterface")
         self.auxiliaryFuncInterface.setObjectName("auxiliaryFuncInterface")
         self.settingInterface.setObjectName("settingInterface")
+        self.testInterface.setObjectName("testInterface")
 
     def __initNavigation(self):
         pos = NavigationItemPosition.SCROLL
@@ -115,6 +118,10 @@ class MainWindow(FluentWindow):
         self.addSubInterface(
             self.auxiliaryFuncInterface, Icon.WRENCH,
             self.tr("Auxiliary Functions"), pos)
+        self.addSubInterface(
+            self.testInterface, Icon.WRENCH,
+            self.tr("test"), pos)
+
 
         self.navigationInterface.addSeparator()
 
