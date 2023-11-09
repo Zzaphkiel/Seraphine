@@ -363,7 +363,25 @@ class LolClientConnector:
     @tackle()
     @retry()
     def getGameDetailByGameId(self, gameId):
+        """
+        获取一局历史对局详情
+        @param gameId:
+        @return: @see detail.json
+        """
         res = self.__get(f"/lol-match-history/v1/games/{gameId}").json()
+
+        return res
+
+
+    @tackle()
+    @retry()
+    def getGameTimelinesByGameId(self, gameId):
+        """
+        获取一局历史对局时间轴
+        @param gameId:
+        @return: @see timelines.json
+        """
+        res = self.__get(f"/lol-match-history/v1/game-timelines/{gameId}").json()
 
         return res
 
@@ -574,6 +592,10 @@ class LolClientConnector:
 
     @needLcu()
     def __get(self, path, params=None):
+        url = self.url + path
+        return self.sess.get(url, params=params, verify=False)
+    @needLcu()
+    def get(self, path, params=None):
         url = self.url + path
         return self.sess.get(url, params=params, verify=False)
 

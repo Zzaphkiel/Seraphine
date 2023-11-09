@@ -156,6 +156,17 @@ def processGameData(game):
 
 
 def processGameDetailData(puuid, game):
+    """
+
+    'magicDamageDealt' = 造成的魔法伤害
+    'magicDamageDealtToChampions' = 对英雄魔法伤害
+    'magicalDamageTaken' = 承受魔法伤害
+
+
+    @param puuid:
+    @param game:
+    @return:
+    """
     queueId = game['queueId']
     mapId = game['mapId']
 

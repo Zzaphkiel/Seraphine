@@ -15,7 +15,7 @@ from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                             FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                            ToolTipFilter)
+                            ToolTipFilter, setTheme, Theme)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -92,6 +92,8 @@ class MainWindow(FluentWindow):
         self.__conncetSignalToSlot()
 
         self.splashScreen.finish()
+        setTheme(cfg.get(cfg.themeMode))
+
 
     def __initInterface(self):
         self.__lockInterface()
@@ -227,6 +229,16 @@ class MainWindow(FluentWindow):
 
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
+        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        # cfg.themeChanged.emit(cfg.get(cfg.themeMode))
+
+        # tmpTheme = cfg.get(cfg.themeMode)
+        # if tmpTheme == Theme.AUTO:
+        #     cfg.set(cfg.themeMode, Theme.DARK, False)
+        # else:
+        #     cfg.set(cfg.themeMode, Theme.AUTO, False)
+        # cfg.set(cfg.themeMode, tmpTheme, False)
 
     def __onShowLcuConnectError(self, api, obj):
         if type(obj) is SummonerGamesNotFound:
