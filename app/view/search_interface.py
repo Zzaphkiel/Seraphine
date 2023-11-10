@@ -15,6 +15,7 @@ from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
+from ..components.game_detail_chart_widget import GameDetailChartWidget
 from ..components.mode_filter_widget import ModeFilterWidget
 from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
@@ -117,8 +118,9 @@ class GamesTab(QFrame):
                 game = connector.getGameDetailByGameId(self.gameId)
 
                 if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
-                    game = processGameDetailData(self.puuid, game)
+                    game = processGameDetailData(self.puuid, game, True)
                     self.gameDetailReady.emit(game)
+                    self.parent().gameDetailView.chartWidget.initChartHtml(game)
 
                 if nowGameId == self.gameId:
                     break
@@ -340,7 +342,12 @@ class GameDetailView(QFrame):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.vBoxLayout = QVBoxLayout(self)
+        self.stackWidget = QStackedWidget(self)
+
+        self.overviewWidget = QWidget()
+        self.chartWidget = GameDetailChartWidget()
+
+        self.vBoxLayout = QVBoxLayout()
         self.titleBar = GameTitleBar()
 
         self.teamView1 = TeamView()
@@ -389,6 +396,12 @@ class GameDetailView(QFrame):
         self.vBoxLayout.addWidget(self.extraTeamView2)
 
         self.vBoxLayout.addWidget(self.processRing, alignment=Qt.AlignCenter)
+
+        self.overviewWidget.setLayout(self.vBoxLayout)
+
+        self.stackWidget.addWidget(self.overviewWidget)
+        self.stackWidget.addWidget(self.chartWidget)
+        self.stackWidget.setCurrentIndex(0)
 
         self.processRing.setVisible(False)
         self.extraTeamView1.setVisible(False)

@@ -155,17 +155,134 @@ def processGameData(game):
     }
 
 
-def processGameDetailData(puuid, game):
+def processGameDetailData(puuid, game, enableChartData=False):
     """
-
-    'magicDamageDealt' = 造成的魔法伤害
-    'magicDamageDealtToChampions' = 对英雄魔法伤害
-    'magicalDamageTaken' = 承受魔法伤害
-
+    解析对局详情
 
     @param puuid:
     @param game:
+    @param enableChartData:
+        启用图表相关数据的解析
+        当该字段True时, 返回结果中的每一个 item 会新增一个字段 chartData, 用于承载图表相关数据
+                        result -> teams -> tid -> item
+        若不需要使用图表数据, 应置为 False
     @return:
+    @rtype: dict
+
+    @note:
+        participants 字段说明:
+            - "assists": 助攻 (int)
+            - "causedEarlySurrender": 发起早期投降 (bool)
+            - "champLevel": 英雄等级 (int)
+            - "combatPlayerScore": 战斗玩家得分 (int)
+            - "damageDealtToObjectives": 对目标造成的伤害 (int)
+            - "damageDealtToTurrets": 对炮塔造成的伤害 (int)
+            - "damageSelfMitigated": 自我减轻的伤害 (int)
+            - "deaths": 死亡 (int)
+            - "doubleKills": 双杀 (int)
+            - "earlySurrenderAccomplice": 早期投降同谋 (bool)
+            - "firstBloodAssist": 一血助攻 (bool)
+            - "firstBloodKill": 一血击杀 (bool)
+            - "firstInhibitorAssist": 第一个阻止助攻 (bool)
+            - "firstInhibitorKill": 第一个阻止击杀 (bool)
+            - "firstTowerAssist": 第一个塔助攻 (bool)
+            - "firstTowerKill": 第一个塔击杀 (bool)
+            - "gameEndedInEarlySurrender": 游戏在早期投降中结束 (bool)
+            - "gameEndedInSurrender": 游戏在投降中结束 (bool)
+            - "goldEarned": 获得金币 (int)
+            - "goldSpent": 花费金币 (int)
+            - "inhibitorKills": 阻止击杀 (int)
+            - "item0": 物品0 (int)
+            - "item1": 物品1 (int)
+            - "item2": 物品2 (int)
+            - "item3": 物品3 (int)
+            - "item4": 物品4 (int)
+            - "item5": 物品5 (int)
+            - "item6": 物品6 (int)
+            - "killingSprees": 连杀 (int)
+            - "kills": 击杀 (int)
+            - "largestCriticalStrike": 最大暴击 (int)
+            - "largestKillingSpree": 最大连杀 (int)
+            - "largestMultiKill": 最大多杀 (int)
+            - "longestTimeSpentLiving": 最长生存时间 (int)
+            - "magicDamageDealt": 魔法伤害 (int)
+            - "magicDamageDealtToChampions": 对英雄造成的魔法伤害 (int)
+            - "magicalDamageTaken": 承受的魔法伤害 (int)
+            - "neutralMinionsKilled": 中立小兵击杀 (int)
+            - "neutralMinionsKilledEnemyJungle": 敌方丛林中立小兵击杀 (int)
+            - "neutralMinionsKilledTeamJungle": 我方丛林中立小兵击杀 (int)
+            - "objectivePlayerScore": 目标玩家得分 (int)
+            - "participantId": 参与者ID (int)
+            - "pentaKills": 五杀 (int)
+            - "perk0": 天赋0 (int)
+            - "perk0Var1": 天赋0变量1 (int)
+            - "perk0Var2": 天赋0变量2 (int)
+            - "perk0Var3": 天赋0变量3 (int)
+            - "perk1": 天赋1 (int)
+            - "perk1Var1": 天赋1变量1 (int)
+            - "perk1Var2": 天赋1变量2 (int)
+            - "perk1Var3": 天赋1变量3 (int)
+            - "perk2": 天赋2 (int)
+            - "perk2Var1": 天赋2变量1 (int)
+            - "perk2Var2": 天赋2变量2 (int)
+            - "perk2Var3": 天赋2变量3 (int)
+            - "perk3": 天赋3 (int)
+            - "perk3Var1": 天赋3变量1 (int)
+            - "perk3Var2": 天赋3变量2 (int)
+            - "perk3Var3": 天赋3变量3 (int)
+            - "perk4": 天赋4 (int)
+            - "perk4Var1": 天赋4变量1 (int)
+            - "perk4Var2": 天赋4变量2 (int)
+            - "perk4Var3": 天赋4变量3 (int)
+            - "perk5": 天赋5 (int)
+            - "perk5Var1": 天赋5变量1 (int)
+            - "perk5Var2": 天赋5变量2 (int)
+            - "perk5Var3": 天赋5变量3 (int)
+            - "perkPrimaryStyle": 主要天赋风格 (int)
+            - "perkSubStyle": 次要天赋风格 (int)
+            - "physicalDamageDealt": 物理伤害 (int)
+            - "physicalDamageDealtToChampions": 对英雄造成的物理伤害 (int)
+            - "physicalDamageTaken": 承受的物理伤害 (int)
+            - "playerAugment1": 玩家增强1 (int)
+            - "playerAugment2": 玩家增强2 (int)
+            - "playerAugment3": 玩家增强3 (int)
+            - "playerAugment4": 玩家增强4 (int)
+            - "playerScore0": 玩家得分0 (int)
+            - "playerScore1": 玩家得分1 (int)
+            - "playerScore2": 玩家得分2 (int)
+            - "playerScore3": 玩家得分3 (int)
+            - "playerScore4": 玩家得分4 (int)
+            - "playerScore5": 玩家得分5 (int)
+            - "playerScore6": 玩家得分6 (int)
+            - "playerScore7": 玩家得分7 (int)
+            - "playerScore8": 玩家得分8 (int)
+            - "playerScore9": 玩家得分9 (int)
+            - "playerSubteamId": 玩家子团队ID (int)
+            - "quadraKills": 四杀 (int)
+            - "sightWardsBoughtInGame": 游戏中购买的视野守卫 (int)
+            - "subteamPlacement": 子团队位置 (int)
+            - "teamEarlySurrendered": 团队早期投降 (bool)
+            - "timeCCingOthers": 控制别人的时间 (int)
+            - "totalDamageDealt": 总伤害 (int)
+            - "totalDamageDealtToChampions": 对英雄造成的总伤害 (int)
+            - "totalDamageTaken": 承受的总伤害 (int)
+            - "totalHeal": 总治疗 (int)
+            - "totalMinionsKilled": 小兵击杀总数 (int)
+            - "totalPlayerScore": 玩家总得分 (int)
+            - "totalScoreRank": 总得分排名 (int)
+            - "totalTimeCrowdControlDealt": 总控制时间 (int)
+            - "totalUnitsHealed": 总治疗单位 (int)
+            - "tripleKills": 三杀 (int)
+            - "trueDamageDealt": 真实伤害 (int)
+            - "trueDamageDealtToChampions": 对英雄造成的真实伤害 (int)
+            - "trueDamageTaken": 承受的真实伤害 (int)
+            - "turretKills": 炮塔击杀 (int)
+            - "unrealKills": 超神击杀 (int)
+            - "visionScore": 视野得分 (int)
+            - "visionWardsBoughtInGame": 游戏中购买的视野守卫 (int)
+            - "wardsKilled": 守卫击杀 (int)
+            - "wardsPlaced": 守卫放置 (int)
+            - "win": 胜利 (bool)
     """
     queueId = game['queueId']
     mapId = game['mapId']
@@ -283,6 +400,7 @@ def processGameDetailData(puuid, game):
 
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
+                chartData = {} if enableChartData else None
                 stats = summoner['stats']
 
                 if queueId != 1700:
@@ -363,6 +481,25 @@ def processGameDetailData(puuid, game):
                     except KeyError:
                         ...
 
+                # -------- Process Cart Data --------
+                if enableChartData:
+                    chartData = {
+                        'totalDamageDealtToChampions': stats['totalDamageDealtToChampions'],  # 对英雄总伤害
+                        'trueDamageDealtToChampions': stats['trueDamageDealtToChampions'],  # 对英雄真实伤害
+                        'magicDamageDealtToChampions': stats['magicDamageDealtToChampions'],  # 对英雄魔法伤害
+                        'physicalDamageDealtToChampions': stats['physicalDamageDealtToChampions'],  # 对英雄物理伤害
+                        'totalDamageTaken': stats['totalDamageTaken'],  # 承受总伤害
+                        'trueDamageTaken': stats['trueDamageTaken'],  # 承受真实伤害
+                        'magicalDamageTaken': stats['magicalDamageTaken'],  # 承受魔法伤害
+                        'physicalDamageTaken': stats['physicalDamageTaken'],  # 承受物理伤害
+                        'totalHealingDone': stats['totalHeal'],  # 总治疗
+                        'damageSelfMitigated': stats['damageSelfMitigated'],  # 自缓和伤害
+                        'totalMinionsKilled': stats['totalMinionsKilled'],  # 小兵击杀数
+                        'goldEarned': stats['goldEarned'],  # 获得金币
+                        'visionScore': stats['visionScore'],  # 视野得分
+                    }
+                # -------- Process Cart Data --------
+
                 item = {
                     'summonerName': summonerName,
                     'puuid': summonerPuuid,
@@ -384,7 +521,8 @@ def processGameDetailData(puuid, game):
                     'runeIcon': runeIcon,
                     'champLevel': stats['champLevel'],
                     'demage': stats['totalDamageDealtToChampions'],
-                    'subteamPlacement': subteamPlacement
+                    'subteamPlacement': subteamPlacement,
+                    'chartData': chartData
                 }
                 teams[tid]['summoners'].append(item)
 
