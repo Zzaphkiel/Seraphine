@@ -3,7 +3,7 @@ param(
     [String]$dest = "."
 )
 
-pyinstaller -w -i .\app\resource\images\logo.ico main.py
+pyinstaller --add-data=".\app\resource\datasets;pyecharts\datasets\." --add-data=".\app\resource\templates;pyecharts\render\templates\." -w -i .\app\resource\images\logo.ico main.py
 rm -r -fo .\build
 rm -r -fo .\main.spec
 rni -path .\dist\main -newName Seraphine

@@ -143,3 +143,10 @@ SummonerInfoBar#currentSummonerWidget>SummonerName:pressed {
     font: bold;
     color: --ThemeColorDark3;
 }
+
+
+#chartWholeWidget {
+    border: 1px solid rgba(255, 255, 255, 0.095);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}

@@ -73,10 +73,10 @@ class LolClientEventListener(QThread):
             self.goingSwap.emit(info)
 
         async def defaultHandler(data):
-            print(data)
-            # uri = data.get("uri")
-            # if uri:
-            #     print(uri)
+            # print(data)
+            uri = data.get("uri")
+            if uri:
+                print(uri)
 
         async def main():
             wllp = await willump.start()
@@ -101,6 +101,8 @@ class LolClientEventListener(QThread):
 
             # 订阅选择英雄阶段的交换位置消息
             wllp.subscription_filter_endpoint(allEventSubscription, '/lol-champ-select/v1/ongoing-swap', onGoingSwap)
+
+            wllp.subscription_filter_endpoint(allEventSubscription, '/', defaultHandler)
 
             # print("[INFO] Event listener initialized.")
             while True:
