@@ -83,8 +83,6 @@ class GameDetailChartWidget(QWidget):
             .reversal_axis()
             .set_series_opts(label_opts=opts.LabelOpts(position="right"))
             .set_global_opts(
-                # yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
-                # title_opts=opts.TitleOpts(is_show=False, pos_left="0", pos_right="0"),
                 yaxis_opts=opts.AxisOpts(is_show=False),
                 legend_opts=opts.LegendOpts(
                     border_radius=5,

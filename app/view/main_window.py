@@ -1261,7 +1261,8 @@ class MainWindow(FluentWindow):
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
                     # 上野中辅下
-                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos)
+                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(
+                        pos)
                 }
 
             with ThreadPoolExecutor() as executor:
