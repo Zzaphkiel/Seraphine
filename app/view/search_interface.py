@@ -420,7 +420,6 @@ class GameDetailView(QFrame):
         self.chartGLayout.addWidget(self.chartWidget, 0, 0)
         self.chartWholeWidget.setLayout(self.chartGLayout)
         self.chartWholeWidget.setObjectName("chartWholeWidget")
-        # self.chartWholeWidget.setStyleSheet("border: 1px solid rgba(0, 0, 0, 0.095); border-radius: 6px;")
 
         self.stackWidget.addWidget(self.teamViewWidget)
         self.stackWidget.addWidget(self.chartWholeWidget)
