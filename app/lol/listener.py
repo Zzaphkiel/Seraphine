@@ -102,7 +102,7 @@ class LolClientEventListener(QThread):
             # 订阅选择英雄阶段的交换位置消息
             wllp.subscription_filter_endpoint(allEventSubscription, '/lol-champ-select/v1/ongoing-swap', onGoingSwap)
 
-            wllp.subscription_filter_endpoint(allEventSubscription, '/', defaultHandler)
+            # wllp.subscription_filter_endpoint(allEventSubscription, '/', defaultHandler)
 
             # print("[INFO] Event listener initialized.")
             while True:
