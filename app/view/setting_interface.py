@@ -239,7 +239,8 @@ class SettingInterface(SmoothScrollArea):
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
 
-        self.micaCard.switchButton.setEnabled(isWin11())
+        # self.micaCard.switchButton.setEnabled(isWin11())
+        self.micaCard.switchButton.setEnabled(False)
 
         # initialize style sheet
         self.scrollWidget.setObjectName('scrollWidget')

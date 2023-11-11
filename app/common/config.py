@@ -35,7 +35,7 @@ class Config(QConfig):
                                        False, BoolValidator())
 
     micaEnabled = ConfigItem(
-        "Personalization", "MicaEnabled", isWin11(), BoolValidator())
+        "Personalization", "MicaEnabled", False, BoolValidator())
     dpiScale = OptionsConfigItem("Personalization",
                                  "DpiScale",
                                  "Auto",

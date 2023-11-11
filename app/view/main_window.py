@@ -92,7 +92,6 @@ class MainWindow(FluentWindow):
         self.splashScreen.finish()
         setTheme(cfg.get(cfg.themeMode))
 
-
     def __initInterface(self):
         self.__lockInterface()
 
@@ -117,7 +116,6 @@ class MainWindow(FluentWindow):
         self.addSubInterface(
             self.auxiliaryFuncInterface, Icon.WRENCH,
             self.tr("Auxiliary Functions"), pos)
-
 
         self.navigationInterface.addSeparator()
 
@@ -201,7 +199,9 @@ class MainWindow(FluentWindow):
             "QLabel {font: 13px 'Segoe UI', 'Microsoft YaHei';}")
         self.titleBar.hBoxLayout.insertSpacing(0, 10)
 
-        self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
+        # self.setMicaEffectEnabled(cfg.get(cfg.micaEnabled))
+        cfg.set(cfg.micaEnabled, False)
+        self.setMicaEffectEnabled(False)
 
         self.splashScreen = SplashScreen(self.windowIcon(), self)
         self.splashScreen.setIconSize(QSize(106, 106))
