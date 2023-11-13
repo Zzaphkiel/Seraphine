@@ -29,6 +29,8 @@
 ### 直接使用打包好的程序
 在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压，运行文件夹内 `Seraphine.exe` 开始使用。
 
+**请您暂时关闭 “在游戏进行时最小化 Seraphine 窗口” 功能，该功能可能会引起程序崩溃，针对其的修复随下版本上线**
+
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
