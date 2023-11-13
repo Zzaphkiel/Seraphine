@@ -40,7 +40,7 @@ SummonerName:hover {
     color: --ThemeColorLight1;
 }
 
-SummonerName:pressed {
+SummonerName[pressed=true] {
     color: --ThemeColorLight3;
 }
 
@@ -51,6 +51,15 @@ SummonerName:disabled {
 SummonerInfoView>QLabel {
     font: 12px 'Segoe UI', 'Microsoft YaHei';
     /* border: 1px solid black; */
+}
+
+SummonerInfoView>SummonerName {
+    font: bold 13px 'Microsoft YaHei', 'Segoe UI';
+    /* text-align: left; */
+    padding: 4px 6px 4px 6px;
+    color: black;
+    border: none;
+    background-color: transparent;
 }
 
 SummonerInfoView>#kdaLabel,

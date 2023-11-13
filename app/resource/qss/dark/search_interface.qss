@@ -119,7 +119,7 @@ SummonerName:hover {
     color: --ThemeColorDark1;
 }
 
-SummonerName:pressed {
+SummonerName[pressed=true] {
     color: --ThemeColorDark3;
 }
 
@@ -139,7 +139,7 @@ SummonerInfoBar#currentSummonerWidget>SummonerName:hover {
     color: --ThemeColorDark1;
 }
 
-SummonerInfoBar#currentSummonerWidget>SummonerName:pressed {
+SummonerInfoBar#currentSummonerWidget>SummonerName[pressed=true] {
     font: bold;
     color: --ThemeColorDark3;
 }

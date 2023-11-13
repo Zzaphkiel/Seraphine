@@ -13,7 +13,7 @@ QLabel#level {
 QLabel#rencent20GamesLabel,
 QLabel#winsLabel,
 QLabel#lossesLabel,
-QLabel#kdaLabel
+QLabel#kdaLabel,
 QLabel#kdaValLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
@@ -97,7 +97,7 @@ SummonerName:hover {
     color: --ThemeColorLight1;
 }
 
-SummonerName:pressed {
+SummonerName[pressed=true] {
     color: --ThemeColorLight3;
 }
 

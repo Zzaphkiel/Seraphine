@@ -61,8 +61,8 @@ class GameInfoInterface(SmoothScrollArea):
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(30, 32, 30, 30)
 
-        self.hBoxLayout.addWidget(self.summonersView)
-        self.hBoxLayout.addWidget(self.summonersGamesView)
+        self.hBoxLayout.addWidget(self.summonersView, stretch=2)
+        self.hBoxLayout.addWidget(self.summonersGamesView, stretch=7)
 
     def __connectSignalToSlot(self):
         self.summonersView.currentTeamChanged.connect(
@@ -182,7 +182,7 @@ class SummonersView(QFrame):
         self.allyButton.clicked.connect(self.__onAllyButtonClicked)
         self.enemyButton.clicked.connect(self.__onEnemyButtonClicked)
 
-        self.setFixedWidth(235)
+        # self.setFixedWidth(235)
 
         self.__initWidget()
         self.__initLayout()
@@ -282,10 +282,10 @@ class SummonerInfoView(QFrame):
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
-        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 50 and len(name) > 8:
-            pos = (len(name)+1) // 2
-            name = name[:pos] + "\n" + name[pos:]
-            self.summonerName.setText(name)
+        # if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 70 and len(name) > 8:
+        #     pos = (len(name)+1) // 2
+        #     name = name[:pos] + "\n" + name[pos:]
+        #     self.summonerName.setText(name)
 
         self.gridHBoxLayout = QHBoxLayout()
         self.kdaHBoxLayout = QHBoxLayout()
@@ -454,11 +454,11 @@ class SummonerInfoView(QFrame):
             (self.parent().parent().parent().parent().parent().parent()
              .parent().gameInfoInterface.pageSwitchSignal.emit())
 
-    def enterEvent(self, event):
-        QApplication.setOverrideCursor(Qt.PointingHandCursor)
+    # def enterEvent(self, event):
+    #     QApplication.setOverrideCursor(Qt.PointingHandCursor)
 
-    def leaveEvent(self, event):
-        QApplication.restoreOverrideCursor()
+    # def leaveEvent(self, event):
+    #     QApplication.restoreOverrideCursor()
 
     def updateIcon(self, iconPath: str):
         self.nowIconId = iconPath.split("/")[-1][:-4]
@@ -514,10 +514,12 @@ class Games(QFrame):
         self.vBoxLayout = QVBoxLayout(self)
         self.vBoxLayout.setSpacing(5)
 
+        self.vBoxLayout.setContentsMargins(11, 5, 11, 11)
+
         self.gamesLayout = QVBoxLayout()
 
-        self.setSizePolicy(QSizePolicy.Policy.Expanding,
-                           QSizePolicy.Policy.Expanding)
+        # self.setSizePolicy(QSizePolicy.Policy.Expanding,
+        #                    QSizePolicy.Policy.Fixed)
 
         name: str = summoner['name']
         self.summonerName = SummonerName(name)
@@ -525,21 +527,11 @@ class Games(QFrame):
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))
 
-        # self.summonerName.setFixedHeight(35)
+        self.summonerName.setFixedHeight(60)
 
-        warped = False
-
-        if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 50 and len(name) > 8:
-            pos = (len(name)+1) // 2
-            name = name[:pos] + "\n" + name[pos:]
-            self.summonerName.setText(name)
-            warped = True
-
-        sp1, sp2 = (-2, 2) if warped else (8, 11)
-
-        self.vBoxLayout.addSpacing(sp1)
+        # self.vBoxLayout.addSpacing(8)
         self.vBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignCenter)
-        self.vBoxLayout.addSpacing(sp2)
+        # self.vBoxLayout.addSpacing(11)
 
         self.vBoxLayout.addLayout(self.gamesLayout)
         self.gamesLayout.setContentsMargins(0, 0, 0, 0)
@@ -559,7 +551,7 @@ class GameTab(QFrame):
 
     def __init__(self, game=None, parent=None):
         super().__init__(parent)
-        self.setMinimumHeight(54)
+        # self.setMinimumHeight(20)
         # self.setFixedWidth(129)
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -591,8 +583,9 @@ class GameTab(QFrame):
         self.time.setObjectName("time")
 
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(7, 9, 7, 9)
+        self.hBoxLayout.setContentsMargins(7, 7, 7, 7)
 
+        self.nameTimeKdaLayout.setSpacing(0)
         self.nameTimeKdaLayout.addWidget(self.modeName)
         self.nameTimeKdaLayout.addWidget(self.time)
 

@@ -96,6 +96,6 @@ SummonerName:hover {
     color: --ThemeColorDark1;
 }
 
-SummonerName:pressed {
+SummonerName[pressed=true] {
     color: --ThemeColorDark3;
 }

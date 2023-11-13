@@ -15,3 +15,6 @@ app/resource/game
 
 # 忽略自用的打包脚本
 mymake.ps1
+
+# 忽略 HTML 图表文件
+render.html
