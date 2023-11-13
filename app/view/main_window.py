@@ -280,21 +280,28 @@ class MainWindow(FluentWindow):
             webbrowser.open(info.get("zipball_url"))
 
     def gameStartMinimize(self):
-        src_window = None
+        srcWindow = None
         while True:
             time.sleep(.5)
+
             if cfg.get(cfg.enableGameStartMinimize):
-                active_window_title = gw.getActiveWindow().title
-                # 有窗口切换发生, 并且与LOL有关
-                if (src_window != active_window_title
-                        and "League of Legends (TM) Client" in (active_window_title, src_window)):
-                    # 进入游戏窗口, 隐藏Seraphine
-                    if src_window == "League of Legends (TM) Client":
-                        self.mainWindowHide.emit(False)
-                    else:  # 切出游戏窗口, 显示Seraphine
-                        self.mainWindowHide.emit(True)
-                        # self.activateWindow()
-                src_window = active_window_title
+                activaWindow = gw.getActiveWindow()
+
+                if activaWindow:
+                    activeWindowTitle = activaWindow.title
+
+                    # 有窗口切换发生, 并且与 LOL 有关
+                    if (srcWindow != activeWindowTitle
+                            and "League of Legends (TM) Client" in (activeWindowTitle, srcWindow)):
+                        
+                        # 进入游戏窗口, 隐藏 Seraphine
+                        if srcWindow == "League of Legends (TM) Client":
+                            self.mainWindowHide.emit(False)
+                        else:  # 切出游戏窗口, 显示 Seraphine
+                            self.mainWindowHide.emit(True)
+                            # self.activateWindow()
+                    
+                    srcWindow = activeWindowTitle
 
     def pollingConnectTimeout(self):
         while True:
