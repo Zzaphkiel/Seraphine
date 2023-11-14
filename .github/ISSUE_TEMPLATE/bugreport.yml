@@ -81,3 +81,10 @@ body:
     validations:
       required: true
 
+  - type: checkboxes
+    id: unique
+    attributes:
+      label: 我已经搜索了之前的 issue，并没有与我相同的问题
+    validations:
+      required: true
+
