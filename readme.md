@@ -27,7 +27,7 @@
 
 ## 快速上手 🤗
 ### 直接使用打包好的程序
-在 [release](https://github.com/Zzaphkiel/Seraphine/releases/latest) 中下载最新版本的压缩包后解压，运行文件夹内 `Seraphine.exe` 开始使用。
+点击[这里](https://github.com/Zzaphkiel/Seraphine/releases/latest)进入发布页面，在下方找到资源中的 `Seraphine.zip`，点击下载并解压至文件夹中，双击运行其中的 `Seraphine.exe` 即可。
 
 ### 或通过本地构建
 下载项目 `zip` 压缩包解压至文件夹或通过 `git`
@@ -90,7 +90,7 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
 
-**发布新 issue 前先善用搜索功能，请看看之前是否讨论过相关或类似的问题！** _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
+**发布新 issue 前请先善用搜索功能，看看之前是否讨论过相关或类似的问题！** _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
 
 ## 您也可以自己打包可执行文件 📂
 在 `seraphine` 虚拟环境下安装 `Pyinstaller`

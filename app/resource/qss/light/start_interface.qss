@@ -7,7 +7,8 @@ QLabel#label1 {
     font: 33px 'Microsoft YaHei'
 }
 
-QLabel#label2 {
+QLabel#label2,
+QLabel#label3 {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
     color: rgb(131, 131, 131)
 }

@@ -27,9 +27,8 @@ class StartInterface(SmoothScrollArea):
         self.processBar = IndeterminateProgressBar(self)
         self.label1 = QLabel()
         self.label2 = QLabel()
+        self.label3 = QLabel()
         self.pushButton = PushButton()
-
-        self.pushButtonLayout = QHBoxLayout()
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -37,11 +36,6 @@ class StartInterface(SmoothScrollArea):
         self.__initLayout()
 
     def __initLayout(self):
-        self.pushButtonLayout.addItem(
-            QSpacerItem(20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-        self.pushButtonLayout.addWidget(self.pushButton)
-        self.pushButtonLayout.addItem(
-            QSpacerItem(20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
         self.label1.setAlignment(Qt.AlignCenter)
         self.label2.setAlignment(Qt.AlignCenter)
@@ -51,15 +45,20 @@ class StartInterface(SmoothScrollArea):
             QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
         self.vBoxLayout.addWidget(self.label1)
         self.vBoxLayout.addSpacing(20)
-        self.vBoxLayout.addLayout(self.pushButtonLayout)
+        self.vBoxLayout.addWidget(self.pushButton, alignment=Qt.AlignCenter)
+        self.vBoxLayout.addWidget(self.label3, alignment=Qt.AlignCenter)
         self.vBoxLayout.addSpacing(20)
         self.vBoxLayout.addWidget(self.label2)
         self.vBoxLayout.addItem(
             QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def __initWidget(self):
+        self.pushButton.setSizePolicy(
+            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+
         self.label1.setObjectName('label1')
         self.label2.setObjectName('label2')
+        self.label3.setObjectName("label3")
 
         self.__onShowLoadingPage()
 
@@ -81,9 +80,10 @@ class StartInterface(SmoothScrollArea):
         self.processBar.start()
         self.loading = True
 
-        self.label1.setText(self.tr("Connecting to LOL Client"))
+        self.label1.setText(self.tr("Connecting to LOL Client..."))
         self.label2.setText(self.tr("LOL client folder:") +
                             f" {cfg.get(cfg.lolFolder)}")
+        self.label3.setText(self.tr("(You can launch LOL by other means)"))
 
         self.pushButton.setIcon(Icon.CIRCLERIGHT)
         self.pushButton.setText(self.tr("Start LOL Client"))
