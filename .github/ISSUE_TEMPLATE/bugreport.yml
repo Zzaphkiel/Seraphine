@@ -9,14 +9,14 @@ body:
     attributes:
       label: 问题描述
       description: 请简单描述一下错误内容
-      placeholder: 说说发生了什么?
+      placeholder: 说说发生了什么？
     validations:
       required: true
   - type: dropdown
     id: OS
     attributes:
       label: 系统信息
-      description: 您使用的操作系统是?
+      description: 您使用的操作系统是？
       options:
         - Windows 11
         - Windows 10
@@ -28,7 +28,7 @@ body:
     id: run-mode
     attributes:
       label: 运行方式
-      description: 您以什么方式运行 Seraphine?
+      description: 您以什么方式运行 Seraphine？
       options:
         - 直接双击打开 exe 程序
         - 在 Python 环境中直接运行源代码
@@ -46,7 +46,7 @@ body:
     id: LCU-state
     attributes:
       label: 客户端状态（若有）
-      description: 在问题出现时, LOL 客户端处于什么状态?
+      description: 在问题出现时，LOL 客户端处于什么状态？
       placeholder: e.g. 队列中
     validations:
       required: false
@@ -54,15 +54,15 @@ body:
     id: reproduce
     attributes:
       label: 复现方法（若有）
-      description: 您有办法使问题复现吗?
-      placeholder: 描述一下问题出现前您进行的操作, 或者您知道的问题复现方法. 可以使用图片或视频帮助说明.
+      description: 您有办法使问题复现吗？
+      placeholder: 描述一下问题出现前您进行的操作，或者您知道的问题复现方法。可以使用图片或视频帮助说明。
     validations:
       required: false
   - type: input
     id: server
     attributes:
       label: 您进行游戏的服务器（若有）
-      description: 如果您不希望透露, 可以将此项留空.
+      description: 如果您不希望透露，可以将此项留空。
       placeholder: e.g. 艾欧尼亚
     validations:
       required: false
@@ -70,14 +70,14 @@ body:
     id: frequency
     attributes:
       label: 出现率（若有）
-      description: 问题的出现概率大概是多少?
+      description: 在您描述的场景下，问题的出现概率大概是多少？
       options:
-        - 未进行过具体的测试
-        - 100%       - (必现)
-        - 80% ~ 100% - (高概率)
-        - 50% ~ 80%  - (偶现)
-        - 30% ~ 50%  - (低概率)
-        - 30%以下     - (极低概率)
+        - 未进行具体的重复测试
+        - 每次这么做都必定会出现
+        - 每次这么做大部分时候会出现
+        - 差不多一半的情况会出现
+        - 非常低的概率会出现
+        - 只有第一次出现了，之后再没遇见过
     validations:
       required: true
 
