@@ -1,5 +1,5 @@
 name: 新的想法
-description: 提出关于改进Seraphine的任何想法
+description: 提出关于改进 Seraphine 的任何想法
 title: "[Enhancement] "
 labels: ["enhancement"]
 
@@ -8,7 +8,7 @@ body:
     id: description
     attributes:
       label: 功能描述
-      description: 请简单介绍一下您的想法, 可以结合图片来更好的解释它
-      placeholder: e.g. 希望能够在...添加xx功能, 它能够让使用者更加便捷的完成...操作.
+      description: 请简单介绍一下您的想法, 可以结合图片来更好的解释它。
+      placeholder: e.g. 我希望能够在 xxx 页面添加 xxx 功能, 它能够让使用者更加...
     validations:
       required: true
