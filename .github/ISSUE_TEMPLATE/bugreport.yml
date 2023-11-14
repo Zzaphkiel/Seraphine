@@ -85,7 +85,7 @@ body:
     attributes:
       label: 我已经查看了之前的 issue，并没有与我相同的问题
       options:
-        - 是
+        - label: 是
     validations:
       required: true
 
