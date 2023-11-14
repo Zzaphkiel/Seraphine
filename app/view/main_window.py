@@ -260,6 +260,7 @@ class MainWindow(FluentWindow):
             except:
                 self.checkUpdateFailed.emit()
             else:
+
                 if releasesInfo:
                     self.showUpdateMessageBox.emit(releasesInfo)
 
@@ -277,12 +278,12 @@ class MainWindow(FluentWindow):
     def __onShowUpdateMessageBox(self, info):
         msgBox = UpdateMessageBox(info, self.window())
         if msgBox.exec():
-            webbrowser.open(info.get("zipball_url"))
+            webbrowser.open(info['assets'][0]['browser_download_url'])
 
     def gameStartMinimize(self):
         srcWindow = None
         while True:
-            time.sleep(.5)
+            time.sleep(1)
 
             if cfg.get(cfg.enableGameStartMinimize):
                 activaWindow = gw.getActiveWindow()
@@ -293,14 +294,14 @@ class MainWindow(FluentWindow):
                     # 有窗口切换发生, 并且与 LOL 有关
                     if (srcWindow != activeWindowTitle
                             and "League of Legends (TM) Client" in (activeWindowTitle, srcWindow)):
-                        
+
                         # 进入游戏窗口, 隐藏 Seraphine
                         if srcWindow == "League of Legends (TM) Client":
                             self.mainWindowHide.emit(False)
                         else:  # 切出游戏窗口, 显示 Seraphine
                             self.mainWindowHide.emit(True)
                             # self.activateWindow()
-                    
+
                     srcWindow = activeWindowTitle
 
     def pollingConnectTimeout(self):

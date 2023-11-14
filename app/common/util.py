@@ -21,6 +21,7 @@ class Github:
         @return: 有更新 -> info, 无更新 -> None
         """
         info = self.getReleasesInfo()
+
         if info.get("tag_name")[1:] != VERSION:
             return info
         return None
