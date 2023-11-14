@@ -1,0 +1,83 @@
+name: 报告 Bug
+description: 反馈一个BUG来帮助我们改进
+title: "[Bug] "
+labels: ["bug"]
+
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 请简单描述一下错误内容
+      placeholder: 说说发生了什么?
+    validations:
+      required: true
+  - type: dropdown
+    id: OS
+    attributes:
+      label: 系统信息
+      description: 您使用的操作系统是?
+      options:
+        - windows 11
+        - windows 10
+        - windows 7
+        - 其他 (请在问题描述中补充)
+    validations:
+      required: true
+  - type: input
+    id: ver
+    attributes:
+      label: 软件版本
+      description: 您使用的是哪个版本的Seraphine? (可以从设置页面的最底部"关于"一项中查看)
+      placeholder: ex. 0.9.2
+    validations:
+      required: true
+  - type: dropdown
+    id: run-mode
+    attributes:
+      label: 运行方式
+      description: 您以什么方式运行Seraphine?
+      options:
+        - exe(直接双击打开)
+        - Source Code(Python运行)
+    validations:
+      required: true
+  - type: input
+    id: LCU-state
+    attributes:
+      label: 客户端状态(若有)
+      description: 在问题出现时, LOL客户端处于什么状态?
+      placeholder: ex. 队列中
+    validations:
+      required: false
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现方法(若有)
+      description: 您有办法使问题复现吗?
+      placeholder: 描述一下问题出现前您进行的操作, 或者您知道的问题复现方法. 可以使用图片或视频帮助说明.
+    validations:
+      required: false
+  - type: input
+    id: server
+    attributes:
+      label: 您进行游戏的服务器(若有)
+      description: 如果您不希望透露, 可以将此项留空.
+      placeholder: ex. 艾欧尼亚
+    validations:
+      required: false
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 出现率(若有)
+      description: 问题的出现概率大概是多少?
+      options:
+        - 100%       - (必现)
+        - 80% ~ 100% - (高概率)
+        - 50% ~ 80%  - (偶现)
+        - 30% ~ 50%  - (低概率)
+        - 30%以下     - (极低概率)
+        - 未进行过具体的测试
+    validations:
+      required: true
+
