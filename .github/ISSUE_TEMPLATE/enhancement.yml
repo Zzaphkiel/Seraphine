@@ -9,6 +9,6 @@ body:
     attributes:
       label: 功能描述
       description: 请简单介绍一下您的想法, 可以结合图片来更好的解释它
-      placeholder: ex. 希望能够在...添加xx功能, 它能够使用户更加便捷的完成...操作.
+      placeholder: e.g. 希望能够在...添加xx功能, 它能够让使用者更加便捷的完成...操作.
     validations:
       required: true
