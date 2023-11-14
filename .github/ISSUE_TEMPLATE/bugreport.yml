@@ -80,11 +80,12 @@ body:
         - 只有第一次出现了，之后再没遇见过
     validations:
       required: true
-
   - type: checkboxes
     id: unique
     attributes:
-      label: 我已经搜索了之前的 issue，并没有与我相同的问题
+      label: 我已经查看了之前的 issue，并没有与我相同的问题
+      options:
+        - 是
     validations:
       required: true
 
