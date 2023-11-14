@@ -12,3 +12,12 @@ body:
       placeholder: e.g. 我希望能够在 xxx 页面添加 xxx 功能, 它能够让使用者更加...
     validations:
       required: true
+  - type: checkboxes
+    id: confirm-unduplicate
+    attributes:
+      label: 我已经查看了之前（包括已经关闭）的 issue，但并没有与我相同的建议
+      options:
+        - label: 是
+          required: true
+    validations:
+      required: true

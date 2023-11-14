@@ -12,3 +12,12 @@ body:
       placeholder: 想写什么写什么, 可以结合图片和视频。
     validations:
       required: true
+  - type: checkboxes
+    id: confirm-unduplicate
+    attributes:
+      label: 我已经查看了之前（包括已经关闭）的 issue，但这并不能解决我的问题
+      options:
+        - label: 是
+          required: true
+    validations:
+      required: true
