@@ -1,5 +1,5 @@
 name: 问题咨询
-description: 任何时候都可以选择它，包括不清楚如何使用、环境搭建、或者您不知道您所提出的问题是否属于 BUG 时
+description: 任何时候都可以选择它，包括不清楚如何使用、环境搭建，或者您不知道您所提出的问题是否属于 BUG 时
 title: "[Question] "
 labels: ["question"]
 
@@ -9,7 +9,7 @@ body:
     attributes:
       label: 问题描述
       description: 简单的描述一下您的问题。
-      placeholder: 想写什么写什么, 可以结合图片和视频。
+      placeholder: 想写什么写什么，也可以结合图片和视频来描述。
     validations:
       required: true
   - type: checkboxes
