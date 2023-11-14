@@ -1,0 +1,14 @@
+name: 问题咨询
+description: 任何时候都可以选择它，包括不清楚如何使用、环境搭建、或者您不知道您所提出的问题是否属于BUG时
+title: "[Question] "
+labels: ["question"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 描述
+      description: 简单的描述一下您遇到的事情, 以及您希望得到的结果.
+      placeholder: 想写什么写什么, 可以结合图片和视频.
+    validations:
+      required: true
