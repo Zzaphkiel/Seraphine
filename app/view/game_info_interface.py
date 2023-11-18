@@ -278,7 +278,11 @@ class SummonerInfoView(QFrame):
         self.infoVBoxLayout = QVBoxLayout()
 
         name = info['name']
-        self.summonerName = SummonerName(name)
+        fateFlag = info["fateFlag"]
+        nameColor = None
+        if fateFlag:
+            nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
+        self.summonerName = SummonerName(name, nameColor)
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
@@ -522,7 +526,11 @@ class Games(QFrame):
         #                    QSizePolicy.Policy.Fixed)
 
         name: str = summoner['name']
-        self.summonerName = SummonerName(name)
+        fateFlag = summoner["fateFlag"]
+        nameColor = None
+        if fateFlag:
+            nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
+        self.summonerName = SummonerName(name, nameColor)
         self.summonerName.setObjectName("summonerName")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))

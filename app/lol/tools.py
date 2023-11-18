@@ -397,6 +397,13 @@ def processGameDetailData(puuid, game):
 
 
 def getTeammates(game, targetPuuid):
+    """
+    通过game信息获取目标召唤师的队友
+
+    @param game: @see connector.getGameDetailByGameId
+    @param targetPuuid: 目标召唤师puuid
+    @return: @see res
+    """
     targetParticipantId = None
 
     for participant in game['participantIdentities']:
@@ -420,8 +427,13 @@ def getTeammates(game, targetPuuid):
 
             break
 
-    res = {'queueId': game['queueId'], 'win': win,
-           'remake': remake, 'summoners': []}
+    res = {
+        'queueId': game['queueId'],
+        'win': win,
+        'remake': remake,
+        'summoners': [],  # 队友召唤师 (由于兼容性, 未修改字段名)
+        'enemies': []  # 对面召唤师, 若有多个队伍会全放这里面
+    }
 
     for player in game['participants']:
 
@@ -430,14 +442,17 @@ def getTeammates(game, targetPuuid):
         else:
             cmp = player['stats']['subteamPlacement']
 
+        p = player['participantId']
+        s = game['participantIdentities'][p - 1]['player']
+
         if cmp == tid:
-
-            p = player['participantId']
-            s = game['participantIdentities'][p - 1]['player']
-
             if s['puuid'] != targetPuuid:
                 res['summoners'].append(
                     {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
+        else:
+            res['enemies'].append(
+                {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'],
+                 'icon': s['profileIcon']})
 
     return res
 
