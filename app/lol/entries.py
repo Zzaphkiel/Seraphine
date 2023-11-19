@@ -1,4 +1,4 @@
-class Summoner():
+class Summoner:
 
     def __init__(self, data: dict):
         self.summonerId = data['summonerId']
@@ -8,3 +8,4 @@ class Summoner():
         self.level = data['summonerLevel']
         self.xpSinceLastLevel = data['xpSinceLastLevel']
         self.xpUntilNextLevel = data['xpUntilNextLevel']
+        self.isPublic = data["privacy"] == "PUBLIC"

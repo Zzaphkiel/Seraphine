@@ -430,6 +430,7 @@ class MainWindow(FluentWindow):
             'games': games,
             'champions': champions,
             'triggerByUser': True,
+            'isPublic': self.currentSummoner.isPublic
         }
         if champions:
             emitInfo["champions"] = champions
@@ -527,6 +528,7 @@ class MainWindow(FluentWindow):
                  'level': level,
                  'xpSinceLastLevel': xpSinceLastLevel,
                  'xpUntilNextLevel': xpUntilNextLevel,
+                 'isPublic': self.currentSummoner.isPublic
                  }
             )
 
@@ -702,6 +704,7 @@ class MainWindow(FluentWindow):
                 'rankInfo': rankInfo,
                 'games': games,
                 'triggerByUser': True,
+                'isPublic': summoner.isPublic
             }
             if champions:
                 emitInfo["champions"] = champions
@@ -772,7 +775,9 @@ class MainWindow(FluentWindow):
                  'rankInfo': rankInfo,
                  'games': games,
                  'champions': champions,
-                 'triggerByUser': True, }
+                 'triggerByUser': True,
+                 'isPublic': summoner.isPublic
+                 }
             )
             self.careerInterface.hideLoadingPage.emit()
 
@@ -848,7 +853,9 @@ class MainWindow(FluentWindow):
                  'rankInfo': rankInfo,
                  'games': games,
                  'champions': champions,
-                 'triggerByUser': True, }
+                 'triggerByUser': True,
+                 'isPublic': summoner.isPublic
+                 }
             )
             self.careerInterface.hideLoadingPage.emit()
 
@@ -1096,7 +1103,8 @@ class MainWindow(FluentWindow):
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
                     "cellId": item["cellId"],
-                    "fateFlag": fateFlag
+                    "fateFlag": fateFlag,
+                    "isPublic": summoner["privacy"] == "PUBLIC"
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1274,7 +1282,8 @@ class MainWindow(FluentWindow):
                     "kda": [kill, deaths, assists],
                     # 上野中辅下
                     "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos),
-                    "fateFlag": fateFlag
+                    "fateFlag": fateFlag,
+                    "isPublic": summoner["privacy"] == "PUBLIC"
                 }
 
             with ThreadPoolExecutor() as executor:

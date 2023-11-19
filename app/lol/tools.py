@@ -270,6 +270,8 @@ def processGameDetailData(puuid, game):
         summonerPuuid = participant['player']['puuid']
         isCurrent = (summonerPuuid == puuid)
 
+        isPublic = connector.getSummonerByName(summonerName)["privacy"] == "PUBLIC"
+
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
                 stats = summoner['stats']
@@ -373,7 +375,8 @@ def processGameDetailData(puuid, game):
                     'runeIcon': runeIcon,
                     'champLevel': stats['champLevel'],
                     'demage': stats['totalDamageDealtToChampions'],
-                    'subteamPlacement': subteamPlacement
+                    'subteamPlacement': subteamPlacement,
+                    'isPublic': isPublic
                 }
                 teams[tid]['summoners'].append(item)
 
