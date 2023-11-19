@@ -732,7 +732,7 @@ class SummonerInfoBar(QFrame):
 
         self.levelLabel = QLabel()
         self.championIconLabel = RoundIcon(summoner["championIcon"], 25, 0, 3)
-        self.summonerName = SummonerName(summoner["summonerName"])
+        self.summonerName = SummonerName(summoner["summonerName"], isPublic=summoner["isPublic"])
 
         self.rankIcon = QLabel()
 

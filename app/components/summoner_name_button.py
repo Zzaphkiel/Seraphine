@@ -6,10 +6,10 @@ from qfluentwidgets import ToolTipPosition, ToolTipFilter
 class SummonerName(QLabel):
     clicked = pyqtSignal(bool)
 
-    def __init__(self, text, color=None, parent=None):
+    def __init__(self, text, isPublic=True, color=None, parent=None):
         super().__init__(parent)
         self.setCursor(Qt.PointingHandCursor)
-        self.setText(text)
+        self.setText(text if isPublic else f"{text}🫣")
 
         self.setAlignment(Qt.AlignCenter)
 
@@ -26,6 +26,8 @@ class SummonerName(QLabel):
             self.installEventFilter(
                 ToolTipFilter(self, 0, ToolTipPosition.BOTTOM))
 
+    def text(self) -> str:
+        return super().text().replace("🫣", "")
 
     def mousePressEvent(self, ev) -> None:
         self.setProperty('pressed', True)

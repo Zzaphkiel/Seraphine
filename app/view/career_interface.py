@@ -26,6 +26,11 @@ from ..lol.entries import Summoner
 from ..lol.tools import translateTier, getTeammates, parseGames
 
 
+class NameLabel(QLabel):
+    def text(self) -> str:
+        return super().text().replace("🫣", '')
+
+
 class CareerInterface(SmoothScrollArea):
     careerInfoChanged = pyqtSignal(dict)
     showLoadingPage = pyqtSignal()
@@ -46,7 +51,7 @@ class CareerInterface(SmoothScrollArea):
                                      0,
                                      1,
                                      parent=self)
-        self.name = QLabel(self.tr("Connecting..."))
+        self.name = NameLabel(self.tr("Connecting..."))
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
 
@@ -314,7 +319,7 @@ class CareerInterface(SmoothScrollArea):
         if not self.isCurrentSummoner():
             return
 
-        name = info['name']
+        name = info['name'] if info['isPublic'] else f"{info['name']}🫣"
         icon = info['icon']
         level = info['level']
         xpSinceLastLevel = info['xpSinceLastLevel']
@@ -329,7 +334,7 @@ class CareerInterface(SmoothScrollArea):
         if not info['triggerByUser'] and not self.isCurrentSummoner():
             return
 
-        name = info['name']
+        name = info['name'] if info['isPublic'] else f"{info['name']}🫣"
         icon = info['icon']
         level = info['level']
         xpSinceLastLevel = info['xpSinceLastLevel']
