@@ -18,7 +18,7 @@ class SummonerName(QLabel):
         if color:
             self.setStyleSheet(f"color: {color}")
 
-            if color == "bf242a":
+            if color == "#bf242a":
                 self.setToolTip(self.tr("Former enemy"))
             else:
                 self.setToolTip(self.tr("Former ally"))
