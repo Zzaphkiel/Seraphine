@@ -1024,7 +1024,7 @@ class MainWindow(FluentWindow):
                         origGamesInfo["games"] = [
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
-                        while len(origGamesInfo["games"]) < 11:
+                        while len(origGamesInfo["games"]) < 11:  # FIXME 老玩家打排位, 会死锁
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
@@ -1075,6 +1075,14 @@ class MainWindow(FluentWindow):
                     if sId in [x['summonerId'] for x in data['myTeam']] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
+                fateFlag = None
+                if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+                    # 上把队友
+                    fateFlag = "ally"
+                elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+                    # 上把对面
+                    fateFlag = "enemy"
+
                 return {
                     "name": summoner["displayName"],
                     "icon": icon,
@@ -1087,7 +1095,8 @@ class MainWindow(FluentWindow):
                     "summonerId": summonerId,
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
-                    "cellId": item["cellId"]
+                    "cellId": item["cellId"],
+                    "fateFlag": fateFlag
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1190,7 +1199,7 @@ class MainWindow(FluentWindow):
                         origGamesInfo["games"] = [
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
-                        while len(origGamesInfo["games"]) < 11:
+                        while len(origGamesInfo["games"]) < 11:  # FIXME 老玩家打排位, 会死锁
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
@@ -1243,6 +1252,14 @@ class MainWindow(FluentWindow):
                     if sId in [x.get('summonerId') for x in teamMember] and cnt >= cfg.get(cfg.teamGamesNumber)
                 ]
 
+                fateFlag = None
+                if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+                    # 上把队友
+                    fateFlag = "ally"
+                elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+                    # 上把对面
+                    fateFlag = "enemy"
+
                 return {
                     "name": summoner["displayName"],
                     "icon": icon,
@@ -1256,7 +1273,8 @@ class MainWindow(FluentWindow):
                     "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
                     # 上野中辅下
-                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos)
+                    "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos),
+                    "fateFlag": fateFlag
                 }
 
             with ThreadPoolExecutor() as executor:
