@@ -13,9 +13,11 @@ class ProgressArc(ProgressRing):
     def __init__(self, parent=None, useAni=True, text="", fontSize=10):
         self.text = text
         self.fontSize = fontSize
+        self.drawVal = 0
         super().__init__(parent, useAni=useAni)
 
     def paintEvent(self, e):
+        self.drawVal = self.val or self.drawVal  # 有值取值, 没值保持; self.val 在控件刚实例化时, 前几次update可能会为0
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -35,8 +37,7 @@ class ProgressArc(ProgressRing):
         # draw bar
         pen.setColor(themeColor())
         painter.setPen(pen)
-        degree = int(self.val / (self.maximum() - self.minimum()) * 270)
-
+        degree = int(self.drawVal / (self.maximum() - self.minimum()) * 270)
         painter.drawArc(rc, -135 * 16, -degree * 16)
         painter.setFont(QFont('Microsoft YaHei', self.fontSize, QFont.Bold))
         text_rect = QRectF(0, self.height() * 0.85,
@@ -74,7 +75,6 @@ class RoundLevelAvatar(QWidget):
         self.paintXpUntilNextLevel = None
         self.callUpdate = False
 
-        self.updateIcon(icon, xpSinceLastLevel, xpUntilNextLevel, text)
 
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
