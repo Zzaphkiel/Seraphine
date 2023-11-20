@@ -1620,12 +1620,12 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../components/summoner_name_button.py" line="22"/>
         <source>Former enemy</source>
-        <translation>之前的队友</translation>
+        <translation>之前的对手</translation>
     </message>
     <message>
         <location filename="../../components/summoner_name_button.py" line="24"/>
         <source>Former ally</source>
-        <translation>之前的对手</translation>
+        <translation>之前的队友</translation>
     </message>
 </context>
 <context>
