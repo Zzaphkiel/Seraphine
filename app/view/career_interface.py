@@ -559,7 +559,7 @@ class CareerInterface(SmoothScrollArea):
                         summonerIcon = connector.getProfileIcon(p['icon'])
                         summoners[p['puuid']] = {
                             "name": p['name'], 'icon': summonerIcon,
-                            "total": 0, "wins": 0, "losses": 0}
+                            "total": 0, "wins": 0, "losses": 0, "puuid": p["puuid"]}
 
                     summoners[p['puuid']]['total'] += 1
 
@@ -674,7 +674,7 @@ class TeammateInfoBar(QFrame):
 
         self.name.clicked.connect(
             lambda: self.parent().parent().parent().parent()
-            .parent().summonerNameClicked.emit(self.name.text()))
+            .parent().summonerNameClicked.emit(summoner['puuid']))
 
     def __initWidget(self):
         self.name.setFixedWidth(180)

@@ -372,7 +372,7 @@ class MainWindow(FluentWindow):
 
         iconId = self.currentSummoner.profileIconId
         icon = connector.getProfileIcon(iconId)
-        name = self.currentSummoner.name
+        name = self.currentSummoner.completeName
         level = self.currentSummoner.level
         xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
         xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
@@ -513,7 +513,7 @@ class MainWindow(FluentWindow):
         self.currentSummoner = Summoner(data)
 
         def _():
-            name = self.currentSummoner.name
+            name = self.currentSummoner.completeName
 
             iconId = self.currentSummoner.profileIconId
             icon = connector.getProfileIcon(iconId)
@@ -645,7 +645,7 @@ class MainWindow(FluentWindow):
 
     def __onSearchInterfaceCareerButtonClicked(self):
         self.careerInterface.showLoadingPage.emit()
-        name = self.searchInterface.currentSummonerName
+        name = self.searchInterface.currentSummonerName  # 搜的那个人
 
         def _():
             summoner = Summoner(connector.getSummonerByName(name))
@@ -715,12 +715,12 @@ class MainWindow(FluentWindow):
         threading.Thread(target=_).start()
         self.checkAndSwitchTo(self.careerInterface)
 
-    def __onTeammateFlyoutSummonerNameClicked(self, name):
+    def __onTeammateFlyoutSummonerNameClicked(self, puuid):
         self.careerInterface.w.close()
         self.careerInterface.showLoadingPage.emit()
 
         def _():
-            summoner = Summoner(connector.getSummonerByName(name))
+            summoner = Summoner(connector.getSummonerByPuuid(puuid))  # 改为puuid, 兼容外服
             iconId = summoner.profileIconId
 
             icon = connector.getProfileIcon(iconId)
@@ -766,7 +766,7 @@ class MainWindow(FluentWindow):
                 champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
-                {'name': name,
+                {'name': summoner.completeName,
                  'icon': icon,
                  'level': level,
                  'xpSinceLastLevel': xpSinceLastLevel,
@@ -844,7 +844,7 @@ class MainWindow(FluentWindow):
                 champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
-                {'name': summoner.name,
+                {'name': summoner.completeName,
                  'icon': icon,
                  'level': level,
                  'xpSinceLastLevel': xpSinceLastLevel,
@@ -1083,15 +1083,16 @@ class MainWindow(FluentWindow):
                 ]
 
                 fateFlag = None
-                if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
-                    # 上把队友
-                    fateFlag = "ally"
-                elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
-                    # 上把对面
-                    fateFlag = "enemy"
+                if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
+                    if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+                        # 上把队友
+                        fateFlag = "ally"
+                    elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+                        # 上把对面
+                        fateFlag = "enemy"
 
                 return {
-                    "name": summoner["displayName"],
+                    "name": summoner["gameName"] or summoner["displayName"],
                     "icon": icon,
                     "level": summoner["summonerLevel"],
                     "rankInfo": rankInfo,
@@ -1261,15 +1262,16 @@ class MainWindow(FluentWindow):
                 ]
 
                 fateFlag = None
-                if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
-                    # 上把队友
-                    fateFlag = "ally"
-                elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
-                    # 上把对面
-                    fateFlag = "enemy"
+                if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
+                    if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+                        # 上把队友
+                        fateFlag = "ally"
+                    elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+                        # 上把对面
+                        fateFlag = "enemy"
 
                 return {
-                    "name": summoner["displayName"],
+                    "name": summoner.get("gameName") or summoner["displayName"],
                     "icon": icon,
                     "level": summoner["summonerLevel"],
                     "rankInfo": rankInfo,
