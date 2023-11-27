@@ -266,11 +266,14 @@ def processGameDetailData(puuid, game):
 
     for participant in game['participantIdentities']:
         participantId = participant['participantId']
-        summonerName = participant['player']['summonerName']
+        summonerName = participant['player'].get('gameName') or participant['player'].get('summonerName')  # 兼容外服
         summonerPuuid = participant['player']['puuid']
         isCurrent = (summonerPuuid == puuid)
 
-        isPublic = connector.getSummonerByName(summonerName)["privacy"] == "PUBLIC"
+        if summonerPuuid == '00000000-0000-0000-0000-000000000000':  # AI
+            isPublic = True
+        else:
+            isPublic = connector.getSummonerByPuuid(summonerPuuid)["privacy"] == "PUBLIC"
 
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
