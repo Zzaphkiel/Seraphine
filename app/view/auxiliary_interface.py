@@ -51,11 +51,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
-        # self.dodgeCard = DodgeCard(
-        #     self.tr("Dodge"),
-        #     self.tr("Dodge from champion select without closing clint"),
-        #     self.gameGroup
-        # )
+        self.playAgainCard = PlayAgainCard(
+            self.tr("Fix infinite loading"),
+            self.tr("Fix infinite loading bug when game ends"),
+            self.gameGroup
+        )
         self.lockConfigCard = LockConfigCard(
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
@@ -128,6 +128,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.gameGroup.addSettingCard(self.spectateCard)
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
+        self.gameGroup.addSettingCard(self.playAgainCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -621,6 +622,20 @@ class RemoveTokensCard(SettingCard):
 
         self.pushButton.clicked.connect(lambda: threading.Thread(
             target=lambda: connector.removeTokens()).start())
+
+
+class PlayAgainCard(SettingCard):
+
+    def __init__(self, title, content, parent):
+        super().__init__(Icon.ARROWCIRCLE, title, content, parent)
+        self.pushButton = PushButton(self.tr("Fix"))
+        self.pushButton.setMinimumWidth(100)
+
+        self.hBoxLayout.addWidget(self.pushButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.pushButton.clicked.connect(lambda: threading.Thread(
+            target=lambda: connector.playAgain()).start())
 
 
 class CreatePracticeLobbyCard(ExpandGroupSettingCard):

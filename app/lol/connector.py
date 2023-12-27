@@ -60,7 +60,8 @@ def retry(count=5, retry_sep=0):
                     break
             else:
                 # 有异常抛异常, 没异常抛 RetryMaximumAttempts
-                exce = exce if exce else RetryMaximumAttempts("Exceeded maximum retry attempts.")
+                exce = exce if exce else RetryMaximumAttempts(
+                    "Exceeded maximum retry attempts.")
 
                 # ReferenceError为LCU未就绪仍有请求发送时抛出, 直接吞掉不用提示
                 # 其余异常弹一个提示
@@ -185,7 +186,8 @@ class LolClientConnector:
 
             if type(result) is list:
                 return result
-            elif result.get("httpStatus") and result.get("httpStatus") != 200:  # 如果有才判定, 有部分相应成功时没有httpStatus
+            # 如果有才判定, 有部分相应成功时没有httpStatus
+            elif result.get("httpStatus") and result.get("httpStatus") != 200:
                 time.sleep(.5)
                 retries += 1
             else:
@@ -572,6 +574,12 @@ class LolClientConnector:
 
         return res
 
+    @retry()
+    def playAgain(self):
+        res = self.__post("/riotclient/kill-and-restart-ux").content
+
+        return res
+
     @needLcu()
     def __get(self, path, params=None):
         url = self.url + path
@@ -583,6 +591,7 @@ class LolClientConnector:
         if not self.slowlySess:
             self.slowlySess = requests.session()
         return self.slowlySess.get(url, params=params, verify=False)
+
     @needLcu()
     def __post(self, path, data=None):
         url = self.url + path
@@ -626,7 +635,7 @@ class JsonManager:
         for item in skins.values():
             championId = item["id"] // 1000
             self.champions[champs[championId]
-            ]["skins"][item["name"]] = item["id"]
+                           ]["skins"][item["name"]] = item["id"]
             self.champions[champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():

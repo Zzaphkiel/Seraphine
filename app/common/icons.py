@@ -45,6 +45,7 @@ class Icon(FluentIconBase, Enum):
     UPDATE = 'Update'
     CONNECTION = "Connection"
     PAGE = 'Page'
+    ARROWCIRCLE = 'ArrowCircle'
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'
