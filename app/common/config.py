@@ -51,7 +51,7 @@ class Config(QConfig):
                                  restart=True)
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
-                                        RangeValidator(1, 999))
+                                        RangeValidator(1, 60))
 
     teamGamesNumber = RangeConfigItem("Functions", "TeamGamesNumber", 1,
                                       RangeValidator(1, 10))
