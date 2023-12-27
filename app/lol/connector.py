@@ -44,7 +44,7 @@ def retry(count=5, retry_sep=0):
         def wrapper(*args, **kwargs):
             exce = None
             for _ in range(count):
-                while connector.ref_cnt >= 3:
+                while connector.ref_cnt >= 2:
                     time.sleep(.2)
 
                 connector.ref_cnt += 1

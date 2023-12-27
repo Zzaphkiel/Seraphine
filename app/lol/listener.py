@@ -12,7 +12,10 @@ def getLolProcessPid():
 
     if b'LeagueClientUx.exe' in processes:
         arr = processes.split()
-        return int(arr[1])
+        try:
+            return int(arr[1])
+        except ValueError:
+            raise ValueError(f"Subprocess return exception: {processes}")
     else:
         return 0
 
