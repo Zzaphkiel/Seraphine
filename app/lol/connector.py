@@ -576,7 +576,7 @@ class LolClientConnector:
 
     @retry()
     def playAgain(self):
-        res = self.__post("/riotclient/kill-and-restart-ux").content
+        res = self.__post("/lol-lobby/v2/play-again").content
 
         return res
 
