@@ -1,5 +1,4 @@
 import copy
-import json
 import os
 import sys
 import traceback
@@ -720,7 +719,8 @@ class MainWindow(FluentWindow):
         self.careerInterface.showLoadingPage.emit()
 
         def _():
-            summoner = Summoner(connector.getSummonerByPuuid(puuid))  # 改为puuid, 兼容外服
+            summoner = Summoner(
+                connector.getSummonerByPuuid(puuid))  # 改为puuid, 兼容外服
             iconId = summoner.profileIconId
 
             icon = connector.getProfileIcon(iconId)

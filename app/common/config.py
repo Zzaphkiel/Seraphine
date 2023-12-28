@@ -4,8 +4,8 @@ import sys
 from PyQt5.QtCore import QLocale
 
 from qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
-                            OptionsConfigItem, OptionsValidator, ConfigSerializer, RangeConfigItem, RangeValidator,
-                            EnumSerializer)
+                            OptionsConfigItem, OptionsValidator, ConfigSerializer,
+                            RangeConfigItem, RangeValidator, EnumSerializer)
 
 
 class Language(Enum):

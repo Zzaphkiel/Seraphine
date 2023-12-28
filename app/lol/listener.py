@@ -13,7 +13,8 @@ def getLolProcessPid():
     if b'LeagueClientUx.exe' in processes:
         arr = processes.split()
         try:
-            return int(arr[1])
+            pos = arr.index(b"LeagueClientUx.exe")
+            return int(arr[pos+1])
         except ValueError:
             raise ValueError(f"Subprocess return exception: {processes}")
     else:
@@ -103,7 +104,8 @@ class LolClientEventListener(QThread):
                 allEventSubscription, '/lol-champ-select/v1/session', onChampSelectChanged)
 
             # 订阅选择英雄阶段的交换位置消息
-            wllp.subscription_filter_endpoint(allEventSubscription, '/lol-champ-select/v1/ongoing-swap', onGoingSwap)
+            wllp.subscription_filter_endpoint(
+                allEventSubscription, '/lol-champ-select/v1/ongoing-swap', onGoingSwap)
 
             # print("[INFO] Event listener initialized.")
             while True:
