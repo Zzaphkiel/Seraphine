@@ -31,6 +31,11 @@ class NameLabel(QLabel):
         return super().text().replace("🫣", '')
 
 
+class TagLineLabel(QLabel):
+    def text(self) -> str:
+        return super().text().replace(" ", '')
+
+
 class CareerInterface(SmoothScrollArea):
     careerInfoChanged = pyqtSignal(dict)
     showLoadingPage = pyqtSignal()
@@ -43,6 +48,7 @@ class CareerInterface(SmoothScrollArea):
         super().__init__(parent)
         self.currentSummonerName = None
         self.puuid = None
+        self.showTagLine = False
 
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
@@ -52,8 +58,10 @@ class CareerInterface(SmoothScrollArea):
                                      1,
                                      parent=self)
         self.name = NameLabel(self.tr("Connecting..."))
+        self.tagLineLabel = TagLineLabel()
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
+        self.nameTagLineLayout = QVBoxLayout()
 
         self.buttonsLayout = QVBoxLayout()
         self.backToMeButton = PushButton(self.tr("Back to me"))
@@ -90,6 +98,9 @@ class CareerInterface(SmoothScrollArea):
         self.__connectSignalToSlot()
 
     def __initWidget(self):
+        self.tagLineLabel.setVisible(False)
+        self.tagLineLabel.setAlignment(Qt.AlignCenter)
+
         self.copyButton.setFixedSize(26, 26)
         self.copyButton.setEnabled(False)
         self.copyButton.setToolTip(self.tr("Copy summoner name to ClipBoard"))
@@ -97,7 +108,7 @@ class CareerInterface(SmoothScrollArea):
             ToolTipFilter(self.copyButton, 500, ToolTipPosition.TOP))
 
         self.name.setObjectName("name")
-        # self.level.setObjectName("level")
+        self.tagLineLabel.setObjectName("tagLineLabel")
         self.nameLevelVLayout.setObjectName("nameLevelVLayout")
 
         self.recent20GamesLabel.setObjectName('rencent20GamesLabel')
@@ -161,8 +172,13 @@ class CareerInterface(SmoothScrollArea):
         self.initTableStyle()
 
     def __initLayout(self):
+        self.nameTagLineLayout.setContentsMargins(0, 0, 0, 0)
+        self.nameTagLineLayout.addWidget(self.name)
+        self.nameTagLineLayout.addWidget(self.tagLineLabel)
+        self.nameTagLineLayout.setSpacing(0)
+
         self.nameButtonLayout.setContentsMargins(0, 0, 0, 0)
-        self.nameButtonLayout.addWidget(self.name)
+        self.nameButtonLayout.addLayout(self.nameTagLineLayout)
         self.nameButtonLayout.addSpacing(5)
         self.nameButtonLayout.addWidget(self.copyButton)
 
@@ -251,6 +267,7 @@ class CareerInterface(SmoothScrollArea):
         self.winsLabel.setVisible(not enable)
         self.lossesLabel.setVisible(not enable)
         self.gameInfoArea.setVisible(not enable)
+        self.tagLineLabel.setVisible(not enable and self.showTagLine)
 
         self.progressRing.setVisible(enable)
 
@@ -305,7 +322,7 @@ class CareerInterface(SmoothScrollArea):
         self.filterComboBox.currentIndexChanged.connect(
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
-            lambda: pyperclip.copy(self.name.text()))
+            lambda: pyperclip.copy(self.getSummonerName()))
 
         self.hideLoadingPage.connect(
             lambda: self.__setLoadingPageEnabled(False))
@@ -342,6 +359,10 @@ class CareerInterface(SmoothScrollArea):
         puuid = info['puuid']
         rankInfo = info['rankInfo']
         games = info['games']
+
+        if info['tagLine'] != None:
+            self.showTagLine = True
+            self.tagLineLabel.setText(f"# {info['tagLine']}")
 
         levelStr = str(level) if level != -1 else "None"
         self.icon.updateIcon(icon, xpSinceLastLevel,
@@ -532,6 +553,9 @@ class CareerInterface(SmoothScrollArea):
 
     def setCurrentSummonerName(self, name):
         self.currentSummonerName = name
+
+    def getSummonerName(self):
+        return self.name.text() if not self.showTagLine else f'{self.name.text()}{self.tagLineLabel.text()}'
 
     def isCurrentSummoner(self):
 

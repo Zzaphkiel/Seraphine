@@ -371,10 +371,11 @@ class MainWindow(FluentWindow):
 
         iconId = self.currentSummoner.profileIconId
         icon = connector.getProfileIcon(iconId)
-        name = self.currentSummoner.completeName
+        name = self.currentSummoner.name
         level = self.currentSummoner.level
         xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
         xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
+        tagLine = self.currentSummoner.tagLine
 
         self.careerInterface.currentSummonerName = name
 
@@ -429,7 +430,8 @@ class MainWindow(FluentWindow):
             'games': games,
             'champions': champions,
             'triggerByUser': True,
-            'isPublic': self.currentSummoner.isPublic
+            'isPublic': self.currentSummoner.isPublic,
+            'tagLine': tagLine
         }
         if champions:
             emitInfo["champions"] = champions
@@ -512,7 +514,8 @@ class MainWindow(FluentWindow):
         self.currentSummoner = Summoner(data)
 
         def _():
-            name = self.currentSummoner.completeName
+            name = self.currentSummoner.name
+            tagLine = self.currentSummoner.tagLine
 
             iconId = self.currentSummoner.profileIconId
             icon = connector.getProfileIcon(iconId)
@@ -522,13 +525,15 @@ class MainWindow(FluentWindow):
 
             self.nameOrIconChanged.emit(icon, name)
             self.careerInterface.IconLevelExpChanged.emit(
-                {'name': name,
-                 'icon': icon,
-                 'level': level,
-                 'xpSinceLastLevel': xpSinceLastLevel,
-                 'xpUntilNextLevel': xpUntilNextLevel,
-                 'isPublic': self.currentSummoner.isPublic
-                 }
+                {
+                    'name': name,
+                    'icon': icon,
+                    'level': level,
+                    'xpSinceLastLevel': xpSinceLastLevel,
+                    'xpUntilNextLevel': xpUntilNextLevel,
+                    'isPublic': self.currentSummoner.isPublic,
+                    'tagLine': tagLine,
+                }
             )
 
         threading.Thread(target=_).start()
@@ -629,7 +634,7 @@ class MainWindow(FluentWindow):
             self.hide()
 
     def __onCareerInterfaceHistoryButtonClicked(self):
-        summonerName = self.careerInterface.name.text()
+        summonerName = self.careerInterface.getSummonerName()
 
         self.searchInterface.searchLineEdit.setText(summonerName)
         self.searchInterface.searchLineEdit.searchButton.clicked.emit()
@@ -694,7 +699,7 @@ class MainWindow(FluentWindow):
                 champions = getRecentChampions(games['games'])
 
             emitInfo = {
-                'name': name,
+                'name': summoner.name,
                 'icon': icon,
                 'level': level,
                 'xpSinceLastLevel': xpSinceLastLevel,
@@ -703,7 +708,8 @@ class MainWindow(FluentWindow):
                 'rankInfo': rankInfo,
                 'games': games,
                 'triggerByUser': True,
-                'isPublic': summoner.isPublic
+                'isPublic': summoner.isPublic,
+                'tagLine': summoner.tagLine
             }
             if champions:
                 emitInfo["champions"] = champions
@@ -766,18 +772,20 @@ class MainWindow(FluentWindow):
                 champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
-                {'name': summoner.completeName,
-                 'icon': icon,
-                 'level': level,
-                 'xpSinceLastLevel': xpSinceLastLevel,
-                 'xpUntilNextLevel': xpUntilNextLevel,
-                 'puuid': summoner.puuid,
-                 'rankInfo': rankInfo,
-                 'games': games,
-                 'champions': champions,
-                 'triggerByUser': True,
-                 'isPublic': summoner.isPublic
-                 }
+                {
+                    'name': summoner.name,
+                    'icon': icon,
+                    'level': level,
+                    'xpSinceLastLevel': xpSinceLastLevel,
+                    'xpUntilNextLevel': xpUntilNextLevel,
+                    'puuid': summoner.puuid,
+                    'rankInfo': rankInfo,
+                    'games': games,
+                    'champions': champions,
+                    'triggerByUser': True,
+                    'isPublic': summoner.isPublic,
+                    'tagline': summoner.tagLine
+                }
             )
             self.careerInterface.hideLoadingPage.emit()
 
@@ -844,18 +852,20 @@ class MainWindow(FluentWindow):
                 champions = getRecentChampions(games['games'])
 
             self.careerInterface.careerInfoChanged.emit(
-                {'name': summoner.completeName,
-                 'icon': icon,
-                 'level': level,
-                 'xpSinceLastLevel': xpSinceLastLevel,
-                 'xpUntilNextLevel': xpUntilNextLevel,
-                 'puuid': summoner.puuid,
-                 'rankInfo': rankInfo,
-                 'games': games,
-                 'champions': champions,
-                 'triggerByUser': True,
-                 'isPublic': summoner.isPublic
-                 }
+                {
+                    'name': summoner.name,
+                    'icon': icon,
+                    'level': level,
+                    'xpSinceLastLevel': xpSinceLastLevel,
+                    'xpUntilNextLevel': xpUntilNextLevel,
+                    'puuid': summoner.puuid,
+                    'rankInfo': rankInfo,
+                    'games': games,
+                    'champions': champions,
+                    'triggerByUser': True,
+                    'isPublic': summoner.isPublic,
+                    'tagLine': summoner.tagLine
+                }
             )
             self.careerInterface.hideLoadingPage.emit()
 

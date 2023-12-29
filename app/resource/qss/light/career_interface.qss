@@ -6,6 +6,11 @@ QLabel#name {
     font: bold 32px 'Microsoft YaHei', 'Segoe UI';
 }
 
+QLabel#tagLineLabel {
+    font: 16px;
+    color: rgb(100, 100, 100);
+}
+
 QLabel#level {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }

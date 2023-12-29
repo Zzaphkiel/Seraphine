@@ -9,5 +9,6 @@ class Summoner:
         self.xpSinceLastLevel = data['xpSinceLastLevel']
         self.xpUntilNextLevel = data['xpUntilNextLevel']
         self.isPublic = data["privacy"] == "PUBLIC"
-        self.tagLine = data.get("tagLine", "")
-        self.completeName = "#".join((self.name, self.tagLine)) if self.tagLine else self.name  # 兼容外服
+        self.tagLine = data.get("tagLine")
+        self.completeName = "#".join(
+            (self.name, self.tagLine)) if self.tagLine else self.name  # 兼容外服

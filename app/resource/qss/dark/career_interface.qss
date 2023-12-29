@@ -8,6 +8,11 @@ QLabel#name {
     font: bold 32px 'Segoe UI', 'Microsoft YaHei';
 }
 
+QLabel#tagLineLabel {
+    font: 16px;
+    color: rgb(200, 200, 200);
+}
+
 QLabel#rencent20GamesLabel,
 QLabel#winsLabel,
 QLabel#lossesLabel,
