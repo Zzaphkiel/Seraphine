@@ -62,6 +62,10 @@ python main.py
     - 创建 5v5 自定义训练模式房间 ✅
     - 观战同大区玩家正在进行的游戏 ✅
     - 锁定游戏内设置 ✅
+  
+  - 客户端功能
+    - 退出后自动重新连接 ✅
+    - 修复客户端结算时无限转圈 ✅
 
   - 个性化功能
     - 修改个人主页背景 ✅
@@ -108,7 +112,7 @@ pip install pyinstaller
 命令结束后在目标文件夹获得 `Seraphine.zip`。
 
 
-## 引用以及参考资料 👀
+## 参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
 - 部分与 LOL 客户端的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
 - LCU API 使用方法以及汇总详见官方文档
@@ -120,6 +124,14 @@ pip install pyinstaller
   - https://github.com/KebsCS/KBotExt
   - https://github.com/XHXIAIEIN/LeagueCustomLobby
   - https://github.com/7rebux/league-tools
+
+- 锁定游戏设置相关请见
+  - https://www.bilibili.com/video/BV1s84y1x7ub
+
+  修复客户端无限转圈 / 缩成一块 BUG 请见
+  - https://www.bilibili.com/video/BV1Cw41147iS
+  - https://github.com/LeagueTavern/fix-lcu-window
+
 
 - 游戏资源获取请见
   - https://raw.communitydragon.org/latest/
