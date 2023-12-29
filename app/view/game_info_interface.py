@@ -282,7 +282,8 @@ class SummonerInfoView(QFrame):
         nameColor = None
         if fateFlag:
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
-        self.summonerName = SummonerName(name, isPublic=info["isPublic"], color=nameColor)
+        self.summonerName = SummonerName(
+            name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'])
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
@@ -530,7 +531,8 @@ class Games(QFrame):
         nameColor = None
         if fateFlag:
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
-        self.summonerName = SummonerName(name, isPublic=summoner["isPublic"], color=nameColor)
+        self.summonerName = SummonerName(
+            name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'])
         self.summonerName.setObjectName("summonerName")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))

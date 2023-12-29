@@ -1093,6 +1093,7 @@ class MainWindow(FluentWindow):
 
                 return {
                     "name": summoner["gameName"] or summoner["displayName"],
+                    'tagLine': summoner.get("tagLine"),
                     "icon": icon,
                     "level": summoner["summonerLevel"],
                     "rankInfo": rankInfo,
@@ -1272,6 +1273,7 @@ class MainWindow(FluentWindow):
 
                 return {
                     "name": summoner.get("gameName") or summoner["displayName"],
+                    'tagLine': summoner.get("tagLine"),
                     "icon": icon,
                     "level": summoner["summonerLevel"],
                     "rankInfo": rankInfo,

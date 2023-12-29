@@ -6,7 +6,7 @@ from qfluentwidgets import ToolTipPosition, ToolTipFilter
 class SummonerName(QLabel):
     clicked = pyqtSignal(bool)
 
-    def __init__(self, text, isPublic=True, color=None, parent=None):
+    def __init__(self, text, isPublic=True, color=None, tagLine=None, parent=None):
         super().__init__(parent)
         self.setCursor(Qt.PointingHandCursor)
         self.setText(text if isPublic else f"{text}🫣")
@@ -26,8 +26,15 @@ class SummonerName(QLabel):
             self.installEventFilter(
                 ToolTipFilter(self, 0, ToolTipPosition.BOTTOM))
 
+        self.tagLine = tagLine
+
     def text(self) -> str:
-        return super().text().replace("🫣", "")
+        name = super().text().replace("🫣", "")
+
+        if self.tagLine:
+            name += f'#{self.tagLine}'
+
+        return name
 
     def mousePressEvent(self, ev) -> None:
         self.setProperty('pressed', True)
