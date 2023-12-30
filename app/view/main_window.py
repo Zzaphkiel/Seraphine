@@ -1374,7 +1374,7 @@ class MainWindow(FluentWindow):
         threading.Thread(target=_).start()
 
     def __onCareerInterfaceGameInfoBarClicked(self, gameId):
-        name = self.careerInterface.name.text()
+        name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
         self.searchInterface.gamesView.gamesTab.waitingForSelected = gameId
