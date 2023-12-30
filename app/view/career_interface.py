@@ -360,7 +360,7 @@ class CareerInterface(SmoothScrollArea):
         rankInfo = info['rankInfo']
         games = info['games']
 
-        if info['tagLine'] != None:
+        if len(info['tagLine']):
             self.showTagLine = True
             self.tagLineLabel.setText(f"# {info['tagLine']}")
 
