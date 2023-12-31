@@ -580,6 +580,12 @@ class LolClientConnector:
 
         return res
 
+    @retry()
+    def getClientZoom(self):
+        res = self.__get("/riotclient/zoom-scale").json()
+
+        return res
+
     @needLcu()
     def __get(self, path, params=None):
         url = self.url + path
