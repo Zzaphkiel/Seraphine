@@ -11,7 +11,7 @@ from app.view.main_window import MainWindow
 
 
 if __name__ == '__main__':
-    os.environ['PATH'] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"]
+    os.chdir(os.path.dirname(__file__))
 
     if cfg.get(cfg.dpiScale) == "Auto":
         QApplication.setHighDpiScaleFactorRoundingPolicy(
