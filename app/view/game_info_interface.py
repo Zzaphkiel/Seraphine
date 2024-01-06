@@ -90,8 +90,8 @@ class GameInfoInterface(SmoothScrollArea):
 
     def __onAllySummonerInfoReady(self, info):
         self.allySummonersInfo = info
-        self.summonersView.allySummoners.updateSummoners(info['summoners'])
-        self.allySummonerGamesView.updateSummoners(info['summoners'])
+        self.summonersView.allySummoners.updateSummoners(info['summoners'])  # 概览栏(左侧)
+        self.allySummonerGamesView.updateSummoners(info['summoners'])  # 战绩栏(右侧)
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
@@ -229,6 +229,8 @@ class TeamSummoners(QFrame):
         self.items: Dict[int, SummonerInfoView] = {}
         self.vBoxLayout = QVBoxLayout(self)
 
+        self.teamIdBuf = []  # 当前队伍的预组队Id缓冲区
+
         self.__initLayout()
 
     def __initLayout(self):
@@ -239,7 +241,7 @@ class TeamSummoners(QFrame):
         self.clear()
 
         for summoner in summoners:
-            summonerView = SummonerInfoView(summoner)
+            summonerView = SummonerInfoView(summoner, self)
             # 用 summonerId 避免空字符串
             self.items[summoner["summonerId"]] = summonerView
             self.vBoxLayout.addWidget(summonerView, stretch=1)
@@ -256,9 +258,17 @@ class TeamSummoners(QFrame):
             if item.widget():
                 item.widget().deleteLater()
         self.items = {}
+        self.teamIdBuf = []
 
 
 class SummonerInfoView(QFrame):
+    """
+    对局信息页单个召唤师概览 item
+
+    Layout中页面位于左侧, 多个控件自上而下呈纵向堆叠
+
+    显示了KDA, 召唤师名称, 经验, 头像 等信息
+    """
 
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
@@ -269,11 +279,12 @@ class SummonerInfoView(QFrame):
                                      info['xpUntilNextLevel'],
                                      70, info["level"])
 
-        if info["teammatesMarker"] and info["teamId"]:
-            self.setToolTip(
-                '\n'.join([t['name'] for t in info["teammatesMarker"]]))
-            self.installEventFilter(
-                ToolTipFilter(self, 0, ToolTipPosition.TOP))
+        teamInfo = info.get("teamInfo")  # BP阶段没有该字段, onGameStart才有
+
+        if teamInfo:
+            self.setToolTip("\n".join(teamInfo))
+            self.installEventFilter(ToolTipFilter(self, 0, ToolTipPosition.TOP))
+            self.__setColor(info["teamId"])
 
         self.infoVBoxLayout = QVBoxLayout()
 
@@ -283,7 +294,7 @@ class SummonerInfoView(QFrame):
         if fateFlag:
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
         self.summonerName = SummonerName(
-            name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'])
+            name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'], tips=info["recentlyChampionName"])
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
 
@@ -380,9 +391,6 @@ class SummonerInfoView(QFrame):
         self.rankFlexLp.installEventFilter(
             ToolTipFilter(self.rankFlexLp, 0, ToolTipPosition.TOP))
 
-        if info["teamId"]:
-            self.__setColor(info["teamId"])
-
         self.__initLayout()
 
     def __initLayout(self):
@@ -425,17 +433,20 @@ class SummonerInfoView(QFrame):
         self.hBoxLayout.addWidget(self.icon)
         self.hBoxLayout.addLayout(self.infoVBoxLayout)
 
-        # if self.teammateIcon:
-        #     self.vBoxLayout.addWidget(self.teammateIcon)
-
         # self.setFixedHeight(150)
 
     def __setColor(self, teamId):
-        assert 0 < teamId < 3  # 预组队不会超过2个
 
-        if teamId == 1:
+        if teamId not in self.parent().teamIdBuf:
+            self.parent().teamIdBuf.append(teamId)
+
+        teamIndex = self.parent().teamIdBuf.index(teamId)
+
+        assert 0 < len(self.parent().teamIdBuf) < 3  # 预组队数量一定不超过2
+
+        if teamIndex == 0:
             r, g, b = 255, 176, 27
-        elif teamId == 2:
+        elif teamIndex == 1:
             r, g, b = 255, 51, 153
         else:
             return
@@ -532,7 +543,7 @@ class Games(QFrame):
         if fateFlag:
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
         self.summonerName = SummonerName(
-            name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'])
+            name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'], tips=summoner["recentlyChampionName"])
         self.summonerName.setObjectName("summonerName")
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().summonerGamesClicked.emit(self.summonerName.text()))

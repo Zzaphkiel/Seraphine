@@ -462,12 +462,46 @@ def getTeammates(game, targetPuuid):
             if s['puuid'] != targetPuuid:
                 res['summoners'].append(
                     {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
+            else:
+                res["championId"] = player.get('championId', -1)  # 当前召唤师在该对局使用的英雄, 自定义对局没有该字段
         else:
             res['enemies'].append(
                 {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'],
                  'icon': s['profileIcon']})
 
     return res
+
+
+def markTeam(summoners):
+    """
+    标记预组队的召唤师
+
+    在summoners中, teamId是int型数据, 若有效, 则不小于0, 若无此信息, 则被标记为-1;
+
+    该方法会将所有 teamId >= 0 的召唤师名称, 放入一个dict中, key是teamId, value是召唤师名称组成的list;
+
+    如果结果中一个teamId的成员大于1个召唤师, 则判定为是预组队;
+
+    该方法的结果会直接作用于 summoners 上, 以字段teamInfo存储.
+
+    @param summoners:
+    @return:
+    """
+
+    teamInfo = {}
+
+    # 完整迭代一次
+    for summoner in summoners:
+        team_id = summoner.get("teamId", -1)
+        if team_id >= 0:
+            teamInfo.setdefault(team_id, []).append(summoner["name"])
+
+    # 将队伍信息添加到对应的召唤师
+    for summoner in summoners:
+        tmp = teamInfo.get(summoner["teamId"])
+        summoner["teamInfo"] = tmp if len(tmp) > 1 else []
+
+    return summoners
 
 
 def assignTeamId(summoners):
@@ -492,6 +526,11 @@ def assignTeamId(summoners):
     @return: 变更直接作用于入参 :summoners: 同时会return; 两者为同一实例;
 
     """
+    raise DeprecationWarning(
+        "The method has been enabled, and currently, the \"teamParticipantId\" field is being used to determine team "
+        "information."
+    )
+
     team_id = 1
     summoner_to_team = {}
 
