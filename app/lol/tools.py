@@ -636,7 +636,7 @@ def fixLeagueClientWindow():
     调用 Win API 手动调整窗口大小 / 位置
     详情请见 https://github.com/LeagueTavern/fix-lcu-window
 
-    @return: 当且仅当需要修复且权限不足时返回 False
+    @return: 当且仅当需要修复且权限不足时返回 `False`
     """
 
     windowHWnd = win32gui.FindWindow("RCLIENT", "League of Legends")

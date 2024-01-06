@@ -3,12 +3,26 @@ import subprocess
 import logging
 import asyncio
 import willump
-from PyQt5.QtCore import QObject, QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
-def getLolProcessPid():
+def getTasklistPath():
+    for path in ['tasklist',
+                 'C:/Windows/System32/tasklist.exe',
+                 'app/bin/tasklist.exe']:
+        try:
+            _ = subprocess.check_output(path, shell=True)
+            return path
+        except:
+            pass
+
+    return None
+
+
+def getLolProcessPid(path):
+
     processes = subprocess.check_output(
-        'tasklist /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
+        f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
 
     if b'LeagueClientUx.exe' in processes:
         arr = processes.split()
@@ -21,9 +35,9 @@ def getLolProcessPid():
         return 0
 
 
-def isLolGameProcessExist():
+def isLolGameProcessExist(path):
     processes = subprocess.check_output(
-        'tasklist /FI "imagename eq League of Legends.exe" /NH', shell=True)
+        f'{path} /FI "imagename eq League of Legends.exe" /NH', shell=True)
 
     return b'League of Legends.exe' in processes
 
@@ -32,14 +46,16 @@ class LolProcessExistenceListener(QThread):
     lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, tasklistPath, parent):
+        self.tasklistPath = tasklistPath
+
         super().__init__(parent)
 
     def run(self):
         isRunning = False
 
         while True:
-            pid = getLolProcessPid()
+            pid = getLolProcessPid(self.tasklistPath)
             if pid != 0:
                 if not isRunning:
                     isRunning = True
