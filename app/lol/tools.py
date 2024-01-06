@@ -1,6 +1,11 @@
 import time
+import win32gui
+import win32con
+import win32api
+import ctypes
 
 from PyQt5.QtCore import QObject
+from PyQt5.QtWidgets import QApplication
 
 from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector, connector
@@ -622,3 +627,97 @@ def parseGames(games, targetId=0):
                     losses += 1
 
     return hitGames, kills, deaths, assists, wins, losses
+
+
+def fixLeagueClientWindow():
+    """
+    #### 需要管理员权限
+
+    调用 Win API 手动调整窗口大小 / 位置
+    详情请见 https://github.com/LeagueTavern/fix-lcu-window
+
+    @return: 当且仅当需要修复且权限不足时返回 `False`
+    """
+
+    windowHWnd = win32gui.FindWindow("RCLIENT", "League of Legends")
+
+    # 客户端只有在 DX 9 模式下这个玩意才不是 0
+    windowCefHWnd = win32gui.FindWindowEx(
+        windowHWnd, 0, "CefBrowserWindow", None)
+
+    if not windowHWnd or not windowCefHWnd:
+        return True
+
+    # struct WINDOWPLACEMENT {
+    #     UINT  length; (事实上并没有该字段)
+    #     UINT  flags;
+    #     UINT  showCmd;
+    #     POINT ptMinPosition;
+    #     POINT ptMaxPosition;
+    #     RECT  rcNormalPosition;
+    # } ;
+    placement = win32gui.GetWindowPlacement(windowHWnd)
+
+    if placement[1] == win32con.SW_SHOWMINIMIZED:
+        return True
+
+    # struct RECT {
+    #     LONG left;
+    #     LONG top;
+    #     LONG right;
+    #     LONG bottom;
+    # }
+    windowRect = win32gui.GetWindowRect(windowHWnd)
+    windowCefRect = win32gui.GetWindowRect(windowCefHWnd)
+
+    def needResize(rect):
+        return (rect[3] - rect[1]) / (rect[2] - rect[0]) != 0.5625
+
+    if not needResize(windowRect) and not needResize(windowCefRect):
+        return True
+
+    clientZoom = int(connector.getClientZoom())
+
+    screenWidth = win32api.GetSystemMetrics(0)
+    screenHeight = win32api.GetSystemMetrics(1)
+
+    targetWindowWidth = 1280 * clientZoom
+    targetWindowHeight = 720 * clientZoom
+
+    def patchDpiChangedMessage(hWnd):
+        dpi = ctypes.windll.user32.GetDpiForWindow(hWnd)
+        wParam = win32api.MAKELONG(dpi, dpi)
+        lParam = ctypes.pointer((ctypes.c_int * 4)(0, 0, 0, 0))
+
+        WM_DPICHANGED = 0x02E0
+        win32api.SendMessage(hWnd, WM_DPICHANGED, wParam, lParam)
+
+    try:
+        patchDpiChangedMessage(windowHWnd)
+        patchDpiChangedMessage(windowCefHWnd)
+
+        SWP_SHOWWINDOW = 0x0040
+        win32gui.SetWindowPos(
+            windowHWnd,
+            0,
+            (screenWidth - targetWindowWidth) // 2,
+            (screenHeight - targetWindowHeight) // 2,
+            targetWindowWidth, targetWindowHeight,
+            SWP_SHOWWINDOW
+        )
+
+        win32gui.SetWindowPos(
+            windowCefHWnd,
+            0,
+            0,
+            0,
+            targetWindowWidth,
+            targetWindowHeight,
+            SWP_SHOWWINDOW
+        )
+
+    except:
+        # 需要管理员权限
+        return False
+
+    return True

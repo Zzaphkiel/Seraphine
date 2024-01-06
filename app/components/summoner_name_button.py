@@ -31,7 +31,7 @@ class SummonerName(QLabel):
     def text(self) -> str:
         name = super().text().replace("🫣", "")
 
-        if self.tagLine:
+        if len(self.tagLine):
             name += f'#{self.tagLine}'
 
         return name

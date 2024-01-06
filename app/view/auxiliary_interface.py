@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
 from qfluentwidgets.common.icon import FluentIconBase
 
+from ..lol.tools import fixLeagueClientWindow
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
@@ -60,6 +61,12 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
             cfg.lockConfig, self.gameGroup)
+        self.fixDpiCard = FixClientDpiCard(
+            self.tr("Fix client window"),
+            self.tr(
+                "Fix incorrect client window size caused by DirectX 9 (need UAC)"),
+            self.gameGroup
+        )
 
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
             self.tr("Create 5v5 practice lobby"),
@@ -129,6 +136,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
         self.gameGroup.addSettingCard(self.playAgainCard)
+        self.gameGroup.addSettingCard(self.fixDpiCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
@@ -638,6 +646,32 @@ class PlayAgainCard(SettingCard):
             target=lambda: connector.playAgain()).start())
 
 
+class FixClientDpiCard(SettingCard):
+
+    def __init__(self, title, content, parent):
+        super().__init__(Icon.SCALEFIT, title, content, parent)
+        self.pushButton = PushButton(self.tr("Fix"))
+        self.pushButton.setMinimumWidth(100)
+
+        self.hBoxLayout.addWidget(self.pushButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.pushButton.clicked.connect(lambda: threading.Thread(
+            self.__OnButtonClicked()).start())
+
+    def __OnButtonClicked(self):
+        if not fixLeagueClientWindow():
+            InfoBar.error(
+                title=self.tr("Permission denied"),
+                content=self.tr("Failed to set window position"),
+                orient=Qt.Vertical,
+                isClosable=True,
+                position=InfoBarPosition.BOTTOM_RIGHT,
+                duration=5000,
+                parent=self.window().auxiliaryFuncInterface,
+            )
+
+
 class CreatePracticeLobbyCard(ExpandGroupSettingCard):
 
     def __init__(self, title, content, parent):
@@ -783,7 +817,7 @@ class SpectateCard(ExpandGroupSettingCard):
 
             f(title=title, content=content, orient=Qt.Vertical, isClosable=True,
               position=InfoBarPosition.TOP_RIGHT, duration=5000,
-              parent=self.parent().parent().parent().parent())
+              parent=self.window().auxiliaryFuncInterface)
 
         try:
             connector.spectate(self.lineEdit.text())
@@ -1045,7 +1079,7 @@ class LockConfigCard(SettingCard):
                 isClosable=True,
                 position=InfoBarPosition.BOTTOM_RIGHT,
                 duration=5000,
-                parent=self,
+                parent=self.window().auxiliaryFuncInterface,
             )
             self.setValue(not isChecked)
 

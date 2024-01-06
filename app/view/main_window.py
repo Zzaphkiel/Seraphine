@@ -31,9 +31,10 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
-from ..lol.exceptions import SummonerGamesNotFound, RetryMaximumAttempts, SummonerNotFound, SummonerNotInGame
+from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
+                              SummonerNotFound, SummonerNotInGame)
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener, StoppableThread,
-                            getLolProcessPid)
+                            getLolProcessPid, getTasklistPath)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
                          processRankInfo, getTeammates, assignTeamId, parseGames)
@@ -64,9 +65,9 @@ class MainWindow(FluentWindow):
         self.settingInterface = SettingInterface(self)
 
         # crate listener
-
         self.isClientProcessRunning = False
-        self.processListener = LolProcessExistenceListener(self)
+        self.processListener = LolProcessExistenceListener(
+            self.tasklistPath, self)
         self.eventListener = LolClientEventListener(self)
 
         self.checkUpdateThread = StoppableThread(
@@ -213,8 +214,25 @@ class MainWindow(FluentWindow):
         self.show()
         QApplication.processEvents()
 
+        self.tasklistPath = getTasklistPath()
+        # self.tasklistPath = None
+
+        if not self.tasklistPath:
+            msgBox = MessageBox(
+                self.tr("Error 😫"),
+                self.tr("It seems that tasklist.exe doesn't work on your computer"),
+                self
+            )
+            msgBox.buttonLayout.removeWidget(msgBox.cancelButton)
+            msgBox.cancelButton.deleteLater()
+
+            self.splashScreen.finish()
+            msgBox.exec()
+
+            sys.exit()
+
         if cfg.get(cfg.enableStartLolWithApp):
-            if getLolProcessPid() == 0:
+            if getLolProcessPid(self.tasklistPath) == 0:
                 self.__startLolClient()
 
         self.oldHook = sys.excepthook
@@ -1374,7 +1392,7 @@ class MainWindow(FluentWindow):
         threading.Thread(target=_).start()
 
     def __onCareerInterfaceGameInfoBarClicked(self, gameId):
-        name = self.careerInterface.name.text()
+        name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
         self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
         self.searchInterface.gamesView.gamesTab.waitingForSelected = gameId
