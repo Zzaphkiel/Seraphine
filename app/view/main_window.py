@@ -37,7 +37,7 @@ from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid, getTasklistPath)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
-                         processRankInfo, getTeammates, assignTeamId, parseGames)
+                         processRankInfo, getTeammates, assignTeamId, parseGames, markTeam)
 
 import threading
 
@@ -82,7 +82,6 @@ class MainWindow(FluentWindow):
 
         self.isGaming = False
         self.isTrayExit = False
-        self.isChampSelected = False
 
         self.__initInterface()
         self.__initNavigation()
@@ -1078,38 +1077,10 @@ class MainWindow(FluentWindow):
                     getTeammates(
                         connector.getGameDetailByGameId(game["gameId"]),
                         puuid
-                    ) for game in gamesInfo
+                    ) for game in gamesInfo[:1]  # 避免空报错, 查上一局的队友(对手)
                 ]
 
-                # 统计出现次数
-                """
-                teammatesCount = Counter({
-                    (4018313666, '召唤师1'): 6, 
-                    (4018314000, '召唤师2'): 3, 
-                    (summonersId, name): cnt,
-                    ...
-                })
-                """
-                teammatesCount = Counter(
-                    (summoner['summonerId'], summoner['name'])
-                    for historyInfo in teammatesInfo
-                    for summoner in historyInfo['summoners']
-                )
-
-                # 取当前游戏队友交集
-                """
-                teammatesMarker = [
-                    {'summonerId': 4018314000, 'cnt': 3, 'name': "召唤师2"}, 
-                    {'summonerId': summonerId, 'cnt': cnt, 'name': name}, 
-                    ...
-                ]
-                """
-                teammatesMarker = [
-                    {'summonerId': sId, 'cnt': cnt, 'name': name}
-                    for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x['summonerId'] for x in data['myTeam']] and cnt >= cfg.get(cfg.teamGamesNumber)
-                ]
-
+                recentlyChampionName = ""
                 fateFlag = None
                 if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
                     if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
@@ -1118,6 +1089,9 @@ class MainWindow(FluentWindow):
                     elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
                         # 上把对面
                         fateFlag = "enemy"
+
+                    recentlyChampionId = max(teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+                    recentlyChampionName = connector.manager.champs.get(recentlyChampionId)
 
                 return {
                     "name": summoner["gameName"] or summoner["displayName"],
@@ -1130,11 +1104,11 @@ class MainWindow(FluentWindow):
                     "xpUntilNextLevel": summoner["xpUntilNextLevel"],
                     "puuid": puuid,
                     "summonerId": summonerId,
-                    "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
                     "cellId": item["cellId"],
                     "fateFlag": fateFlag,
-                    "isPublic": summoner["privacy"] == "PUBLIC"
+                    "isPublic": summoner["privacy"] == "PUBLIC",
+                    "recentlyChampionName": recentlyChampionName  # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1146,8 +1120,6 @@ class MainWindow(FluentWindow):
                 if result is not None:
                     summoners.append(result)
 
-            assignTeamId(summoners)
-
             summoners = sorted(
                 summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
 
@@ -1156,8 +1128,6 @@ class MainWindow(FluentWindow):
 
             if callback:
                 callback()
-
-            self.isChampSelected = True
 
             # if cfg.get(cfg.enableCopyPlayersInfo):
             #     msg = self.gameInfoInterface.getPlayersInfoSummary()
@@ -1221,8 +1191,7 @@ class MainWindow(FluentWindow):
                 # iconId = summoner["profileIconId"]
                 # icon = connector.getProfileIcon(iconId)
 
-                championId = item.get("championId")
-                championId = championId if championId != None else -1
+                championId = item.get("championId", -1)
 
                 icon = connector.getChampionIcon(championId)
 
@@ -1256,40 +1225,10 @@ class MainWindow(FluentWindow):
                     getTeammates(
                         connector.getGameDetailByGameId(game["gameId"]),
                         puuid
-                    ) for game in gamesInfo
+                    ) for game in gamesInfo[:1]  # 避免空报错, 查上一局的队友(对手)
                 ]
 
-                # 统计出现次数
-                """
-                teammatesCount = Counter({
-                    (4018313666, '召唤师1'): 6, 
-                    (4018314000, '召唤师2'): 3, 
-                    (123456, '召唤师2'): 1, 
-                    (summonersId, name): cnt,
-                    ...
-                })
-                """
-                teammatesCount = Counter(
-                    (summoner['summonerId'], summoner['name'])
-                    for historyInfo in teammatesInfo
-                    for summoner in historyInfo['summoners']
-                )
-
-                # 取当前游戏队友交集
-                """
-                teammatesMarker = [
-                    {'summonerId': 4018314000, 'cnt': 3, 'name': "召唤师2"}, 
-                    {'summonerId': summonerId, 'cnt': cnt, 'name': name}, 
-                    ...
-                ]
-                """
-                teamMember = allys if isAllys else enemies
-                teammatesMarker = [
-                    {'summonerId': sId, 'cnt': cnt, 'name': name}
-                    for (sId, name), cnt in teammatesCount.items()
-                    if sId in [x.get('summonerId') for x in teamMember] and cnt >= cfg.get(cfg.teamGamesNumber)
-                ]
-
+                recentlyChampionName = ""
                 fateFlag = None
                 if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
                     if self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
@@ -1298,6 +1237,9 @@ class MainWindow(FluentWindow):
                     elif self.currentSummoner.summonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
                         # 上把对面
                         fateFlag = "enemy"
+
+                    recentlyChampionId = max(teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+                    recentlyChampionName = connector.manager.champs.get(recentlyChampionId)
 
                 return {
                     "name": summoner.get("gameName") or summoner["displayName"],
@@ -1310,12 +1252,13 @@ class MainWindow(FluentWindow):
                     "xpUntilNextLevel": summoner["xpUntilNextLevel"],
                     "puuid": puuid,
                     "summonerId": summoner["summonerId"],
-                    "teammatesMarker": teammatesMarker,
                     "kda": [kill, deaths, assists],
                     # 上野中辅下
                     "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos),
                     "fateFlag": fateFlag,
-                    "isPublic": summoner["privacy"] == "PUBLIC"
+                    "isPublic": summoner["privacy"] == "PUBLIC",
+                    "teamId": item.get("teamParticipantId", -1),  # 无该字段则是单排, 否则相同值是同一预组队
+                    "recentlyChampionName": recentlyChampionName  # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1327,41 +1270,29 @@ class MainWindow(FluentWindow):
                 if result is not None:
                     summoners.append(result)
 
-            assignTeamId(summoners)
+            summoners = markTeam(summoners)
 
             summoners = sorted(
                 summoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
-            if not self.isChampSelected:
-                allySummoners = []
-                with ThreadPoolExecutor() as executor:
-                    futures = [executor.submit(process_item, item, True)
-                               for item in allys]
+            # 刷新队友页(更新预组队信息)
+            allySummoners = []
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(process_item, item, True)
+                           for item in allys]
 
-                for future in as_completed(futures):
-                    result = future.result()
-                    if result is not None:
-                        allySummoners.append(result)
+            for future in as_completed(futures):
+                result = future.result()
+                if result is not None:
+                    allySummoners.append(result)
 
-                assignTeamId(allySummoners)
+            allySummoners = markTeam(allySummoners)
 
-                allySummoners = sorted(
-                    allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
+            allySummoners = sorted(
+                allySummoners, key=lambda x: x["order"])  # 按照 上野中辅下 排序
 
-                self.gameInfoInterface.allySummonersInfoReady.emit(
-                    {'summoners': allySummoners})
-            else:
-                # 按照selectedPosition排序
-                sorted_allys = sorted(
-                    allys,
-                    key=lambda x: pos.index(x.get('selectedPosition'))
-                    if x.get('selectedPosition') in pos else len(pos)
-                )
-
-                # 取出summonerId
-                result = tuple(player['summonerId'] for player in sorted_allys)
-
-                self.gameInfoInterface.allyOrderUpdate.emit(result)
+            self.gameInfoInterface.allySummonersInfoReady.emit(
+                {'summoners': allySummoners})
 
             self.gameInfoInterface.enemySummonerInfoReady.emit(
                 {'summoners': summoners, 'queueId': queueId})

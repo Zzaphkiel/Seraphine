@@ -53,9 +53,6 @@ class Config(QConfig):
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(1, 60))
 
-    teamGamesNumber = RangeConfigItem("Functions", "TeamGamesNumber", 1,
-                                      RangeValidator(1, 10))
-
     gameInfoFilter = ConfigItem(
         "Functions", "GameInfoFilter", False, BoolValidator())
 

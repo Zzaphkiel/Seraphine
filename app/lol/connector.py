@@ -630,9 +630,9 @@ class JsonManager:
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
         self.runes = {item["id"]: item["iconPath"] for item in runeData}
 
-        champs = {item["id"]: item["name"] for item in champions}
+        self.champs = {item["id"]: item["name"] for item in champions}
 
-        self.champions = {item: {"skins": {}} for item in champs.values()}
+        self.champions = {item: {"skins": {}} for item in self.champs.values()}
         self.queues = {
             item["id"]: {"mapId": item["mapId"], "name": item["name"]}
             for item in queueData
@@ -640,9 +640,9 @@ class JsonManager:
 
         for item in skins.values():
             championId = item["id"] // 1000
-            self.champions[champs[championId]
+            self.champions[self.champs[championId]
                            ]["skins"][item["name"]] = item["id"]
-            self.champions[champs[championId]]["id"] = championId
+            self.champions[self.champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():
             self.items[oldId] = self.items[nowId]
