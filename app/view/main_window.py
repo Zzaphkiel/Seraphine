@@ -458,7 +458,13 @@ class MainWindow(FluentWindow):
 
     def __onLolClientStarted(self, pid):
         def _():
-            connector.start(pid)
+            try:
+                connector.start(pid)
+            except RetryMaximumAttempts:
+                # 若超出最大尝试次数, 则认为lcu未就绪(如大区排队中), 捕获到该异常时不抛出, 等待下一个emit
+                connector.close()
+                return
+
             self.isClientProcessRunning = True
 
             self.__changeCareerToCurrentSummoner()
