@@ -141,6 +141,14 @@ class SettingInterface(SmoothScrollArea):
             cfg.enableCheckUpdate
         )
 
+        self.logLevelCard = ComboBoxSettingCard(
+            cfg.logLevel,
+            Icon.LOG,
+            self.tr('Log Level'),
+            self.tr('The level of logging for Seraphine (take effect after restart)'),
+            texts=["Debug", "Info", "Warning", "Error"],
+            parent=self.generalGroup)
+
         # self.enableStartWithComputer = SwitchSettingCard(
         #     Icon.DESKTOPRIGHT,
         #     self.tr("Auto-start on boot"),
@@ -260,6 +268,7 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.enableCloseToTray)
         self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
         self.generalGroup.addSettingCard(self.checkUpdateCard)
+        self.generalGroup.addSettingCard(self.logLevelCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)

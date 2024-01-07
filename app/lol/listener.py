@@ -60,7 +60,7 @@ class LolProcessExistenceListener(QThread):
                     self.isClientRunning = True
                     self.lolClientStarted.emit(pid)
             else:
-                if self.isClientRunning and not isLolGameProcessExist():
+                if self.isClientRunning and not isLolGameProcessExist(self.tasklistPath):
                     self.isClientRunning = False
                     self.lolClientEnded.emit()
 
