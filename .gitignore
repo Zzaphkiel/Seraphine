@@ -18,3 +18,6 @@ mymake.ps1
 
 # 忽略 HTML 图表文件
 render.html
+
+# 忽略日志文件
+log
