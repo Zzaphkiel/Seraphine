@@ -68,7 +68,7 @@ class Logger:
 
     def _get_log_file(self):
         today = datetime.now().strftime('%Y-%m-%d')
-        log_file = f"{self.name}_{today}_%s.log" % logging.getLevelName(logging.DEBUG)
+        log_file = f"{self.name}_{today}_%s.log" % logging.getLevelName(cfg.get(cfg.logLevel))
         log_path = os.path.join('log', log_file)
         return log_path
 
