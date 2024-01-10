@@ -92,7 +92,7 @@ class Config(QConfig):
                                    "EnableCheckUpdate", True,
                                    BoolValidator())
 
-    logLevel = OptionsConfigItem("General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]))
+    logLevel = OptionsConfigItem("General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]), restart=True)
 
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
