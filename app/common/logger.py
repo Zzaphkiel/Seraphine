@@ -56,7 +56,7 @@ class Logger:
             os.makedirs(log_directory)
 
         log_file = self._get_log_file()
-        file_handler = CustomRotatingFileHandler(log_file, maxBytes=2 * 1024 * 1024, backupCount=20)
+        file_handler = CustomRotatingFileHandler(log_file, maxBytes=2 * 1024 * 1024, backupCount=20, encoding='utf-8')
         formatter = logging.Formatter('%(asctime)s - [%(TAG)s] %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
