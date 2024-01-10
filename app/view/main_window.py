@@ -1059,7 +1059,9 @@ class MainWindow(FluentWindow):
                         origGamesInfo["games"] = [
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
-                        while len(origGamesInfo["games"]) < 11:  # FIXME 老玩家打排位, 会死锁
+
+                        # FIXME 老玩家打排位, 会死锁
+                        while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
@@ -1237,7 +1239,9 @@ class MainWindow(FluentWindow):
                         origGamesInfo["games"] = [
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
-                        while len(origGamesInfo["games"]) < 11:  # FIXME 老玩家打排位, 会死锁
+
+                        # FIXME 老玩家打排位, 会死锁
+                        while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
