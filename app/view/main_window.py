@@ -29,6 +29,7 @@ from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
 from ..common.config import cfg, VERSION
+from ..common.logger import logger
 from ..components.update_message_box import UpdateMessageBox
 from ..lol.entries import Summoner
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
@@ -932,6 +933,7 @@ class MainWindow(FluentWindow):
                 self.gameInfoInterface.allySummonersInfoReady.emit(
                     {"summoners": tmp})
             except:
+                logger.error(f"__onGoingSwap, tmp: {tmp}, buf: {buf}, info: {info}", "GameInfoInterface")
                 return
 
     def __onChampSelectChanged(self, data):
