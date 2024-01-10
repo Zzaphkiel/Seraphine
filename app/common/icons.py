@@ -47,6 +47,7 @@ class Icon(FluentIconBase, Enum):
     PAGE = 'Page'
     ARROWCIRCLE = 'ArrowCircle'
     SCALEFIT = 'ScaleFit'
+    LOG = 'Log'
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

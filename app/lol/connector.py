@@ -1,6 +1,8 @@
+import inspect
 import os
 import json
 import threading
+import traceback
 
 import requests
 import time
@@ -8,9 +10,11 @@ import time
 import psutil
 from ..common.config import cfg, Language
 from .exceptions import *
+from ..common.logger import logger
 
 requests.packages.urllib3.disable_warnings()
 
+TAG = "Connector"
 
 def slowly():
     def decorator(func):
@@ -42,6 +46,23 @@ def tackle():
 def retry(count=5, retry_sep=0):
     def decorator(func):
         def wrapper(*args, **kwargs):
+            logger.info(f"call %s" % func.__name__, TAG)
+
+            # 获取函数的参数信息
+            func_params = inspect.signature(func).parameters
+            param_names = list(func_params.keys())
+
+            tmp_args = args
+            if param_names[0] == "self":  # args[0]是self(connector)的实例, 兼容静态方法
+                param_names = param_names[1:]
+                tmp_args = args[1:]
+
+            # 构建参数字典，将参数名与对应的实参值一一对应
+            params_dict = {param: arg for param, arg in zip(param_names, tmp_args)}
+
+            logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
+
+            # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
             exce = None
             for _ in range(count):
                 while connector.ref_cnt >= 2:
@@ -70,7 +91,12 @@ def retry(count=5, retry_sep=0):
                     connector.exceptApi = func.__name__
                     connector.exceptObj = exce
 
+                logger.exception(f"exit {func.__name__}", exce, TAG)
+
                 raise exce
+
+            logger.info(f"exit {func.__name__}", TAG)
+            logger.debug(f"result = {res}", TAG)
 
             return res
 
@@ -630,9 +656,9 @@ class JsonManager:
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
         self.runes = {item["id"]: item["iconPath"] for item in runeData}
 
-        champs = {item["id"]: item["name"] for item in champions}
+        self.champs = {item["id"]: item["name"] for item in champions}
 
-        self.champions = {item: {"skins": {}} for item in champs.values()}
+        self.champions = {item: {"skins": {}} for item in self.champs.values()}
         self.queues = {
             item["id"]: {"mapId": item["mapId"], "name": item["name"]}
             for item in queueData
@@ -640,9 +666,9 @@ class JsonManager:
 
         for item in skins.values():
             championId = item["id"] // 1000
-            self.champions[champs[championId]
+            self.champions[self.champs[championId]
                            ]["skins"][item["name"]] = item["id"]
-            self.champions[champs[championId]]["id"] = championId
+            self.champions[self.champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():
             self.items[oldId] = self.items[nowId]

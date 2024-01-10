@@ -98,11 +98,6 @@ class SettingInterface(SmoothScrollArea):
         self.functionGroup = SettingCardGroup(self.tr("Functions"),
                                               self.scrollWidget)
 
-        self.teamGamesNumberCard = LineEditSettingCard(
-            cfg.teamGamesNumber,
-            self.tr("Pre-team threshold"), self.tr("Threshold value:"), 1, Icon.TEAM,
-            self.tr("Pre-team threshold for common game rounds"), self.functionGroup)
-
         self.careerGamesCount = LineEditSettingCard(
             cfg.careerGamesNumber,
             self.tr("Default games number"), self.tr(
@@ -145,6 +140,14 @@ class SettingInterface(SmoothScrollArea):
                 "Automatically check for updates when software starts"),
             cfg.enableCheckUpdate
         )
+
+        self.logLevelCard = ComboBoxSettingCard(
+            cfg.logLevel,
+            Icon.LOG,
+            self.tr('Log Level'),
+            self.tr('The level of logging for Seraphine (take effect after restart)'),
+            texts=["Debug", "Info", "Warning", "Error"],
+            parent=self.generalGroup)
 
         # self.enableStartWithComputer = SwitchSettingCard(
         #     Icon.DESKTOPRIGHT,
@@ -255,7 +258,6 @@ class SettingInterface(SmoothScrollArea):
 
         # add cards to group
         self.functionGroup.addSettingCard(self.careerGamesCount)
-        self.functionGroup.addSettingCard(self.teamGamesNumberCard)
         self.functionGroup.addSettingCard(self.gameInfoFilterCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
 
@@ -266,6 +268,7 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.enableCloseToTray)
         self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
         self.generalGroup.addSettingCard(self.checkUpdateCard)
+        self.generalGroup.addSettingCard(self.logLevelCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
@@ -292,8 +295,6 @@ class SettingInterface(SmoothScrollArea):
 
         cfg.appRestartSig.connect(self.__showRestartToolTip)
         self.careerGamesCount.pushButton.clicked.connect(
-            self.__showUpdatedSuccessfullyToolTip)
-        self.teamGamesNumberCard.pushButton.clicked.connect(
             self.__showUpdatedSuccessfullyToolTip)
         self.feedbackCard.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(FEEDBACK_URL)))

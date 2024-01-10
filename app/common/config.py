@@ -53,9 +53,6 @@ class Config(QConfig):
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(1, 60))
 
-    teamGamesNumber = RangeConfigItem("Functions", "TeamGamesNumber", 1,
-                                      RangeValidator(1, 10))
-
     gameInfoFilter = ConfigItem(
         "Functions", "GameInfoFilter", False, BoolValidator())
 
@@ -94,6 +91,8 @@ class Config(QConfig):
     enableCheckUpdate = ConfigItem("General",
                                    "EnableCheckUpdate", True,
                                    BoolValidator())
+
+    logLevel = OptionsConfigItem("General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]))
 
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
