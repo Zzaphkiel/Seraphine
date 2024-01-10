@@ -911,17 +911,22 @@ class MainWindow(FluentWindow):
             }
         elif event == "Update" and data["state"] == "ACCEPTED":
 
-            # 必须deepcopy, 否则操作的实例仍是allySummonersInfo, 通过信号传递到实例赋值后, 随着tmp释放, 会变为空列表!!
-            # 这应该算是python的bug... 也或者是pyqt的?
-            tmp = copy.deepcopy(
-                self.gameInfoInterface.allySummonersInfo["summoners"])
-            buf = self.gameInfoInterface.swapBuffer.get(data["id"])
-            if not buf:
-                return
+            # 必须 deepcopy, 否则操作的实例仍是 allySummonersInfo, 通过信号传递到实例赋值后, 随着 tmp 释放, 会变为空列表!!
+            # 这应该算是 Python 的 BUG... 也或者是 PyQt 的?
+            try:
+                tmp = copy.deepcopy(
+                    self.gameInfoInterface.allySummonersInfo["summoners"])
+                buf = self.gameInfoInterface.swapBuffer.get(data["id"])
 
-            tmp[buf["src"]], tmp[buf["dst"]] = tmp[buf["dst"]], tmp[buf["src"]]
-            self.gameInfoInterface.allySummonersInfoReady.emit(
-                {"summoners": tmp})
+                if not buf:
+                    return
+
+                tmp[buf["src"]], tmp[buf["dst"]
+                                     ] = tmp[buf["dst"]], tmp[buf["src"]]
+                self.gameInfoInterface.allySummonersInfoReady.emit(
+                    {"summoners": tmp})
+            except:
+                return
 
     def __onChampSelectChanged(self, data):
         # FIXME
@@ -1060,7 +1065,6 @@ class MainWindow(FluentWindow):
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
 
-                        # FIXME 老玩家打排位, 会死锁
                         while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
@@ -1240,7 +1244,6 @@ class MainWindow(FluentWindow):
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
 
-                        # FIXME 老玩家打排位, 会死锁
                         while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
