@@ -187,6 +187,8 @@ class LolClientConnector:
             "/lol-game-data/assets/v1/champion-summary.json")
         skins = self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
 
+        print(items)
+
         self.manager = JsonManager(
             items, spells, runes, queues, champions, skins)
 
@@ -675,9 +677,12 @@ class JsonManager:
 
     def getItemIconPath(self, iconId):
         if iconId != 0:
-            return self.items[iconId]
-        else:
-            return "/lol-game-data/assets/ASSETS/Items/Icons2D/gp_ui_placeholder.png"
+            try:
+                return self.items[iconId]
+            except:
+                logger.error(f"getItemIconPath, iconId: {iconId}", tag=TAG)
+        
+        return "/lol-game-data/assets/ASSETS/Items/Icons2D/gp_ui_placeholder.png"
 
     def getSummonerSpellIconPath(self, spellId):
         if spellId != 0:
