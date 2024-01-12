@@ -8,10 +8,10 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 def getTasklistPath():
     for path in ['tasklist',
-                 'C:/Windows/System32/tasklist.exe',
-                 'app/bin/tasklist.exe']:
+                 'C:/Windows/System32/tasklist.exe']:
         try:
-            _ = subprocess.check_output(path, shell=True)
+            cmd = f'{path} /FI "imagename eq LeagueClientUx.exe" /NH'
+            _ = subprocess.check_output(cmd, shell=True)
             return path
         except:
             pass

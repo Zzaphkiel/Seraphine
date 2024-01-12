@@ -187,8 +187,6 @@ class LolClientConnector:
             "/lol-game-data/assets/v1/champion-summary.json")
         skins = self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
 
-        print(items)
-
         self.manager = JsonManager(
             items, spells, runes, queues, champions, skins)
 
