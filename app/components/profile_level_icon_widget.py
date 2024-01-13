@@ -88,8 +88,8 @@ class RoundLevelAvatar(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
 
         scaledImage = self.image.scaled(
-            self.width() - self.sep,
-            self.height() - self.sep,
+            self.width() - int(self.sep),
+            self.height() - int(self.sep),
             Qt.AspectRatioMode.KeepAspectRatioByExpanding)
 
         clipPath = QPainterPath()
@@ -98,7 +98,7 @@ class RoundLevelAvatar(QWidget):
                             self.height() - self.sep)
 
         painter.setClipPath(clipPath)
-        painter.drawImage(self.sep // 2, self.sep // 2, scaledImage)
+        painter.drawImage(int(self.sep // 2), int(self.sep // 2), scaledImage)
 
     def updateIcon(self, icon: str, xpSinceLastLevel=None, xpUntilNextLevel=None, text=""):
         self.image = QImage(icon)

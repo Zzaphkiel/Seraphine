@@ -21,3 +21,7 @@ render.html
 
 # 忽略日志文件
 log
+
+# 忽略虚拟环境
+venv
+seraphine
