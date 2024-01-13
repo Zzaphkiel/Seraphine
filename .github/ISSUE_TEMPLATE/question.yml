@@ -1,6 +1,6 @@
 name: 问题咨询
 description: 任何时候都可以选择它，包括不清楚如何使用、环境搭建，或者您不知道您所提出的问题是否属于 BUG 时
-title: "[Question] "
+title: "[Question] （删去括号并在此处简要描述问题）"
 labels: ["question"]
 
 body:
@@ -15,7 +15,7 @@ body:
   - type: checkboxes
     id: confirm-unduplicate
     attributes:
-      label: 我已经查看了之前**（包括已经关闭）**的 [issues](https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aopen+is%3Aissue)，但这并不能解决我的问题
+      label: 我已经查看了之前（包括已经关闭）的 issue，但这并不能解决我的问题
       options:
         - label: 是
           required: true

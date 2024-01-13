@@ -1,6 +1,6 @@
 name: 新的想法
 description: 提出关于改进 Seraphine 的任何想法
-title: "[Enhancement] "
+title: "[Enhancement] （删去括号并在此处简要描述功能）"
 labels: ["enhancement"]
 
 body:
@@ -15,7 +15,7 @@ body:
   - type: checkboxes
     id: confirm-unduplicate
     attributes:
-      label: 我已经查看了之前**（包括已经关闭）**的 [issues](https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aopen+is%3Aissue)，但并没有与我相同的建议
+      label: 我已经查看了之前（包括已经关闭）的 issue，但并没有与我相同的建议
       options:
         - label: 是
           required: true

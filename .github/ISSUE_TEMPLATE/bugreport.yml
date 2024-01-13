@@ -1,6 +1,6 @@
 name: 报告 BUG
 description: 反馈一个 BUG 来帮助我们改进
-title: "[BUG] "
+title: "[BUG] （删去括号并在此处简要描述问题）"
 labels: ["bug"]
 
 body:
@@ -91,7 +91,7 @@ body:
   - type: checkboxes
     id: confirm-unduplicate
     attributes:
-      label: 我已经查看了之前**（包括已经关闭）**的 [issues](https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aopen+is%3Aissue)，但并没有与我相同的问题
+      label: 我已经查看了之前（包括已经关闭）的 issue，但并没有与我相同的问题
       options:
         - label: 是
           required: true
