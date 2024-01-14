@@ -1073,7 +1073,8 @@ class MainWindow(FluentWindow):
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
 
-                        while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
+
+                        while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
@@ -1222,7 +1223,7 @@ class MainWindow(FluentWindow):
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
 
-                        while len(origGamesInfo["games"]) < 11 and endIdx <= 100:
+                        while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
                             endIdx = begIdx + 5
                             origGamesInfo["games"].extend([
                                 game for game in connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
