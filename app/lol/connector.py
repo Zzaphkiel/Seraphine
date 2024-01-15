@@ -125,6 +125,7 @@ class LolClientConnector:
         self.port = None
         self.token = None
         self.url = None
+        self.server = None
 
         # 并发数过高时会导致LCU闪退
         # 通过引用计数避免 (不大于3个并发)
@@ -149,7 +150,11 @@ class LolClientConnector:
             if p != -1:
                 self.token = cmd[22:]
 
-            if self.port and self.token:
+            p = cmd.find("--rso_platform_id=")
+            if p != -1:
+                self.server = cmd[18:]
+
+            if self.port and self.token and self.server:
                 break
 
         self.url = f"https://riot:{self.token}@127.0.0.1:{self.port}"

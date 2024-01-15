@@ -84,7 +84,7 @@ class MainWindow(FluentWindow):
             target=self.gameStartMinimize, parent=self
         )
 
-        logger.critical("listerners started", TAG)
+        logger.critical("Seraphine listerners started", TAG)
 
         self.currentSummoner: Summoner = None
 
@@ -475,6 +475,8 @@ class MainWindow(FluentWindow):
                 connector.close()
                 self.processListener.isClientRunning = False
                 return
+            
+            logger.critical(f"League of Legends client started, server: {connector.server}", TAG)
 
             self.isClientProcessRunning = True
 
@@ -505,6 +507,8 @@ class MainWindow(FluentWindow):
     def __onLolClientEnded(self):
         def _():
             self.searchInterface.loadGamesThreadStop.set()  # 停掉战绩查询加载
+
+            logger.critical("League of Legends client ended", TAG)
 
             connector.close()
             self.isClientProcessRunning = False
@@ -661,6 +665,8 @@ class MainWindow(FluentWindow):
             self.checkUpdateThread.terminate()
             self.pollingConnectTimeoutThread.terminate()
             self.minimizeThread.terminate()
+
+            logger.critical("Seraphine closed", TAG)
 
             return super().closeEvent(a0)
         else:
