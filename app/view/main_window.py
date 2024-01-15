@@ -42,6 +42,7 @@ from ..lol.tools import (processGameData, translateTier, getRecentChampions,
 
 import threading
 
+TAG = "MainWindow"
 
 class MainWindow(FluentWindow):
     mainWindowHide = pyqtSignal(bool)
@@ -54,6 +55,8 @@ class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
 
+        logger.critical(f"Seraphine started, version: {VERSION}", TAG)
+
         self.__initWindow()
         self.__initSystemTray()
 
@@ -64,6 +67,8 @@ class MainWindow(FluentWindow):
         self.gameInfoInterface = GameInfoInterface(self)
         self.auxiliaryFuncInterface = AuxiliaryInterface(self)
         self.settingInterface = SettingInterface(self)
+
+        logger.critical("Seraphine interfaces initialized", TAG)
 
         # crate listener
         self.isClientProcessRunning = False
@@ -79,6 +84,8 @@ class MainWindow(FluentWindow):
             target=self.gameStartMinimize, parent=self
         )
 
+        logger.critical("listerners started", TAG)
+
         self.currentSummoner: Summoner = None
 
         self.isGaming = False
@@ -90,6 +97,8 @@ class MainWindow(FluentWindow):
         self.__conncetSignalToSlot()
 
         self.splashScreen.finish()
+
+        logger.critical("Seraphine initialized", TAG)
 
     def __initInterface(self):
         self.__lockInterface()
