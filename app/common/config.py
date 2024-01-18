@@ -74,6 +74,8 @@ class Config(QConfig):
 
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
+    
+    lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
 

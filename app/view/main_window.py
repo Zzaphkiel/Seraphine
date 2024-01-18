@@ -30,7 +30,7 @@ from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..common.logger import logger
-from ..components.update_message_box import UpdateMessageBox
+from ..components.message_box import UpdateMessageBox, NoticeMessageBox
 from ..lol.entries import Summoner
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                               SummonerNotFound, SummonerNotInGame)
@@ -49,6 +49,7 @@ class MainWindow(FluentWindow):
     nameOrIconChanged = pyqtSignal(str, str)
     lolInstallFolderChanged = pyqtSignal(str)
     showUpdateMessageBox = pyqtSignal(dict)
+    showNoticeMessageBox = pyqtSignal(str)
     checkUpdateFailed = pyqtSignal()
     showLcuConnectError = pyqtSignal(str, BaseException)
 
@@ -78,6 +79,8 @@ class MainWindow(FluentWindow):
 
         self.checkUpdateThread = StoppableThread(
             target=self.checkUpdate, parent=self)
+        self.checkNoticeThread = StoppableThread(
+            target=lambda: self.checkNotice(False), parent=self)
         self.pollingConnectTimeoutThread = StoppableThread(
             self.pollingConnectTimeout, parent=self)
         self.minimizeThread = StoppableThread(
@@ -167,6 +170,7 @@ class MainWindow(FluentWindow):
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
         self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
+        self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
         self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
         self.showLcuConnectError.connect(self.__onShowLcuConnectError)
 
@@ -280,15 +284,34 @@ class MainWindow(FluentWindow):
             self.activateWindow()
 
     def checkUpdate(self):
-        if cfg.get(cfg.enableCheckUpdate):
-            try:
-                releasesInfo = github.checkUpdate()
-            except:
-                self.checkUpdateFailed.emit()
-            else:
+        if not cfg.get(cfg.enableCheckUpdate):
+            return
+        
+        try:
+            releasesInfo = github.checkUpdate()
+        except:
+            self.checkUpdateFailed.emit()
+            return
+        
+        if releasesInfo:
+            self.showUpdateMessageBox.emit(releasesInfo)
 
-                if releasesInfo:
-                    self.showUpdateMessageBox.emit(releasesInfo)
+    def checkNotice(self, triggerByUser):
+        try:
+            noticeInfo = github.getNotice()
+            sha = noticeInfo['sha']
+            content = noticeInfo['content']
+        except:
+            return
+
+        # 如果是开启软件时，并且该公告曾经已经展示过，就直接 return 了
+        if not triggerByUser and sha == cfg.get(cfg.lastNoticeSha):
+            return
+        
+        cfg.set(cfg.lastNoticeSha, sha)
+        self.showNoticeMessageBox.emit(content)
+
+
 
     def __onCheckUpdateFailed(self):
         InfoBar.warning(
@@ -305,6 +328,10 @@ class MainWindow(FluentWindow):
         msgBox = UpdateMessageBox(info, self.window())
         if msgBox.exec():
             webbrowser.open(info['assets'][0]['browser_download_url'])
+
+    def __onShowNoticeMessageBox(self, msg):
+        msgBox = NoticeMessageBox(msg, self.window())
+        msgBox.exec()
 
     def gameStartMinimize(self):
         srcWindow = None
@@ -389,6 +416,7 @@ class MainWindow(FluentWindow):
     def __initListener(self):
         self.processListener.start()
         self.checkUpdateThread.start()
+        self.checkNoticeThread.start()
         self.pollingConnectTimeoutThread.start()
         self.minimizeThread.start()
 
@@ -663,6 +691,7 @@ class MainWindow(FluentWindow):
             self.processListener.terminate()
             self.eventListener.terminate()
             self.checkUpdateThread.terminate()
+            self.checkNoticeThread.terminate()
             self.pollingConnectTimeoutThread.terminate()
             self.minimizeThread.terminate()
 

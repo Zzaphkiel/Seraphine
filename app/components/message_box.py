@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QLabel
-from qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea, SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
+from PyQt5.QtWidgets import QLabel, QTextBrowser
+from qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
+                            SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
                             CheckBox)
 
 from app.common.config import VERSION, cfg
@@ -33,3 +34,28 @@ class UpdateMessageBox(MessageBoxBase):
 
         self.yesButton.setText(self.tr("Download"))
         self.cancelButton.setText(self.tr("Ok"))
+
+
+class NoticeMessageBox(MessageBoxBase):
+    def __init__(self, msg, parent=None):
+        super().__init__(parent=parent)
+        self.titleLabel = TitleLabel(self.tr('Notice'), self)
+        self.titleLabel.setContentsMargins(5, 0, 5, 0)
+
+        textEdit = TextEdit(self)
+        textEdit.setFixedWidth(int(self.width() * .6))
+        textEdit.setMarkdown(msg)
+        textEdit.setReadOnly(True)
+
+        # checkBox = CheckBox()
+        # checkBox.setText(self.tr("Don't remind me again"))
+        # checkBox.clicked.connect(lambda: cfg.set(
+        #     cfg.enableCheckUpdate, not checkBox.isChecked(), True))
+
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(textEdit)
+        # self.viewLayout.addWidget(checkBox)
+
+        self.hideCancelButton()
+
+        self.yesButton.setText(self.tr("Ok"))

@@ -629,7 +629,7 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../../view/main_window.py" line="341"/>
+        <location filename="../../view/main_window.py" line="377"/>
         <source>Career</source>
         <translation>生涯</translation>
     </message>
@@ -639,47 +639,47 @@
         <translation type="obsolete">查查你的👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="343"/>
+        <location filename="../../view/main_window.py" line="379"/>
         <source>Game Information</source>
         <translation>对局信息</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="507"/>
+        <location filename="../../view/main_window.py" line="548"/>
         <source>Start LOL</source>
         <translation>启动游戏</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="344"/>
+        <location filename="../../view/main_window.py" line="380"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="115"/>
+        <location filename="../../view/main_window.py" line="127"/>
         <source>Auxiliary Functions</source>
         <translation>其他功能</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="605"/>
+        <location filename="../../view/main_window.py" line="646"/>
         <source>LOL Client has been connected</source>
         <translation>客户端已连接</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="593"/>
+        <location filename="../../view/main_window.py" line="634"/>
         <source>Invalid path</source>
         <translation>路径非法</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="593"/>
+        <location filename="../../view/main_window.py" line="634"/>
         <source>Please set the correct directory of the LOL client in the setting page</source>
         <translation>请在设置页面中设置正确的 LOL 客户端路径</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="107"/>
+        <location filename="../../view/main_window.py" line="119"/>
         <source>Start</source>
         <translation>启动页</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="582"/>
+        <location filename="../../view/main_window.py" line="623"/>
         <source>Start LOL successfully</source>
         <translation>启动客户端成功</translation>
     </message>
@@ -694,87 +694,87 @@
         <translation type="obsolete">未定级</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="966"/>
+        <location filename="../../view/main_window.py" line="1010"/>
         <source>Home</source>
         <translation>游戏大厅</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="969"/>
+        <location filename="../../view/main_window.py" line="1013"/>
         <source>Selecting Champions</source>
         <translation>英雄选择</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="984"/>
+        <location filename="../../view/main_window.py" line="1028"/>
         <source>Gaming</source>
         <translation>游戏中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="990"/>
+        <location filename="../../view/main_window.py" line="1034"/>
         <source>Waiting for status</source>
         <translation>等待游戏结果</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="992"/>
+        <location filename="../../view/main_window.py" line="1036"/>
         <source>End of game</source>
         <translation>游戏结束</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="994"/>
+        <location filename="../../view/main_window.py" line="1038"/>
         <source>Lobby</source>
         <translation>房间组队中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="998"/>
+        <location filename="../../view/main_window.py" line="1042"/>
         <source>Ready check</source>
         <translation>匹配确认</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1001"/>
+        <location filename="../../view/main_window.py" line="1045"/>
         <source>Match making</source>
         <translation>匹配中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1354"/>
+        <location filename="../../view/main_window.py" line="1399"/>
         <source>Exception occurred 😥</source>
         <translation>程序出现异常 😥</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1359"/>
+        <location filename="../../view/main_window.py" line="1404"/>
         <source>Copy to clipboard</source>
         <translation>确认并复制到剪贴板</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1360"/>
+        <location filename="../../view/main_window.py" line="1405"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="342"/>
+        <location filename="../../view/main_window.py" line="378"/>
         <source>Search 👀</source>
         <translation>战绩查询 👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="643"/>
+        <location filename="../../view/main_window.py" line="684"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="642"/>
+        <location filename="../../view/main_window.py" line="683"/>
         <source>Minimize</source>
         <translation>最小化到任务栏</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="345"/>
+        <location filename="../../view/main_window.py" line="381"/>
         <source>Quit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="635"/>
+        <location filename="../../view/main_window.py" line="676"/>
         <source>Do you wish to exit?</source>
         <translation>您第一次点击了关闭按钮</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="635"/>
+        <location filename="../../view/main_window.py" line="676"/>
         <source>Choose action for close button (you can modify it at any time in the settings page)</source>
         <translation>请选择点击关闭按钮的默认行为（您可以今后任意时间在设置界面修改它）</translation>
     </message>
@@ -784,12 +784,12 @@
         <translation type="obsolete">客户端请求超时</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="285"/>
+        <location filename="../../view/main_window.py" line="317"/>
         <source>Check Update Failed</source>
         <translation>检查更新失败</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="285"/>
+        <location filename="../../view/main_window.py" line="317"/>
         <source>Failed to check for updates, possibly unable to connect to Github.</source>
         <translation>请确保能连接至 GitHub</translation>
     </message>
@@ -799,47 +799,47 @@
         <translation type="obsolete">超时</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="252"/>
+        <location filename="../../view/main_window.py" line="265"/>
         <source>Connect API</source>
         <translation>请求 API</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="243"/>
+        <location filename="../../view/main_window.py" line="256"/>
         <source>The server returned abnormal content, which may be under maintenance.</source>
         <translation>服务器返回了不正常内容，可能其正在维护中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="246"/>
+        <location filename="../../view/main_window.py" line="259"/>
         <source>Exceeded maximum retry attempts.</source>
         <translation>超出最大尝试次数</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="252"/>
+        <location filename="../../view/main_window.py" line="265"/>
         <source>LCU request error</source>
         <translation>客户端信息请求失败</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="974"/>
+        <location filename="../../view/main_window.py" line="1018"/>
         <source>Blue Team</source>
         <translation>蓝色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="975"/>
+        <location filename="../../view/main_window.py" line="1019"/>
         <source>Red Team</source>
         <translation>红色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1004"/>
+        <location filename="../../view/main_window.py" line="1048"/>
         <source>Waiting reconnect</source>
         <translation>等待重新连接</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="221"/>
+        <location filename="../../view/main_window.py" line="234"/>
         <source>Error 😫</source>
         <translation>错误 😫</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="221"/>
+        <location filename="../../view/main_window.py" line="234"/>
         <source>It seems that tasklist.exe doesn&apos;t work on your computer</source>
         <translation>tasklist.exe 似乎在您的电脑上不可用</translation>
     </message>
@@ -865,6 +865,24 @@
         <location filename="../../components/mode_filter_widget.py" line="23"/>
         <source>A.R.A.M.</source>
         <translation>极地大乱斗</translation>
+    </message>
+</context>
+<context>
+    <name>NoticeMessageBox</name>
+    <message>
+        <location filename="../../components/message_box.py" line="42"/>
+        <source>Update detected</source>
+        <translation type="obsolete">发现新版本</translation>
+    </message>
+    <message>
+        <location filename="../../components/message_box.py" line="61"/>
+        <source>Ok</source>
+        <translation>知道了</translation>
+    </message>
+    <message>
+        <location filename="../../components/message_box.py" line="42"/>
+        <source>Notice</source>
+        <translation>公告</translation>
     </message>
 </context>
 <context>
@@ -1889,37 +1907,37 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>UpdateMessageBox</name>
     <message>
-        <location filename="../../components/update_message_box.py" line="11"/>
+        <location filename="../../components/message_box.py" line="12"/>
         <source>Update detected</source>
         <translation>发现新版本</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="25"/>
+        <location filename="../../components/message_box.py" line="26"/>
         <source>Don&apos;t remind me again</source>
         <translation>不再提醒</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="14"/>
+        <location filename="../../components/message_box.py" line="15"/>
         <source>current: v</source>
         <translation>当前版本：v</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="14"/>
+        <location filename="../../components/message_box.py" line="15"/>
         <source>new: v</source>
         <translation>新版本：v</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="34"/>
+        <location filename="../../components/message_box.py" line="35"/>
         <source>Download</source>
         <translation>立即下载 🤩</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="35"/>
+        <location filename="../../components/message_box.py" line="36"/>
         <source>Ok</source>
         <translation>知道了</translation>
     </message>
     <message>
-        <location filename="../../components/update_message_box.py" line="14"/>
+        <location filename="../../components/message_box.py" line="15"/>
         <source>, </source>
         <translation>，</translation>
     </message>
