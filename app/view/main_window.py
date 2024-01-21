@@ -14,7 +14,7 @@ from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                             FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                            ToolTipFilter)
+                            ToolTipFilter, NavigationTreeWidget)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -116,6 +116,8 @@ class MainWindow(FluentWindow):
     def __initNavigation(self):
         pos = NavigationItemPosition.SCROLL
 
+        self.navigationInterface.addSeparator(NavigationItemPosition.TOP)
+
         self.addSubInterface(
             self.startInterface, Icon.HOME, self.tr("Start"), pos)
         self.addSubInterface(
@@ -128,21 +130,35 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface, Icon.WRENCH,
             self.tr("Auxiliary Functions"), pos)
 
-        self.navigationInterface.addSeparator()
 
-        # add custom widget to bottom
+
+        pos = NavigationItemPosition.BOTTOM
+
+        self.navigationInterface.addItem(
+            routeKey='Notice',
+            icon=Icon.ALERT,
+            text=self.tr("Notice"),
+            onClick=lambda: threading.Thread(target=lambda: self.checkNotice(True)).start(),
+            selectable=False,
+            position=pos,
+            tooltip=self.tr("Notice"),
+        )
+
+        self.navigationInterface.insertSeparator(1, NavigationItemPosition.BOTTOM)
+
         self.avatarWidget = NavigationAvatarWidget(
             avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
         self.navigationInterface.addWidget(
             routeKey="avatar",
             widget=self.avatarWidget,
             onClick=self.__onAvatarWidgetClicked,
-            position=NavigationItemPosition.BOTTOM,
+            position=pos,
         )
+
 
         self.addSubInterface(
             self.settingInterface, FIF.SETTING,
-            self.tr("Settings"), NavigationItemPosition.BOTTOM,
+            self.tr("Settings"), pos,
         )
 
         # set the maximum width
@@ -694,8 +710,6 @@ class MainWindow(FluentWindow):
             self.checkNoticeThread.terminate()
             self.pollingConnectTimeoutThread.terminate()
             self.minimizeThread.terminate()
-
-            logger.critical("Seraphine closed", TAG)
 
             return super().closeEvent(a0)
         else:

@@ -32,8 +32,6 @@ class Github:
         url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/notice.md'
         res = self.sess.get(url, verify=False).json()
 
-        print(res)
-
         content = str(base64.b64decode(res['content']), encoding='utf-8')
 
         return {

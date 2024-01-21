@@ -47,14 +47,8 @@ class NoticeMessageBox(MessageBoxBase):
         textEdit.setMarkdown(msg)
         textEdit.setReadOnly(True)
 
-        # checkBox = CheckBox()
-        # checkBox.setText(self.tr("Don't remind me again"))
-        # checkBox.clicked.connect(lambda: cfg.set(
-        #     cfg.enableCheckUpdate, not checkBox.isChecked(), True))
-
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(textEdit)
-        # self.viewLayout.addWidget(checkBox)
 
         self.hideCancelButton()
 
