@@ -1,6 +1,6 @@
 name: 报告 BUG
 description: 反馈一个 BUG 来帮助我们改进
-title: "[BUG] （删去括号并在此处简要描述问题）"
+title: "[BUG] （删去左右圆括号，并在此处简要描述问题）"
 labels: ["bug"]
 
 body:

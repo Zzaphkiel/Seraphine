@@ -1,6 +1,6 @@
 name: 新的想法
 description: 提出关于改进 Seraphine 的任何想法
-title: "[Enhancement] （删去括号并在此处简要描述功能）"
+title: "[Enhancement] （删去左右圆括号，并在此处简要描述功能）"
 labels: ["enhancement"]
 
 body:
