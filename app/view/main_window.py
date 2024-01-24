@@ -9,12 +9,12 @@ import pygetwindow as gw
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QAbstractAnimation
+from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                             FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                            ToolTipFilter, NavigationTreeWidget)
+                            ToolTipFilter)
 from qfluentwidgets import FluentIcon as FIF
 import pyperclip
 
@@ -38,7 +38,7 @@ from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener,
                             getLolProcessPid, getTasklistPath)
 from ..lol.connector import connector
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
-                         processRankInfo, getTeammates, assignTeamId, parseGames, markTeam)
+                         processRankInfo, getTeammates, parseGames, markTeam)
 
 import threading
 
@@ -130,8 +130,6 @@ class MainWindow(FluentWindow):
             self.auxiliaryFuncInterface, Icon.WRENCH,
             self.tr("Auxiliary Functions"), pos)
 
-
-
         pos = NavigationItemPosition.BOTTOM
 
         self.navigationInterface.addItem(
@@ -163,6 +161,7 @@ class MainWindow(FluentWindow):
 
         # set the maximum width
         self.navigationInterface.setExpandWidth(250)
+        self.navigationInterface.setMinimumExpandWidth(1321)
 
     def __conncetSignalToSlot(self):
         self.processListener.lolClientStarted.connect(

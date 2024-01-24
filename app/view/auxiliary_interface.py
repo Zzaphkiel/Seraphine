@@ -1,16 +1,14 @@
 import threading
 import os
 import stat
-from typing import Union
-from PyQt5.QtGui import QIcon
 
 from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
+
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
-from qfluentwidgets.common.icon import FluentIconBase
 
 from ..lol.tools import fixLeagueClientWindow
 from ..common.icons import Icon

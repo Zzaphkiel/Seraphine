@@ -2,7 +2,6 @@ from enum import Enum
 
 from qfluentwidgets import StyleSheetBase, Theme, qconfig
 
-
 class StyleSheet(StyleSheetBase, Enum):
     SETTING_INTERFACE = 'setting_interface'
     MAIN_WINDOW = 'main_window'
