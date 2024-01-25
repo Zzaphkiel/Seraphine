@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
                              QSpacerItem, QSizePolicy)
 
-from qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
+from ..common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
                             IndeterminateProgressBar)
 
 from ..common.config import cfg

@@ -2,7 +2,7 @@ import threading
 import os
 import stat
 
-from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
+from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                             SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                             PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                             IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)

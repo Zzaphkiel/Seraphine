@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QGridLayout, QSplitter, QApplication, QWidget)
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFontMetrics
 
-from qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
+from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                             ToolTipFilter, ToolTipPosition)
 
 from ..common.icons import Icon

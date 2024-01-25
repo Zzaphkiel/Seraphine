@@ -1,6 +1,6 @@
 from enum import Enum
 
-from qfluentwidgets import getIconColor, Theme, FluentIconBase
+from .qfluentwidgets import getIconColor, Theme, FluentIconBase
 from PyQt5.QtGui import QIcon
 
 

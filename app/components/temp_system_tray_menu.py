@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QApplication
-from qfluentwidgets import (SystemTrayMenu)
+from ..common.qfluentwidgets import (SystemTrayMenu)
 
 
 class TmpSystemTrayMenu(SystemTrayMenu):

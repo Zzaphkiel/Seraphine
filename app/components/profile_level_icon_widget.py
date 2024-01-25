@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout
 from PyQt5.QtGui import QPainter, QImage, QPainterPath, QPen, QFont
 from PyQt5.QtCore import Qt, QRectF
 
-from qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor
+from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor
 
 from app.components.profile_icon_widget import RoundAvatar
 

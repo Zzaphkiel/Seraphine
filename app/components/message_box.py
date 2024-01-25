@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QLabel, QTextBrowser
-from qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
+from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
                             SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
                             CheckBox)
 

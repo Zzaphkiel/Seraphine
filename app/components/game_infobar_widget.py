@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSpacerItem, QSizePolicy)
 from PyQt5.QtGui import QPixmap, QPen, QPainter, QColor
-from qfluentwidgets import isDarkTheme, Theme
+from ..common.qfluentwidgets import isDarkTheme, Theme
 
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon

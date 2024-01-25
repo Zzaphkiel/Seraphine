@@ -2,7 +2,7 @@
 import os
 from typing import Union
 
-from qfluentwidgets import (
+from ..common.qfluentwidgets import (
     SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard, PushSettingCard,
     ExpandLayout, Theme, CustomColorSettingCard, InfoBar, setTheme,
     setThemeColor, SmoothScrollArea, SettingCard, FluentIconBase, SpinBox,

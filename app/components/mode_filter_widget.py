@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QVBoxLayout
-from qfluentwidgets import CheckBox
+from ..common.qfluentwidgets import CheckBox
 from typing import List, Tuple
 
 

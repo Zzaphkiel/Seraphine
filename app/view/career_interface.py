@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
                              QWidget, QFrame, QStackedWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
-from qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton, ComboBox,
+from ..common.qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton, ComboBox,
                             SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
                             ToolTipPosition, ToolButton, IndeterminateProgressRing,
                             Flyout, FlyoutViewBase, FlyoutAnimationType)

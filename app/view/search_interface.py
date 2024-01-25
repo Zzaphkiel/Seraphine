@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
                              QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget, QCompleter)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
-from qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
+from ..common.qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
                             InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
                             CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
                             StateToolTip)

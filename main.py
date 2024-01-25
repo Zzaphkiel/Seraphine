@@ -2,7 +2,7 @@
 import sys
 import os
 
-from qfluentwidgets import FluentTranslator
+from app.common.qfluentwidgets import FluentTranslator
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QTranslator
 
@@ -13,8 +13,6 @@ from app.view.main_window import MainWindow
 
 
 if __name__ == '__main__':
-    
-
     if cfg.get(cfg.dpiScale) == "Auto":
         QApplication.setHighDpiScaleFactorRoundingPolicy(
             Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)

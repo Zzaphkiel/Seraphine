@@ -12,10 +12,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
-from qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
+from ..common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                             FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                            ToolTipFilter)
-from qfluentwidgets import FluentIcon as FIF
+                            ToolTipFilter, FluentIcon)
 import pyperclip
 
 from .start_interface import StartInterface
@@ -155,7 +154,7 @@ class MainWindow(FluentWindow):
 
 
         self.addSubInterface(
-            self.settingInterface, FIF.SETTING,
+            self.settingInterface, FluentIcon.SETTING,
             self.tr("Settings"), pos,
         )
 
@@ -1414,13 +1413,14 @@ class MainWindow(FluentWindow):
 
         w = MessageBox(title, content, self.window())
 
-        w.yesButton.setText(self.tr('Copy to clipboard'))
-        w.cancelButton.setText(self.tr('Cancel'))
+        w.yesButton.setText(self.tr('Copy to clipboard and exit'))
+        w.cancelButton.setText(self.tr('Exit'))
 
         if w.exec():
             pyperclip.copy(content)
 
         self.oldHook(ty, value, tb)
+        sys.exit()
 
     def __onCurrentStackedChanged(self, index):
         # if index == self.stackedWidget.indexOf(self.careerInterface):

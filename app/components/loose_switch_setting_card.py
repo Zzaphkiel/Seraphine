@@ -1,8 +1,7 @@
 from typing import Union
 from PyQt5.QtGui import QIcon
-from qfluentwidgets import SwitchSettingCard
-from qfluentwidgets.common.config import ConfigItem
-from qfluentwidgets.common.icon import FluentIconBase
+from ..common.qfluentwidgets import SwitchSettingCard, ConfigItem, FluentIconBase
+
 
 
 class LooseSwitchSettingCard(SwitchSettingCard):

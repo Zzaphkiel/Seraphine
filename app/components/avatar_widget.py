@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt, QRect, pyqtSignal
 from PyQt5.QtGui import QPainter, QImage, QBrush, QColor
 
-from qfluentwidgets import NavigationWidget, isDarkTheme
+from ..common.qfluentwidgets import NavigationWidget, isDarkTheme
 
 
 class NavigationAvatarWidget(NavigationWidget):

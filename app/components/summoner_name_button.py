@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt, pyqtSignal
-from qfluentwidgets import ToolTipPosition, ToolTipFilter
+from ..common.qfluentwidgets import ToolTipPosition, ToolTipFilter
 
 
 class SummonerName(QLabel):

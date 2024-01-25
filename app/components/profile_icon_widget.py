@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QImage, QPainterPath
 from PyQt5.QtCore import Qt
 
-from qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition
+from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition
 
 
 class RoundAvatar(QWidget):
