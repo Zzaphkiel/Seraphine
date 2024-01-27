@@ -540,7 +540,6 @@ class LolClientConnector:
     @retry()
     def getGameStatus(self):
         res = self.__get("/lol-gameflow/v1/gameflow-phase").text[1:-1]
-
         return res
 
     @retry()

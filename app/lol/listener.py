@@ -106,21 +106,27 @@ class LolClientEventListener(QThread):
 
             # 订阅改头像 / 改名字消息
             wllp.subscription_filter_endpoint(
-                allEventSubscription,
-                f'/lol-summoner/v1/summoners/{res["summonerId"]}',
-                onCurrentSummonerProfileChanged)
+                subscription=allEventSubscription,
+                endpoint=f'/lol-summoner/v1/summoners/{res["summonerId"]}',
+                handler=onCurrentSummonerProfileChanged)
 
             # 订阅游戏状态改变消息
             wllp.subscription_filter_endpoint(
-                allEventSubscription, '/lol-gameflow/v1/gameflow-phase', onGameFlowPhaseChanged)
+                subscription=allEventSubscription, 
+                endpoint='/lol-gameflow/v1/gameflow-phase', 
+                handler=onGameFlowPhaseChanged)
 
             # 订阅英雄选择消息
             wllp.subscription_filter_endpoint(
-                allEventSubscription, '/lol-champ-select/v1/session', onChampSelectChanged)
+                subscription=allEventSubscription, 
+                endpoint='/lol-champ-select/v1/session', 
+                handler=onChampSelectChanged)
 
             # 订阅选择英雄阶段的交换位置消息
             wllp.subscription_filter_endpoint(
-                allEventSubscription, '/lol-champ-select/v1/ongoing-swap', onGoingSwap)
+                subscription=allEventSubscription, 
+                endpoint='/lol-champ-select/v1/ongoing-swap', 
+                handler=onGoingSwap)
 
             # print("[INFO] Event listener initialized.")
             while True:

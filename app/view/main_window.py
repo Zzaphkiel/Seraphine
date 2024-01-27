@@ -132,16 +132,27 @@ class MainWindow(FluentWindow):
         pos = NavigationItemPosition.BOTTOM
 
         self.navigationInterface.addItem(
+            routeKey='Refresh',
+            icon=Icon.ARROWCIRCLE,
+            text=self.tr("Refresh status"),
+            onClick=self.__onFixStatusListenerButtonClicked,
+            selectable=False,
+            position=pos,
+            tooltip=self.tr("Refresh status"),
+        )
+
+        self.navigationInterface.addItem(
             routeKey='Notice',
             icon=Icon.ALERT,
             text=self.tr("Notice"),
-            onClick=lambda: threading.Thread(target=lambda: self.checkNotice(True)).start(),
+            onClick=lambda: threading.Thread(
+                target=lambda: self.checkNotice(True)).start(),
             selectable=False,
             position=pos,
             tooltip=self.tr("Notice"),
         )
 
-        self.navigationInterface.insertSeparator(1, NavigationItemPosition.BOTTOM)
+        self.navigationInterface.insertSeparator(2, NavigationItemPosition.BOTTOM)
 
         self.avatarWidget = NavigationAvatarWidget(
             avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
@@ -1038,7 +1049,8 @@ class MainWindow(FluentWindow):
             isGaming = True
         elif status == 'InProgress':
             title = self.tr("Gaming")
-            # 重连或正常进入游戏(走GameStart), 不需要更新数据
+
+            # 重连或正常进入游戏 (走 GameStart), 不需要更新数据
             if not self.isGaming:
                 self.__onGameStart()
             isGaming = True
@@ -1059,6 +1071,7 @@ class MainWindow(FluentWindow):
         elif status == "Reconnect":  # 等待重连
             title = self.tr("Waiting reconnect")
             self.__onReconnect()
+        
 
         if not isGaming and self.isGaming:
             self.__updateCareerGames()
@@ -1405,6 +1418,17 @@ class MainWindow(FluentWindow):
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(
             self.careerInterface.puuid, switch=False)
+        
+    def __onFixStatusListenerButtonClicked(self):
+        def _():
+            status = connector.getGameStatus()
+            self.eventListener.gameStatusChanged.emit(status)
+
+            self.eventListener.terminate()
+            self.eventListener.start()
+
+        if self.isClientProcessRunning:
+            threading.Thread(target=_).start()
 
     def exceptHook(self, ty, value, tb):
         tracebackFormat = traceback.format_exception(ty, value, tb)

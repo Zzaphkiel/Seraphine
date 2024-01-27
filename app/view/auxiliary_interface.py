@@ -633,7 +633,7 @@ class RemoveTokensCard(SettingCard):
 class PlayAgainCard(SettingCard):
 
     def __init__(self, title, content, parent):
-        super().__init__(Icon.ARROWCIRCLE, title, content, parent)
+        super().__init__(Icon.CIRCLE, title, content, parent)
         self.pushButton = PushButton(self.tr("Fix"))
         self.pushButton.setMinimumWidth(100)
 
