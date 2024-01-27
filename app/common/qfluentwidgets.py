@@ -1,3 +1,7 @@
+'''
+PyQt-Fluent-Widgets without Ads.
+'''
+
 import sys
 
 sys.stdout = None
