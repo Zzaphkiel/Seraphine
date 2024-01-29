@@ -50,11 +50,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
-        self.playAgainCard = PlayAgainCard(
-            self.tr("Fix infinite loading"),
-            self.tr("Fix infinite loading bug when game ends"),
-            self.gameGroup
-        )
+        # self.playAgainCard = PlayAgainCard(
+        #     self.tr("Fix infinite loading"),
+        #     self.tr("Fix infinite loading bug when game ends"),
+        #     self.gameGroup
+        # )
         self.lockConfigCard = LockConfigCard(
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
@@ -133,7 +133,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.gameGroup.addSettingCard(self.spectateCard)
         # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
-        self.gameGroup.addSettingCard(self.playAgainCard)
+        # self.gameGroup.addSettingCard(self.playAgainCard)
         self.gameGroup.addSettingCard(self.fixDpiCard)
 
         self.expandLayout.setSpacing(30)
@@ -633,7 +633,7 @@ class RemoveTokensCard(SettingCard):
 class PlayAgainCard(SettingCard):
 
     def __init__(self, title, content, parent):
-        super().__init__(Icon.CIRCLE, title, content, parent)
+        super().__init__(Icon.ARROWCIRCLE, title, content, parent)
         self.pushButton = PushButton(self.tr("Fix"))
         self.pushButton.setMinimumWidth(100)
 

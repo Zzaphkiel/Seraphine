@@ -132,13 +132,13 @@ class MainWindow(FluentWindow):
         pos = NavigationItemPosition.BOTTOM
 
         self.navigationInterface.addItem(
-            routeKey='Refresh',
+            routeKey='Fix',
             icon=Icon.ARROWCIRCLE,
-            text=self.tr("Refresh status"),
-            onClick=self.__onFixStatusListenerButtonClicked,
+            text=self.tr("Back to Lobby"),
+            onClick=self.__onFixLCUButtonClicked,
             selectable=False,
             position=pos,
-            tooltip=self.tr("Refresh status"),
+            tooltip=self.tr("Back to Lobby"),
         )
 
         self.navigationInterface.addItem(
@@ -1420,13 +1420,9 @@ class MainWindow(FluentWindow):
         self.__onSearchInterfaceSummonerNameClicked(
             self.careerInterface.puuid, switch=False)
         
-    def __onFixStatusListenerButtonClicked(self):
+    def __onFixLCUButtonClicked(self):
         def _():
-            status = connector.getGameStatus()
-            self.eventListener.gameStatusChanged.emit(status)
-
-            self.eventListener.terminate()
-            self.eventListener.start()
+            connector.playAgain()
 
         if self.isClientProcessRunning:
             threading.Thread(target=_).start()
