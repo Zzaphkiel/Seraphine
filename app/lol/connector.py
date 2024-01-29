@@ -118,6 +118,33 @@ def needLcu():
     return decorator
 
 
+def getPortTokenServerByPid(pid):
+    '''
+    通过进程 id 获得启动命令行参数中的 port、token 以及登录服务器
+    '''
+    port, token, server = None, None, None
+
+    process = psutil.Process(pid)
+    cmdline = process.cmdline()
+
+    for cmd in cmdline:
+        p = cmd.find("--app-port=")
+        if p != -1:
+            port = cmd[11:]
+
+        p = cmd.find("--remoting-auth-token=")
+        if p != -1:
+            token = cmd[22:]
+
+        p = cmd.find("--rso_platform_id=")
+        if p != -1:
+            server = cmd[18:]
+
+        if port and token and server:
+            break
+    
+    return port, token, server
+
 class LolClientConnector:
     def __init__(self):
         self.sess = None
@@ -125,7 +152,6 @@ class LolClientConnector:
         self.port = None
         self.token = None
         self.url = None
-        self.server = None
 
         # 并发数过高时会导致LCU闪退
         # 通过引用计数避免 (不大于3个并发)
@@ -136,26 +162,9 @@ class LolClientConnector:
         self.exceptApi = None
         self.exceptObj = None
 
-    def start(self, pid):
+    def start(self, port, token):
         self.sess = requests.session()
-        process = psutil.Process(pid)
-        cmdline = process.cmdline()
-
-        for cmd in cmdline:
-            p = cmd.find("--app-port=")
-            if p != -1:
-                self.port = cmd[11:]
-
-            p = cmd.find("--remoting-auth-token=")
-            if p != -1:
-                self.token = cmd[22:]
-
-            p = cmd.find("--rso_platform_id=")
-            if p != -1:
-                self.server = cmd[18:]
-
-            if self.port and self.token and self.server:
-                break
+        self.port, self.token = port, token
 
         self.url = f"https://riot:{self.token}@127.0.0.1:{self.port}"
 

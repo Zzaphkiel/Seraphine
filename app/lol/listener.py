@@ -1,9 +1,10 @@
 import subprocess
-
 import logging
+
+
 import asyncio
-import willump
 from PyQt5.QtCore import QThread, pyqtSignal
+import lcu_driver
 
 
 def getTasklistPath():
@@ -73,69 +74,32 @@ class LolClientEventListener(QThread):
     champSelectChanged = pyqtSignal(dict)
     goingSwap = pyqtSignal(dict)
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         logging.getLogger().setLevel(level=logging.CRITICAL)
 
+
     def run(self):
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        co = lcu_driver.Connector()
 
-        async def onCurrentSummonerProfileChanged(data):
-            self.currentSummonerProfileChanged.emit(data['data'])
+        @co.ws.register('/lol-summoner/v1/current-summoner', event_types=('UPDATE',))
+        async def onCurrentSummonerProfileChanged(connection, event):
+            self.currentSummonerProfileChanged.emit(event.data)
 
-        async def onGameFlowPhaseChanged(data):
-            self.gameStatusChanged.emit(data["data"])
+        @co.ws.register('/lol-gameflow/v1/gameflow-phase', event_types=('UPDATE',))
+        async def onGameFlowPhaseChanged(connection, event):
+            self.gameStatusChanged.emit(event.data)
 
-        async def onChampSelectChanged(data):
-            self.champSelectChanged.emit(data["data"])
+        @co.ws.register('/lol-champ-select/v1/session', event_types=('UPDATE',))
+        async def onChampSelectChanged(connection, event):
+            self.champSelectChanged.emit(event.data)
 
-        async def onGoingSwap(info):
-            self.goingSwap.emit(info)
-
-        async def defaultHandler(data):
-            print(data)
-            # uri = data.get("uri")
-            # if uri:
-            #     print(uri)
-
-        async def main():
-            wllp = await willump.start()
-            allEventSubscription = await wllp.subscribe('OnJsonApiEvent')
-
-            res = await wllp.request("get", "/lol-summoner/v1/current-summoner")
-            res = await res.json()
-
-            # 订阅改头像 / 改名字消息
-            wllp.subscription_filter_endpoint(
-                subscription=allEventSubscription,
-                endpoint=f'/lol-summoner/v1/summoners/{res["summonerId"]}',
-                handler=onCurrentSummonerProfileChanged)
-
-            # 订阅游戏状态改变消息
-            wllp.subscription_filter_endpoint(
-                subscription=allEventSubscription, 
-                endpoint='/lol-gameflow/v1/gameflow-phase', 
-                handler=onGameFlowPhaseChanged)
-
-            # 订阅英雄选择消息
-            wllp.subscription_filter_endpoint(
-                subscription=allEventSubscription, 
-                endpoint='/lol-champ-select/v1/session', 
-                handler=onChampSelectChanged)
-
-            # 订阅选择英雄阶段的交换位置消息
-            wllp.subscription_filter_endpoint(
-                subscription=allEventSubscription, 
-                endpoint='/lol-champ-select/v1/ongoing-swap', 
-                handler=onGoingSwap)
-
-            # print("[INFO] Event listener initialized.")
-            while True:
-                await asyncio.sleep(10)
-
-        try:
-            asyncio.run(main())
-        except:
-            return
+        @co.ws.register('/lol-champ-select/v1/ongoing-swap')
+        async def onGoingSwap(connection, event):
+            self.goingSwap.emit({'data': event.data, 'eventType': event.type})
+            
+        co.start()
 
 
 class StoppableThread(QThread):

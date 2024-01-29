@@ -35,7 +35,7 @@ from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                               SummonerNotFound, SummonerNotInGame)
 from ..lol.listener import (LolProcessExistenceListener, LolClientEventListener, StoppableThread,
                             getLolProcessPid, getTasklistPath)
-from ..lol.connector import connector
+from ..lol.connector import connector, getPortTokenServerByPid
 from ..lol.tools import (processGameData, translateTier, getRecentChampions,
                          processRankInfo, getTeammates, parseGames, markTeam)
 
@@ -522,14 +522,15 @@ class MainWindow(FluentWindow):
     def __onLolClientStarted(self, pid):
         def _():
             try:
-                connector.start(pid)
+                port, token, server = getPortTokenServerByPid(pid)
+                connector.start(port, token)
             except RetryMaximumAttempts:
                 # 若超出最大尝试次数, 则认为lcu未就绪(如大区排队中), 捕获到该异常时不抛出, 等待下一个emit
                 connector.close()
                 self.processListener.isClientRunning = False
                 return
             
-            logger.critical(f"League of Legends client started, server: {connector.server}", TAG)
+            logger.critical(f"League of Legends client started, server: {server}", TAG)
 
             self.isClientProcessRunning = True
 
@@ -615,7 +616,7 @@ class MainWindow(FluentWindow):
             xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
 
             self.nameOrIconChanged.emit(icon, name)
-            self.careerInterface.IconLevelExpChanged.emit(
+            self.careerInterface.iconLevelExpChanged.emit(
                 {
                     'name': name,
                     'icon': icon,

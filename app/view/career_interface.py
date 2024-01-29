@@ -42,7 +42,7 @@ class CareerInterface(SmoothScrollArea):
     hideLoadingPage = pyqtSignal()
     summonerNameClicked = pyqtSignal(str)
     gameInfoBarClicked = pyqtSignal(str)
-    IconLevelExpChanged = pyqtSignal(dict)
+    iconLevelExpChanged = pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -318,7 +318,7 @@ class CareerInterface(SmoothScrollArea):
 
     def __connectSignalToSlot(self):
         self.careerInfoChanged.connect(self.__onCareerInfoChanged)
-        self.IconLevelExpChanged.connect(self.__onChangeIconLevelAndExp)
+        self.iconLevelExpChanged.connect(self.__onChangeIconLevelAndExp)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
