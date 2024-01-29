@@ -1,4 +1,5 @@
-### 2024 / 1 / 27
+### 2024 / 1 / 29
 
-- 进入游戏出来之后 Seraphine 可能会失去与客户端的同步（表现在标题栏的状态显示卡住），点击一下左侧导航栏的刷新状态按钮即可重新开始与其进行同步
-- 本程序（Seraphine）开源在：https://github.com/Zzaphkiel/Seraphine
+- **由于 LOL 的新 BUG，您需要在一局游戏结束后手动点击左侧导航栏的状态刷新按钮，才能保证 Seraphine 正确工作**
+- 本程序开源在：https://github.com/Zzaphkiel/Seraphine
+- 遇到任何问题请查询 https://github.com/Zzaphkiel/Seraphine/issues 或直接提交反馈
