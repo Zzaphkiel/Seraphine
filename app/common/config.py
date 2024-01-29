@@ -96,6 +96,9 @@ class Config(QConfig):
 
     logLevel = OptionsConfigItem("General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]), restart=True)
 
+    enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
+    proxyAddr = ConfigItem("General", "HttpProxy", "")
+
     # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
     #                                    False, BoolValidator())
 
@@ -103,7 +106,7 @@ class Config(QConfig):
 YEAR = 2023
 AUTHOR = "Zaphkiel"
 VERSION = "0.10.2"
-FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues"
+FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 
 cfg = Config()

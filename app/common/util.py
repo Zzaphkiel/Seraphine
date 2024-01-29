@@ -15,7 +15,13 @@ class Github:
 
     def getReleasesInfo(self):
         url = f"{self.githubApi}/repos/{self.user}/{self.repositories}/releases/latest"
-        return self.sess.get(url, verify=False).json()
+
+        if cfg.get(cfg.enableProxy):
+            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        else:
+            proxy = None
+
+        return self.sess.get(url, proxies=proxy).json()
 
     def checkUpdate(self):
         """
@@ -30,7 +36,13 @@ class Github:
     
     def getNotice(self):
         url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/notice.md'
-        res = self.sess.get(url, verify=False).json()
+
+        if cfg.get(cfg.enableProxy):
+            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        else:
+            proxy = None
+        
+        res = self.sess.get(url, proxies=proxy).json()
 
         content = str(base64.b64decode(res['content']), encoding='utf-8')
 

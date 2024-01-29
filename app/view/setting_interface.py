@@ -4,19 +4,19 @@ from typing import Union
 
 from ..common.qfluentwidgets import (
     SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard, PushSettingCard,
-    ExpandLayout, Theme, CustomColorSettingCard, InfoBar, setTheme,
-    setThemeColor, SmoothScrollArea, SettingCard, FluentIconBase, SpinBox,
-    PushButton, PrimaryPushSettingCard, HyperlinkCard, FlyoutView, Flyout,
-    FlyoutAnimationType, TeachingTip, TeachingTipTailPosition, TeachingTipView, FluentIcon, InfoBarPosition, ExpandGroupSettingCard)
+    ExpandLayout, CustomColorSettingCard, InfoBar, setTheme, setThemeColor, 
+    SmoothScrollArea, FluentIconBase, PrimaryPushSettingCard, 
+    HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView, 
+    ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton, 
+    qconfig, LineEdit, PushButton, IndicatorPosition, SpinBox)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
-from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QHBoxLayout
 
 from ..common.icons import Icon
 from ..common.config import (
     cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
-from ..components.loose_switch_setting_card import LooseSwitchSettingCard
 
 
 class LineEditSettingCard(ExpandGroupSettingCard):
@@ -92,7 +92,6 @@ class SettingInterface(SmoothScrollArea):
         self.scrollWidget = QWidget()
         self.expandLayout = ExpandLayout(self.scrollWidget)
 
-        # setting label
         self.settingLabel = QLabel(self.tr("Settings"), self)
 
         self.functionGroup = SettingCardGroup(self.tr("Functions"),
@@ -121,6 +120,8 @@ class SettingInterface(SmoothScrollArea):
 
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
+        
+
         self.lolFolderCard = PushSettingCard(self.tr("Choose folder"),
                                              Icon.FOLDER,
                                              self.tr("Client Path"),
@@ -134,13 +135,6 @@ class SettingInterface(SmoothScrollArea):
             cfg.enableGameStartMinimize
         )
 
-        self.checkUpdateCard = SwitchSettingCard(
-            Icon.UPDATE, self.tr("Check for updates"),
-            self.tr(
-                "Automatically check for updates when software starts"),
-            cfg.enableCheckUpdate
-        )
-
         self.logLevelCard = ComboBoxSettingCard(
             cfg.logLevel,
             Icon.LOG,
@@ -148,15 +142,7 @@ class SettingInterface(SmoothScrollArea):
             self.tr('The level of logging for Seraphine (take effect after restart)'),
             texts=["Debug", "Info", "Warning", "Error"],
             parent=self.generalGroup)
-
-        # self.enableStartWithComputer = SwitchSettingCard(
-        #     Icon.DESKTOPRIGHT,
-        #     self.tr("Auto-start on boot"),
-        #     self.
-        #     tr("Start Seraphine on boot automatically. Enabling this option may affect the boot speed"
-        #        ),
-        #     configItem=cfg.enableStartWithComputer,
-        #     parent=self.generalGroup)
+        
         self.enableStartLolWithApp = SwitchSettingCard(
             Icon.CIRCLERIGHT,
             self.tr("Auto-start LOL"),
@@ -219,6 +205,17 @@ class SettingInterface(SmoothScrollArea):
             texts=['简体中文', 'English',
                    self.tr('Use system setting')],
             parent=self.personalizationGroup)
+        
+        self.updateGroup = SettingCardGroup(self.tr("Update"), self.scrollWidget)
+        self.checkUpdateCard = SwitchSettingCard(
+            Icon.UPDATE, self.tr("Check for updates"),
+            self.tr(
+                "Automatically check for updates when software starts"),
+            cfg.enableCheckUpdate
+        )
+        self.httpProxyCard = ProxySettingCard(
+            self.tr("Http proxy"), self.tr("Using a proxy when connecting to GitHub"), 
+            cfg.enableProxy, cfg.proxyAddr, self.updateGroup)
 
         self.aboutGroup = SettingCardGroup(self.tr("About"), self.scrollWidget)
         self.feedbackCard = PrimaryPushSettingCard(
@@ -267,7 +264,6 @@ class SettingInterface(SmoothScrollArea):
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
         self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
-        self.generalGroup.addSettingCard(self.checkUpdateCard)
         self.generalGroup.addSettingCard(self.logLevelCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
@@ -275,6 +271,9 @@ class SettingInterface(SmoothScrollArea):
         self.personalizationGroup.addSettingCard(self.themeColorCard)
         self.personalizationGroup.addSettingCard(self.zoomCard)
         self.personalizationGroup.addSettingCard(self.languageCard)
+
+        self.updateGroup.addSettingCard(self.checkUpdateCard)
+        self.updateGroup.addSettingCard(self.httpProxyCard)
 
         self.aboutGroup.addSettingCard(self.feedbackCard)
         self.aboutGroup.addSettingCard(self.aboutCard)
@@ -285,6 +284,7 @@ class SettingInterface(SmoothScrollArea):
         self.expandLayout.addWidget(self.functionGroup)
         self.expandLayout.addWidget(self.generalGroup)
         self.expandLayout.addWidget(self.personalizationGroup)
+        self.expandLayout.addWidget(self.updateGroup)
         self.expandLayout.addWidget(self.aboutGroup)
 
     def __connectSignalToSlot(self):
@@ -361,3 +361,120 @@ class SettingInterface(SmoothScrollArea):
 
         applyButton.clicked.connect(self.__onDeleteButtonClicked)
         view.closed.connect(t.close)
+
+
+class ProxySettingCard(ExpandGroupSettingCard):
+    def __init__(self, title, content, enableConfigItem: ConfigItem = None,
+                 addrConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.PLANE, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.secondsLabel = QLabel(self.tr("Http proxy:"))
+        self.lineEdit = LineEdit()
+
+        self.switchButtonWidget = QWidget(self.view)
+        self.switchButtonLayout = QHBoxLayout(self.switchButtonWidget)
+
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.enableConfigItem = enableConfigItem
+        self.addrConfigItem = addrConfigItem
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(self.secondsLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
+        self.switchButtonLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.switchButtonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setText(cfg.get(self.addrConfigItem))
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setPlaceholderText("127.0.0.1:10809")
+
+        self.switchButton.setChecked(cfg.get(self.enableConfigItem))
+
+        self.lineEdit.textChanged.connect(self.__onLineEditValueChanged)
+        self.switchButton.checkedChanged.connect(
+            self.__onSwitchButtonCheckedChanged)
+
+        # 这玩意在 enabled 是 False 的时候边框怪怪的，强行让它不那么怪
+        qss = """
+            SpinBox:disabled {
+                color: rgba(255, 255, 255, 150);
+                border: 1px solid rgba(255, 255, 255, 0.0698);
+                background-color: rgba(255, 255, 255, 0.0419);
+            }
+        """
+        setCustomStyleSheet(self.lineEdit, "", qss)
+
+        value, isChecked = self.lineEdit.text(), self.switchButton.isChecked()
+        self.__setStatusLableText(value, isChecked)
+        self.lineEdit.setEnabled(not isChecked)
+
+    def setValue(self, addr: int, isChecked: bool):
+        qconfig.set(self.addrConfigItem, addr)
+        qconfig.set(self.enableConfigItem, isChecked)
+
+        self.__setStatusLableText(addr, isChecked)
+
+    def __onSwitchButtonCheckedChanged(self, isChecked: bool):
+        self.setValue(self.lineEdit.text(), isChecked)
+        self.lineEdit.setEnabled(not isChecked)
+
+    def __onLineEditValueChanged(self, value):
+        self.setValue(value, self.switchButton.isChecked())
+
+    def __setStatusLableText(self, addr, isChecked):
+        if isChecked:
+            self.statusLabel.setText(self.tr("Enabled, proxy: ") + str(addr))
+        else:
+            self.statusLabel.setText(self.tr("Disabled"))
+
+
+class LooseSwitchSettingCard(SwitchSettingCard):
+    """ 允许bool以外的值来初始化的SwitchSettingCard控件 """
+
+    def __init__(self, icon, title, content=None, configItem: ConfigItem = None, parent=None):
+        super().__init__(icon, title, content, configItem, parent)
+
+        self.switchButton.setOnText(self.tr("On"))
+        self.switchButton.setOffText(self.tr("Off"))
+
+    def setValue(self, isChecked):
+        """
+        为适应 config 中对应字段为任意值时初始化控件;
+
+        若传入 bool 以外的值, 前端将会看到False
+
+        需要设置值, 有以下途径:
+        1. 代码层调用 setValue 时, 以bool传入
+        2. 用户通过前端拨动 SwitchButton
+
+        @param isChecked:
+        @return:
+        """
+        if isinstance(isChecked, bool):
+            super().setValue(isChecked)
+        else:
+            self.switchButton.setChecked(False)
