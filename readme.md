@@ -114,7 +114,7 @@ pip install pyinstaller==5.13
 
 ## 参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
-- 部分与 LOL 客户端的通信使用 [Willump](https://github.com/elliejs/Willump) 实现
+- 部分与 LOL 客户端的通信使用 [lcu-driver](https://github.com/sousa-andre/lcu-driver) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
   - https://developer.riotgames.com/docs/lol
