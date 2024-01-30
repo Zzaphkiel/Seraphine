@@ -112,6 +112,7 @@ class RoundLevelAvatar(QWidget):
             self.progressRing.text = text
 
         self.callUpdate = True
+        self.repaint()
 
 
 if __name__ == "__main__":

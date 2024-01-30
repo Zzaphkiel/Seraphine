@@ -615,18 +615,20 @@ class MainWindow(FluentWindow):
             xpSinceLastLevel = self.currentSummoner.xpSinceLastLevel
             xpUntilNextLevel = self.currentSummoner.xpUntilNextLevel
 
+            msg = {
+                'name': name,
+                'icon': icon,
+                'level': level,
+                'xpSinceLastLevel': xpSinceLastLevel,
+                'xpUntilNextLevel': xpUntilNextLevel,
+                'isPublic': self.currentSummoner.isPublic,
+                'tagLine': tagLine,
+            }
+
+            logger.debug(f"Update Summoner Info : {msg}", TAG)
+
             self.nameOrIconChanged.emit(icon, name)
-            self.careerInterface.iconLevelExpChanged.emit(
-                {
-                    'name': name,
-                    'icon': icon,
-                    'level': level,
-                    'xpSinceLastLevel': xpSinceLastLevel,
-                    'xpUntilNextLevel': xpUntilNextLevel,
-                    'isPublic': self.currentSummoner.isPublic,
-                    'tagLine': tagLine,
-                }
-            )
+            self.careerInterface.iconLevelExpChanged.emit(msg)
 
         threading.Thread(target=_).start()
 

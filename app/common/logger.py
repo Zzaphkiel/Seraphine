@@ -73,6 +73,7 @@ class Logger:
         return log_path
 
     def log(self, level, message, tag=None):
+        # FIXME if tag is none an exception will be thrown
         extra = {'TAG': tag} if tag else {}
         self.logger.log(level, message, extra=extra)
 
@@ -101,7 +102,7 @@ class Logger:
         return traceback_str
 
 
-logger = Logger("Seraphine")
+logger = Logger("Seraphine", True)
 
 
 if __name__ == "__main__":
