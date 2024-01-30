@@ -102,7 +102,7 @@ class Logger:
         return traceback_str
 
 
-logger = Logger("Seraphine", True)
+logger = Logger("Seraphine")
 
 
 if __name__ == "__main__":

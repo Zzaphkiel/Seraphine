@@ -88,26 +88,26 @@ class LolClientEventListener(QThread):
 
         @co.ws.register('/lol-summoner/v1/current-summoner', event_types=('UPDATE',))
         async def onCurrentSummonerProfileChanged(connection, event):
-            logger.info("/lol-summoner/v1/current-summoner")
-            logger.debug(event.data)
+            logger.info("/lol-summoner/v1/current-summoner", TAG)
+            logger.debug(event.data, TAG)
             self.currentSummonerProfileChanged.emit(event.data)
 
         @co.ws.register('/lol-gameflow/v1/gameflow-phase', event_types=('UPDATE',))
         async def onGameFlowPhaseChanged(connection, event):
-            logger.info("/lol-gameflow/v1/gameflow-phase")
-            logger.debug(event.data)
+            logger.info("/lol-gameflow/v1/gameflow-phase", TAG)
+            logger.debug(event.data, TAG)
             self.gameStatusChanged.emit(event.data)
 
         @co.ws.register('/lol-champ-select/v1/session', event_types=('UPDATE',))
         async def onChampSelectChanged(connection, event):
-            logger.info("/lol-champ-select/v1/session")
-            logger.debug(event.data)
+            logger.info("/lol-champ-select/v1/session", TAG)
+            logger.debug(event.data, TAG)
             self.champSelectChanged.emit(event.data)
 
         @co.ws.register('/lol-champ-select/v1/ongoing-swap')
         async def onGoingSwap(connection, event):
-            logger.info("/lol-champ-select/v1/ongoing-swap")
-            logger.debug(event)
+            logger.info("/lol-champ-select/v1/ongoing-swap", TAG)
+            logger.debug(event, TAG)
             self.goingSwap.emit({'data': event.data, 'eventType': event.type})
             
         co.start()
