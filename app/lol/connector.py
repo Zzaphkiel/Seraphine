@@ -154,7 +154,7 @@ class LolClientConnector:
         self.url = None
 
         # 并发数过高时会导致LCU闪退
-        # 通过引用计数避免 (不大于3个并发)
+        # 通过引用计数避免 (不大于 2 个并发)
         self.ref_cnt = 0
         self.tackleFlag = threading.Event()
         self.manager = None
@@ -584,6 +584,10 @@ class LolClientConnector:
     def getConversations(self):
         res = self.__get("/lol-chat/v1/conversations").json()
 
+        return res
+    
+    def getHelp(self):
+        res = self.__get("/help").json()
         return res
 
     def dodge(self):

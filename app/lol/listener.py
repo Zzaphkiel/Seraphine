@@ -1,10 +1,10 @@
 import subprocess
 import logging
-
+import json
 
 import asyncio
 from PyQt5.QtCore import QThread, pyqtSignal
-import lcu_driver
+import aiohttp
 
 from app.common.logger import logger
 
@@ -81,37 +81,90 @@ class LolClientEventListener(QThread):
         super().__init__(parent)
         logging.getLogger().setLevel(level=logging.CRITICAL)
 
+    def start(self, port, token):
+        self.ws = WSListener(port, token)
+        super().start()
 
     def run(self):
-        asyncio.set_event_loop(asyncio.new_event_loop())
-        co = lcu_driver.Connector()
+        @self.ws.subscribe(event='OnJsonApiEvent_lol-summoner_v1_current-summoner', 
+                           uri='/lol-summoner/v1/current-summoner')
+        async def onCurrentSummonerProfileChanged(event):
+            self.currentSummonerProfileChanged.emit(event['data'])
 
-        @co.ws.register('/lol-summoner/v1/current-summoner', event_types=('UPDATE',))
-        async def onCurrentSummonerProfileChanged(connection, event):
-            logger.info("/lol-summoner/v1/current-summoner", TAG)
-            logger.debug(event.data, TAG)
-            self.currentSummonerProfileChanged.emit(event.data)
+        @self.ws.subscribe(event='OnJsonApiEvent_lol-gameflow_v1_gameflow-phase',
+                           uri='/lol-gameflow/v1/gameflow-phase')
+        async def onGameFlowPhaseChanged(event):
+            self.gameStatusChanged.emit(event['data'])
 
-        @co.ws.register('/lol-gameflow/v1/gameflow-phase', event_types=('UPDATE',))
-        async def onGameFlowPhaseChanged(connection, event):
-            logger.info("/lol-gameflow/v1/gameflow-phase", TAG)
-            logger.debug(event.data, TAG)
-            self.gameStatusChanged.emit(event.data)
+        @self.ws.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
+                           uri='/lol-champ-select/v1/session')
+        async def onChampSelectChanged(event):
+            self.champSelectChanged.emit(event['data'])
 
-        @co.ws.register('/lol-champ-select/v1/session', event_types=('UPDATE',))
-        async def onChampSelectChanged(connection, event):
-            logger.info("/lol-champ-select/v1/session", TAG)
-            logger.debug(event.data, TAG)
-            self.champSelectChanged.emit(event.data)
-
-        @co.ws.register('/lol-champ-select/v1/ongoing-swap')
-        async def onGoingSwap(connection, event):
-            logger.info("/lol-champ-select/v1/ongoing-swap", TAG)
-            logger.debug(event, TAG)
-            self.goingSwap.emit({'data': event.data, 'eventType': event.type})
+        @self.ws.subscribe(event="OnJsonApiEvent_lol-champ-select_v1_ongoing-swap",
+                           uri='/lol-champ-select/v1/ongoing-swap')
+        async def onGoingSwap(event):
+            self.goingSwap.emit(event)
             
-        co.start()
+        self.ws.start()
 
+class WSListener():
+    def __init__(self, port=None, token=None):
+        self.port = port
+        self.token = token
+
+        self.events = []
+        self.subscribes = []
+
+    async def run_ws(self):
+        local_session = aiohttp.ClientSession(
+            auth=aiohttp.BasicAuth('riot', self.token),
+            headers={
+                'Content-type': 'application/json',
+                'Accept': 'application/json'
+            }
+        )
+        ws_address = f'https://127.0.0.1:{self.port}'
+        ws = await local_session.ws_connect(ws_address, ssl=False)
+
+        for event in self.events:
+            await ws.send_json([5, event])
+
+        while True:
+            msg = await ws.receive()
+
+            if msg.type == aiohttp.WSMsgType.TEXT and msg.data != '':
+                data = json.loads(msg.data)[2]
+                self.match_uri(data)
+            elif msg.type == aiohttp.WSMsgType.CLOSED:
+                logger.info("WebSocket closed", TAG)
+                break
+
+        await ws.close()
+        await local_session.close()
+
+    def match_uri(self, data):
+        for s in self.subscribes:
+            if data.get('uri') == s['uri']:
+                logger.info(s['uri'], TAG)
+                logger.debug(data, TAG)
+                asyncio.create_task(s['callable'](data))
+                return
+
+    def start(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.run_ws())
+
+    def subscribe(self, event: str, uri: str):
+        def subscribe_wrapper(func):
+            self.events.append(event)
+            self.subscribes.append({
+                'uri': uri,
+                'callable': func
+            })
+            return func
+        return subscribe_wrapper
 
 class StoppableThread(QThread):
     def __init__(self, target, parent) -> None:

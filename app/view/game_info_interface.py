@@ -470,12 +470,6 @@ class SummonerInfoView(QFrame):
             (self.parent().parent().parent().parent().parent().parent()
              .parent().gameInfoInterface.pageSwitchSignal.emit())
 
-    # def enterEvent(self, event):
-    #     QApplication.setOverrideCursor(Qt.PointingHandCursor)
-
-    # def leaveEvent(self, event):
-    #     QApplication.restoreOverrideCursor()
-
     def updateIcon(self, iconPath: str):
         self.nowIconId = iconPath.split("/")[-1][:-4]
         self.icon.updateIcon(iconPath)

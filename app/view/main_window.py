@@ -545,7 +545,7 @@ class MainWindow(FluentWindow):
             if folder != cfg.get(cfg.lolFolder):
                 self.lolInstallFolderChanged.emit(folder)
 
-            self.eventListener.start()
+            self.eventListener.start(port, token)
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
@@ -1007,26 +1007,27 @@ class MainWindow(FluentWindow):
                 return
 
     def __onChampSelectChanged(self, data):
-        # FIXME
-        #  # 129
+        # FIXME # 129
         #  若在BP进行到一半才打开软件, 进入游戏后仍会有部分队友的头像不是英雄头像
         for t in data["myTeam"]:
-            if t['championId']:
-                # 控件可能未绘制, 判断一下避免报错
-                summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(
-                    t["summonerId"])
-                if summonersView:
-                    if summonersView.nowIconId != t['championId']:  # 只有切换了才触发更新
-                        championIconPath = connector.getChampionIcon(
-                            t['championId'])
-                        summonersView.updateIcon(championIconPath)
-                        summoners = self.gameInfoInterface.allySummonersInfo["summoners"]
+            # 控件可能未绘制, 判断一下避免报错
+            if not t['championId']:
+                continue
 
-                        # 找对应召唤师的缓冲区, 更新头像, 复杂度 O(n)
-                        for summoner in summoners:
-                            if summoner.get("summonerId") == t["summonerId"]:
-                                summoner["icon"] = championIconPath
-                                break
+            summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(
+                t["summonerId"])
+            
+            if summonersView and summonersView.nowIconId != t['championId']:  # 只有切换了才触发新
+                championIconPath = connector.getChampionIcon(
+                    t['championId'])
+                summonersView.updateIcon(championIconPath)
+                summoners = self.gameInfoInterface.allySummonersInfo["summoners"]
+
+                # 找对应召唤师的缓冲区, 更新头像, 复杂度 O(n)
+                for summoner in summoners:
+                    if summoner.get("summonerId") == t["summonerId"]:
+                        summoner["icon"] = championIconPath
+                        break
 
     def __onGameStatusChanged(self, status):
         title = None

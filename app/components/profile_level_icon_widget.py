@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout
-from PyQt5.QtGui import QPainter, QImage, QPainterPath, QPen, QFont
+from PyQt5.QtGui import QPainter, QImage, QPainterPath, QPen, QFont, QPixmap
 from PyQt5.QtCore import Qt, QRectF
 
 from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor
@@ -57,8 +57,9 @@ class RoundLevelAvatar(QWidget):
         super().__init__(parent)
         self.diameter = diameter
         self.sep = .3 * diameter
+        self.iconPath = icon
 
-        self.image = QImage(icon)
+        self.image = QPixmap(self.iconPath)
 
         self.setFixedSize(self.diameter, self.diameter)
 
@@ -90,7 +91,15 @@ class RoundLevelAvatar(QWidget):
         scaledImage = self.image.scaled(
             self.width() - int(self.sep),
             self.height() - int(self.sep),
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding)
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation)
+        
+        if 'champion' in self.iconPath:
+            scaledImage = scaledImage.scaled(self.width() - int(self.sep) + 8,
+                                      self.height() - int(self.sep) + 8,
+                                      Qt.AspectRatioMode.KeepAspectRatio,
+                                      Qt.TransformationMode.SmoothTransformation)
+            scaledImage.scroll(-4, -4, scaledImage.rect())
 
         clipPath = QPainterPath()
         clipPath.addEllipse(self.sep // 2, self.sep // 2,
@@ -98,10 +107,12 @@ class RoundLevelAvatar(QWidget):
                             self.height() - self.sep)
 
         painter.setClipPath(clipPath)
-        painter.drawImage(int(self.sep // 2), int(self.sep // 2), scaledImage)
+        painter.drawPixmap(int(self.sep // 2), int(self.sep // 2), scaledImage)
 
     def updateIcon(self, icon: str, xpSinceLastLevel=None, xpUntilNextLevel=None, text=""):
-        self.image = QImage(icon)
+        self.iconPath = icon
+        self.image = QPixmap(self.iconPath)
+
         if xpSinceLastLevel is not None and xpUntilNextLevel is not None:
             self.xpSinceLastLevel = xpSinceLastLevel
             self.xpUntilNextLevel = xpUntilNextLevel
