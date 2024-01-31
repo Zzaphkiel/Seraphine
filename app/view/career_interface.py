@@ -346,6 +346,7 @@ class CareerInterface(SmoothScrollArea):
         levelStr = str(level) if level != -1 else "None"
         self.icon.updateIcon(icon, xpSinceLastLevel,
                              xpUntilNextLevel, levelStr)
+        self.repaint()
 
     def __onCareerInfoChanged(self, info: dict):
         if not info['triggerByUser'] and not self.isCurrentSummoner():
