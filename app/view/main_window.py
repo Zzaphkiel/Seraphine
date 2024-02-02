@@ -971,7 +971,7 @@ class MainWindow(FluentWindow):
 
     def __onGoingSwap(self, info: dict):
         """
-        bp阶段交换选用位置事件
+        bp 阶段交换选用位置事件
         @param info:
         @return:
         """

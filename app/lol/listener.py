@@ -82,7 +82,7 @@ class LolClientEventListener(QThread):
         logging.getLogger().setLevel(level=logging.CRITICAL)
 
     def start(self, port, token):
-        self.ws = WSListener(port, token)
+        self.ws = LcuWebSocket(port, token)
         super().start()
 
     def run(self):
@@ -99,16 +99,18 @@ class LolClientEventListener(QThread):
         @self.ws.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
                            uri='/lol-champ-select/v1/session')
         async def onChampSelectChanged(event):
+            # print("onChampSelectChanged" + str(event))
             self.champSelectChanged.emit(event['data'])
 
         @self.ws.subscribe(event="OnJsonApiEvent_lol-champ-select_v1_ongoing-swap",
                            uri='/lol-champ-select/v1/ongoing-swap')
         async def onGoingSwap(event):
+            print("onGoingSwap" + str(event))
             self.goingSwap.emit(event)
             
         self.ws.start()
 
-class WSListener():
+class LcuWebSocket():
     def __init__(self, port=None, token=None):
         self.port = port
         self.token = token
@@ -116,16 +118,16 @@ class WSListener():
         self.events = []
         self.subscribes = []
 
-    async def run_ws(self):
-        local_session = aiohttp.ClientSession(
+    async def runWs(self):
+        session = aiohttp.ClientSession(
             auth=aiohttp.BasicAuth('riot', self.token),
             headers={
                 'Content-type': 'application/json',
                 'Accept': 'application/json'
             }
         )
-        ws_address = f'https://127.0.0.1:{self.port}'
-        ws = await local_session.ws_connect(ws_address, ssl=False)
+        address = f'https://127.0.0.1:{self.port}'
+        ws = await session.ws_connect(address, ssl=False)
 
         for event in self.events:
             await ws.send_json([5, event])
@@ -135,15 +137,15 @@ class WSListener():
 
             if msg.type == aiohttp.WSMsgType.TEXT and msg.data != '':
                 data = json.loads(msg.data)[2]
-                self.match_uri(data)
+                self.matchUri(data)
             elif msg.type == aiohttp.WSMsgType.CLOSED:
                 logger.info("WebSocket closed", TAG)
                 break
 
         await ws.close()
-        await local_session.close()
+        await session.close()
 
-    def match_uri(self, data):
+    def matchUri(self, data):
         for s in self.subscribes:
             if data.get('uri') == s['uri']:
                 logger.info(s['uri'], TAG)
@@ -154,17 +156,17 @@ class WSListener():
     def start(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.run_ws())
+        loop.run_until_complete(self.runWs())
 
     def subscribe(self, event: str, uri: str):
-        def subscribe_wrapper(func):
+        def subscribeWrapper(func):
             self.events.append(event)
             self.subscribes.append({
                 'uri': uri,
                 'callable': func
             })
             return func
-        return subscribe_wrapper
+        return subscribeWrapper
 
 class StoppableThread(QThread):
     def __init__(self, target, parent) -> None:

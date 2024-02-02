@@ -153,7 +153,7 @@ class LolClientConnector:
         self.token = None
         self.url = None
 
-        # 并发数过高时会导致LCU闪退
+        # 并发数过高时会导致 LCU 闪退
         # 通过引用计数避免 (不大于 2 个并发)
         self.ref_cnt = 0
         self.tackleFlag = threading.Event()
@@ -589,6 +589,19 @@ class LolClientConnector:
     def getHelp(self):
         res = self.__get("/help").json()
         return res
+    
+    @retry()
+    def sendFriendRequest(self, name):
+        summoner = self.getSummonerByName(name)
+        summonerId = summoner['summonerId']
+
+        data = {
+            "name": name,
+        }
+
+        res = self.__post('/lol-chat/v1/friend-requests', data=data)
+
+        print(res.content)
 
     def dodge(self):
         res = self.__post(

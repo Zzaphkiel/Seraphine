@@ -108,7 +108,8 @@ def processGameData(game):
     itemIcons = [connector.getItemIcon(itemId) for itemId in itemIds]
     runeId = stats['perk0']
     runeIcon = connector.getRuneIcon(runeId)
-    cs = stats['totalMinionsKilled']
+
+    cs = stats['totalMinionsKilled'] + stats['neutralMinionsKilled']
     gold = stats['goldEarned']
     remake = stats['gameEndedInEarlySurrender']
     win = stats['win']
@@ -380,7 +381,7 @@ def processGameDetailData(puuid, game):
                     'kills': kills,
                     'deaths': deaths,
                     'assists': assists,
-                    'cs': stats['totalMinionsKilled'],
+                    'cs': stats['totalMinionsKilled'] + stats['neutralMinionsKilled'],
                     'gold': gold,
                     'runeIcon': runeIcon,
                     'champLevel': stats['champLevel'],

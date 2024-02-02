@@ -50,11 +50,10 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
-        # self.playAgainCard = PlayAgainCard(
-        #     self.tr("Fix infinite loading"),
-        #     self.tr("Fix infinite loading bug when game ends"),
-        #     self.gameGroup
-        # )
+        # self.addFriendCard = FriendRequestCard(
+        #     self.tr("Send friend request"),
+        #     self.tr("Send friend request by summoner's name"),
+        #     self.profileGroup)
         self.lockConfigCard = LockConfigCard(
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
@@ -123,17 +122,15 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.profileGroup.addSettingCard(self.profileTierCard)
         self.profileGroup.addSettingCard(self.onlineAvailabilityCard)
         self.profileGroup.addSettingCard(self.removeTokensCard)
+        # self.profileGroup.addSettingCard(self.addFriendCard)
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.autoReconnectCard)
         self.gameGroup.addSettingCard(self.autoSelectChampionCard)
-        # self.gameGroup.addSettingCard(self.copyPlayersInfoCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
-        # self.gameGroup.addSettingCard(self.dodgeCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
-        # self.gameGroup.addSettingCard(self.playAgainCard)
         self.gameGroup.addSettingCard(self.fixDpiCard)
 
         self.expandLayout.setSpacing(30)
@@ -1095,3 +1092,73 @@ class LockConfigCard(SettingCard):
             return False
 
         return True
+
+
+class FriendRequestCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None, parent=None):
+        super().__init__(Icon.EYES, title, content, parent)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.summonerNameLabel = QLabel(
+            self.tr("Summoners's name you want to send friend request to:"))
+        self.lineEdit = LineEdit()
+
+        self.buttonWidget = QWidget(self.view)
+        self.buttonLayout = QHBoxLayout(self.buttonWidget)
+        self.button = PushButton(self.tr("Send"))
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.summonerNameLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonLayout.addWidget(self.button, 0, Qt.AlignRight)
+        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setPlaceholderText(
+            self.tr("Please input summoner's name"))
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setClearButtonEnabled(True)
+
+        self.button.setMinimumWidth(100)
+        self.button.setEnabled(False)
+
+        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
+        self.button.clicked.connect(self.__onButtonClicked)
+
+    def __onLineEditTextChanged(self):
+        enable = self.lineEdit.text() != ""
+        self.button.setEnabled(enable)
+
+    def __onButtonClicked(self):
+        def info(type, title, content=None):
+            f = InfoBar.error if type == 'error' else InfoBar.success
+
+            f(title=title, content=content, orient=Qt.Vertical, isClosable=True,
+              position=InfoBarPosition.TOP_RIGHT, duration=5000,
+              parent=self.window().auxiliaryFuncInterface)
+
+        try:
+            connector.sendFriendRequest(self.lineEdit.text())
+        except:
+            info('error', self.tr("Summoner not found"),
+                 self.tr("Please check the summoner's name and retry"))
+        else:
+            info('success', self.tr("Send friend request successfully"))
