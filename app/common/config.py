@@ -5,8 +5,9 @@ from PyQt5.QtCore import QLocale
 
 
 from .qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
-                            OptionsConfigItem, OptionsValidator, ConfigSerializer,
-                            RangeConfigItem, RangeValidator, EnumSerializer)
+                             OptionsConfigItem, OptionsValidator, ConfigSerializer,
+                             RangeConfigItem, RangeValidator, EnumSerializer)
+
 
 class Language(Enum):
     CHINESE_SIMPLIFIED = QLocale(QLocale.Chinese, QLocale.China)
@@ -51,7 +52,9 @@ class Config(QConfig):
                                  restart=True)
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
-                                        RangeValidator(1, 60))
+                                        RangeValidator(10, 60))
+    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
+                                           RangeValidator(1, 5), restart=True)
 
     gameInfoFilter = ConfigItem(
         "Functions", "GameInfoFilter", False, BoolValidator())
@@ -74,7 +77,7 @@ class Config(QConfig):
 
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
-    
+
     lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
@@ -94,7 +97,8 @@ class Config(QConfig):
                                    "EnableCheckUpdate", True,
                                    BoolValidator())
 
-    logLevel = OptionsConfigItem("General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]), restart=True)
+    logLevel = OptionsConfigItem(
+        "General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]), restart=True)
 
     enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
     proxyAddr = ConfigItem("General", "HttpProxy", "")

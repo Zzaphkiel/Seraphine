@@ -4,10 +4,10 @@ from typing import Union
 
 from ..common.qfluentwidgets import (
     SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard, PushSettingCard,
-    ExpandLayout, CustomColorSettingCard, InfoBar, setTheme, setThemeColor, 
-    SmoothScrollArea, FluentIconBase, PrimaryPushSettingCard, 
-    HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView, 
-    ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton, 
+    ExpandLayout, CustomColorSettingCard, InfoBar, setTheme, setThemeColor,
+    SmoothScrollArea, FluentIconBase, PrimaryPushSettingCard,
+    HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView,
+    ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton,
     qconfig, LineEdit, PushButton, IndicatorPosition, SpinBox)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QDesktopServices
@@ -21,8 +21,8 @@ from ..common.style_sheet import StyleSheet
 
 class LineEditSettingCard(ExpandGroupSettingCard):
 
-    def __init__(self, configItem, title, hintContent, step,
-                 icon: Union[str, QIcon, FluentIconBase],
+    def __init__(self, configItem, title, hintContent, step, min,
+                 max, icon: Union[str, QIcon, FluentIconBase],
                  content=None, parent=None):
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -40,15 +40,15 @@ class LineEditSettingCard(ExpandGroupSettingCard):
         self.statusLabel = QLabel(self)
 
         self.__initLayout()
-        self.__initWidget(step)
+        self.__initWidget(step, min, max)
 
     def __onValueChanged(self):
         value = self.lineEdit.value()
         cfg.set(self.configItem, value)
         self.__setStatusLabelText(value)
 
-    def __initWidget(self, step):
-        self.lineEdit.setRange(1, 999)
+    def __initWidget(self, step, min, max):
+        self.lineEdit.setRange(min, max)
         value = cfg.get(self.configItem)
         self.__setStatusLabelText(value)
 
@@ -97,13 +97,22 @@ class SettingInterface(SmoothScrollArea):
         self.functionGroup = SettingCardGroup(self.tr("Functions"),
                                               self.scrollWidget)
 
+        self.apiConcurrencyCount = LineEditSettingCard(
+            cfg.apiConcurrencyNumber,
+            self.tr("LCU API concurrency number"),
+            self.tr("Number of concurrency:"),
+            1, 1, 5,
+            Icon.APPLIST,
+            self.tr("Setting the maximum number of API concurrency."),
+            self.functionGroup)
+
         self.careerGamesCount = LineEditSettingCard(
             cfg.careerGamesNumber,
-            self.tr("Default games number"), self.tr(
-                "Number of games:"), 10, Icon.SLIDESEARCH,
-            self.
-            tr("Setting the maximum number of games shows in the career interface"
-               ), self.functionGroup)
+            self.tr("Default games number"),
+            self.tr("Number of games:"),
+            10, 10, 60,
+            Icon.SLIDESEARCH,
+            self.tr("Setting the maximum number of games shows in the career interface"), self.functionGroup)
 
         self.gameInfoFilterCard = SwitchSettingCard(
             Icon.FILTER, self.tr("Rank filter other mode"),
@@ -120,7 +129,6 @@ class SettingInterface(SmoothScrollArea):
 
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
-        
 
         self.lolFolderCard = PushSettingCard(self.tr("Choose folder"),
                                              Icon.FOLDER,
@@ -142,7 +150,7 @@ class SettingInterface(SmoothScrollArea):
             self.tr('The level of logging for Seraphine (take effect after restart)'),
             texts=["Debug", "Info", "Warning", "Error"],
             parent=self.generalGroup)
-        
+
         self.enableStartLolWithApp = SwitchSettingCard(
             Icon.CIRCLERIGHT,
             self.tr("Auto-start LOL"),
@@ -205,8 +213,9 @@ class SettingInterface(SmoothScrollArea):
             texts=['简体中文', 'English',
                    self.tr('Use system setting')],
             parent=self.personalizationGroup)
-        
-        self.updateGroup = SettingCardGroup(self.tr("Update"), self.scrollWidget)
+
+        self.updateGroup = SettingCardGroup(
+            self.tr("Update"), self.scrollWidget)
         self.checkUpdateCard = SwitchSettingCard(
             Icon.UPDATE, self.tr("Check for updates"),
             self.tr(
@@ -214,7 +223,8 @@ class SettingInterface(SmoothScrollArea):
             cfg.enableCheckUpdate
         )
         self.httpProxyCard = ProxySettingCard(
-            self.tr("Http proxy"), self.tr("Using a proxy when connecting to GitHub"), 
+            self.tr("Http proxy"), self.tr(
+                "Using a proxy when connecting to GitHub"),
             cfg.enableProxy, cfg.proxyAddr, self.updateGroup)
 
         self.aboutGroup = SettingCardGroup(self.tr("About"), self.scrollWidget)
@@ -254,6 +264,7 @@ class SettingInterface(SmoothScrollArea):
         self.settingLabel.move(36, 30)
 
         # add cards to group
+        self.functionGroup.addSettingCard(self.apiConcurrencyCount)
         self.functionGroup.addSettingCard(self.careerGamesCount)
         self.functionGroup.addSettingCard(self.gameInfoFilterCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)

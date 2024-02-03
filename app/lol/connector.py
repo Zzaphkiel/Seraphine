@@ -16,6 +16,7 @@ requests.packages.urllib3.disable_warnings()
 
 TAG = "Connector"
 
+
 def slowly():
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -58,26 +59,27 @@ def retry(count=5, retry_sep=0):
                 tmp_args = args[1:]
 
             # 构建参数字典，将参数名与对应的实参值一一对应
-            params_dict = {param: arg for param, arg in zip(param_names, tmp_args)}
+            params_dict = {param: arg for param,
+                           arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
 
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
             exce = None
             for _ in range(count):
-                while connector.ref_cnt >= 2:
+                while connector.refCnt >= connector.refMaxCnt:
                     time.sleep(.2)
 
-                connector.ref_cnt += 1
+                connector.refCnt += 1
                 try:
                     res = func(*args, **kwargs)
                 except BaseException as e:
-                    connector.ref_cnt -= 1
+                    connector.refCnt -= 1
                     time.sleep(retry_sep)
                     exce = e
                     continue
                 else:
-                    connector.ref_cnt -= 1
+                    connector.refCnt -= 1
                     break
             else:
                 # 有异常抛异常, 没异常抛 RetryMaximumAttempts
@@ -87,7 +89,7 @@ def retry(count=5, retry_sep=0):
                 # ReferenceError为LCU未就绪仍有请求发送时抛出, 直接吞掉不用提示
                 # 其余异常弹一个提示
                 if type(exce) is not ReferenceError:
-                    connector.ref_cnt -= 1
+                    connector.refCnt -= 1
                     connector.exceptApi = func.__name__
                     connector.exceptObj = exce
 
@@ -142,8 +144,9 @@ def getPortTokenServerByPid(pid):
 
         if port and token and server:
             break
-    
+
     return port, token, server
+
 
 class LolClientConnector:
     def __init__(self):
@@ -155,7 +158,8 @@ class LolClientConnector:
 
         # 并发数过高时会导致 LCU 闪退
         # 通过引用计数避免 (不大于 2 个并发)
-        self.ref_cnt = 0
+        self.refCnt = 0
+        self.refMaxCnt = cfg.get(cfg.apiConcurrencyNumber)
         self.tackleFlag = threading.Event()
         self.manager = None
 
@@ -585,11 +589,11 @@ class LolClientConnector:
         res = self.__get("/lol-chat/v1/conversations").json()
 
         return res
-    
+
     def getHelp(self):
         res = self.__get("/help").json()
         return res
-    
+
     @retry()
     def sendFriendRequest(self, name):
         summoner = self.getSummonerByName(name)
@@ -709,7 +713,7 @@ class JsonManager:
                 return self.items[iconId]
             except:
                 logger.error(f"getItemIconPath, iconId: {iconId}", tag=TAG)
-        
+
         return "/lol-game-data/assets/ASSETS/Items/Icons2D/gp_ui_placeholder.png"
 
     def getSummonerSpellIconPath(self, spellId):
