@@ -1,5 +1,5 @@
-### 2024 / 1 / 29
+### 2024 / 2 / 4
 
-- **由于 LOL 的新 BUG，您需要在一局游戏结束后手动点击左侧导航栏的状态刷新按钮，才能保证 Seraphine 正确工作**
+- **v0.10.3 已解决对局信息界面只有第一局加载 / 自动接受对局只有第一局能用的问题** 
 - 本程序开源在 https://github.com/Zzaphkiel/Seraphine
 - 遇到问题请查询 https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue 或直接提交反馈
