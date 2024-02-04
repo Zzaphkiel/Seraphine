@@ -36,7 +36,6 @@ class RoundLevel(QFrame):
             painter.drawText(QRect(0, -1, 22, 22), Qt.AlignCenter, self.level)
 
 
-
 class RoundIconWithLevel(QWidget):
     def __init__(self, icon, level, parent=None):
         super().__init__(parent)
@@ -320,5 +319,5 @@ class GameInfoBar(QFrame):
         self.setProperty("pressed", False)
         self.style().polish(self)
 
-        self.parent().parent().parent().parent().gameInfoBarClicked.emit(str(self.gameId))
+        self.window().careerInterface.gameInfoBarClicked.emit(str(self.gameId))
         return super().mouseReleaseEvent(a0)

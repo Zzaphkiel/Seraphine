@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QWidget, QFrame, QStackedWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
 from ..common.qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton, ComboBox,
-                            SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
-                            ToolTipPosition, ToolButton, IndeterminateProgressRing,
-                            Flyout, FlyoutViewBase, FlyoutAnimationType)
+                                     SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
+                                     ToolTipPosition, ToolButton, IndeterminateProgressRing,
+                                     Flyout, FlyoutViewBase, FlyoutAnimationType)
 
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar

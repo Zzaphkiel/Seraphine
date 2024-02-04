@@ -13,8 +13,8 @@ from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage, QCursor
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from ..common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
-                            FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                            ToolTipFilter, FluentIcon)
+                                     FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
+                                     ToolTipFilter, FluentIcon)
 import pyperclip
 
 from .start_interface import StartInterface
@@ -42,6 +42,7 @@ from ..lol.tools import (processGameData, translateTier, getRecentChampions,
 import threading
 
 TAG = "MainWindow"
+
 
 class MainWindow(FluentWindow):
     mainWindowHide = pyqtSignal(bool)
@@ -152,7 +153,8 @@ class MainWindow(FluentWindow):
             tooltip=self.tr("Notice"),
         )
 
-        self.navigationInterface.insertSeparator(2, NavigationItemPosition.BOTTOM)
+        self.navigationInterface.insertSeparator(
+            2, NavigationItemPosition.BOTTOM)
 
         self.avatarWidget = NavigationAvatarWidget(
             avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
@@ -162,7 +164,6 @@ class MainWindow(FluentWindow):
             onClick=self.__onAvatarWidgetClicked,
             position=pos,
         )
-
 
         self.addSubInterface(
             self.settingInterface, FluentIcon.SETTING,
@@ -186,10 +187,6 @@ class MainWindow(FluentWindow):
 
         self.eventListener.champSelectChanged.connect(
             self.__onChampSelectChanged
-        )
-
-        self.eventListener.goingSwap.connect(
-            self.__onGoingSwap
         )
 
         self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
@@ -311,13 +308,13 @@ class MainWindow(FluentWindow):
     def checkUpdate(self):
         if not cfg.get(cfg.enableCheckUpdate):
             return
-        
+
         try:
             releasesInfo = github.checkUpdate()
         except:
             self.checkUpdateFailed.emit()
             return
-        
+
         if releasesInfo:
             self.showUpdateMessageBox.emit(releasesInfo)
 
@@ -332,11 +329,9 @@ class MainWindow(FluentWindow):
         # 如果是开启软件时，并且该公告曾经已经展示过，就直接 return 了
         if not triggerByUser and sha == cfg.get(cfg.lastNoticeSha):
             return
-        
+
         cfg.set(cfg.lastNoticeSha, sha)
         self.showNoticeMessageBox.emit(content)
-
-
 
     def __onCheckUpdateFailed(self):
         InfoBar.warning(
@@ -529,8 +524,9 @@ class MainWindow(FluentWindow):
                 connector.close()
                 self.processListener.isClientRunning = False
                 return
-            
-            logger.critical(f"League of Legends client started, server: {server}", TAG)
+
+            logger.critical(
+                f"League of Legends client started, server: {server}", TAG)
 
             self.isClientProcessRunning = True
 
@@ -969,65 +965,45 @@ class MainWindow(FluentWindow):
         if switch:
             self.checkAndSwitchTo(self.careerInterface)
 
-    def __onGoingSwap(self, info: dict):
-        """
-        bp 阶段交换选用位置事件
-        @param info:
-        @return:
-        """
-        data = info.get("data")
-        event = info.get("eventType")
-
-        if not event:
+    def __onChampSelectChanged(self, data):
+        if data['eventType'] != 'Update':
             return
 
-        if event == "Create":
-            self.gameInfoInterface.swapBuffer[data["id"]] = {
-                'src': data["requestorIndex"],
-                'dst': data["responderIndex"]
-            }
-        elif event == "Update" and data["state"] == "ACCEPTED":
+        # 更新头像
+        summonersOrder = []
+        for t in data['data']["myTeam"]:
+            summonersOrder.append({"summonerId": t['summonerId'],
+                                   'cellId': t['cellId']})
 
-            # 必须 deepcopy, 否则操作的实例仍是 allySummonersInfo, 通过信号传递到实例赋值后, 随着 tmp 释放, 会变为空列表!!
-            # 这应该算是 Python 的 BUG... 也或者是 PyQt 的?
-            try:
-                tmp = copy.deepcopy(
-                    self.gameInfoInterface.allySummonersInfo["summoners"])
-                buf = self.gameInfoInterface.swapBuffer.get(data["id"])
-
-                if not buf:
-                    return
-
-                tmp[buf["src"]], tmp[buf["dst"]
-                                     ] = tmp[buf["dst"]], tmp[buf["src"]]
-                self.gameInfoInterface.allySummonersInfoReady.emit(
-                    {"summoners": tmp})
-            except:
-                logger.error(f"__onGoingSwap, tmp: {tmp}, buf: {buf}, info: {info}", "GameInfoInterface")
-                return
-
-    def __onChampSelectChanged(self, data):
-        # FIXME # 129
-        #  若在BP进行到一半才打开软件, 进入游戏后仍会有部分队友的头像不是英雄头像
-        for t in data["myTeam"]:
             # 控件可能未绘制, 判断一下避免报错
             if not t['championId']:
                 continue
 
             summonersView = self.gameInfoInterface.summonersView.allySummoners.items.get(
                 t["summonerId"])
-            
-            if summonersView and summonersView.nowIconId != t['championId']:  # 只有切换了才触发新
+
+            # 只有切换了才触发更新
+            if summonersView and summonersView.nowIconId != t['championId']:
                 championIconPath = connector.getChampionIcon(
                     t['championId'])
                 summonersView.updateIcon(championIconPath)
                 summoners = self.gameInfoInterface.allySummonersInfo["summoners"]
 
-                # 找对应召唤师的缓冲区, 更新头像, 复杂度 O(n)
+                # 找对应召唤师的缓冲区, 更新头像
                 for summoner in summoners:
                     if summoner.get("summonerId") == t["summonerId"]:
                         summoner["icon"] = championIconPath
                         break
+
+        # 如果楼层换了就更新一下楼层的顺序
+        if len(self.gameInfoInterface.allySummonersOrder) == 0:
+            return
+
+        order = [summoner['summonerId']
+                 for summoner in sorted(summonersOrder, key=lambda x: x['cellId'])]
+
+        if order != self.gameInfoInterface.allySummonersOrder:
+            self.gameInfoInterface.allyOrderUpdate.emit(order)
 
     def __onGameStatusChanged(self, status):
         title = None
@@ -1075,7 +1051,6 @@ class MainWindow(FluentWindow):
         elif status == "Reconnect":  # 等待重连
             title = self.tr("Waiting reconnect")
             self.__onReconnect()
-        
 
         if not isGaming and self.isGaming:
             self.__updateCareerGames()
@@ -1114,7 +1089,6 @@ class MainWindow(FluentWindow):
 
     # 英雄选择界面触发事件
     def __onChampionSelectBegin(self):
-
         def updateGameInfoInterface(callback=None):
             summoners = []
             data = connector.getChampSelectSession()
@@ -1145,7 +1119,6 @@ class MainWindow(FluentWindow):
                         origGamesInfo["games"] = [
                             game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
                         begIdx = 15
-
 
                         while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
                             endIdx = begIdx + 5
@@ -1179,8 +1152,10 @@ class MainWindow(FluentWindow):
                         # 上把对面
                         fateFlag = "enemy"
 
-                    recentlyChampionId = max(teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
-                    recentlyChampionName = connector.manager.champs.get(recentlyChampionId)
+                    recentlyChampionId = max(
+                        teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+                    recentlyChampionName = connector.manager.champs.get(
+                        recentlyChampionId)
 
                 return {
                     "name": summoner["gameName"] or summoner["displayName"],
@@ -1197,7 +1172,8 @@ class MainWindow(FluentWindow):
                     "cellId": item["cellId"],
                     "fateFlag": fateFlag,
                     "isPublic": summoner["privacy"] == "PUBLIC",
-                    "recentlyChampionName": recentlyChampionName  # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
+                    # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
+                    "recentlyChampionName": recentlyChampionName
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1212,15 +1188,14 @@ class MainWindow(FluentWindow):
             summoners = sorted(
                 summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
 
+            order = [summoner['summonerId'] for summoner in summoners]
+
             self.gameInfoInterface.allySummonersInfoReady.emit(
                 {'summoners': summoners})
+            self.gameInfoInterface.allySummonersOrder = order
 
             if callback:
                 callback()
-
-            # if cfg.get(cfg.enableCopyPlayersInfo):
-            #     msg = self.gameInfoInterface.getPlayersInfoSummary()
-            #     pyperclip.copy(msg)
 
         threading.Thread(target=updateGameInfoInterface, args=(
             lambda: self.switchTo(self.gameInfoInterface),)).start()
@@ -1241,9 +1216,8 @@ class MainWindow(FluentWindow):
             session = connector.getGameflowSession()
             data = session['gameData']
             queueId = data['queue']['id']
-            # 特判一下斗魂竞技场
 
-            if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配(排位)
+            if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配 (排位)
                 return
 
             team1 = data['teamOne']
@@ -1328,8 +1302,10 @@ class MainWindow(FluentWindow):
                         # 上把对面
                         fateFlag = "enemy"
 
-                    recentlyChampionId = max(teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
-                    recentlyChampionName = connector.manager.champs.get(recentlyChampionId)
+                    recentlyChampionId = max(
+                        teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+                    recentlyChampionName = connector.manager.champs.get(
+                        recentlyChampionId)
 
                 return {
                     "name": summoner.get("gameName") or summoner["displayName"],
@@ -1347,8 +1323,10 @@ class MainWindow(FluentWindow):
                     "order": pos.index(item.get('selectedPosition')) if item.get('selectedPosition') in pos else len(pos),
                     "fateFlag": fateFlag,
                     "isPublic": summoner["privacy"] == "PUBLIC",
-                    "teamId": item.get("teamParticipantId", -1),  # 无该字段则是单排, 否则相同值是同一预组队
-                    "recentlyChampionName": recentlyChampionName  # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
+                    # 无该字段则是单排, 否则相同值是同一预组队
+                    "teamId": item.get("teamParticipantId", -1),
+                    # 最近游戏的英雄(用于上一局与与同一召唤师游玩之后显示)
+                    "recentlyChampionName": recentlyChampionName
                 }
 
             with ThreadPoolExecutor() as executor:
@@ -1422,7 +1400,7 @@ class MainWindow(FluentWindow):
     def __onCareerInterfaceRefreshButtonClicked(self):
         self.__onSearchInterfaceSummonerNameClicked(
             self.careerInterface.puuid, switch=False)
-        
+
     def __onFixLCUButtonClicked(self):
         def _():
             connector.playAgain()

@@ -65,8 +65,6 @@ def secsToStr(secs):
 
 
 def processGameData(game):
-    # print(game)
-
     timeStamp = game["gameCreation"]  # 毫秒级时间戳
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
@@ -464,7 +462,8 @@ def getTeammates(game, targetPuuid):
                 res['summoners'].append(
                     {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'], 'icon': s['profileIcon']})
             else:
-                res["championId"] = player.get('championId', -1)  # 当前召唤师在该对局使用的英雄, 自定义对局没有该字段
+                # 当前召唤师在该对局使用的英雄, 自定义对局没有该字段
+                res["championId"] = player.get('championId', -1)
         else:
             res['enemies'].append(
                 {'summonerId': s['summonerId'], 'name': s['summonerName'], 'puuid': s['puuid'],

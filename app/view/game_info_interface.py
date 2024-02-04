@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFontMetrics
 
 from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
-                            ToolTipFilter, ToolTipPosition)
+                                     ToolTipFilter, ToolTipPosition)
 
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
@@ -20,7 +20,7 @@ from ..lol.tools import parseGames
 
 
 class GameInfoInterface(SmoothScrollArea):
-    allyOrderUpdate = pyqtSignal(tuple)
+    allyOrderUpdate = pyqtSignal(list)
     allySummonersInfoReady = pyqtSignal(dict)
     enemySummonerInfoReady = pyqtSignal(dict)
     summonerViewClicked = pyqtSignal(str)
@@ -32,7 +32,7 @@ class GameInfoInterface(SmoothScrollArea):
         super().__init__(parent)
 
         self.allySummonersInfo = {}
-        self.swapBuffer = {}
+        self.allySummonersOrder = []
 
         self.hBoxLayout = QHBoxLayout(self)
 
@@ -73,11 +73,12 @@ class GameInfoInterface(SmoothScrollArea):
 
         self.gameEnd.connect(self.__onGameEnd)
 
-    def __onAllyOrderUpdate(self, order: tuple):
+    def __onAllyOrderUpdate(self, order: list):
+        self.allySummonersOrder = order
         """
         更新队友页排序
 
-        @param order: (summonerId,)
+        @param order: [summonerId]
         @return:
         """
         if self.allySummonersInfo:
@@ -90,8 +91,10 @@ class GameInfoInterface(SmoothScrollArea):
 
     def __onAllySummonerInfoReady(self, info):
         self.allySummonersInfo = info
-        self.summonersView.allySummoners.updateSummoners(info['summoners'])  # 概览栏(左侧)
-        self.allySummonerGamesView.updateSummoners(info['summoners'])  # 战绩栏(右侧)
+        self.summonersView.allySummoners.updateSummoners(
+            info['summoners'])  # 概览栏(左侧)
+        self.allySummonerGamesView.updateSummoners(
+            info['summoners'])  # 战绩栏(右侧)
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
@@ -109,7 +112,7 @@ class GameInfoInterface(SmoothScrollArea):
 
     def __onGameEnd(self):
         self.allySummonersInfo = {}
-        self.swapBuffer = {}
+        self.allySummonersOrder = []
 
         self.summonersView.allySummoners.clear()
         self.summonersView.enemySummoners.clear()
@@ -282,8 +285,8 @@ class SummonerInfoView(QFrame):
         teamInfo = info.get("teamInfo")  # BP阶段没有该字段, onGameStart才有
 
         if teamInfo:
-            self.setToolTip("\n".join(teamInfo))
-            self.installEventFilter(ToolTipFilter(self, 0, ToolTipPosition.TOP))
+            # self.setToolTip("\n".join(teamInfo))
+            # self.installEventFilter(ToolTipFilter(self, 0, ToolTipPosition.TOP))
             self.__setColor(info["teamId"])
 
         self.infoVBoxLayout = QVBoxLayout()
@@ -297,11 +300,6 @@ class SummonerInfoView(QFrame):
             name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'], tips=info["recentlyChampionName"])
         self.summonerName.clicked.connect(lambda: self.parent().parent(
         ).parent().parent().summonerViewClicked.emit(info['puuid']))
-
-        # if QWidget().fontMetrics().size(Qt.TextSingleLine, name).width() > 70 and len(name) > 8:
-        #     pos = (len(name)+1) // 2
-        #     name = name[:pos] + "\n" + name[pos:]
-        #     self.summonerName.setText(name)
 
         self.gridHBoxLayout = QHBoxLayout()
         self.kdaHBoxLayout = QHBoxLayout()

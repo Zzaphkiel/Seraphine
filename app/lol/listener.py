@@ -10,6 +10,7 @@ from app.common.logger import logger
 
 TAG = "Listener"
 
+
 def getTasklistPath():
     for path in ['tasklist',
                  'C:/Windows/System32/tasklist.exe']:
@@ -75,7 +76,6 @@ class LolClientEventListener(QThread):
     currentSummonerProfileChanged = pyqtSignal(dict)
     gameStatusChanged = pyqtSignal(str)
     champSelectChanged = pyqtSignal(dict)
-    goingSwap = pyqtSignal(dict)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -86,7 +86,7 @@ class LolClientEventListener(QThread):
         super().start()
 
     def run(self):
-        @self.ws.subscribe(event='OnJsonApiEvent_lol-summoner_v1_current-summoner', 
+        @self.ws.subscribe(event='OnJsonApiEvent_lol-summoner_v1_current-summoner',
                            uri='/lol-summoner/v1/current-summoner')
         async def onCurrentSummonerProfileChanged(event):
             self.currentSummonerProfileChanged.emit(event['data'])
@@ -99,16 +99,10 @@ class LolClientEventListener(QThread):
         @self.ws.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
                            uri='/lol-champ-select/v1/session')
         async def onChampSelectChanged(event):
-            # print("onChampSelectChanged" + str(event))
-            self.champSelectChanged.emit(event['data'])
+            self.champSelectChanged.emit(event)
 
-        @self.ws.subscribe(event="OnJsonApiEvent_lol-champ-select_v1_ongoing-swap",
-                           uri='/lol-champ-select/v1/ongoing-swap')
-        async def onGoingSwap(event):
-            print("onGoingSwap" + str(event))
-            self.goingSwap.emit(event)
-            
         self.ws.start()
+
 
 class LcuWebSocket():
     def __init__(self, port=None, token=None):
@@ -167,6 +161,7 @@ class LcuWebSocket():
             })
             return func
         return subscribeWrapper
+
 
 class StoppableThread(QThread):
     def __init__(self, target, parent) -> None:
