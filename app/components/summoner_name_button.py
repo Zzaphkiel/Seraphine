@@ -9,7 +9,7 @@ class SummonerName(QLabel):
     def __init__(self, text, isPublic=True, color=None, tagLine=None, tips="", parent=None):
         super().__init__(parent)
         self.setCursor(Qt.PointingHandCursor)
-        self.setText(text if isPublic else f"{text}🫣")
+        self.setText(text if isPublic else f"{text}🔒")
 
         self.setAlignment(Qt.AlignCenter)
 
@@ -27,7 +27,7 @@ class SummonerName(QLabel):
         self.tagLine = tagLine
 
     def text(self) -> str:
-        name = super().text().replace("🫣", "")
+        name = super().text().replace("🔒", "")
 
         if len(self.tagLine):
             name += f'#{self.tagLine}'

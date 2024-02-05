@@ -28,7 +28,7 @@ from ..lol.tools import translateTier, getTeammates, parseGames
 
 class NameLabel(QLabel):
     def text(self) -> str:
-        return super().text().replace("🫣", '')
+        return super().text().replace("🔒", '')
 
 
 class TagLineLabel(QLabel):
@@ -336,7 +336,7 @@ class CareerInterface(SmoothScrollArea):
         if not self.isCurrentSummoner():
             return
 
-        name = info['name'] if info['isPublic'] else f"{info['name']}🫣"
+        name = info['name'] if info['isPublic'] else f"{info['name']}🔒"
         icon = info['icon']
         level = info['level']
         xpSinceLastLevel = info['xpSinceLastLevel']
@@ -352,7 +352,7 @@ class CareerInterface(SmoothScrollArea):
         if not info['triggerByUser'] and not self.isCurrentSummoner():
             return
 
-        name = info['name'] if info['isPublic'] else f"{info['name']}🫣"
+        name = info['name'] if info['isPublic'] else f"{info['name']}🔒"
         icon = info['icon']
         level = info['level']
         xpSinceLastLevel = info['xpSinceLastLevel']
