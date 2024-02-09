@@ -875,7 +875,7 @@ class MainWindow(FluentWindow):
                     'champions': champions,
                     'triggerByUser': True,
                     'isPublic': summoner.isPublic,
-                    'tagline': summoner.tagLine
+                    'tagLine': summoner.tagLine
                 }
             )
             self.careerInterface.hideLoadingPage.emit()
