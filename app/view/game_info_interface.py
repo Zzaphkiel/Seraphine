@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFontMetrics
 
 from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
-                                     ToolTipFilter, ToolTipPosition)
+                                     ToolTipFilter, ToolTipPosition, setCustomStyleSheet)
 
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
@@ -201,6 +201,8 @@ class SummonersView(QFrame):
         self.stackedWidget.addWidget(self.enemySummoners)
         self.stackedWidget.setCurrentIndex(0)
 
+        self.__setStyleSheet()
+
     def __initLayout(self):
         self.buttonsLayout.addWidget(self.allyButton)
         self.buttonsLayout.addWidget(self.enemyButton)
@@ -222,6 +224,22 @@ class SummonersView(QFrame):
             self.currentTeamChanged.emit(False)
         else:
             self.enemyButton.setChecked(True)
+
+    def __setStyleSheet(self):
+        light = '''
+            TransparentTogglePushButton,
+            TransparentTogglePushButton:hover {
+            border: 1px solid rgba(0, 0, 0, 0.073);
+        }'''
+
+        dark = '''
+            TransparentTogglePushButton,
+            TransparentTogglePushButton:hover {
+            border: 1px solid rgba(255, 255, 255, 0.053);
+        }'''
+
+        setCustomStyleSheet(self.allyButton, light, dark)
+        setCustomStyleSheet(self.enemyButton, light, dark)
 
 
 class TeamSummoners(QFrame):
