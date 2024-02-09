@@ -3,6 +3,8 @@ import time
 import typing
 from PyQt5 import QtCore
 
+import asyncio
+from qasync import asyncSlot
 import pyperclip
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
@@ -21,9 +23,11 @@ from ..components.summoner_name_button import SummonerName
 from ..common.style_sheet import StyleSheet
 from ..common.config import cfg
 from ..common.icons import Icon
+from ..common.signals import signalBus
 from ..lol.connector import connector
 from ..lol.entries import Summoner
-from ..lol.tools import translateTier, getTeammates, parseGames
+from ..lol.tools import (translateTier, getTeammates, parseGames,
+                         parseGameData, getRecentChampions, parseSummonerData, getRecentTeammates, parseDetailRankInfo)
 
 
 class NameLabel(QLabel):
@@ -37,10 +41,6 @@ class TagLineLabel(QLabel):
 
 
 class CareerInterface(SmoothScrollArea):
-    careerInfoChanged = pyqtSignal(dict)
-    showLoadingPage = pyqtSignal()
-    hideLoadingPage = pyqtSignal()
-    summonerNameClicked = pyqtSignal(str)
     gameInfoBarClicked = pyqtSignal(str)
     iconLevelExpChanged = pyqtSignal(dict)
 
@@ -244,9 +244,9 @@ class CareerInterface(SmoothScrollArea):
 
         self.vBoxLayout.setContentsMargins(30, 32, 30, 20)
 
-        self.__setLoadingPageEnabled(True)
+        self.setLoadingPageEnabled(True)
 
-    def __setLoadingPageEnabled(self, enable):
+    def setLoadingPageEnabled(self, enable):
         self.gameInfoArea.delegate.vScrollBar.resetValue(0)
         self.gameInfoArea.verticalScrollBar().setSliderPosition(0)
 
@@ -317,28 +317,24 @@ class CareerInterface(SmoothScrollArea):
         setCustomStyleSheet(self.rankTable, light, dark)
 
     def __connectSignalToSlot(self):
-        self.careerInfoChanged.connect(self.__onCareerInfoChanged)
-        self.iconLevelExpChanged.connect(self.__onChangeIconLevelAndExp)
+        self.backToMeButton.clicked.connect(self.__changeToCurrentSummoner)
+        self.refreshButton.clicked.connect(self.__onRefreshButtonClicked)
         self.filterComboBox.currentIndexChanged.connect(
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
             lambda: pyperclip.copy(self.getSummonerName()))
 
-        self.hideLoadingPage.connect(
-            lambda: self.__setLoadingPageEnabled(False))
-        self.showLoadingPage.connect(
-            lambda: self.__setLoadingPageEnabled(True))
-
         self.recentTeamButton.clicked.connect(
             self.__onRecentTeammatesButtonClicked)
 
-    def __onChangeIconLevelAndExp(self, info):
+    async def updateNameIconExp(self, info):
         if not self.isCurrentSummoner():
             return
 
-        name = info['name'] if info['isPublic'] else f"{info['name']}🔒"
-        icon = info['icon']
-        level = info['level']
+        name = info.get("gameName") or info['displayName']
+        name = name if info['privacy'] == 'PUBLIC' else f"{name}🔒"
+        icon = await connector.getProfileIcon(info['profileIconId'])
+        level = info['summonerLevel']
         xpSinceLastLevel = info['xpSinceLastLevel']
         xpUntilNextLevel = info['xpUntilNextLevel']
 
@@ -346,12 +342,33 @@ class CareerInterface(SmoothScrollArea):
         levelStr = str(level) if level != -1 else "None"
         self.icon.updateIcon(icon, xpSinceLastLevel,
                              xpUntilNextLevel, levelStr)
+
         self.repaint()
 
-    def __onCareerInfoChanged(self, info: dict):
-        if not info['triggerByUser'] and not self.isCurrentSummoner():
-            return
+    @asyncSlot()
+    async def __changeToCurrentSummoner(self):
+        self.setLoadingPageEnabled(True)
+        summoner = await connector.getCurrentSummoner()
+        await self.updateInterface(summoner=summoner)
+        self.setLoadingPageEnabled(False)
 
+    @asyncSlot()
+    async def __onRefreshButtonClicked(self):
+        await self.updateInterface(puuid=self.puuid)
+
+    async def updateInterface(self, puuid=None, summoner=None):
+        '''
+        通过 `puuid` 或 `summoner` 更新界面
+        '''
+        self.setLoadingPageEnabled(True)
+
+        if summoner == None:
+            summoner = await connector.getSummonerByPuuid(puuid)
+
+        info = await parseSummonerData(summoner)
+        await self.repaintInterface(info)
+
+    async def repaintInterface(self, info):
         name = info['name'] if info['isPublic'] else f"{info['name']}🔒"
         icon = info['icon']
         level = info['level']
@@ -373,79 +390,7 @@ class CareerInterface(SmoothScrollArea):
         self.puuid = puuid
 
         if 'queueMap' in rankInfo:
-            soloRankInfo = rankInfo['queueMap']['RANKED_SOLO_5x5']
-            soloTier = translateTier(soloRankInfo['tier'])
-            soloDivision = soloRankInfo['division']
-            if soloTier == '--' or soloDivision == 'NA':
-                soloDivision = ""
-
-            soloHighestTier = translateTier(soloRankInfo['highestTier'])
-            soloHighestDivision = soloRankInfo['highestDivision']
-            if soloHighestTier == '--' or soloHighestDivision == 'NA':
-                soloHighestDivision = ""
-
-            solxPreviousSeasonEndTier = translateTier(
-                soloRankInfo['previousSeasonEndTier'])
-            soloPreviousSeasonDivision = soloRankInfo[
-                'previousSeasonEndDivision']
-            if solxPreviousSeasonEndTier == '--' or soloPreviousSeasonDivision == 'NA':
-                soloPreviousSeasonDivision = ""
-
-            soloWins = soloRankInfo['wins']
-            soloLosses = soloRankInfo['losses']
-            soloTotal = soloWins + soloLosses
-            soloWinRate = soloWins * 100 // soloTotal if soloTotal != 0 else 0
-            soloLp = soloRankInfo['leaguePoints']
-
-            flexRankInfo = rankInfo['queueMap']['RANKED_FLEX_SR']
-            flexTier = translateTier(flexRankInfo['tier'])
-            flexDivision = flexRankInfo['division']
-            if flexTier == '--' or flexDivision == 'NA':
-                flexDivision = ""
-
-            flexHighestTier = translateTier(flexRankInfo['highestTier'])
-            flexHighestDivision = flexRankInfo['highestDivision']
-            if flexHighestTier == '--' or flexHighestDivision == 'NA':
-                flexHighestDivision = ""
-
-            flexPreviousSeasonEndTier = translateTier(
-                flexRankInfo['previousSeasonEndTier'])
-            flexPreviousSeasonEndDivision = flexRankInfo[
-                'previousSeasonEndDivision']
-            if flexPreviousSeasonEndTier == '--' or flexPreviousSeasonEndDivision == 'NA':
-                flexPreviousSeasonEndDivision = ""
-
-            flexWins = flexRankInfo['wins']
-            flexLosses = flexRankInfo['losses']
-            flexTotal = flexWins + flexLosses
-            flexWinRate = flexWins * 100 // flexTotal if flexTotal != 0 else 0
-            flexLp = flexRankInfo['leaguePoints']
-
-            self.rankInfo = [
-                [
-                    self.tr('Ranked Solo'),
-                    str(soloTotal),
-                    str(soloWinRate) + ' %' if soloTotal != 0 else '--',
-                    str(soloWins),
-                    str(soloLosses),
-                    f'{soloTier} {soloDivision}',
-                    str(soloLp),
-                    f'{soloHighestTier} {soloHighestDivision}',
-                    f'{solxPreviousSeasonEndTier} {soloPreviousSeasonDivision}',
-                ],
-                [
-                    self.tr('Ranked Flex'),
-                    str(flexTotal),
-                    str(flexWinRate) + ' %' if flexTotal != 0 else '--',
-                    str(flexWins),
-                    str(flexLosses),
-                    f'{flexTier} {flexDivision}',
-                    str(flexLp),
-                    f'{flexHighestTier} {flexHighestDivision}',
-                    f'{flexPreviousSeasonEndTier} {flexPreviousSeasonEndDivision}',
-                ],
-            ]
-
+            self.rankInfo = parseDetailRankInfo(rankInfo)
             self.copyButton.setEnabled(True)
         else:
             self.rankInfo = [[
@@ -478,19 +423,21 @@ class CareerInterface(SmoothScrollArea):
             self.winsLabel.setText(f"{self.tr('Wins:')} 0")
             self.lossesLabel.setText(f"{self.tr('Losses:')} 0")
             self.kdaLabel.setText(f"{self.tr('KDA:')} 0 / 0 / 0")
+
         self.games = games
 
         self.__updateGameInfo()
 
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
-
         self.teammatesFlyout.updatePuuid(puuid)
-
-        if self.games:
-            self.updateRecentTeammates()
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
+
+        self.setLoadingPageEnabled(False)
+
+        if self.games:
+            asyncio.create_task(self.__updateRecentTeammates())
 
     def __updateGameInfo(self):
         for i in reversed(range(self.gameInfoLayout.count())):
@@ -511,6 +458,9 @@ class CareerInterface(SmoothScrollArea):
                 QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def __onfilterComboBoxChanged(self, index):
+        self.gameInfoArea.delegate.vScrollBar.resetValue(0)
+        self.gameInfoArea.verticalScrollBar().setSliderPosition(0)
+
         items = list(range(self.gameInfoLayout.count()))
         items.reverse()
 
@@ -559,7 +509,6 @@ class CareerInterface(SmoothScrollArea):
         return self.name.text() if not self.showTagLine else f'{self.name.text()}{self.tagLineLabel.text()}'
 
     def isCurrentSummoner(self):
-
         return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
 
     def __onRecentTeammatesButtonClicked(self):
@@ -567,50 +516,17 @@ class CareerInterface(SmoothScrollArea):
             self.teammatesFlyout, self.recentTeamButton, self,
             aniType=FlyoutAnimationType.DROP_DOWN, isDeleteOnClose=False)
 
-    def updateRecentTeammates(self):
-        self.teammatesFlyout.showLoadingPage.emit()
+    async def __updateRecentTeammates(self):
+        self.teammatesFlyout.setLoadingPageEnabled(True)
 
-        def _():
-            summoners = {}
-            puuid = self.puuid
+        info = await getRecentTeammates(
+            self.games['games'], self.puuid)
 
-            for game in self.games['games']:
-                gameId = game['gameId']
-                game = connector.getGameDetailByGameId(gameId)
-
-                teammates = getTeammates(game, puuid)
-                for p in teammates['summoners']:
-                    if p['puuid'] not in summoners:
-                        summonerIcon = connector.getProfileIcon(p['icon'])
-                        summoners[p['puuid']] = {
-                            "name": p['name'], 'icon': summonerIcon,
-                            "total": 0, "wins": 0, "losses": 0, "puuid": p["puuid"]}
-
-                    summoners[p['puuid']]['total'] += 1
-
-                    if not teammates['remake']:
-                        if teammates['win']:
-                            summoners[p['puuid']]['wins'] += 1
-                        else:
-                            summoners[p['puuid']]['losses'] += 1
-
-            ret = {"puuid": self.puuid, "summoners": [
-                item for item in summoners.values()]}
-
-            ret['summoners'] = sorted(ret['summoners'],
-                                      key=lambda x: x['total'], reverse=True)[:5]
-
-            self.teammatesFlyout.hideLoadingPage.emit()
-            self.teammatesFlyout.summonersInfoReady.emit(ret)
-
-        threading.Thread(target=_).start()
+        self.teammatesFlyout.updateSummoners(info)
+        self.teammatesFlyout.setLoadingPageEnabled(False)
 
 
 class TeammatesFlyOut(FlyoutViewBase):
-    summonersInfoReady = pyqtSignal(dict)
-    showLoadingPage = pyqtSignal()
-    hideLoadingPage = pyqtSignal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -626,14 +542,6 @@ class TeammatesFlyOut(FlyoutViewBase):
         self.processRing = IndeterminateProgressRing()
 
         self.__initLayout()
-        self.__connectSignalToSlot()
-
-    def __connectSignalToSlot(self):
-        self.summonersInfoReady.connect(self.__summonersInfoReady)
-        self.showLoadingPage.connect(
-            lambda: self.__setLoadingPageEnabled(True))
-        self.hideLoadingPage.connect(
-            lambda: self.__setLoadingPageEnabled(False))
 
     def __initLayout(self):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -659,7 +567,7 @@ class TeammatesFlyOut(FlyoutViewBase):
             if item.widget():
                 item.widget().deleteLater()
 
-    def __summonersInfoReady(self, info):
+    def updateSummoners(self, info):
         if self.puuid != info['puuid']:
             return
 
@@ -669,7 +577,7 @@ class TeammatesFlyOut(FlyoutViewBase):
             infoBar = TeammateInfoBar(summoner)
             self.infopageVBoxLayout.addWidget(infoBar)
 
-    def __setLoadingPageEnabled(self, enable):
+    def setLoadingPageEnabled(self, enable):
         index = 0 if enable else 1
         self.stackedWidget.setCurrentIndex(index)
 
@@ -698,8 +606,7 @@ class TeammateInfoBar(QFrame):
         self.setFixedHeight(62)
 
         self.name.clicked.connect(
-            lambda: self.parent().parent().parent().parent()
-            .parent().summonerNameClicked.emit(summoner['puuid']))
+            lambda: signalBus.careerTeammateSummonerNameClicked.emit(summoner['puuid']))
 
     def __initWidget(self):
         self.name.setFixedWidth(180)

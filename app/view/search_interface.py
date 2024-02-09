@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from ..common.qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
-                            InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
-                            CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
-                            StateToolTip)
+                                     InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
+                                     CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
+                                     StateToolTip)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -20,7 +20,7 @@ from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import LolClientConnector, connector
 from ..lol.exceptions import SummonerGamesNotFound, SummonerNotFound
-from ..lol.tools import processGameData, processGameDetailData
+from ..lol.tools import parseGameData, parseGameDetailData
 
 
 class GamesTab(QFrame):
@@ -117,7 +117,7 @@ class GamesTab(QFrame):
                 game = connector.getGameDetailByGameId(self.gameId)
 
                 if nowPuuid == self.puuid:  # 当请求对局详情时, 如果切换了查询的召唤师, 就放弃数据, 重新请求
-                    game = processGameDetailData(self.puuid, game)
+                    game = parseGameDetailData(self.puuid, game)
                     self.gameDetailReady.emit(game)
 
                 if nowGameId == self.gameId:
@@ -732,7 +732,8 @@ class SummonerInfoBar(QFrame):
 
         self.levelLabel = QLabel()
         self.championIconLabel = RoundIcon(summoner["championIcon"], 25, 0, 3)
-        self.summonerName = SummonerName(summoner["summonerName"], isPublic=summoner["isPublic"])
+        self.summonerName = SummonerName(
+            summoner["summonerName"], isPublic=summoner["isPublic"])
 
         self.rankIcon = QLabel()
 
@@ -1166,7 +1167,7 @@ class SearchInterface(SmoothScrollArea):
                     self.loadGamesThreadStop.clear()
                     return
 
-                self.games.append(processGameData(game))
+                self.games.append(parseGameData(game))
 
                 if self.queueIdBuffer.get(game["queueId"]):
                     self.queueIdBuffer[game["queueId"]].append(gameIdx)
@@ -1194,7 +1195,6 @@ class SearchInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.searchLineEdit.searchButton.clicked.connect(
             self.__onSearchButtonClicked)
-        # self.searchButton.clicked.connect(self.__onSearchButtonClicked)
         self.summonerPuuidGetted.connect(self.__onSummonerPuuidGetted)
         self.gamesNotFound.connect(self.__onShowGamesNotFoundMessage)
         self.filterComboBox.currentIndexChanged.connect(

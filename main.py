@@ -2,8 +2,9 @@
 import sys
 import os
 
+import asyncio
+from qasync import QApplication, QEventLoop
 from app.common.qfluentwidgets import FluentTranslator
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QTranslator
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +26,12 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
 
+    eventLoop = QEventLoop(app)
+    asyncio.set_event_loop(eventLoop)
+
+    appCloseEvent = asyncio.Event()
+    app.aboutToQuit.connect(appCloseEvent.set)
+
     locale = cfg.get(cfg.language).value
     translator = FluentTranslator(locale)
     lolHelperTranslator = QTranslator()
@@ -36,4 +43,5 @@ if __name__ == '__main__':
     w = MainWindow()
     w.show()
 
-    app.exec_()
+    eventLoop.run_until_complete(appCloseEvent.wait())
+    eventLoop.close()
