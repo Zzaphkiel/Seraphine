@@ -236,7 +236,7 @@ class LolClientConnector(QObject):
 
             # 客户端刚打开, Service 正在初始化
             # 有部分请求可能会 ConnectionError, 直接忽略重试
-            except ConnectionError:
+            except aiohttp.ClientConnectorError:
                 retries += 1
                 time.sleep(.5)
                 continue
