@@ -520,27 +520,26 @@ class LolClientConnector:
         return res
 
     # 选择英雄
-    def selectChampion(self, championId):
-        session = self.__get("/lol-champ-select/v1/session").json()
-
-        if not session['hasSimultaneousPicks'] or session['isSpectating']:
-            return
-
-        localPlayerCellId = session["localPlayerCellId"]
-
-        for action in session["actions"][0]:
-            if action["actorCellId"] == localPlayerCellId:
-                id = action["id"]
-                break
-
+    def selectChampion(self, actionsId, championId):
         data = {
             "championId": championId,
             'type': 'pick',
             # 'completed': True,
         }
 
-        res = self.__patch(
-            f"/lol-champ-select/v1/session/actions/{id}", data=data).content
+        res = self.__patch(f"/lol-champ-select/v1/session/actions/{actionsId}", data=data).content
+
+        return res
+
+    # 禁用英雄
+    def banChampion(self, actionsId, championId):
+        data = {
+            "championId": championId,
+            'type': 'ban',
+            'completed': True
+        }
+
+        res = self.__patch(f"/lol-champ-select/v1/session/actions/{actionsId}", data=data).content
 
         return res
 
