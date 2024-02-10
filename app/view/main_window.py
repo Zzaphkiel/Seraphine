@@ -1217,7 +1217,8 @@ class MainWindow(FluentWindow):
             data = session['gameData']
             queueId = data['queue']['id']
 
-            if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配 (排位)
+            # 斗魂、云顶匹配、云顶排位、云顶教程、云顶 HyperRoll、云顶双人
+            if queueId in (1700, 1090, 1100, 1110, 1130, 1160):
                 return
 
             team1 = data['teamOne']
