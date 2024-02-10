@@ -71,7 +71,7 @@ class MainWindow(FluentWindow):
 
         logger.critical("Seraphine interfaces initialized", TAG)
 
-        # crate listener
+        # create listener
         self.isClientProcessRunning = False
         self.processListener = LolProcessExistenceListener(
             self.tasklistPath, self)

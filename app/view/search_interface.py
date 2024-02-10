@@ -21,10 +21,14 @@ from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import connector
 from ..lol.exceptions import SummonerGamesNotFound, SummonerNotFound
-from ..lol.tools import parseGameData, parseGameDetailData, getSummonerGames
+from ..lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
 
 
 class GamesTab(QFrame):
+    tabClicked = pyqtSignal(str)
+    gameDetailReady = pyqtSignal(dict)
+    loadFinish = pyqtSignal()
+
     def __init__(self, parnet=None):
         super().__init__(parnet)
         self.setFixedWidth(160)
@@ -37,7 +41,23 @@ class GamesTab(QFrame):
         self.pageLabel = QLabel(" ")
         self.nextButton = ToolButton(Icon.CHEVRONRIGHT)
 
+        # 当前选中的 queueId，-1 对应所有对局
+        self.queueId = -1
+
+        # 当前所在的页码
+        self.currentPageNum = 0
+
+        # 目前已经绘制好的最大页码
+        self.maxPageNum = 0
+
+        # 目前选中的 tab
+        self.currentTabSelected = None
+
+        # 所有的对局记录
         self.games = []
+
+        # queueId 到对应 self.games 下标数组的映射
+        self.queueIdMap = {-1: []}
 
         self.__initWidget()
         self.__initLayout()
@@ -55,7 +75,7 @@ class GamesTab(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.stackWidget.addWidget(defaultWidget)
-        self.stackWidget.setCurrentIndex(0)
+        self.stackWidget.setCurrentIndex(self.currentPageNum)
 
         self.buttonsLayout.addWidget(self.prevButton)
         self.buttonsLayout.addWidget(self.pageLabel)
@@ -64,6 +84,75 @@ class GamesTab(QFrame):
         self.vBoxLayout.addWidget(self.stackWidget)
         self.vBoxLayout.addSpacing(10)
         self.vBoxLayout.addLayout(self.buttonsLayout)
+
+    def updateQueueIdMap(self, games):
+        for game in games:
+            index = len(self.games)
+            self.games.append(game)
+            queueId = game['queueId']
+
+            l: list = self.queueIdMap.get(queueId)
+
+            if not l:
+                self.queueIdMap[queueId] = [index]
+            else:
+                l.append(index)
+
+            self.queueIdMap[-1].append(index)
+
+    @asyncSlot()
+    async def __onPrevButtonClicked():
+        pass
+
+    @asyncSlot()
+    async def __onNextButtonClicked():
+        pass
+
+    def showTheFirstPage(self):
+        self.prepareNextPage()
+
+        self.stackWidget.setCurrentIndex(1)
+        self.currentPageNum = 1
+        self.pageLabel.setText("1")
+
+        self.nextButton.setVisible(True)
+        self.prevButton.setVisible(True)
+        self.pageLabel.setVisible(True)
+
+        self.prevButton.setEnabled(False)
+        e = len(self.queueIdMap[self.queueId]) > 10
+        self.nextButton.setEnabled(e)
+
+    def prepareNextPage(self):
+        ''' 满足
+        - 当前所在页码 == 已经绘制好的最大页码时
+        - 在内存中的对局记录数量大于已经绘制好的数量时
+
+        调用该函数，绘制下一页，加入 stackedWidget
+        '''
+
+        # 游戏数据在 self.games 数组中对应的下标
+        indices = self.queueIdMap[self.queueId]
+
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        begin = self.maxPageNum * 10
+
+        # 防止能画上去的不够 10 个导致越界
+        end = min(10 + begin, len(indices))
+
+        for i in range(begin, end):
+            tab = GameTab(self.games[indices[i]])
+            layout.addWidget(tab, stretch=1)
+
+        # 如果不够十个就给它填充一下
+        if end - begin < 10:
+            layout.addStretch(10 - (end - begin))
+
+        self.stackWidget.addWidget(widget)
+        self.maxPageNum += 1
 
 
 class GameDetailView(QFrame):
@@ -618,10 +707,7 @@ class GamesView(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        # 左侧预览栏
         self.gamesTab = GamesTab()
-
-        # 右侧详情栏
         self.gameDetailView = GameDetailView()
 
         self.__initLayout()
@@ -738,8 +824,13 @@ class GameTab(QFrame):
 
 
 class SearchInterface(SmoothScrollArea):
+    summonerPuuidGetted = pyqtSignal(str)
+    gamesNotFound = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self.gameLoadingTask = None
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -749,6 +840,7 @@ class SearchInterface(SmoothScrollArea):
         self.filterComboBox = ComboBox()
 
         self.gamesView = GamesView()
+        self.currentSummonerName = None
 
         self.__initWidget()
         self.__initLayout()
@@ -791,7 +883,8 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.setEnabled(a0)
         self.searchLineEdit.searchButton.setEnabled(a0)
 
-        self.filterComboBox.setEnabled(a0)
+        if not a0:
+            self.filterComboBox.setEnabled(a0)
 
         return super().setEnabled(a0)
 
@@ -814,15 +907,99 @@ class SearchInterface(SmoothScrollArea):
     @asyncSlot()
     async def __onSearchButtonClicked(self):
         name = self.searchLineEdit.text()
+
         if name == "":
             return
 
         summoner = await connector.getSummonerByName(name)
-        puuid = summoner.get('puuid')
-        if not puuid:
+
+        if 'errorCode' in summoner:
             self.__showSummonerNotFoundMsg()
             return
 
-        queueIds = (0, 430, 450, 420, 440)
-        queueId = queueIds[self.filterComboBox.currentIndex()]
+        self.puuid = summoner['puuid']
+
+        # 先加载两页，让用户先看着
+        games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
+        games = await parseGamesDataConcurrently(games['games'])
+        self.gamesView.gamesTab.updateQueueIdMap(games)
+        self.gamesView.gamesTab.showTheFirstPage()
+
         # TODO
+        # 运行任务开始 while 中获取对局数据，同时调用 updateQueueIdMap 更新下标索引
+        # self.gameLoadingTask = asyncio.create_task(self.loadGames())
+
+    async def loadGames(self):
+        pass
+
+    @asyncSlot()
+    async def recursiveLoadGames(self, puuid, begIdx=0, endIdx=0, gameIdx=0):
+        print(1)
+        self.games = []
+        self.queueIdMap = {}
+
+        if not endIdx:
+            endIdx = begIdx + 19
+
+        # 递归终止条件
+        print(type(begIdx))
+        print(type(endIdx))
+        if begIdx >= endIdx or not self.loadGamesFlag:
+            print(2)
+            return
+
+        print(3)
+        try:
+            games = await connector.getSummonerGamesByPuuidSlowly(
+                puuid, begIdx, endIdx)
+        except SummonerGamesNotFound:
+            print(4)
+            self.__showSummonerNotFoundMsg()
+            # self.gamesNotFound.emit()
+            return
+        except ReferenceError:  # LCU 关闭了
+            print(5)
+            return
+
+        # 如果没有游戏，检查是否有任何游戏被找到
+        if not games["games"]:
+            if not self.games:
+                if begIdx == 0:  # 没找到任何一盘
+                    print(6)
+                    self.__showSummonerNotFoundMsg()
+                    # self.gamesNotFound.emit()
+                    return
+                else:  # 搜到头了
+                    print(7)
+                    return
+
+        for game in games["games"]:
+            if self.gamesView.gamesTab.puuid != puuid:
+                ...
+                # TODO 中途切换了查询目标
+                # return
+
+            if time.time() - game['gameCreation'] / 1000 > 60 * 60 * 24 * 365:
+                print(8)
+                return
+
+            self.games.append(await parseGameData(game))
+
+            if self.queueIdMap.get(game["queueId"]):
+                self.queueIdMap[game["queueId"]].append(gameIdx)
+            else:
+                self.queueIdMap[game["queueId"]] = [gameIdx]
+
+            gameIdx += 1
+
+        print(9)
+        # 更新索引，准备下一次递归调用
+        begIdx = endIdx + 1
+        endIdx = begIdx + 19
+
+        # 递归调用自身
+        print(f'load game {begIdx} - {endIdx}')
+        await self.recursiveLoadGames(puuid, begIdx, endIdx, gameIdx)
+
+    async def getSummonerNames(self):
+        pass

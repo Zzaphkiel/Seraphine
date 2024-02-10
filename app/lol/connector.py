@@ -371,7 +371,7 @@ class LolClientConnector(QObject):
         return res
 
     @retry(5, 1)
-    def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
+    async def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
         """
         Retrieves a list of summoner games by puuid using a slow and retry mechanism.
 
@@ -387,9 +387,10 @@ class LolClientConnector(QObject):
             SummonerGamesNotFound: If the summoner games are not found.
         """
         params = {"begIndex": begIndex, "endIndex": endIndex}
-        res = self.__slowlyGet(
+        res = await self.__get(
             f"/lol-match-history/v1/products/lol/{puuid}/matches", params
-        ).json()
+        )
+        res = await res.json()
 
         if "games" not in res:
             raise SummonerGamesNotFound()

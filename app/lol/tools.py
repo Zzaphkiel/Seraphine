@@ -810,7 +810,7 @@ def getTeamColor(session, currentSummonerId):
     return makeTeam(ally), makeTeam(enemy)
 
 
-async def getSummonerGames(puuid, begIndex, queueId):
+async def getSummonerGames(puuid, begIndex, endIndex, queueId):
     '''
     从 `begIndex`（含）开始，返回 100 局同 `queueId` 的对局
 
@@ -860,6 +860,11 @@ def separateTeams(data, currentSummonerId):
         enemy = team1
 
     return ally, enemy
+
+
+async def parseGamesDataConcurrently(games):
+    tasks = [parseGameData(game) for game in games]
+    return await asyncio.gather(*tasks)
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
