@@ -6,3 +6,4 @@ Requests==2.31.0
 aiohttp==3.9.2
 pygetwindow==0.0.9
 psutil==5.9.8
+qasync==0.27.1
