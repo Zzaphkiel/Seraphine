@@ -311,22 +311,20 @@ class SummonerInfoView(QFrame):
         self.kdaLabel.setObjectName("kdaLabel")
 
         k, d, a = info['kda']
-        if d:
-            kda = ((k + a) / d)
-            self.kdaValLabel = QLabel(f"{kda:.1f}")
-            pe = QPalette()
-            if 3 <= kda < 4:
-                pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
-            elif 4 <= kda < 5:
-                pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
-            elif 5 < kda:
-                pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
-            self.kdaValLabel.setPalette(pe)
-        else:
-            self.kdaValLabel = QLabel(f"Perfect")
-            pe = QPalette()
+        if d == 0:
+            d = 1
+                
+        kda = ((k + a) / d)
+        self.kdaValLabel = QLabel(f"{kda:.1f}")
+        pe = QPalette()
+        if 3 <= kda < 4:
+            pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
+        elif 4 <= kda < 5:
+            pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
+        elif 5 < kda:
             pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
-            self.kdaValLabel.setPalette(pe)
+        self.kdaValLabel.setPalette(pe)
+
 
         self.kdaValLabel.setAlignment(Qt.AlignCenter)
         self.kdaValLabel.setObjectName("kdaValLabel")

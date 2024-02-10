@@ -348,13 +348,11 @@ class LolClientConnector(QObject):
 
         return icon
 
+    @retry()
     async def getSummonerByName(self, name):
         params = {"name": name}
         res = await self.__get(f"/lol-summoner/v1/summoners", params)
         res = await res.json()
-
-        if "errorCode" in res:
-            raise SummonerNotFound()
 
         return res
 
