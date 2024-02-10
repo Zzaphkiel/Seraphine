@@ -467,7 +467,7 @@ class MainWindow(FluentWindow):
 
     @asyncSlot()
     async def __onLolClientEnded(self):
-        self.searchInterface.loadGamesThreadStop.set()  # 停掉战绩查询加载
+        # self.searchInterface.loadGamesThreadStop.set()  # 停掉战绩查询加载
 
         logger.critical("League of Legends client ended", TAG)
         await connector.close()
@@ -887,9 +887,6 @@ class MainWindow(FluentWindow):
     # 英雄选择时，英雄改变 / 楼层改变时触发
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
-        if data['eventType'] != 'Update':
-            return
-
         team = data['data']["myTeam"]
 
         # 更新头像

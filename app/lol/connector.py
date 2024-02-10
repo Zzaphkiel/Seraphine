@@ -86,11 +86,12 @@ class LcuWebSocket():
         self.events = []
         self.subscribes = []
 
-    def subscribe(self, event: str, uri: str):
+    def subscribe(self, event: str, uri: str, type: tuple = ('Update', 'Create', 'Delete')):
         def wrapper(func):
             self.events.append(event)
             self.subscribes.append({
                 'uri': uri,
+                'type': type,
                 'callable': func
             })
             return func
@@ -98,7 +99,7 @@ class LcuWebSocket():
 
     def matchUri(self, data):
         for s in self.subscribes:
-            if data.get('uri') == s['uri']:
+            if data.get('uri') == s['uri'] and data.get('eventType') in s['type']:
                 logger.info(s['uri'], TAG)
                 logger.debug(data, TAG)
                 asyncio.create_task(s['callable'](data))
@@ -167,17 +168,20 @@ class LolClientConnector(QObject):
         self.listener = LcuWebSocket(self.port, self.token)
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-summoner_v1_current-summoner',
-                                 uri='/lol-summoner/v1/current-summoner')
+                                 uri='/lol-summoner/v1/current-summoner',
+                                 type=('Update'))
         async def onCurrentSummonerProfileChanged(event):
             signalBus.currentSummonerProfileChanged.emit(event['data'])
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-gameflow_v1_gameflow-phase',
-                                 uri='/lol-gameflow/v1/gameflow-phase')
+                                 uri='/lol-gameflow/v1/gameflow-phase',
+                                 type=('Update'))
         async def onGameFlowPhaseChanged(event):
             signalBus.gameStatusChanged.emit(event['data'])
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
-                                 uri='/lol-champ-select/v1/session')
+                                 uri='/lol-champ-select/v1/session',
+                                 type=('Update'))
         async def onChampSelectChanged(event):
             signalBus.champSelectChanged.emit(event)
 
