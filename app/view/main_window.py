@@ -452,7 +452,9 @@ class MainWindow(FluentWindow):
 
         self.startInterface.hideLoadingPage()
 
-        folder = await connector.getInstallFolder()
+        folder, status = await asyncio.gather(connector.getInstallFolder(),
+                                              connector.getGameStatus())
+
         if folder != cfg.get(cfg.lolFolder):
             self.lolInstallFolderChanged.emit(folder)
 
@@ -460,9 +462,7 @@ class MainWindow(FluentWindow):
         self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
-        status = await connector.getGameStatus()
         self.__onGameStatusChanged(status)
-
         self.__unlockInterface()
 
     @asyncSlot()
@@ -516,8 +516,8 @@ class MainWindow(FluentWindow):
     async def __onCurrentSummonerProfileChanged(self, data: dict):
         self.currentSummoner = data
 
-        asyncio.create_task(self.__updateAvatarIconName())
-        asyncio.create_task(self.careerInterface.updateNameIconExp(data))
+        await asyncio.gather(self.__updateAvatarIconName(),
+                             self.careerInterface.updateNameIconExp(data))
 
         logger.debug(f"Update Summoner Info : {data}", TAG)
 

@@ -21,21 +21,14 @@ from ..components.search_line_edit import SearchLineEdit
 from ..components.summoner_name_button import SummonerName
 from ..lol.connector import connector
 from ..lol.exceptions import SummonerGamesNotFound, SummonerNotFound
-from ..lol.tools import parseGameData, parseGameDetailData
+from ..lol.tools import parseGameData, parseGameDetailData, getSummonerGames
 
 
 class GamesTab(QFrame):
-    tabClicked = pyqtSignal(str)
-    gameDetailReady = pyqtSignal(dict)
-    loadFinish = pyqtSignal()
-
     def __init__(self, parnet=None):
         super().__init__(parnet)
         self.setFixedWidth(160)
         self.vBoxLayout = QVBoxLayout(self)
-
-        self.first = True
-        self.stateTooltip = None
 
         self.stackWidget = QStackedWidget()
         self.buttonsLayout = QHBoxLayout()
@@ -44,20 +37,7 @@ class GamesTab(QFrame):
         self.pageLabel = QLabel(" ")
         self.nextButton = ToolButton(Icon.CHEVRONRIGHT)
 
-        self.currentIndex = 0
-        self.queueId = 0
-        self.gamesNumberPerPage = 10
-        self.maxPage = None
-        self.gameId = 0
-
-        self.puuid = None
         self.games = []
-        self.currentTabSelected = None
-
-        self.begIndex = 0
-
-        self.triggerGameId = 0
-        self.waitingForSelected = 0
 
         self.__initWidget()
         self.__initLayout()
@@ -75,7 +55,7 @@ class GamesTab(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.stackWidget.addWidget(defaultWidget)
-        self.stackWidget.setCurrentIndex(self.currentIndex)
+        self.stackWidget.setCurrentIndex(0)
 
         self.buttonsLayout.addWidget(self.prevButton)
         self.buttonsLayout.addWidget(self.pageLabel)
@@ -638,7 +618,10 @@ class GamesView(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
+        # 左侧预览栏
         self.gamesTab = GamesTab()
+
+        # 右侧详情栏
         self.gameDetailView = GameDetailView()
 
         self.__initLayout()
@@ -755,17 +738,8 @@ class GameTab(QFrame):
 
 
 class SearchInterface(SmoothScrollArea):
-    summonerPuuidGetted = pyqtSignal(str)
-    gamesNotFound = pyqtSignal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        self.comboBoxQueueId = (0, 430, 450, 420, 440)
-        self.games = []
-        self.queueIdBuffer = {}
-        self.loadGamesThread = None
-        self.loadGamesThreadStop = threading.Event()
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -775,7 +749,6 @@ class SearchInterface(SmoothScrollArea):
         self.filterComboBox = ComboBox()
 
         self.gamesView = GamesView()
-        self.currentSummonerName = None
 
         self.__initWidget()
         self.__initLayout()
@@ -818,8 +791,7 @@ class SearchInterface(SmoothScrollArea):
         self.searchLineEdit.setEnabled(a0)
         self.searchLineEdit.searchButton.setEnabled(a0)
 
-        if not a0:
-            self.filterComboBox.setEnabled(a0)
+        self.filterComboBox.setEnabled(a0)
 
         return super().setEnabled(a0)
 
@@ -842,17 +814,15 @@ class SearchInterface(SmoothScrollArea):
     @asyncSlot()
     async def __onSearchButtonClicked(self):
         name = self.searchLineEdit.text()
-
         if name == "":
             return
 
         summoner = await connector.getSummonerByName(name)
-
-        if 'errorCode' in summoner:
+        puuid = summoner.get('puuid')
+        if not puuid:
             self.__showSummonerNotFoundMsg()
             return
 
-        print(summoner)
-
-    async def getSummonerNames(self):
-        pass
+        queueIds = (0, 430, 450, 420, 440)
+        queueId = queueIds[self.filterComboBox.currentIndex()]
+        # TODO

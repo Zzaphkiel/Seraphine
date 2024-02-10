@@ -810,6 +810,40 @@ def getTeamColor(session, currentSummonerId):
     return makeTeam(ally), makeTeam(enemy)
 
 
+async def getSummonerGames(puuid, begIndex, queueId):
+    '''
+    从 `begIndex`（含）开始，返回 100 局同 `queueId` 的对局
+
+    以下情况会导致返回值不够 100 局：
+
+    - 从 `begIndex` 开始，总对局数量已不足 100
+    - 从 `begIndex` 开始，一年内且同 `queueId` 的对局不足 100
+    '''
+    games = await connector.getSummonerGamesByPuuid(puuid, begIndex, begIndex+99)
+
+    # TODO!
+
+    return games
+    # now = time.time()
+    # res = []
+
+    # if games['gameCount'] == 0:
+    #     return res
+
+    # for game in games['games']:
+    #     gameTime = game['gameCreation']
+
+    #     if queueId and now - gameTime / 1000 > 60 * 60 * 24 * 365:
+    #         return res
+
+    #     if queueId and game['queueId'] != queueId:
+    #         continue
+
+    #     res.append(game)
+
+    # return res
+
+
 def separateTeams(data, currentSummonerId):
     team1 = data['teamOne']
     team2 = data['teamTwo']
