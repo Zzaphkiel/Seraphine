@@ -89,6 +89,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
             self.tr("Auto select champion when blind selection begin"),
+            cfg.enableAutoBanChampion, cfg.autoBanChampion,
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
             self.gameGroup)
 
@@ -918,11 +919,16 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
 
 # 自动选择英雄卡片
 class AutoSelectChampionCard(ExpandGroupSettingCard):
-    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
+    def __init__(self, title, content=None, enableBanChampion: ConfigItem = None, banChampion: ConfigItem= None, enableConfigItem: ConfigItem = None,
                  championConfigItem: ConfigItem = None, parent=None):
         super().__init__(Icon.CHECK, title, content, parent)
 
         self.statusLabel = QLabel(self)
+
+        self.banLayout = QHBoxLayout(QWidget(self.view))
+        self.banLabel = QLabel("自动禁用（亚索）：")
+        self.banEdit = LineEdit()
+        # self.banSwitch = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
         self.inputWidget = QWidget(self.view)
         self.inputLayout = QHBoxLayout(self.inputWidget)
@@ -938,6 +944,9 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.completer = None
         self.champions = []
 
+        self.enableBanChampion = enableBanChampion
+        self.banChampion = banChampion
+
         self.enableConfigItem = enableConfigItem
         self.championConfigItem = championConfigItem
 
@@ -946,6 +955,10 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
     def __initLayout(self):
         self.addWidget(self.statusLabel)
+
+        self.inputLayout.addWidget(self.banLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.banEdit, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.switchButton, alignment=Qt.AlignLeft)
 
         self.inputLayout.setSpacing(19)
         self.inputLayout.setAlignment(Qt.AlignTop)
@@ -965,6 +978,11 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.switchButtonWidget)
 
     def __initWidget(self):
+        self.banEdit.setPlaceholderText("疾风剑豪")
+        self.banEdit.setMinimumWidth(250)
+        self.banEdit.setClearButtonEnabled(True)
+        self.banEdit.setEnabled(False)
+
         self.lineEdit.setPlaceholderText(self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
@@ -993,6 +1011,9 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.validate()
 
     def setValue(self, championName: str, isChecked: bool):
+        qconfig.set(self.banChampion, "疾风剑豪")
+        qconfig.set(self.enableBanChampion, True)
+
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
 
