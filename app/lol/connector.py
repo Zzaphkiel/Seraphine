@@ -655,10 +655,10 @@ class LolClientConnector(QObject):
         return res
 
     @retry()
-    def playAgain(self):
-        res = self.__post("/lol-lobby/v2/play-again").content
+    async def playAgain(self):
+        res = await self.__post("/lol-lobby/v2/play-again")
 
-        return res
+        return await res.read()
 
     @retry()
     async def getClientZoom(self):

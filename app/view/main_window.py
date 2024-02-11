@@ -48,7 +48,6 @@ TAG = "MainWindow"
 
 class MainWindow(FluentWindow):
     mainWindowHide = pyqtSignal(bool)
-    lolInstallFolderChanged = pyqtSignal(str)
     showUpdateMessageBox = pyqtSignal(dict)
     showNoticeMessageBox = pyqtSignal(str)
     checkUpdateFailed = pyqtSignal()
@@ -184,7 +183,6 @@ class MainWindow(FluentWindow):
             self.__onChampSelectChanged
         )
 
-        self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
         self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
         self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
@@ -456,7 +454,7 @@ class MainWindow(FluentWindow):
                                               connector.getGameStatus())
 
         if folder != cfg.get(cfg.lolFolder):
-            self.lolInstallFolderChanged.emit(folder)
+            self.__onLolInstallFolderChanged(folder)
 
         self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
         self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
@@ -618,166 +616,25 @@ class MainWindow(FluentWindow):
 
         self.checkAndSwitchTo(self.searchInterface)
 
-    def __onSearchInterfaceCareerButtonClicked(self):
-        self.careerInterface.showLoadingPage.emit()
+    @asyncSlot()
+    async def __onSearchInterfaceCareerButtonClicked(self):
         name = self.searchInterface.currentSummonerName  # 搜的那个人
-
-        def _():
-            summoner = Summoner(connector.getSummonerByName(name))
-            iconId = summoner.profileIconId
-
-            icon = connector.getProfileIcon(iconId)
-            level = summoner.level
-            xpSinceLastLevel = summoner.xpSinceLastLevel
-            xpUntilNextLevel = summoner.xpUntilNextLevel
-
-            rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-
-            try:
-                gamesInfo = connector.getSummonerGamesByPuuid(
-                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
-            except SummonerGamesNotFound:
-                champions = []
-                games = {}
-            else:
-                games = {
-                    "gameCount": gamesInfo["gameCount"],
-                    "wins": 0,
-                    "losses": 0,
-                    "kills": 0,
-                    "deaths": 0,
-                    "assists": 0,
-                    "games": [],
-                }
-
-                for game in gamesInfo["games"]:
-                    info = parseGameData(game)
-                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
-                        continue
-
-                    if not info["remake"] and info["queueId"] != 0:
-                        games["kills"] += info["kills"]
-                        games["deaths"] += info["deaths"]
-                        games["assists"] += info["assists"]
-
-                        if info["win"]:
-                            games["wins"] += 1
-                        else:
-                            games["losses"] += 1
-
-                    games["games"].append(info)
-
-                champions = getRecentChampions(games['games'])
-
-            emitInfo = {
-                'name': summoner.name,
-                'icon': icon,
-                'level': level,
-                'xpSinceLastLevel': xpSinceLastLevel,
-                'xpUntilNextLevel': xpUntilNextLevel,
-                'puuid': summoner.puuid,
-                'rankInfo': rankInfo,
-                'games': games,
-                'triggerByUser': True,
-                'isPublic': summoner.isPublic,
-                'tagLine': summoner.tagLine
-            }
-            if champions:
-                emitInfo["champions"] = champions
-
-            self.careerInterface.careerInfoChanged.emit(emitInfo)
-            self.careerInterface.hideLoadingPage.emit()
-
-        threading.Thread(target=_).start()
+        summoner = await connector.getSummonerByName(name)
+        await self.careerInterface.updateInterface(summoner=summoner)
         self.checkAndSwitchTo(self.careerInterface)
 
     @asyncSlot(str)
     async def __onTeammateFlyoutSummonerNameClicked(self, puuid):
         self.careerInterface.w.close()
-
-        self.careerInterface.setLoadingPageEnabled(True)
         await self.careerInterface.updateInterface(puuid=puuid)
-        self.careerInterface.setLoadingPageEnabled(False)
 
-    def __onSearchInterfaceSummonerNameClicked(self, puuid, switch=True):
-        if puuid == "00000000-0000-0000-0000-000000000000":
+    @asyncSlot(str)
+    async def __onSearchInterfaceSummonerNameClicked(self, puuid):
+        if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
             return
 
-        self.careerInterface.showLoadingPage.emit()
-
-        def _():
-            try:
-                summoner = Summoner(
-                    connector.getSummonerByPuuid(puuid))
-            except:
-                return
-
-            iconId = summoner.profileIconId
-
-            icon = connector.getProfileIcon(iconId)
-            level = summoner.level
-            xpSinceLastLevel = summoner.xpSinceLastLevel
-            xpUntilNextLevel = summoner.xpUntilNextLevel
-
-            rankInfo = connector.getRankedStatsByPuuid(summoner.puuid)
-            try:
-                gamesInfo = connector.getSummonerGamesByPuuid(
-                    summoner.puuid, 0, cfg.get(cfg.careerGamesNumber) - 1)
-            except SummonerGamesNotFound:
-                champions = []
-                games = {}
-            else:
-                games = {
-                    "gameCount": gamesInfo["gameCount"],
-                    "wins": 0,
-                    "losses": 0,
-                    "kills": 0,
-                    "deaths": 0,
-                    "assists": 0,
-                    "games": [],
-                }
-
-                for game in gamesInfo["games"]:
-                    info = parseGameData(game)
-                    if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
-                        continue
-
-                    if not info["remake"] and info["queueId"] != 0:
-                        games["kills"] += info["kills"]
-                        games["deaths"] += info["deaths"]
-                        games["assists"] += info["assists"]
-
-                        if info["win"]:
-                            games["wins"] += 1
-                        else:
-                            games["losses"] += 1
-
-                    games["games"].append(info)
-
-                champions = getRecentChampions(games['games'])
-
-            self.careerInterface.careerInfoChanged.emit(
-                {
-                    'name': summoner.name,
-                    'icon': icon,
-                    'level': level,
-                    'xpSinceLastLevel': xpSinceLastLevel,
-                    'xpUntilNextLevel': xpUntilNextLevel,
-                    'puuid': summoner.puuid,
-                    'rankInfo': rankInfo,
-                    'games': games,
-                    'champions': champions,
-                    'triggerByUser': True,
-                    'isPublic': summoner.isPublic,
-                    'tagLine': summoner.tagLine
-                }
-            )
-            self.careerInterface.hideLoadingPage.emit()
-
-        threading.Thread(target=_).start()
-
-        if switch:
-            self.checkAndSwitchTo(self.careerInterface)
+        await self.careerInterface.updateInterface(puuid=puuid)
+        self.checkAndSwitchTo(self.careerInterface)
 
     @asyncSlot(str)
     async def __onGameStatusChanged(self, status):
@@ -942,12 +799,10 @@ class MainWindow(FluentWindow):
         self.__onSearchInterfaceSummonerNameClicked(
             self.careerInterface.puuid, switch=False)
 
-    def __onFixLCUButtonClicked(self):
-        def _():
-            connector.playAgain()
-
+    @asyncSlot()
+    async def __onFixLCUButtonClicked(self):
         if self.isClientProcessRunning:
-            threading.Thread(target=_).start()
+            await connector.playAgain()
 
     def exceptHook(self, ty, value, tb):
         tracebackFormat = traceback.format_exception(ty, value, tb)
