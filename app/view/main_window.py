@@ -970,25 +970,33 @@ class MainWindow(FluentWindow):
         if data['eventType'] != 'Update':
             return
 
+        # 自动 BP
         # todo: 存在重复的data订阅数据需要做处理
-        localPlayerCellId = data["data"]["localPlayerCellId"]
-        actions = data["data"]["actions"]
-        for action in actions:
-            action = action[0]
-            if action["actorCellId"] == localPlayerCellId and action["isInProgress"] and not action["completed"]:
-                actionId = action["id"]
-                if action["type"] == "pick":
-                    if (cfg.get(cfg.enableAutoSelectChampion)):
-                        championId = connector.manager.getChampionIdByName(
-                            cfg.get(cfg.autoSelectChampion))
-                        connector.selectChampion(action["id"], championId)
-                        break
-                elif action["type"] == "ban":
-                    if (cfg.get(cfg.enableAutoBanChampion) and data["data"]["bans"]["numBans"] > 0):
-                        championId = connector.manager.getChampionIdByName(
-                            cfg.get(cfg.autoBanChampion))
-                        connector.banChampion(actionId, championId)
-                        return
+        def selectOrBan():
+            localPlayerCellId = data["data"]["localPlayerCellId"]
+            actions = data["data"]["actions"]
+
+            for action in actions:
+                action = action[0]
+
+                if action["actorCellId"] == localPlayerCellId and action["isInProgress"] and not action["completed"]:
+                    actionId = action["id"]
+
+                    if action["type"] == "pick":
+                        if (cfg.get(cfg.enableAutoSelectChampion)):
+
+                            championId = connector.manager.getChampionIdByName(
+                                cfg.get(cfg.autoSelectChampion))
+                            connector.selectChampion(action["id"], championId)
+                            break
+                    elif action["type"] == "ban":
+                        if (cfg.get(cfg.enableAutoBanChampion) and data["data"]["bans"]["numBans"] > 0):
+                            championId = connector.manager.getChampionIdByName(
+                                cfg.get(cfg.autoBanChampion))
+                            connector.banChampion(actionId, championId)
+                            return
+
+        threading.Thread(target=selectOrBan).start()
 
         # 更新头像
         summonersOrder = []
