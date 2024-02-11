@@ -31,6 +31,8 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.profileGroup = SettingCardGroup(self.tr("Profile"),
                                              self.scrollWidget)
         self.gameGroup = SettingCardGroup(self.tr("Game"), self.scrollWidget)
+        self.bpGroup = SettingCardGroup(
+            self.tr("Ban / Pick"), self.scrollWidget)
 
         self.onlineStatusCard = OnlineStatusCard(
             title=self.tr("Online status"),
@@ -70,12 +72,6 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Only bots can be added to the lobby"),
             self.gameGroup)
         # 自动接受对局
-        self.autoAcceptMatchingCard = AutoAcceptMatchingCard(
-            self.tr("Auto accept"),
-            self.tr(
-                "Accept match making automatically after the number of seconds you set"),
-            cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
-            self.gameGroup)
         self.autoReconnectCard = SwitchSettingCard(
             Icon.CONNECTION,
             self.tr("Auto reconnect"),
@@ -86,21 +82,23 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Spectate live game of summoner in the same environment"),
             self.gameGroup
         )
+
+        self.autoAcceptMatchingCard = AutoAcceptMatchingCard(
+            self.tr("Auto accept"),
+            self.tr(
+                "Accept match making automatically after the number of seconds you set"),
+            cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
+            self.bpGroup)
         self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
             self.tr("Auto select champion when your selection begin"),
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
-            self.gameGroup)
+            self.bpGroup)
         self.autoBanChampionCard = AutoBanChampionCard(
             self.tr("Auto ban champion"),
             self.tr("Auto ban champion when your ban section begin"),
             cfg.enableAutoBanChampion, cfg.autoBanChampion,
-            self.gameGroup)
-
-        # self.copyPlayersInfoCard = SwitchSettingCard(
-        #     Icon.COPY, self.tr("Auto copy players' info"),
-        #     self.tr("Copy players' infomation to clipboard when game starts"),
-        #     cfg.enableCopyPlayersInfo)
+            self.bpGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -129,11 +127,13 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.profileGroup.addSettingCard(self.removeTokensCard)
         # self.profileGroup.addSettingCard(self.addFriendCard)
 
+        # BP
+        self.bpGroup.addSettingCard(self.autoAcceptMatchingCard)
+        self.bpGroup.addSettingCard(self.autoSelectChampionCard)
+        self.bpGroup.addSettingCard(self.autoBanChampionCard)
+
         # 游戏
-        self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.autoReconnectCard)
-        self.gameGroup.addSettingCard(self.autoSelectChampionCard)
-        self.gameGroup.addSettingCard(self.autoBanChampionCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
@@ -141,6 +141,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
+        self.expandLayout.addWidget(self.bpGroup)
         self.expandLayout.addWidget(self.gameGroup)
         self.expandLayout.addWidget(self.profileGroup)
 
