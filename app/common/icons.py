@@ -52,6 +52,7 @@ class Icon(FluentIconBase, Enum):
     CIRCLE = 'Circle'
     PLANE = 'Plane'
     APPLIST = 'AppList'
+    SQUARECROSS = "SquareCross"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

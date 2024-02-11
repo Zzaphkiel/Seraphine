@@ -545,6 +545,7 @@ class MainWindow(FluentWindow):
 
             self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
             self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
+            self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
             self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
             status = connector.getGameStatus()
@@ -978,12 +979,14 @@ class MainWindow(FluentWindow):
                 actionId = action["id"]
                 if action["type"] == "pick":
                     if (cfg.get(cfg.enableAutoSelectChampion)):
-                        championId = connector.manager.getChampionIdByName(cfg.get(cfg.autoSelectChampion))
+                        championId = connector.manager.getChampionIdByName(
+                            cfg.get(cfg.autoSelectChampion))
                         connector.selectChampion(action["id"], championId)
                         break
                 elif action["type"] == "ban":
                     if (cfg.get(cfg.enableAutoBanChampion) and data["data"]["bans"]["numBans"] > 0):
-                        championId = connector.manager.getChampionIdByName(cfg.get(cfg.autoBanChampion))
+                        championId = connector.manager.getChampionIdByName(
+                            cfg.get(cfg.autoBanChampion))
                         connector.banChampion(actionId, championId)
                         return
 

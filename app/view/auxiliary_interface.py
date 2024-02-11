@@ -3,9 +3,9 @@ import os
 import stat
 
 from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
-                            SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
-                            PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                            IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
+                                     SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
+                                     PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
+                                     IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
@@ -88,9 +88,13 @@ class AuxiliaryInterface(SmoothScrollArea):
         )
         self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
-            self.tr("Auto select champion when blind selection begin"),
-            cfg.enableAutoBanChampion, cfg.autoBanChampion,
+            self.tr("Auto select champion when your selection begin"),
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
+            self.gameGroup)
+        self.autoBanChampionCard = AutoBanChampionCard(
+            self.tr("Auto ban champion"),
+            self.tr("Auto ban champion when your ban section begin"),
+            cfg.enableAutoBanChampion, cfg.autoBanChampion,
             self.gameGroup)
 
         # self.copyPlayersInfoCard = SwitchSettingCard(
@@ -129,6 +133,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.gameGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.gameGroup.addSettingCard(self.autoReconnectCard)
         self.gameGroup.addSettingCard(self.autoSelectChampionCard)
+        self.gameGroup.addSettingCard(self.autoBanChampionCard)
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
@@ -171,8 +176,16 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         self.removeTokensCard.pushButton.setEnabled(a0)
 
-        if a0 and cfg.get(cfg.enableAutoSelectChampion):
-            self.autoSelectChampionCard.switchButton.setEnabled(True)
+        if a0 and cfg.get(cfg.enableAutoBanChampion):
+            self.autoBanChampionCard.switchButton.setEnabled(True)
+
+        if not cfg.get(cfg.enableAutoBanChampion):
+            self.autoBanChampionCard.lineEdit.setEnabled(a0)
+        if a0:
+            self.autoBanChampionCard.validate()
+
+        if a0 and cfg.get(cfg.enableAutoBanChampion):
+            self.autoBanChampionCard.switchButton.setEnabled(True)
 
         self.lockConfigCard.setEnabled(a0)
         self.autoReconnectCard.setEnabled(a0)
@@ -919,16 +932,11 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
 
 # 自动选择英雄卡片
 class AutoSelectChampionCard(ExpandGroupSettingCard):
-    def __init__(self, title, content=None, enableBanChampion: ConfigItem = None, banChampion: ConfigItem= None, enableConfigItem: ConfigItem = None,
+    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
                  championConfigItem: ConfigItem = None, parent=None):
         super().__init__(Icon.CHECK, title, content, parent)
 
         self.statusLabel = QLabel(self)
-
-        self.banLayout = QHBoxLayout(QWidget(self.view))
-        self.banLabel = QLabel("自动禁用（亚索）：")
-        self.banEdit = LineEdit()
-        # self.banSwitch = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
         self.inputWidget = QWidget(self.view)
         self.inputLayout = QHBoxLayout(self.inputWidget)
@@ -944,9 +952,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.completer = None
         self.champions = []
 
-        self.enableBanChampion = enableBanChampion
-        self.banChampion = banChampion
-
         self.enableConfigItem = enableConfigItem
         self.championConfigItem = championConfigItem
 
@@ -955,10 +960,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
     def __initLayout(self):
         self.addWidget(self.statusLabel)
-
-        self.inputLayout.addWidget(self.banLabel, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(self.banEdit, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(self.switchButton, alignment=Qt.AlignLeft)
 
         self.inputLayout.setSpacing(19)
         self.inputLayout.setAlignment(Qt.AlignTop)
@@ -978,11 +979,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.switchButtonWidget)
 
     def __initWidget(self):
-        self.banEdit.setPlaceholderText("疾风剑豪")
-        self.banEdit.setMinimumWidth(250)
-        self.banEdit.setClearButtonEnabled(True)
-        self.banEdit.setEnabled(False)
-
         self.lineEdit.setPlaceholderText(self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
@@ -1011,9 +1007,111 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.validate()
 
     def setValue(self, championName: str, isChecked: bool):
-        qconfig.set(self.banChampion, "疾风剑豪")
-        qconfig.set(self.enableBanChampion, True)
+        qconfig.set(self.championConfigItem, championName)
+        qconfig.set(self.enableConfigItem, isChecked)
 
+        self.lineEdit.setText(championName)
+        self.switchButton.setChecked(isChecked)
+
+        self.__setStatusLabelText(championName, isChecked)
+
+    def validate(self):
+        text = self.lineEdit.text()
+
+        if text not in self.champions and self.switchButton.checked:
+            self.setValue("", False)
+
+        self.__onLineEditTextChanged(text)
+
+    def __onLineEditTextChanged(self, text):
+        enable = text in self.champions
+
+        self.switchButton.setEnabled(enable)
+
+        self.setValue(text, self.switchButton.isChecked())
+
+    def __onCheckedChanged(self, isChecked: bool):
+        self.lineEdit.setEnabled(not isChecked)
+        self.setValue(self.lineEdit.text(), isChecked)
+
+
+# 自动 ban 英雄卡片
+class AutoBanChampionCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
+                 championConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.SQUARECROSS, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.championLabel = QLabel(
+            self.tr("Champion will be banned automatically:"))
+        self.lineEdit = LineEdit()
+
+        self.switchButtonWidget = QWidget(self.view)
+        self.switchButtonLayout = QHBoxLayout(self.switchButtonWidget)
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.completer = None
+        self.champions = []
+
+        self.enableConfigItem = enableConfigItem
+        self.championConfigItem = championConfigItem
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(self.championLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
+        self.switchButtonLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.switchButtonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setPlaceholderText(self.tr("Champion name"))
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setClearButtonEnabled(True)
+        self.lineEdit.setEnabled(False)
+
+        self.switchButton.setEnabled(False)
+
+        self.setValue(qconfig.get(self.championConfigItem),
+                      qconfig.get(self.enableConfigItem))
+
+        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
+        self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
+
+    def __setStatusLabelText(self, champion, isChecked):
+        if isChecked:
+            self.statusLabel.setText(self.tr("Enabled, champion: ") + champion)
+        else:
+            self.statusLabel.setText(self.tr("Disabled"))
+
+    def updateCompleter(self):
+        self.champions = connector.manager.getChampionList()
+        self.completer = QCompleter(self.champions)
+        self.completer.setFilterMode(Qt.MatchContains)
+        self.lineEdit.setCompleter(self.completer)
+
+        self.validate()
+
+    def setValue(self, championName: str, isChecked: bool):
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
 
