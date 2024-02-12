@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap, QPen, QPainter, QColor
 from ..common.qfluentwidgets import isDarkTheme, Theme
 
+from ..common.signals import signalBus
 from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
 
@@ -319,5 +320,5 @@ class GameInfoBar(QFrame):
         self.setProperty("pressed", False)
         self.style().polish(self)
 
-        self.window().careerInterface.gameInfoBarClicked.emit(str(self.gameId))
+        signalBus.careerGameBarClicked.emit(str(self.gameId))
         return super().mouseReleaseEvent(a0)

@@ -319,8 +319,8 @@ async def parseGameDetailData(puuid, game):
         if summonerPuuid == '00000000-0000-0000-0000-000000000000':  # AI
             isPublic = True
         else:
-            isPublic = connector.getSummonerByPuuid(
-                summonerPuuid)["privacy"] == "PUBLIC"
+            t = await connector.getSummonerByPuuid(summonerPuuid)
+            isPublic = t["privacy"] == "PUBLIC"
 
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
@@ -378,8 +378,9 @@ async def parseGameDetailData(puuid, game):
 
                 tier, division, lp, rankIcon = None, None, None, None
                 if getRankInfo:
-                    rank = connector.getRankedStatsByPuuid(
-                        summonerPuuid).get('queueMap')
+                    rank = await connector.getRankedStatsByPuuid(
+                        summonerPuuid)
+                    rank = rank.get('queueMap')
 
                     try:
                         if queueId != 1700 and rank:

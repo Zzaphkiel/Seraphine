@@ -319,6 +319,8 @@ class CareerInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.backToMeButton.clicked.connect(self.__changeToCurrentSummoner)
         self.refreshButton.clicked.connect(self.__onRefreshButtonClicked)
+        self.searchButton.clicked.connect(
+            lambda: signalBus.toSearchInterface.emit(self.getSummonerName()))
         self.filterComboBox.currentIndexChanged.connect(
             self.__onfilterComboBoxChanged)
         self.copyButton.clicked.connect(
@@ -606,7 +608,7 @@ class TeammateInfoBar(QFrame):
         self.setFixedHeight(62)
 
         self.name.clicked.connect(
-            lambda: signalBus.careerTeammateSummonerNameClicked.emit(summoner['puuid']))
+            lambda: signalBus.toCareerInterface.emit(summoner['puuid']))
 
     def __initWidget(self):
         self.name.setFixedWidth(180)

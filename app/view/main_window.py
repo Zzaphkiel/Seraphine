@@ -171,45 +171,40 @@ class MainWindow(FluentWindow):
         self.navigationInterface.setMinimumExpandWidth(1321)
 
     def __conncetSignalToSlot(self):
-        self.processListener.lolClientStarted.connect(
+        # From listener:
+        signalBus.lolClientStarted.connect(
             self.__onLolClientStarted)
-        self.processListener.lolClientEnded.connect(self.__onLolClientEnded)
+        signalBus.lolClientEnded.connect(self.__onLolClientEnded)
 
+        # From connector
         signalBus.currentSummonerProfileChanged.connect(
             self.__onCurrentSummonerProfileChanged)
         signalBus.gameStatusChanged.connect(
             self.__onGameStatusChanged)
         signalBus.champSelectChanged.connect(
-            self.__onChampSelectChanged
-        )
-
-        self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
-        self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
-        self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
+            self.__onChampSelectChanged)
         signalBus.lcuApiExceptionRaised.connect(
             self.__onShowLcuConnectError)
 
-        self.careerInterface.searchButton.clicked.connect(
-            self.__onCareerInterfaceHistoryButtonClicked)
-        signalBus.careerTeammateSummonerNameClicked.connect(
-            self.__onTeammateFlyoutSummonerNameClicked)
-        self.careerInterface.gameInfoBarClicked.connect(
-            self.__onCareerInterfaceGameInfoBarClicked)
-        self.searchInterface.careerButton.clicked.connect(
-            self.__onSearchInterfaceCareerButtonClicked)
-        self.searchInterface.gamesView.gameDetailView.summonerNameClicked.connect(
-            self.__onSearchInterfaceSummonerNameClicked)
-        self.gameInfoInterface.summonerViewClicked.connect(
-            self.__onSearchInterfaceSummonerNameClicked)
-        self.gameInfoInterface.summonerGamesClicked.connect(
-            self.__onGameInfoInterfaceGamesSummonerNameClicked)
+        # From career_interface
+        signalBus.careerGameBarClicked.connect(self.__onCareerGameClicked)
+
+        # From search_interface and gameinfo_interface
+        signalBus.toSearchInterface.connect(self.__switchToSearchInterface)
+        signalBus.toCareerInterface.connect(self.__switchToCareerInterface)
+
+        # From setting_interface
         self.settingInterface.careerGamesCount.pushButton.clicked.connect(
-            self.__onCareerInterfaceRefreshButtonClicked)
+            self.__refreshCareerInterface)
         self.settingInterface.micaCard.checkedChanged.connect(
             self.setMicaEffectEnabled)
+
+        # From main_window
+        self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
+        self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
+        self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
         self.stackedWidget.currentChanged.connect(
             self.__onCurrentStackedChanged)
-
         self.mainWindowHide.connect(self.__onWindowHide)
 
     def __initWindow(self):
@@ -602,39 +597,22 @@ class MainWindow(FluentWindow):
             a0.ignore()
             self.hide()
 
-    def __onCareerInterfaceHistoryButtonClicked(self):
-        summonerName = self.careerInterface.getSummonerName()
-
-        self.searchInterface.searchLineEdit.setText(summonerName)
-        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
-
-        self.checkAndSwitchTo(self.searchInterface)
-
-    def __onGameInfoInterfaceGamesSummonerNameClicked(self, name):
+    @asyncSlot(str)
+    async def __switchToSearchInterface(self, name):
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.searchLineEdit.searchButton.clicked.emit()
+        await self.searchInterface.onSearchButtonClicked()
 
         self.checkAndSwitchTo(self.searchInterface)
 
-    @asyncSlot()
-    async def __onSearchInterfaceCareerButtonClicked(self):
-        name = self.searchInterface.currentSummonerName  # 搜的那个人
-        summoner = await connector.getSummonerByName(name)
-        await self.careerInterface.updateInterface(summoner=summoner)
-        self.checkAndSwitchTo(self.careerInterface)
-
     @asyncSlot(str)
-    async def __onTeammateFlyoutSummonerNameClicked(self, puuid):
-        self.careerInterface.w.close()
-        await self.careerInterface.updateInterface(puuid=puuid)
+    async def __switchToCareerInterface(self, puuid):
+        try:
+            self.careerInterface.w.close()
+        except:
+            pass
 
-    @asyncSlot(str)
-    async def __onSearchInterfaceSummonerNameClicked(self, puuid):
-        if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
-            return
-
-        await self.careerInterface.updateInterface(puuid=puuid)
         self.checkAndSwitchTo(self.careerInterface)
+        await self.careerInterface.updateInterface(puuid=puuid)
 
     @asyncSlot(str)
     async def __onGameStatusChanged(self, status):
@@ -788,16 +766,20 @@ class MainWindow(FluentWindow):
     async def __onGameEnd(self):
         asyncio.create_task(self.gameInfoInterface.clear())
 
-    def __onCareerInterfaceGameInfoBarClicked(self, gameId):
+    @asyncSlot(str)
+    async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.gamesView.gamesTab.triggerGameId = gameId
-        self.searchInterface.gamesView.gamesTab.waitingForSelected = gameId
-        self.searchInterface.searchLineEdit.searchButton.click()
 
-    def __onCareerInterfaceRefreshButtonClicked(self):
-        self.__onSearchInterfaceSummonerNameClicked(
-            self.careerInterface.puuid, switch=False)
+        await self.searchInterface.searchAndShowFirstPage()
+        await self.searchInterface.updateGameDetailView(gameId)
+        self.searchInterface.waitingForDrawSelect(gameId)
+
+        self.checkAndSwitchTo(self.searchInterface)
+
+    @asyncSlot()
+    async def __refreshCareerInterface(self):
+        self.careerInterface.refreshButton.click()
 
     @asyncSlot()
     async def __onFixLCUButtonClicked(self):
@@ -821,8 +803,5 @@ class MainWindow(FluentWindow):
         sys.exit()
 
     def __onCurrentStackedChanged(self, index):
-        # if index == self.stackedWidget.indexOf(self.careerInterface):
-        #     self.careerInterface.setTableStyle()
-
         widget: SmoothScrollArea = self.stackedWidget.view.currentWidget()
         widget.delegate.vScrollBar.resetValue(0)

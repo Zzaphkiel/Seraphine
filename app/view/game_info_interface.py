@@ -12,6 +12,7 @@ from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButt
 
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
+from ..common.signals import signalBus
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.champion_icon_widget import RoundIcon
 from ..components.profile_level_icon_widget import RoundLevelAvatar
@@ -22,11 +23,6 @@ from ..lol.connector import connector
 
 
 class GameInfoInterface(SmoothScrollArea):
-    enemySummonerInfoReady = pyqtSignal(dict)
-    summonerViewClicked = pyqtSignal(str)
-    summonerGamesClicked = pyqtSignal(str)
-    pageSwitchSignal = pyqtSignal()
-    gameEnd = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -296,8 +292,8 @@ class SummonerInfoView(QFrame):
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
         self.summonerName = SummonerName(
             name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'], tips=info["recentlyChampionName"])
-        self.summonerName.clicked.connect(lambda: self.parent().parent(
-        ).parent().parent().summonerViewClicked.emit(info['puuid']))
+        self.summonerName.clicked.connect(
+            lambda: signalBus.toCareerInterface.emit(info['puuid']))
 
         self.gridHBoxLayout = QHBoxLayout()
         self.kdaHBoxLayout = QHBoxLayout()
@@ -313,7 +309,7 @@ class SummonerInfoView(QFrame):
         k, d, a = info['kda']
         if d == 0:
             d = 1
-                
+
         kda = ((k + a) / d)
         self.kdaValLabel = QLabel(f"{kda:.1f}")
         pe = QPalette()
@@ -324,7 +320,6 @@ class SummonerInfoView(QFrame):
         elif 5 < kda:
             pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
         self.kdaValLabel.setPalette(pe)
-
 
         self.kdaValLabel.setAlignment(Qt.AlignCenter)
         self.kdaValLabel.setObjectName("kdaValLabel")
@@ -451,11 +446,6 @@ class SummonerInfoView(QFrame):
             background-color: rgba({r1}, {g1}, {b1}, 0.2);
         }}""")
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            (self.parent().parent().parent().parent().parent().parent()
-             .parent().gameInfoInterface.pageSwitchSignal.emit())
-
     def updateIcon(self, iconPath: str):
         self.icon.updateIcon(iconPath)
 
@@ -538,8 +528,9 @@ class Games(QFrame):
         self.summonerName = SummonerName(
             name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'], tips=summoner["recentlyChampionName"])
         self.summonerName.setObjectName("summonerName")
-        self.summonerName.clicked.connect(lambda: self.parent().parent(
-        ).parent().summonerGamesClicked.emit(self.summonerName.text()))
+
+        self.summonerName.clicked.connect(
+            lambda: signalBus.toSearchInterface.emit(self.summonerName.text()))
 
         self.summonerName.setFixedHeight(60)
 

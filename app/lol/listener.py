@@ -7,15 +7,13 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import aiohttp
 
 from app.common.logger import logger
+from app.common.signals import signalBus
 from app.common.util import getLolProcessPid, isLolGameProcessExist
 
 TAG = "Listener"
 
 
 class LolProcessExistenceListener(QThread):
-    lolClientStarted = pyqtSignal(int)
-    lolClientEnded = pyqtSignal()
-
     def __init__(self, tasklistPath, parent):
         self.tasklistPath = tasklistPath
         self.isClientRunning = False
@@ -28,11 +26,11 @@ class LolProcessExistenceListener(QThread):
             if pid != 0:
                 if not self.isClientRunning:
                     self.isClientRunning = True
-                    self.lolClientStarted.emit(pid)
+                    signalBus.lolClientStarted.emit(pid)
             else:
                 if self.isClientRunning and not isLolGameProcessExist(self.tasklistPath):
                     self.isClientRunning = False
-                    self.lolClientEnded.emit()
+                    signalBus.lolClientEnded.emit()
 
             self.msleep(2000)
 
