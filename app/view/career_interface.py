@@ -1,8 +1,3 @@
-import threading
-import time
-import typing
-from PyQt5 import QtCore
-
 import asyncio
 from qasync import asyncSlot
 import pyperclip
@@ -10,24 +5,21 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QTableWidgetItem, QHeaderView,
                              QWidget, QFrame, QStackedWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
-from ..common.qfluentwidgets import (ScrollArea, TableWidget, Theme, PushButton, ComboBox,
+from ..common.qfluentwidgets import (TableWidget, PushButton, ComboBox,
                                      SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
                                      ToolTipPosition, ToolButton, IndeterminateProgressRing,
                                      Flyout, FlyoutViewBase, FlyoutAnimationType)
 
-from ..components.profile_icon_widget import RoundAvatar
 from ..components.game_infobar_widget import GameInfoBar
 from ..components.champion_icon_widget import RoundIcon
 from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
 from ..common.style_sheet import StyleSheet
-from ..common.config import cfg
 from ..common.icons import Icon
 from ..common.signals import signalBus
 from ..lol.connector import connector
-from ..lol.entries import Summoner
-from ..lol.tools import (translateTier, getTeammates, parseGames,
-                         parseGameData, getRecentChampions, parseSummonerData, getRecentTeammates, parseDetailRankInfo)
+from ..lol.tools import (parseGames, parseSummonerData,
+                         getRecentTeammates, parseDetailRankInfo)
 
 
 class NameLabel(QLabel):

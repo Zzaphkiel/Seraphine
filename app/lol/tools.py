@@ -699,6 +699,7 @@ async def parseAllyGameInfo(session, currentSummonerId):
     tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
              for item in session['myTeam']]
     summoners = await asyncio.gather(*tasks)
+    summoners = [summoner for summoner in summoners if summoner]
 
     # 按照楼层排序
     summoners = sorted(
@@ -718,10 +719,10 @@ def parseSummonerOrder(team):
     } for s in team]
 
     summoners.sort(key=lambda x: x['cellId'])
-    return [s['summonerId'] for s in summoners]
+    return [s['summonerId'] for s in summoners if s['summonerId'] != 0]
 
 
-async def parseEnemyGameInfo(session, currentSummonerId):
+async def parseGameInfoByGameflowSession(session, currentSummonerId, side):
     data = session['gameData']
     queueId = data['queue']['id']
 
@@ -729,11 +730,17 @@ async def parseEnemyGameInfo(session, currentSummonerId):
         return None
 
     isRank = queueId in (420, 440)
-    _, enemy = separateTeams(data, currentSummonerId)
+
+    if side == 'enemy':
+        _, team = separateTeams(data, currentSummonerId)
+    else:
+        team, _ = separateTeams(data, currentSummonerId)
 
     tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
-             for item in enemy]
+             for item in team]
+
     summoners = await asyncio.gather(*tasks)
+    summoners = [summoner for summoner in summoners if summoner]
 
     if isRank:
         s = sortedSummonersByGameRole(summoners)
@@ -741,7 +748,11 @@ async def parseEnemyGameInfo(session, currentSummonerId):
         if s != None:
             summoners = s
 
-    return {'summoners': summoners}
+    champions = {summoner['summonerId']: summoner['championId']
+                 for summoner in summoners}
+    order = [summoner['summonerId'] for summoner in summoners]
+
+    return {'summoners': summoners, 'champions': champions, 'order': order}
 
 
 def sortedSummonersByGameRole(summoners: list):
@@ -756,7 +767,7 @@ def sortedSummonersByGameRole(summoners: list):
 
 def getAllyOrderByGameRole(session, currentSummonerId):
     data = session['gameData']
-    queueId = data['queueId']['id']
+    queueId = data['queue']['id']
 
     # 只有排位模式下有返回值
     if queueId not in (420, 440):
@@ -788,7 +799,10 @@ def getTeamColor(session, currentSummonerId):
         currentColor = 0
 
         for s in team:
-            summonerId = s['summonerId']
+            summonerId = s.get('summonerId')
+            if not summonerId:
+                continue
+
             teamParticipantId = s.get("teamParticipantId")
 
             # 如果没这个字段，就是单排，直接让它的 color 为 -1
@@ -852,7 +866,7 @@ def separateTeams(data, currentSummonerId):
     enemy = None
 
     for summoner in team1:
-        if summoner['summonerId'] == currentSummonerId:
+        if summoner.get('summonerId') == currentSummonerId:
             ally = team1
             enemy = team2
             break
@@ -869,9 +883,10 @@ async def parseGamesDataConcurrently(games):
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
-    summonerId = item['summonerId']
 
-    if summonerId == 0:
+    summonerId = item.get('summonerId')
+
+    if summonerId == 0 or summonerId == None:
         return None
 
     summoner = await connector.getSummonerById(summonerId)
@@ -945,7 +960,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
         "puuid": puuid,
         "summonerId": summonerId,
         "kda": [kill, deaths, assists],
-        "cellId": item["cellId"],
+        "cellId": item.get("cellId"),
         "selectedPosition": item.get("selectedPosition"),
         "fateFlag": fateFlag,
         "isPublic": summoner["privacy"] == "PUBLIC",

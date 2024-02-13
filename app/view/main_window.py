@@ -1,17 +1,15 @@
-import copy
 import os
 import sys
 import traceback
 import time
 import webbrowser
 import pyperclip
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import asyncio
 from qasync import asyncClose, asyncSlot
 import pygetwindow as gw
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QIcon, QImage, QCursor
+from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from ..common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                                      FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
@@ -31,14 +29,13 @@ from ..common.config import cfg, VERSION
 from ..common.logger import logger
 from ..common.signals import signalBus
 from ..components.message_box import UpdateMessageBox, NoticeMessageBox
-from ..lol.entries import Summoner
+
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                               SummonerNotFound, SummonerNotInGame)
 from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
-from ..lol.tools import (parseGameData, getRecentChampions,
-                         parseAllyGameInfo, parseEnemyGameInfo,
+from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                          getAllyOrderByGameRole, getTeamColor)
 
 import threading
@@ -74,14 +71,12 @@ class MainWindow(FluentWindow):
         self.isClientProcessRunning = False
         self.processListener = LolProcessExistenceListener(
             self.tasklistPath, self)
-
         self.checkUpdateThread = StoppableThread(
             target=self.checkUpdate, parent=self)
         self.checkNoticeThread = StoppableThread(
             target=lambda: self.checkNotice(False), parent=self)
         self.minimizeThread = StoppableThread(
-            target=self.gameStartMinimize, parent=self
-        )
+            target=self.gameStartMinimize, parent=self)
 
         logger.critical("Seraphine listerners started", TAG)
 
@@ -606,6 +601,9 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(str)
     async def __switchToCareerInterface(self, puuid):
+        if puuid == '00000000-0000-0000-0000-000000000000':
+            return
+
         try:
             self.careerInterface.w.close()
         except:
@@ -701,9 +699,9 @@ class MainWindow(FluentWindow):
     async def __onChampionSelectBegin(self):
         async def paintAllySummonersInfo():
             session = await connector.getChampSelectSession()
+
             currentSummonerId = self.currentSummoner['summonerId']
             info = await parseAllyGameInfo(session, currentSummonerId)
-
             self.gameInfoInterface.updateAllySummoners(info)
 
         async def selectChampion():
@@ -735,9 +733,18 @@ class MainWindow(FluentWindow):
         session = await connector.getGameflowSession()
         currentSummonerId = self.currentSummoner['summonerId']
 
+        async def paintAllySummonersInfo():
+            if self.gameInfoInterface.allyChampions:
+                return
+
+            info = await parseGameInfoByGameflowSession(
+                session, currentSummonerId, "ally")
+            self.gameInfoInterface.updateAllySummoners(info)
+
         # 将敌方的召唤师基本信息绘制上去
         async def paintEnemySummonersInfo():
-            info = await parseEnemyGameInfo(session, currentSummonerId)
+            info = await parseGameInfoByGameflowSession(
+                session, currentSummonerId, 'enemy')
             # 这个 info 是已经按照游戏位置排序过的了（若排位）
             self.gameInfoInterface.updateEnemySummoners(info)
 
@@ -759,6 +766,7 @@ class MainWindow(FluentWindow):
             ally, enemy = getTeamColor(session, currentSummonerId)
             self.gameInfoInterface.updateTeamColor(ally, enemy)
 
+        await paintAllySummonersInfo()
         await asyncio.gather(paintEnemySummonersInfo(),
                              sortAllySummonersByGameRole())
         await paintTeamColor()

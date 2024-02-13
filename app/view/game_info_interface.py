@@ -101,7 +101,7 @@ class GameInfoInterface(SmoothScrollArea):
 
     async def updateAllyIcon(self, team):
         for new in team:
-            if not new['championId']:
+            if not new['championId'] or not new['summonerId']:
                 continue
 
             summonerId = new['summonerId']
@@ -236,6 +236,9 @@ class TeamSummoners(QFrame):
         self.clear()
 
         for summoner in summoners:
+            if not summoner:
+                continue
+
             summonerView = SummonerInfoView(summoner, self)
 
             # 用 summonerId 避免空字符串
@@ -247,7 +250,7 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addStretch(5 - len(summoners))
 
     def updateColor(self, colors):
-        for summonerId, color in colors:
+        for summonerId, color in colors.items():
             view = self.items.get(summonerId)
 
             if not view:
@@ -481,6 +484,9 @@ class SummonersGamesView(QFrame):
         self.clear()
 
         for i, summoner in enumerate(summoners):
+            if not summoner:
+                continue
+
             games = Games(summoner)
             self.items[summoner["summonerId"]] = games
 
