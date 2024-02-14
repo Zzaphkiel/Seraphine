@@ -53,7 +53,7 @@ class Config(QConfig):
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 60))
-    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
+    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 2,
                                            RangeValidator(1, 5), restart=True)
 
     gameInfoFilter = ConfigItem(

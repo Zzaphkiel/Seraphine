@@ -46,7 +46,8 @@ def retry(count=5, retry_sep=0):
             exce = None
             for _ in range(count):
                 try:
-                    res = await func(*args, **kwargs)
+                    async with connector.semaphore:
+                        res = await func(*args, **kwargs)
                 except BaseException as e:
                     time.sleep(retry_sep)
                     exce = e
@@ -149,9 +150,7 @@ class LolClientConnector(QObject):
         self.server = None
 
         self.manager = None
-
-        self.exceptApi = None
-        self.exceptObj = None
+        self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
 
     async def start(self, pid):
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
@@ -159,6 +158,8 @@ class LolClientConnector(QObject):
             base_url=f'https://127.0.0.1:{self.port}',
             auth=aiohttp.BasicAuth('riot', self.token)
         )
+
+        self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
         await self.__initManager()
         self.__initFolder()
