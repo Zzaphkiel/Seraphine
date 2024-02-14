@@ -629,7 +629,7 @@ class MainWindow(FluentWindow):
                 if side == 'blue':
                     mapSide = self.tr("Blue Team")
                 else:
-                    mapSide = self.tr("Read Team")
+                    mapSide = self.tr("Red Team")
 
                 title = title + " - " + mapSide
 
