@@ -771,6 +771,8 @@ class MainWindow(FluentWindow):
                              sortAllySummonersByGameRole())
         await paintTeamColor()
 
+        self.checkAndSwitchTo(self.gameInfoInterface)
+
     async def __onGameEnd(self):
         asyncio.create_task(self.gameInfoInterface.clear())
 
