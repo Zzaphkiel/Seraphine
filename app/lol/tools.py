@@ -790,73 +790,42 @@ def getTeamColor(session, currentSummonerId):
     ally, enemy = separateTeams(data, currentSummonerId)
 
     def makeTeam(team):
-        # teamParticipantId -> color 的映射
-        map = {}
-
-        # summonerId -> color 的映射
-        res = {}
-
-        currentColor = 0
+        # teamParticipantId => [summonerId]
+        tIdToSIds = {}
 
         for s in team:
             summonerId = s.get('summonerId')
             if not summonerId:
                 continue
 
-            teamParticipantId = s.get("teamParticipantId")
-
-            # 如果没这个字段，就是单排，直接让它的 color 为 -1
-            if teamParticipantId == None:
-                res[summonerId] = -1
+            teamParticipantId = s.get('teamParticipantId')
+            if not teamParticipantId:
                 continue
 
-            color = map.get(teamParticipantId)
+            summoners = tIdToSIds.get(teamParticipantId)
 
-            if color == None:
-                # 如果目前没有相同的 teamParticipantId
-                map[teamParticipantId] = currentColor
-                res[summonerId] = currentColor
-                currentColor += 1
+            if not summoners:
+                tIdToSIds[teamParticipantId] = [summonerId]
             else:
-                res[summonerId] = color
+                tIdToSIds[teamParticipantId].append(summonerId)
+
+        # summonerId => color
+        res = {}
+
+        currentColor = 0
+
+        for ids in tIdToSIds.values():
+            if len(ids) == 1:
+                res[ids[0]] = -1
+            else:
+                for id in ids:
+                    res[id] = currentColor
+
+                currentColor += 1
 
         return res
 
     return makeTeam(ally), makeTeam(enemy)
-
-
-async def getSummonerGames(puuid, begIndex, endIndex, queueId):
-    '''
-    从 `begIndex`（含）开始，返回 100 局同 `queueId` 的对局
-
-    以下情况会导致返回值不够 100 局：
-
-    - 从 `begIndex` 开始，总对局数量已不足 100
-    - 从 `begIndex` 开始，一年内且同 `queueId` 的对局不足 100
-    '''
-    games = await connector.getSummonerGamesByPuuid(puuid, begIndex, begIndex+99)
-
-    # TODO!
-
-    return games
-    # now = time.time()
-    # res = []
-
-    # if games['gameCount'] == 0:
-    #     return res
-
-    # for game in games['games']:
-    #     gameTime = game['gameCreation']
-
-    #     if queueId and now - gameTime / 1000 > 60 * 60 * 24 * 365:
-    #         return res
-
-    #     if queueId and game['queueId'] != queueId:
-    #         continue
-
-    #     res.append(game)
-
-    # return res
 
 
 def separateTeams(data, currentSummonerId):
