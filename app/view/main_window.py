@@ -652,6 +652,7 @@ class MainWindow(FluentWindow):
         elif status == 'Lobby':
             title = self.tr("Lobby")
             await self.__onGameEnd()
+            await self.careerInterface.refresh()
             self.switchTo(self.careerInterface)
         elif status == 'ReadyCheck':
             title = self.tr("Ready check")
@@ -691,7 +692,6 @@ class MainWindow(FluentWindow):
                 # 掉线立刻重连会无效
                 await asyncio.sleep(.3)
                 await connector.reconnect()
-                return
 
         asyncio.create_task(reconnect())
 

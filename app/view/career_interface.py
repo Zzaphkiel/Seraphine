@@ -310,7 +310,7 @@ class CareerInterface(SmoothScrollArea):
 
     def __connectSignalToSlot(self):
         self.backToMeButton.clicked.connect(self.__changeToCurrentSummoner)
-        self.refreshButton.clicked.connect(self.__onRefreshButtonClicked)
+        self.refreshButton.clicked.connect(self.refresh)
         self.searchButton.clicked.connect(
             lambda: signalBus.toSearchInterface.emit(self.getSummonerName()))
         self.filterComboBox.currentIndexChanged.connect(
@@ -347,7 +347,7 @@ class CareerInterface(SmoothScrollArea):
         self.setLoadingPageEnabled(False)
 
     @asyncSlot()
-    async def __onRefreshButtonClicked(self):
+    async def refresh(self):
         await self.updateInterface(puuid=self.puuid)
 
     async def updateInterface(self, puuid=None, summoner=None):
