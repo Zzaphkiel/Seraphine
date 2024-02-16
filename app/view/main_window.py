@@ -733,6 +733,7 @@ class MainWindow(FluentWindow):
         session = await connector.getGameflowSession()
         currentSummonerId = self.currentSummoner['summonerId']
 
+        # 如果是进游戏后开的软件，需要先把友方信息更新上去
         async def paintAllySummonersInfo():
             if self.gameInfoInterface.allyChampions:
                 return

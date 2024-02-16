@@ -1036,6 +1036,8 @@ class SearchInterface(SmoothScrollArea):
         self.gamesView.gameDetailView.clear()
         self.gamesView.gamesTab.clear()
 
+        self.__addSearchHistroy(name)
+
         # 停止已有的加载任务
         if self.gameLoadingTask != None:
             self.gameLoadingTask.cancel()
@@ -1055,7 +1057,8 @@ class SearchInterface(SmoothScrollArea):
         self.gamesView.setLoadingPageEnable(False)
 
         # 启动任务，往 gamesTab 里丢数据
-        self.gameLoadingTask = asyncio.create_task(self.loadGames(self.puuid))
+        self.gameLoadingTask = asyncio.create_task(
+            self.__loadGames(self.puuid))
 
         return True
 
@@ -1092,7 +1095,7 @@ class SearchInterface(SmoothScrollArea):
 
         self.gamesView.gamesTab.clickFirstTab()
 
-    async def loadGames(self, puuid):
+    async def __loadGames(self, puuid):
         begIdx = 20
         endIdx = 59
 
@@ -1175,3 +1178,13 @@ class SearchInterface(SmoothScrollArea):
 
         if enable:
             self.gamesView.gamesTab.showTheFirstPage()
+
+    def __addSearchHistroy(self, name):
+        history: list = cfg.get(cfg.searchHistory).split(',')
+
+        if name in history:
+            history.remove(name)
+
+        history.insert(0, name)
+        cfg.set(cfg.searchHistory, ",".join(
+            [t for t in history if t][:10]), True)
