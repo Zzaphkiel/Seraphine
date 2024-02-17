@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 import sys
 
 from PyQt5.QtCore import QLocale
@@ -112,6 +113,7 @@ AUTHOR = "Zaphkiel"
 VERSION = "0.10.3"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
+LOCAL_CONFIG_PATH = f"{os.getenv('APPDATA')}\\Seraphine\\config.json"
 
 cfg = Config()
-qconfig.load('app/config/config.json', cfg)
+qconfig.load(LOCAL_CONFIG_PATH, cfg)
