@@ -12,9 +12,10 @@ from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollAre
                                      CheckBox, setCustomStyleSheet, ProgressBar,
                                      PrimaryPushButton)
 
-from app.common.config import VERSION, cfg
+from app.common.config import VERSION, cfg, LOCAL_PATH
 from app.common.util import github
 from app.common.signals import signalBus
+from app.common.update import runUpdater
 
 
 class UpdateMessageBox(MessageBoxBase):
@@ -58,7 +59,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setVisible(False)
         self.bar.setVisible(False)
 
-        self.myYesButton.setText(self.tr("Download"))
+        self.myYesButton.setText(self.tr("Update and Restart"))
         self.myCancelButton.setText(self.tr("Ok"))
 
         self.myYesButton.clicked.connect(self.__onYesButtonClicked)
@@ -94,7 +95,7 @@ class UpdateMessageBox(MessageBoxBase):
             self.bar.setMaximum(length)
             cur = 0
 
-            with open('Seraphine.zip', 'wb') as f:
+            with open(f'{LOCAL_PATH}/Seraphine.zip', 'wb') as f:
                 async for chunk in resp.content.iter_chunked(1024*1024):
                     f.write(chunk)
 
@@ -106,13 +107,14 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setText(
             self.tr("Downloading finished, decompressing..."))
 
-        with zipfile.ZipFile('Seraphine.zip', 'r') as z:
-            z.extractall('tmp')
+        with zipfile.ZipFile(f'{LOCAL_PATH}/Seraphine.zip', 'r') as z:
+            z.extractall(f'{LOCAL_PATH}/temp')
 
+        os.remove(f'{LOCAL_PATH}/Seraphine.zip')
         self.infoLabel.setText("Waiting for restart...")
 
         # 覆盖自己
-        # subprocess.Popen()
+        runUpdater()
 
         # 关掉 QThread 之后退出
         signalBus.terminateListeners.emit()

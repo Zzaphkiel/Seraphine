@@ -113,7 +113,7 @@ AUTHOR = "Zaphkiel"
 VERSION = "0.10.3"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
-LOCAL_CONFIG_PATH = f"{os.getenv('APPDATA')}\\Seraphine\\config.json"
+LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"
 
 cfg = Config()
-qconfig.load(LOCAL_CONFIG_PATH, cfg)
+qconfig.load(f"{LOCAL_PATH}\\config.json", cfg)
