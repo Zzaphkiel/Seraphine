@@ -11,6 +11,8 @@ class Github:
         self.githubApi = "http://api.github.com"
         self.giteeApi = "http://gitee.com/api"
 
+        self.proxyApi = 'https://ghproxy.net'
+
         self.user = user
         self.repositories = repositories
         self.sess = requests.session()

@@ -170,6 +170,7 @@ class MainWindow(FluentWindow):
         signalBus.lolClientStarted.connect(
             self.__onLolClientStarted)
         signalBus.lolClientEnded.connect(self.__onLolClientEnded)
+        signalBus.terminateListeners.connect(self.__terminateListeners)
 
         # From connector
         signalBus.currentSummonerProfileChanged.connect(
@@ -325,8 +326,7 @@ class MainWindow(FluentWindow):
 
     def __onShowUpdateMessageBox(self, info):
         msgBox = UpdateMessageBox(info, self.window())
-        if msgBox.exec():
-            webbrowser.open(info['assets'][0]['browser_download_url'])
+        msgBox.exec()
 
     def __onShowNoticeMessageBox(self, msg):
         msgBox = NoticeMessageBox(msg, self.window())
@@ -563,6 +563,12 @@ class MainWindow(FluentWindow):
         self.auxiliaryFuncInterface.setEnabled(False)
         # pass
 
+    def __terminateListeners(self):
+        self.processListener.terminate()
+        self.checkUpdateThread.terminate()
+        self.checkNoticeThread.terminate()
+        self.minimizeThread.terminate()
+
     @asyncClose
     async def closeEvent(self, a0) -> None:
 
@@ -582,10 +588,7 @@ class MainWindow(FluentWindow):
             cfg.set(cfg.enableCloseToTray, msgBox.exec())
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
-            self.processListener.terminate()
-            self.checkUpdateThread.terminate()
-            self.checkNoticeThread.terminate()
-            self.minimizeThread.terminate()
+            self.__terminateListeners()
 
             return super().closeEvent(a0)
         else:

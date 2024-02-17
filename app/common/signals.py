@@ -7,6 +7,8 @@ class SignalBus(QObject):
     lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
 
+    terminateListeners = pyqtSignal()
+
     # connector:
     lcuApiExceptionRaised = pyqtSignal(str, BaseException)
     currentSummonerProfileChanged = pyqtSignal(dict)

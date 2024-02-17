@@ -9,11 +9,17 @@ from PyQt5.QtCore import Qt, QTranslator
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from app.common.config import cfg
+from app.common.config import cfg, VERSION
 from app.view.main_window import MainWindow
 
 
-if __name__ == '__main__':
+def main():
+    args = sys.argv
+    if len(args) == 2 and args[1] in ['--version', '-v']:
+        print(VERSION)
+        return
+
+
     if cfg.get(cfg.dpiScale) == "Auto":
         QApplication.setHighDpiScaleFactorRoundingPolicy(
             Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
@@ -45,3 +51,7 @@ if __name__ == '__main__':
 
     eventLoop.run_until_complete(appCloseEvent.wait())
     eventLoop.close()
+
+
+if __name__ == '__main__':
+    main()
