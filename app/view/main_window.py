@@ -793,7 +793,8 @@ class MainWindow(FluentWindow):
 
     @asyncSlot()
     async def __refreshCareerInterface(self):
-        self.careerInterface.refreshButton.click()
+        if self.isClientProcessRunning:
+            self.careerInterface.refreshButton.click()
 
     @asyncSlot()
     async def __onFixLCUButtonClicked(self):
