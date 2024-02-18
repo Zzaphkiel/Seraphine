@@ -15,9 +15,9 @@ body:
   - type: checkboxes
     id: confirm-unduplicate
     attributes:
-      label: 我已经查看了之前（包括已经关闭）的 issue，但并没有与我相同的建议
+      label: 在提交之前，请您确认
       options:
-        - label: 是
+        - label: 我已经查看了之前（包括已经关闭）的 [issues](https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue)，其中并没有与我相同的想法
           required: true
     validations:
       required: true

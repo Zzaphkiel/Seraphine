@@ -15,9 +15,11 @@ body:
   - type: checkboxes
     id: confirm-unduplicate
     attributes:
-      label: 我已经查看了之前（包括已经关闭）的 issue，但这并不能解决我的问题
+      label: 在提交之前，请您确认
       options:
-        - label: 是
+        - label: 我已经查看了 [常见问题 FAQ](https://github.com/Zzaphkiel/Seraphine?tab=readme-ov-file#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98-faq-)，但并不能解决我的问题
+          required: true
+        - label: 我已经查看了之前（包括已经关闭）的 [issues](https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue)，但并不能解决我的问题
           required: true
     validations:
       required: true
