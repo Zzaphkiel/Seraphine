@@ -35,12 +35,13 @@ for %%a in (%src%\\*) do (
     move %%a .
 )
 
-@REM 删除原来的那堆东西和自己
+@REM 删除原来的那堆东西
 rmdir %src% /s /q
 
 @REM 启动一下新版本
 start /b .\Seraphine.exe
 
+@REM 删除自己
 del %0
 '''
 

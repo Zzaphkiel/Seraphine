@@ -76,6 +76,7 @@ class GameInfoInterface(SmoothScrollArea):
 
         if order != self.allyOrder:
             self.summonersView.ally.updateSummonersOrder(order)
+            self.allyGamesView.updateOrder(order)
             self.allyOrder = order
 
     def updateAllySummoners(self, info):

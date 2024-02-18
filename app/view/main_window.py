@@ -763,6 +763,7 @@ class MainWindow(FluentWindow):
                 return
 
             interface.summonersView.ally.updateSummonersOrder(order)
+            interface.allyGamesView.updateOrder(order)
             interface.allyOrder = order
 
         # 绘制提示组队的颜色
