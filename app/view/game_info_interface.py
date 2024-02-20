@@ -473,9 +473,19 @@ class SummonersGamesView(QFrame):
             item = self.hBoxLayout.itemAt(i)
             self.hBoxLayout.removeItem(item)
 
-        for summonerId in order:
+        for i, summonerId in enumerate(order):
             view = self.items[summonerId]
             self.hBoxLayout.addWidget(view)
+
+            view.setProperty("isFirst", False)
+            view.setProperty("isLast", False)
+
+            if i == 0:
+                view.setProperty("isFirst", True)
+            elif i == 4:
+                view.setProperty("isLast", True)
+
+            view.style().polish(view)
 
         if len(order) < 5:
             self.hBoxLayout.addSpacing(self.hBoxLayout.spacing())
