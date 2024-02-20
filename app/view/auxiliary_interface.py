@@ -137,46 +137,6 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.expandLayout.addWidget(self.gameGroup)
         self.expandLayout.addWidget(self.profileGroup)
 
-    def setEnabled(self, a0: bool) -> None:
-        self.autoAcceptMatchingCard.switchButton.setEnabled(a0)
-        self.autoAcceptMatchingCard.lineEdit.setEnabled(a0)
-
-        self.createPracticeLobbyCard.clear()
-        self.createPracticeLobbyCard.nameLineEdit.setEnabled(a0)
-        self.createPracticeLobbyCard.passwordLineEdit.setEnabled(a0)
-
-        self.spectateCard.lineEdit.clear()
-        self.spectateCard.lineEdit.setEnabled(a0)
-
-        self.onlineStatusCard.clear()
-        self.onlineStatusCard.lineEdit.setEnabled(a0)
-
-        self.profileBackgroundCard.clear()
-        self.profileBackgroundCard.championEdit.setEnabled(a0)
-
-        self.profileTierCard.clear()
-        self.profileTierCard.rankModeBox.setEnabled(a0)
-        self.profileTierCard.tierBox.setEnabled(a0)
-        self.profileTierCard.divisionBox.setEnabled(a0)
-
-        self.onlineAvailabilityCard.clear()
-        self.onlineAvailabilityCard.comboBox.setEnabled(a0)
-
-        if not cfg.get(cfg.enableAutoSelectChampion):
-            self.autoSelectChampionCard.lineEdit.setEnabled(a0)
-        if a0:
-            self.autoSelectChampionCard.validate()
-
-        self.removeTokensCard.pushButton.setEnabled(a0)
-
-        if a0 and cfg.get(cfg.enableAutoSelectChampion):
-            self.autoSelectChampionCard.switchButton.setEnabled(True)
-
-        self.lockConfigCard.setEnabled(a0)
-        self.autoReconnectCard.setEnabled(a0)
-
-        return super().setEnabled(a0)
-
 
 class OnlineStatusCard(ExpandGroupSettingCard):
     def __init__(self, title, content, parent=None):
@@ -320,6 +280,8 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
             self.skinComboBox.clear()
             self.skinComboBox.setEnabled(False)
             self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+
+        self.__onComboBoxTextChanged()
 
     def __onComboBoxTextChanged(self):
         enable = self.championEdit.text(
@@ -860,7 +822,6 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
         self.lineEdit.setSingleStep(1)
         self.lineEdit.setMinimumWidth(250)
 
-        self.switchButton.setEnabled(False)
         self.switchButton.setChecked(cfg.get(self.enableConfigItem))
 
         self.lineEdit.valueChanged.connect(self.__onLineEditValueChanged)
@@ -952,7 +913,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.lineEdit.setPlaceholderText(self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
-        self.lineEdit.setEnabled(False)
 
         self.switchButton.setEnabled(False)
 
