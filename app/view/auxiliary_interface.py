@@ -241,7 +241,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __initWidget(self):
         self.championEdit.setPlaceholderText(
-            self.tr("Place input champion name"))
+            self.tr("Please input champion name"))
         self.championEdit.setMinimumWidth(250)
         self.championEdit.setClearButtonEnabled(True)
 
@@ -250,7 +250,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
         self.skinComboBox.setEnabled(False)
         self.skinComboBox.setMinimumWidth(250)
-        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+        self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
 
         self.championEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.skinComboBox.currentTextChanged.connect(
@@ -279,7 +279,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         else:
             self.skinComboBox.clear()
             self.skinComboBox.setEnabled(False)
-            self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+            self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
 
         self.__onComboBoxTextChanged()
 
