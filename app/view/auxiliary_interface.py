@@ -172,18 +172,14 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         if not cfg.get(cfg.enableAutoSelectChampion):
             self.autoSelectChampionCard.lineEdit.setEnabled(a0)
-        if a0:
-            self.autoSelectChampionCard.validate()
 
         self.removeTokensCard.pushButton.setEnabled(a0)
 
-        if a0 and cfg.get(cfg.enableAutoBanChampion):
-            self.autoBanChampionCard.switchButton.setEnabled(True)
+        if a0 and cfg.get(cfg.enableAutoSelectChampion):
+            self.autoSelectChampionCard.switchButton.setEnabled(True)
 
         if not cfg.get(cfg.enableAutoBanChampion):
             self.autoBanChampionCard.lineEdit.setEnabled(a0)
-        if a0:
-            self.autoBanChampionCard.validate()
 
         if a0 and cfg.get(cfg.enableAutoBanChampion):
             self.autoBanChampionCard.switchButton.setEnabled(True)
@@ -1008,6 +1004,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.validate()
 
     def setValue(self, championName: str, isChecked: bool):
+        print(f"{championName = }, {isChecked = }")
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
 
@@ -1020,6 +1017,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         text = self.lineEdit.text()
 
         if text not in self.champions and self.switchButton.checked:
+            print('hi')
             self.setValue("", False)
 
         self.__onLineEditTextChanged(text)
@@ -1032,6 +1030,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.setValue(text, self.switchButton.isChecked())
 
     def __onCheckedChanged(self, isChecked: bool):
+
         self.lineEdit.setEnabled(not isChecked)
         self.setValue(self.lineEdit.text(), isChecked)
 
