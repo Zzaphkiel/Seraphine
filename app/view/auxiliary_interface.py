@@ -1004,7 +1004,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.validate()
 
     def setValue(self, championName: str, isChecked: bool):
-        print(f"{championName = }, {isChecked = }")
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
 
@@ -1017,7 +1016,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         text = self.lineEdit.text()
 
         if text not in self.champions and self.switchButton.checked:
-            print('hi')
             self.setValue("", False)
 
         self.__onLineEditTextChanged(text)
