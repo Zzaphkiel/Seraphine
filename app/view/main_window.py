@@ -1212,6 +1212,9 @@ class MainWindow(FluentWindow):
                 if result is not None:
                     summoners.append(result)
 
+            if len(summoners) > 5:
+                return
+
             summoners = sorted(
                 summoners, key=lambda x: x["cellId"])  # 按照选用顺序排序
 
