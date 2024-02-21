@@ -51,6 +51,7 @@ class MainWindow(FluentWindow):
     showUpdateMessageBox = pyqtSignal(dict)
     showNoticeMessageBox = pyqtSignal(str)
     checkUpdateFailed = pyqtSignal()
+    fetchNoticeFailed = pyqtSignal()
     showLcuConnectError = pyqtSignal(str, BaseException)
 
     def __init__(self):
@@ -194,6 +195,7 @@ class MainWindow(FluentWindow):
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
         self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
         self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
+        self.fetchNoticeFailed.connect(self.__onFetchNoticeFailed)
         self.showLcuConnectError.connect(self.__onShowLcuConnectError)
 
         self.careerInterface.searchButton.clicked.connect(
@@ -324,6 +326,7 @@ class MainWindow(FluentWindow):
             sha = noticeInfo['sha']
             content = noticeInfo['content']
         except:
+            self.fetchNoticeFailed.emit()
             return
 
         # 如果是开启软件时，并且该公告曾经已经展示过，就直接 return 了
@@ -338,6 +341,17 @@ class MainWindow(FluentWindow):
             self.tr("Check Update Failed"),
             self.tr(
                 "Failed to check for updates, possibly unable to connect to Github."),
+            duration=5000,
+            orient=Qt.Vertical,
+            parent=self,
+            position=InfoBarPosition.BOTTOM_RIGHT
+        )
+
+    def __onFetchNoticeFailed(self):
+        InfoBar.warning(
+            self.tr("Fetch notice Failed"),
+            self.tr(
+                "Failed to fetch notice, possibly unable to connect to Github."),
             duration=5000,
             orient=Qt.Vertical,
             parent=self,
