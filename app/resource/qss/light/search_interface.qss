@@ -99,7 +99,7 @@ SummonerInfoBar#currentSummonerWidget>QLabel {
 SummonerName {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
     text-align: left;
-    padding: 4px 6px 4px 6px;
+    padding: 0px 6px 3px 6px;
     color: black;
     border: none;
     background-color: transparent;

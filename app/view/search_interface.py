@@ -7,9 +7,9 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from ..common.qfluentwidgets import (SmoothScrollArea, LineEdit, PushButton, ToolButton, InfoBar,
-                            InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
-                            CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
-                            StateToolTip)
+                                     InfoBarPosition, ToolTipFilter, ToolTipPosition, Theme, isDarkTheme, FlyoutViewBase, Flyout,
+                                     CardWidget, IndeterminateProgressRing, FlyoutView, FlyoutAnimationType, ComboBox,
+                                     StateToolTip)
 
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
@@ -732,7 +732,8 @@ class SummonerInfoBar(QFrame):
 
         self.levelLabel = QLabel()
         self.championIconLabel = RoundIcon(summoner["championIcon"], 25, 0, 3)
-        self.summonerName = SummonerName(summoner["summonerName"], isPublic=summoner["isPublic"])
+        self.summonerName = SummonerName(
+            summoner["summonerName"], isPublic=summoner["isPublic"])
 
         self.rankIcon = QLabel()
 
@@ -754,6 +755,10 @@ class SummonerInfoBar(QFrame):
         self.isCurrent = summoner["isCurrent"]
         if self.isCurrent:
             self.setObjectName("currentSummonerWidget")
+
+        self.summonerName.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        self.summonerName.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.runeIcon.setPixmap(QPixmap(summoner["runeIcon"]).scaled(
             23, 23, Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -833,10 +838,10 @@ class SummonerInfoBar(QFrame):
         self.hBoxLayout.addLayout(self.spellsLayout)
         self.hBoxLayout.addWidget(self.levelLabel)
         self.hBoxLayout.addWidget(self.championIconLabel)
-        self.hBoxLayout.addWidget(self.summonerName)
-        self.hBoxLayout.addSpacing(10)
+        self.hBoxLayout.addWidget(self.summonerName, alignment=Qt.AlignVCenter)
+        self.hBoxLayout.addSpacing(4)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
-            1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            1, 1, QSizePolicy.Minimum, QSizePolicy.Minimum))
         self.hBoxLayout.addSpacing(5)
         self.hBoxLayout.addWidget(self.rankIcon)
         self.hBoxLayout.addSpacing(5)
