@@ -1009,7 +1009,7 @@ class MainWindow(FluentWindow):
                                     if championId == team["championPickIntent"]:
                                         isIntent = True
                                         break
-                                if not isIntent and ["isInProgress"]:
+                                if not isIntent and action["isInProgress"]:
                                     connector.banChampion(actionId, championId)
                                     break
 
