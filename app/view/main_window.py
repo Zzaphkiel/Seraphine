@@ -1002,9 +1002,14 @@ class MainWindow(FluentWindow):
                                 connector.selectChampion(actionId, championId)
                                 break
                             elif action["type"] == "ban" and isAutoBan:
-                                if action["isInProgress"]:
-                                    championId = connector.manager.getChampionIdByName(
-                                        cfg.get(cfg.autoBanChampion))
+                                championId = connector.manager.getChampionIdByName(
+                                    cfg.get(cfg.autoBanChampion))
+                                isIntent = False
+                                for team in data["data"]["myTeam"]:
+                                    if championId == team["championPickIntent"]:
+                                        isIntent = True
+                                        break
+                                if not isIntent and ["isInProgress"]:
                                     connector.banChampion(actionId, championId)
                                     break
 
