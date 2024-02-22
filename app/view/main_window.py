@@ -990,28 +990,40 @@ class MainWindow(FluentWindow):
         if isAutoBan or isAutoSelect:
             def selectOrBan():
                 localPlayerCellId = data["data"]["localPlayerCellId"]
+                team = data["data"]["myTeam"]
                 actions = data["data"]["actions"]
                 for actionGroup in actions:
                     for action in actionGroup:
                         if (action["actorCellId"] == localPlayerCellId
                                 and not action["completed"]):
                             actionId = action["id"]
-                            if action["type"] == "pick" and isAutoSelect:
-                                championId = connector.manager.getChampionIdByName(
-                                    cfg.get(cfg.autoSelectChampion))
-                                connector.selectChampion(actionId, championId)
-                                break
-                            elif action["type"] == "ban" and isAutoBan:
-                                championId = connector.manager.getChampionIdByName(
-                                    cfg.get(cfg.autoBanChampion))
-                                isIntent = False
-                                for team in data["data"]["myTeam"]:
-                                    if championId == team["championPickIntent"]:
-                                        isIntent = True
+                            if isAutoSelect and action["type"] == "pick":
+                                isPicked = False
+                                for player in team:
+                                    if player["cellId"] == localPlayerCellId:
+                                        isPicked = bool(player["championId"]) or bool(player["championPickIntent"])
                                         break
-                                if not isIntent and action["isInProgress"]:
+
+                                if not isPicked:
+                                    championId = connector.manager.getChampionIdByName(
+                                        cfg.get(cfg.autoSelectChampion))
+                                    connector.selectChampion(actionId, championId)
+
+                            elif isAutoBan and action["type"] == "ban":
+                                if action["isInProgress"]:
+                                    championId = connector.manager.getChampionIdByName(
+                                        cfg.get(cfg.autoBanChampion))
+
+                                    isFriendly = cfg.get(cfg.pretentBan)
+                                    if isFriendly:
+                                        for player in team:
+                                            if championId == player["championPickIntent"]:
+                                                championId = 0
+                                                break
+
                                     connector.banChampion(actionId, championId)
-                                    break
+
+                            break
 
             threading.Thread(target=selectOrBan).start()
 
