@@ -98,7 +98,7 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Auto ban champion"),
             self.tr("Auto ban champion when your ban section begin"),
             cfg.enableAutoBanChampion, cfg.autoBanChampion,
-            self.bpGroup)
+            cfg.pretentBan, self.bpGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -182,7 +182,7 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.autoBanChampionCard.lineEdit.setEnabled(a0)
 
         if a0 and cfg.get(cfg.enableAutoBanChampion):
-            self.autoBanChampionCard.switchButton.setEnabled(True)
+            self.autoBanChampionCard.switchButton1.setEnabled(True)
 
         self.lockConfigCard.setEnabled(a0)
         self.autoReconnectCard.setEnabled(a0)
@@ -1036,7 +1036,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 # 自动 ban 英雄卡片
 class AutoBanChampionCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
-                 championConfigItem: ConfigItem = None, parent=None):
+                 championConfigItem: ConfigItem = None,
+                 pretentConfigItem: ConfigItem = None, parent=None):
         super().__init__(Icon.SQUARECROSS, title, content, parent)
 
         self.statusLabel = QLabel(self)
@@ -1049,14 +1050,21 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.lineEdit = LineEdit()
 
         self.switchButtonWidget = QWidget(self.view)
-        self.switchButtonLayout = QHBoxLayout(self.switchButtonWidget)
-        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+        self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
+
+        self.label1 = QLabel(self.tr("Enable:"))
+        self.switchButton1 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.label2 = QLabel(
+            self.tr("Prevent banning champions selected by teammates"))
+        self.switchButton2 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
         self.completer = None
         self.champions = []
 
         self.enableConfigItem = enableConfigItem
         self.championConfigItem = championConfigItem
+        self.pretentConfigItem = pretentConfigItem
 
         self.__initLayout()
         self.__initWidget()
@@ -1073,7 +1081,13 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
-        self.switchButtonLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
+        self.switchButtonLayout.setVerticalSpacing(15)
+        self.switchButtonLayout.addWidget(self.label1, 0, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.switchButton1, 0, 1, Qt.AlignRight)
+        self.switchButtonLayout.addWidget(self.label2, 1, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.switchButton2, 1, 1, Qt.AlignRight)
         self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.viewLayout.setSpacing(0)
@@ -1087,13 +1101,16 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.lineEdit.setClearButtonEnabled(True)
         self.lineEdit.setEnabled(False)
 
-        self.switchButton.setEnabled(False)
+        self.switchButton1.setEnabled(False)
+        self.switchButton2.setEnabled(False)
 
         self.setValue(qconfig.get(self.championConfigItem),
-                      qconfig.get(self.enableConfigItem))
+                      qconfig.get(self.enableConfigItem),
+                      qconfig.get(self.pretentConfigItem))
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
-        self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
+        self.switchButton1.checkedChanged.connect(self.__onCheckedChanged)
+        self.switchButton2.checkedChanged.connect(self.__onPrententChanged)
 
     def __setStatusLabelText(self, champion, isChecked):
         if isChecked:
@@ -1109,33 +1126,47 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
 
         self.validate()
 
-    def setValue(self, championName: str, isChecked: bool):
+    def setValue(self, championName: str, isChecked: bool, pretent: bool):
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
+        qconfig.set(self.pretentConfigItem, pretent)
 
         self.lineEdit.setText(championName)
-        self.switchButton.setChecked(isChecked)
+        self.switchButton1.setChecked(isChecked)
+        self.switchButton2.setChecked(pretent)
 
         self.__setStatusLabelText(championName, isChecked)
 
     def validate(self):
         text = self.lineEdit.text()
 
-        if text not in self.champions and self.switchButton.checked:
-            self.setValue("", False)
+        if text not in self.champions and self.switchButton1.checked:
+            self.setValue("", False, False)
 
         self.__onLineEditTextChanged(text)
+        self.__onCheckedChanged(self.switchButton1.isChecked())
 
     def __onLineEditTextChanged(self, text):
         enable = text in self.champions
 
-        self.switchButton.setEnabled(enable)
+        self.switchButton1.setEnabled(enable)
 
-        self.setValue(text, self.switchButton.isChecked())
+        self.setValue(text, self.switchButton1.isChecked(),
+                      self.switchButton2.isChecked())
 
     def __onCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)
-        self.setValue(self.lineEdit.text(), isChecked)
+        self.switchButton2.setEnabled(isChecked)
+
+        if not isChecked:
+            self.switchButton2.setChecked(False)
+
+        self.setValue(self.lineEdit.text(), isChecked,
+                      self.switchButton2.isChecked())
+
+    def __onPrententChanged(self, isChecked: bool):
+        self.setValue(self.lineEdit.text(), self.switchButton1.isChecked(),
+                      isChecked)
 
 
 class DodgeCard(SettingCard):

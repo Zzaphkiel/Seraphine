@@ -81,6 +81,7 @@ class Config(QConfig):
     enableAutoBanChampion = ConfigItem(
         "Functions", "EnableAutoBanChampion", False, BoolValidator())
     autoBanChampion = ConfigItem("Functions", "AutoBanChampion", "")
+    pretentBan = ConfigItem("Functions", "PrententBan", False, BoolValidator())
 
     lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
 
