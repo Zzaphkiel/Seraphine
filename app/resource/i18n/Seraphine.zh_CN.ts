@@ -27,24 +27,34 @@
 <context>
     <name>AutoBanChampionCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1047"/>
+        <location filename="../../view/auxiliary_interface.py" line="1048"/>
         <source>Champion will be banned automatically:</source>
         <translation>将要被自动禁用的英雄：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1085"/>
+        <location filename="../../view/auxiliary_interface.py" line="1099"/>
         <source>Champion name</source>
         <translation>请输入英雄名</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1100"/>
+        <location filename="../../view/auxiliary_interface.py" line="1117"/>
         <source>Enabled, champion: </source>
         <translation>已启用，自动禁用：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1102"/>
+        <location filename="../../view/auxiliary_interface.py" line="1119"/>
         <source>Disabled</source>
         <translation>未启用</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="1055"/>
+        <source>Enable:</source>
+        <translation>启用自动 Ban：</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="1058"/>
+        <source>Prevent banning champions selected by teammates</source>
+        <translation>若队友预选该英雄，则空 Ban：</translation>
     </message>
 </context>
 <context>
@@ -430,7 +440,7 @@
 <context>
     <name>DodgeCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1144"/>
+        <location filename="../../view/auxiliary_interface.py" line="1175"/>
         <source>Dodge</source>
         <translation>秒退</translation>
     </message>
@@ -456,32 +466,32 @@
 <context>
     <name>FriendRequestCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1227"/>
+        <location filename="../../view/auxiliary_interface.py" line="1258"/>
         <source>Send</source>
         <translation>发送</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1252"/>
+        <location filename="../../view/auxiliary_interface.py" line="1283"/>
         <source>Please input summoner&apos;s name</source>
         <translation>请输入召唤师名</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1278"/>
+        <location filename="../../view/auxiliary_interface.py" line="1309"/>
         <source>Summoner not found</source>
         <translation>召唤师未找到</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1278"/>
+        <location filename="../../view/auxiliary_interface.py" line="1309"/>
         <source>Please check the summoner&apos;s name and retry</source>
         <translation>请检查召唤师名后重试</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1281"/>
+        <location filename="../../view/auxiliary_interface.py" line="1312"/>
         <source>Send friend request successfully</source>
         <translation>发送好友请求成功</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1221"/>
+        <location filename="../../view/auxiliary_interface.py" line="1252"/>
         <source>Summoners&apos;s name you want to send friend request to:</source>
         <translation>你想加好友的召唤师名：</translation>
     </message>
@@ -594,12 +604,12 @@
 <context>
     <name>LockConfigCard</name>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1187"/>
+        <location filename="../../view/auxiliary_interface.py" line="1218"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1187"/>
+        <location filename="../../view/auxiliary_interface.py" line="1218"/>
         <source>Failed to set file permissions</source>
         <translation>设置文件读写属性失败</translation>
     </message>
