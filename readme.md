@@ -59,13 +59,14 @@ python main.py
   - 游戏功能 
     - 找到对局后自动接受对局 ✅
     - 进入英雄选择后自动选择英雄 ✅
+    - 进入禁用环节时自动禁用英雄 ✅
     - 创建 5v5 自定义训练模式房间 ✅
     - 观战同大区玩家正在进行的游戏 ✅
     - 锁定游戏内设置 ✅
   
   - 客户端功能
     - 退出后自动重新连接 ✅
-    - 修复客户端结算时无限转圈 ✅
+    - 修复客户端结算时无限转圈和缩成一块 ✅
 
   - 个性化功能
     - 修改个人主页背景 ✅
@@ -79,6 +80,9 @@ python main.py
 ### Q：我会因为使用 Seraphine 而被封号吗 😨？
 由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，但**并不保证**一定不会封号。
 
+### Q：真的被封号了怎么办？
+根据反馈，目前有被封 1 小时的情况发生，申诉或等待解封吧 😭
+
 ### Q：为什么客户端无法连接 / 功能无法使用 / 生涯界面无限转圈 / 最新战绩更新有延迟？
 Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户端接口所提供的，程序只是负责将它们显示出来。所以如果遇到功能无法使用或数据更新由延迟的情况，原因基本出在英雄联盟服务器本身，与 Seraphine 大概率没啥关系~
 
@@ -88,9 +92,12 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 ### Q：为什么不提供具体某模式 / 某英雄总场次以及总胜率？
 英雄联盟客户端没有提供相关数据接口，我们做不到哇~
 
+### Q：客户端为什么有时候会闪退？
+我们怀疑是由于并发 LCU API 访问导致的，您可以自行在设置中设置这一数量。
+
 
 ## 帮助我们改进 Seraphine 😘
-在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请务必带上**环境信息**（如 Python、Seraphine 版本等），以及问题的**复现过程**；若程序报错请带上**错误信息**。
+在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请按照模板填写哦~
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
 
@@ -114,9 +121,9 @@ pip install pyinstaller==5.13
 
 ## 参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
-- 部分与 LOL 客户端的通信使用 [lcu-driver](https://github.com/sousa-andre/lcu-driver) 实现
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
+  - https://hextechdocs.dev/tag/lcu/
   - https://developer.riotgames.com/docs/lol
   - https://www.mingweisamuel.com/lcu-schema/tool/#/
 
