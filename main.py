@@ -1,4 +1,6 @@
 # coding:utf-8
+from app.view.main_window import MainWindow
+from app.common.config import cfg, VERSION
 import sys
 import os
 
@@ -9,16 +11,12 @@ from PyQt5.QtCore import Qt, QTranslator
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from app.common.config import cfg, VERSION
-from app.view.main_window import MainWindow
-
 
 def main():
     args = sys.argv
     if len(args) == 2 and args[1] in ['--version', '-v']:
         print(VERSION)
         return
-
 
     if cfg.get(cfg.dpiScale) == "Auto":
         QApplication.setHighDpiScaleFactorRoundingPolicy(
@@ -39,12 +37,12 @@ def main():
     app.aboutToQuit.connect(appCloseEvent.set)
 
     locale = cfg.get(cfg.language).value
-    translator = FluentTranslator(locale)
-    lolHelperTranslator = QTranslator()
-    lolHelperTranslator.load(locale, "Seraphine", ".", "./app/resource/i18n")
+    fluentTranslator = FluentTranslator(locale)
+    seraphineTranslator = QTranslator()
+    seraphineTranslator.load(locale, "Seraphine", ".", "./app/resource/i18n")
 
-    app.installTranslator(translator)
-    app.installTranslator(lolHelperTranslator)
+    app.installTranslator(fluentTranslator)
+    app.installTranslator(seraphineTranslator)
 
     w = MainWindow()
     w.show()
