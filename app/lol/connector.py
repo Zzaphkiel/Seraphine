@@ -590,7 +590,7 @@ class LolClientConnector(QObject):
         return await res.json()
 
     async def spectate(self, summonerName):
-        info = self.getSummonerByName(summonerName)
+        info = await self.getSummonerByName(summonerName)
 
         data = {
             'allowObserveMode': 'ALL',
