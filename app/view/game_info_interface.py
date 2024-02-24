@@ -12,35 +12,35 @@ from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButt
 
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
+from ..common.signals import signalBus
 from ..components.profile_icon_widget import RoundAvatar
 from ..components.champion_icon_widget import RoundIcon
 from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
-from ..lol.tools import parseGames
+from ..lol.tools import parseSummonerOrder
+
+from ..lol.connector import connector
 
 
 class GameInfoInterface(SmoothScrollArea):
-    allyOrderUpdate = pyqtSignal(list)
-    allySummonersInfoReady = pyqtSignal(dict)
-    enemySummonerInfoReady = pyqtSignal(dict)
-    summonerViewClicked = pyqtSignal(str)
-    summonerGamesClicked = pyqtSignal(str)
-    pageSwitchSignal = pyqtSignal()
-    gameEnd = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        self.allySummonersInfo = {}
-        self.allySummonersOrder = []
 
         self.hBoxLayout = QHBoxLayout(self)
 
         self.summonersView = SummonersView()
         self.summonersGamesView = QStackedWidget()
 
-        self.allySummonerGamesView = SummonersGamesView()
-        self.enemySummonerGamesView = SummonersGamesView()
+        self.allyGamesView = SummonersGamesView()
+        self.enemyGamesView = SummonersGamesView()
+
+        # 保存召唤师的英雄信息
+        # {summonerId: championId}
+        self.allyChampions = {}
+
+        # 保存召唤师楼层的顺序，列表中为 summonerId
+        self.allyOrder = []
 
         self.queueId = 0
 
@@ -53,8 +53,8 @@ class GameInfoInterface(SmoothScrollArea):
     def __initWidget(self):
         self.summonersGamesView.setObjectName("summonersGamesView")
 
-        self.summonersGamesView.addWidget(self.allySummonerGamesView)
-        self.summonersGamesView.addWidget(self.enemySummonerGamesView)
+        self.summonersGamesView.addWidget(self.allyGamesView)
+        self.summonersGamesView.addWidget(self.enemyGamesView)
 
         self.summonersGamesView.setCurrentIndex(0)
 
@@ -67,57 +67,66 @@ class GameInfoInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.summonersView.currentTeamChanged.connect(
             self.__onCurrentTeamChanged)
-        self.allySummonersInfoReady.connect(self.__onAllySummonerInfoReady)
-        self.enemySummonerInfoReady.connect(self.__onEnemiesSummonerInfoReady)
-        self.allyOrderUpdate.connect(self.__onAllyOrderUpdate)
 
-        self.gameEnd.connect(self.__onGameEnd)
+    def updateAllySummonersOrder(self, team: list):
+        if len(self.allyOrder) == 0:
+            return
 
-    def __onAllyOrderUpdate(self, order: list):
-        self.allySummonersOrder = order
-        """
-        更新队友页排序
+        order = parseSummonerOrder(team)
 
-        @param order: [summonerId]
-        @return:
-        """
-        if self.allySummonersInfo:
-            self.allySummonersInfo["summoners"] = sorted(
-                self.allySummonersInfo["summoners"],
-                key=lambda x: order.index(
-                    x["summonerId"]) if x["summonerId"] in order else len(order)
-            )
-            self.__onAllySummonerInfoReady(self.allySummonersInfo)
+        if order != self.allyOrder:
+            self.summonersView.ally.updateSummonersOrder(order)
+            self.allyGamesView.updateOrder(order)
+            self.allyOrder = order
 
-    def __onAllySummonerInfoReady(self, info):
-        self.allySummonersInfo = info
-        self.summonersView.allySummoners.updateSummoners(
-            info['summoners'])  # 概览栏(左侧)
-        self.allySummonerGamesView.updateSummoners(
-            info['summoners'])  # 战绩栏(右侧)
+    def updateAllySummoners(self, info):
+        self.allyChampions = info['champions']
+        self.allyOrder = info['order']
+
+        # 概览栏 (左侧)
+        self.summonersView.ally.updateSummoners(info['summoners'])
+        # 战绩栏 (右侧)
+        self.allyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
         self.summonersView.allyButton.setEnabled(True)
 
-    def __onEnemiesSummonerInfoReady(self, info):
-        self.queueId = info['queueId']
-
-        self.summonersView.enemySummoners.updateSummoners(info['summoners'])
-        self.enemySummonerGamesView.updateSummoners(info['summoners'])
+    def updateEnemySummoners(self, info):
+        self.summonersView.enemy.updateSummoners(info['summoners'])
+        self.enemyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
         self.summonersView.enemyButton.setEnabled(True)
 
-    def __onGameEnd(self):
-        self.allySummonersInfo = {}
-        self.allySummonersOrder = []
+    async def updateAllyIcon(self, team):
+        for new in team:
+            if not new['championId'] or not new['summonerId']:
+                continue
 
-        self.summonersView.allySummoners.clear()
-        self.summonersView.enemySummoners.clear()
-        self.allySummonerGamesView.clear()
-        self.enemySummonerGamesView.clear()
+            summonerId = new['summonerId']
+            view = self.summonersView.ally.items.get(summonerId)
+            orig = self.allyChampions.get(summonerId)
+
+            if not view or orig == None:
+                continue
+
+            newChampionId = new['championId']
+
+            if orig != newChampionId:
+                icon = await connector.getChampionIcon(newChampionId)
+                self.allyChampions[summonerId] = newChampionId
+                view.updateIcon(icon)
+
+    async def clear(self):
+        self.allyChampions = {}
+        self.allyOrder = []
+
+        self.summonersView.ally.clear()
+        self.summonersView.enemy.clear()
+        self.allyGamesView.clear()
+        self.enemyGamesView.clear()
 
         self.summonersView.allyButton.click()
         self.summonersView.allyButton.setVisible(False)
@@ -131,36 +140,10 @@ class GameInfoInterface(SmoothScrollArea):
         self.summonersView.stackedWidget.setCurrentIndex(index)
         self.summonersGamesView.setCurrentIndex(index)
 
-    def getPlayersInfoSummary(self):
-        allyWins, allyLosses = 0, 0
-        for summoner in self.allySummonerGamesView.summoners:
-            for game in summoner['gamesInfo']:
-                if game['queueId'] != self.queueId:
-                    continue
-
-                if game['remake']:
-                    continue
-
-                if game['win']:
-                    allyWins += 1
-                else:
-                    allyLosses += 1
-
-        enemyWins, enemyLosses = 0, 0
-        for summoner in self.enemySummonerGamesView.summoners:
-            for game in summoner['gamesInfo']:
-                if game['queueId'] != self.queueId:
-                    continue
-
-                if game['remake']:
-                    continue
-
-                if game['win']:
-                    enemyWins += 1
-                else:
-                    enemyLosses += 1
-
-        return
+    # 进入游戏时标记预组队颜色
+    def updateTeamColor(self, allyColor, enemyColor):
+        self.summonersView.ally.updateColor(allyColor)
+        self.summonersView.enemy.updateColor(enemyColor)
 
 
 class SummonersView(QFrame):
@@ -175,8 +158,8 @@ class SummonersView(QFrame):
         self.stackedWidget = QStackedWidget()
         self.buttonsLayout = QHBoxLayout()
 
-        self.allySummoners = TeamSummoners()
-        self.enemySummoners = TeamSummoners()
+        self.ally = TeamSummoners()
+        self.enemy = TeamSummoners()
 
         self.allyButton = TransparentTogglePushButton(self.tr("Ally"))
         self.enemyButton = TransparentTogglePushButton(self.tr("Enemy"))
@@ -197,8 +180,8 @@ class SummonersView(QFrame):
         self.allyButton.setVisible(False)
         self.enemyButton.setVisible(False)
 
-        self.stackedWidget.addWidget(self.allySummoners)
-        self.stackedWidget.addWidget(self.enemySummoners)
+        self.stackedWidget.addWidget(self.ally)
+        self.stackedWidget.addWidget(self.enemy)
         self.stackedWidget.setCurrentIndex(0)
 
         self.__setStyleSheet()
@@ -250,19 +233,33 @@ class TeamSummoners(QFrame):
         self.items: Dict[int, SummonerInfoView] = {}
         self.vBoxLayout = QVBoxLayout(self)
 
-        self.teamIdBuf = []  # 当前队伍的预组队Id缓冲区
-
         self.__initLayout()
 
     def __initLayout(self):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        # self.vBoxLayout.setSpacing(0)
+
+    def updateSummonersOrder(self, order: list):
+        for i in reversed(range(self.vBoxLayout.count())):
+            item = self.vBoxLayout.itemAt(i)
+            self.vBoxLayout.removeItem(item)
+
+        for summonerId in order:
+            view = self.items[summonerId]
+            self.vBoxLayout.addWidget(view)
+
+        if len(order) < 5:
+            self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
+            self.vBoxLayout.addStretch(5 - len(order))
 
     def updateSummoners(self, summoners):
         self.clear()
 
         for summoner in summoners:
+            if not summoner:
+                continue
+
             summonerView = SummonerInfoView(summoner, self)
+
             # 用 summonerId 避免空字符串
             self.items[summoner["summonerId"]] = summonerView
             self.vBoxLayout.addWidget(summonerView, stretch=1)
@@ -271,6 +268,15 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
             self.vBoxLayout.addStretch(5 - len(summoners))
 
+    def updateColor(self, colors):
+        for summonerId, color in colors.items():
+            view = self.items.get(summonerId)
+
+            if not view:
+                continue
+
+            view.setColor(color)
+
     def clear(self):
         for i in reversed(range(self.vBoxLayout.count())):
             item = self.vBoxLayout.itemAt(i)
@@ -278,34 +284,26 @@ class TeamSummoners(QFrame):
 
             if item.widget():
                 item.widget().deleteLater()
+
         self.items = {}
-        self.teamIdBuf = []
 
 
 class SummonerInfoView(QFrame):
     """
     对局信息页单个召唤师概览 item
 
-    Layout中页面位于左侧, 多个控件自上而下呈纵向堆叠
+    Layout 中页面位于左侧, 多个控件自上而下呈纵向堆叠
 
-    显示了KDA, 召唤师名称, 经验, 头像 等信息
+    显示了 KDA, 召唤师名称, 经验, 头像 等信息
     """
 
     def __init__(self, info: dict, parent=None):
         super().__init__(parent)
         self.hBoxLayout = QHBoxLayout(self)
-        self.nowIconId = ''
         self.icon = RoundLevelAvatar(info['icon'],
                                      info['xpSinceLastLevel'],
                                      info['xpUntilNextLevel'],
                                      70, info["level"])
-
-        teamInfo = info.get("teamInfo")  # BP阶段没有该字段, onGameStart才有
-
-        if teamInfo:
-            # self.setToolTip("\n".join(teamInfo))
-            # self.installEventFilter(ToolTipFilter(self, 0, ToolTipPosition.TOP))
-            self.__setColor(info["teamId"])
 
         self.infoVBoxLayout = QVBoxLayout()
 
@@ -316,8 +314,8 @@ class SummonerInfoView(QFrame):
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
         self.summonerName = SummonerName(
             name, isPublic=info["isPublic"], color=nameColor, tagLine=info['tagLine'], tips=info["recentlyChampionName"])
-        self.summonerName.clicked.connect(lambda: self.parent().parent(
-        ).parent().parent().summonerViewClicked.emit(info['puuid']))
+        self.summonerName.clicked.connect(
+            lambda: signalBus.toCareerInterface.emit(info['puuid']))
 
         self.gridHBoxLayout = QHBoxLayout()
         self.kdaHBoxLayout = QHBoxLayout()
@@ -331,22 +329,19 @@ class SummonerInfoView(QFrame):
         self.kdaLabel.setObjectName("kdaLabel")
 
         k, d, a = info['kda']
-        if d:
-            kda = ((k + a) / d)
-            self.kdaValLabel = QLabel(f"{kda:.1f}")
-            pe = QPalette()
-            if 3 <= kda < 4:
-                pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
-            elif 4 <= kda < 5:
-                pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
-            elif 5 < kda:
-                pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
-            self.kdaValLabel.setPalette(pe)
-        else:
-            self.kdaValLabel = QLabel(f"Perfect")
-            pe = QPalette()
+        if d == 0:
+            d = 1
+
+        kda = ((k + a) / d)
+        self.kdaValLabel = QLabel(f"{kda:.1f}")
+        pe = QPalette()
+        if 3 <= kda < 4:
+            pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
+        elif 4 <= kda < 5:
+            pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
+        elif 5 < kda:
             pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
-            self.kdaValLabel.setPalette(pe)
+        self.kdaValLabel.setPalette(pe)
 
         self.kdaValLabel.setAlignment(Qt.AlignCenter)
         self.kdaValLabel.setObjectName("kdaValLabel")
@@ -451,18 +446,10 @@ class SummonerInfoView(QFrame):
 
         # self.setFixedHeight(150)
 
-    def __setColor(self, teamId):
-
-        if teamId not in self.parent().teamIdBuf:
-            self.parent().teamIdBuf.append(teamId)
-
-        teamIndex = self.parent().teamIdBuf.index(teamId)
-
-        assert 0 < len(self.parent().teamIdBuf) < 3  # 预组队数量一定不超过2
-
-        if teamIndex == 0:
+    def setColor(self, color):
+        if color == 0:
             r, g, b = 255, 176, 27
-        elif teamIndex == 1:
+        elif color == 1:
             r, g, b = 255, 51, 153
         else:
             return
@@ -481,13 +468,7 @@ class SummonerInfoView(QFrame):
             background-color: rgba({r1}, {g1}, {b1}, 0.2);
         }}""")
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            (self.parent().parent().parent().parent().parent().parent()
-             .parent().gameInfoInterface.pageSwitchSignal.emit())
-
     def updateIcon(self, iconPath: str):
-        self.nowIconId = iconPath.split("/")[-1][:-4]
         self.icon.updateIcon(iconPath)
 
 
@@ -497,7 +478,7 @@ class SummonersGamesView(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.summoners = []
+        self.items: Dict[int, Games] = {}
 
         self.__initLayout()
 
@@ -505,12 +486,39 @@ class SummonersGamesView(QFrame):
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
+    def updateOrder(self, order):
+        for i in reversed(range(self.hBoxLayout.count())):
+            item = self.hBoxLayout.itemAt(i)
+            self.hBoxLayout.removeItem(item)
+
+        for i, summonerId in enumerate(order):
+            view = self.items[summonerId]
+            self.hBoxLayout.addWidget(view)
+
+            view.setProperty("isFirst", False)
+            view.setProperty("isLast", False)
+
+            if i == 0:
+                view.setProperty("isFirst", True)
+            elif i == 4:
+                view.setProperty("isLast", True)
+
+            view.style().polish(view)
+
+        if len(order) < 5:
+            self.hBoxLayout.addSpacing(self.hBoxLayout.spacing())
+            self.hBoxLayout.addStretch(5 - len(order))
+
     def updateSummoners(self, summoners):
         self.clear()
-        self.summoners = summoners
 
         for i, summoner in enumerate(summoners):
+            if not summoner:
+                continue
+
             games = Games(summoner)
+            self.items[summoner["summonerId"]] = games
+
             self.hBoxLayout.addWidget(games, stretch=1)
 
             if i == 0:
@@ -522,14 +530,14 @@ class SummonersGamesView(QFrame):
             self.hBoxLayout.addStretch(5 - len(summoners))
 
     def clear(self):
-        self.summoners.clear()
-
         for i in reversed(range(self.hBoxLayout.count())):
             item = self.hBoxLayout.itemAt(i)
             self.hBoxLayout.removeItem(item)
 
             if item.widget():
                 item.widget().deleteLater()
+
+        self.items = {}
 
 
 class Games(QFrame):
@@ -555,8 +563,9 @@ class Games(QFrame):
         self.summonerName = SummonerName(
             name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'], tips=summoner["recentlyChampionName"])
         self.summonerName.setObjectName("summonerName")
-        self.summonerName.clicked.connect(lambda: self.parent().parent(
-        ).parent().summonerGamesClicked.emit(self.summonerName.text()))
+
+        self.summonerName.clicked.connect(
+            lambda: signalBus.toSearchInterface.emit(self.summonerName.text()))
 
         self.summonerName.setFixedHeight(60)
 

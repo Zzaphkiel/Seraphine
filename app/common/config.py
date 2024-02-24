@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 import sys
 
 from PyQt5.QtCore import QLocale
@@ -30,8 +31,6 @@ def isWin11():
 
 class Config(QConfig):
     lolFolder = ConfigItem("General", "LolPath", "", FolderValidator())
-    # enableStartWithComputer = ConfigItem("General", "EnableStartWithComputer",
-    #                                      False, BoolValidator())
     enableStartLolWithApp = ConfigItem("General", "EnableStartLolWithApp",
                                        False, BoolValidator())
 
@@ -53,7 +52,7 @@ class Config(QConfig):
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 60))
-    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
+    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 2,
                                            RangeValidator(1, 5), restart=True)
 
     gameInfoFilter = ConfigItem(
@@ -117,6 +116,7 @@ AUTHOR = "Zaphkiel"
 VERSION = "0.10.3"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
+LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"
 
 cfg = Config()
-qconfig.load('app/config/config.json', cfg)
+qconfig.load(f"{LOCAL_PATH}\\config.json", cfg)

@@ -9,6 +9,7 @@ from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expand
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout
+from qasync import asyncSlot
 
 from ..lol.tools import fixLeagueClientWindow
 from ..common.icons import Icon
@@ -103,8 +104,6 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.__initWidget()
         self.__initLayout()
 
-        self.__connectSignalToSlot()
-
     def __initWidget(self):
         self.titleLabel.setObjectName("titleLabel")
         self.scrollWidget.setObjectName('scrollWidget')
@@ -144,65 +143,6 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.expandLayout.addWidget(self.bpGroup)
         self.expandLayout.addWidget(self.gameGroup)
         self.expandLayout.addWidget(self.profileGroup)
-
-    def setEnabled(self, a0: bool) -> None:
-        self.autoAcceptMatchingCard.switchButton.setEnabled(a0)
-        self.autoAcceptMatchingCard.lineEdit.setEnabled(a0)
-
-        self.createPracticeLobbyCard.clear()
-        self.createPracticeLobbyCard.nameLineEdit.setEnabled(a0)
-        self.createPracticeLobbyCard.passwordLineEdit.setEnabled(a0)
-
-        self.spectateCard.lineEdit.clear()
-        self.spectateCard.lineEdit.setEnabled(a0)
-
-        self.onlineStatusCard.clear()
-        self.onlineStatusCard.lineEdit.setEnabled(a0)
-
-        self.profileBackgroundCard.clear()
-        self.profileBackgroundCard.championEdit.setEnabled(a0)
-
-        self.profileTierCard.clear()
-        self.profileTierCard.rankModeBox.setEnabled(a0)
-        self.profileTierCard.tierBox.setEnabled(a0)
-        self.profileTierCard.divisionBox.setEnabled(a0)
-
-        self.onlineAvailabilityCard.clear()
-        self.onlineAvailabilityCard.comboBox.setEnabled(a0)
-
-        if not cfg.get(cfg.enableAutoSelectChampion):
-            self.autoSelectChampionCard.lineEdit.setEnabled(a0)
-
-        self.removeTokensCard.pushButton.setEnabled(a0)
-
-        if a0 and cfg.get(cfg.enableAutoSelectChampion):
-            self.autoSelectChampionCard.switchButton.setEnabled(True)
-
-        if not cfg.get(cfg.enableAutoBanChampion):
-            self.autoBanChampionCard.lineEdit.setEnabled(a0)
-
-        if a0 and cfg.get(cfg.enableAutoBanChampion):
-            self.autoBanChampionCard.switchButton1.setEnabled(True)
-
-        self.lockConfigCard.setEnabled(a0)
-        self.autoReconnectCard.setEnabled(a0)
-
-        return super().setEnabled(a0)
-
-    def __connectSignalToSlot(self):
-        self.profileBackgroundCard.pushButton.clicked.connect(
-            self.__onSetProfileBackgroundButtonClicked)
-
-    def __onSetProfileBackgroundButtonClicked(self):
-        champion = self.profileBackgroundCard.championEdit.text()
-        skin = self.profileBackgroundCard.skinComboBox.currentText()
-
-        def _():
-            skinId = connector.manager.getSkinIdByChampionAndSkinName(
-                champion, skin)
-            connector.setProfileBackground(skinId)
-
-        threading.Thread(target=_).start()
 
 
 class OnlineStatusCard(ExpandGroupSettingCard):
@@ -248,11 +188,10 @@ class OnlineStatusCard(ExpandGroupSettingCard):
         self.pushButton.setMinimumWidth(100)
         self.pushButton.clicked.connect(self.__onPushButtonClicked)
 
-    def __onPushButtonClicked(self):
+    @asyncSlot()
+    async def __onPushButtonClicked(self):
         msg = self.lineEdit.text()
-
-        threading.Thread(
-            target=lambda: connector.setOnlineStatus(msg)).start()
+        await connector.setOnlineStatus(msg)
 
     def clear(self):
         self.lineEdit.clear()
@@ -309,7 +248,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __initWidget(self):
         self.championEdit.setPlaceholderText(
-            self.tr("Place input champion name"))
+            self.tr("Please input champion name"))
         self.championEdit.setMinimumWidth(250)
         self.championEdit.setClearButtonEnabled(True)
 
@@ -318,11 +257,13 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
         self.skinComboBox.setEnabled(False)
         self.skinComboBox.setMinimumWidth(250)
-        self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+        self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
 
         self.championEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.skinComboBox.currentTextChanged.connect(
             self.__onComboBoxTextChanged)
+        self.pushButton.clicked.connect(
+            self.__onButtonClicked)
 
     def clear(self):
         self.championEdit.clear()
@@ -345,12 +286,23 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         else:
             self.skinComboBox.clear()
             self.skinComboBox.setEnabled(False)
-            self.skinComboBox.setPlaceholderText(self.tr("Place select skin"))
+            self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
+
+        self.__onComboBoxTextChanged()
 
     def __onComboBoxTextChanged(self):
         enable = self.championEdit.text(
         ) != "" and self.skinComboBox.currentText() != ""
         self.pushButton.setEnabled(enable)
+
+    @asyncSlot()
+    async def __onButtonClicked(self):
+        champion = self.championEdit.text()
+        skin = self.skinComboBox.currentText()
+
+        skinId = connector.manager.getSkinIdByChampionAndSkinName(
+            champion, skin)
+        await connector.setProfileBackground(skinId)
 
 
 class ProfileTierCard(ExpandGroupSettingCard):
@@ -522,7 +474,8 @@ class ProfileTierCard(ExpandGroupSettingCard):
         enable = rankMode != '' and tier != '' and division != ''
         self.pushButton.setEnabled(enable)
 
-    def __onPushButtonClicked(self):
+    @asyncSlot()
+    async def __onPushButtonClicked(self):
         queue = {
             self.tr("Teamfight Tactics"): "RANKED_TFT",
             self.tr("Ranked solo"): "RANKED_SOLO_5x5",
@@ -546,8 +499,7 @@ class ProfileTierCard(ExpandGroupSettingCard):
         currentDivision = self.divisionBox.currentText()
         division = currentDivision if currentDivision != '--' else "NA"
 
-        threading.Thread(target=lambda: connector.setTierShowed(
-            queue, tier, division)).start()
+        await connector.setTierShowed(queue, tier, division)
 
 
 class OnlineAvailabilityCard(ExpandGroupSettingCard):
@@ -607,15 +559,15 @@ class OnlineAvailabilityCard(ExpandGroupSettingCard):
         self.comboBox.setPlaceholderText(self.tr("Availability"))
         self.comboBox.setCurrentIndex(0)
 
-    def __onPushButttonClicked(self):
+    @asyncSlot()
+    async def __onPushButttonClicked(self):
         availability = {
             self.tr("chat"): "chat",
             self.tr("away"): "away",
             self.tr("offline"): "offline"
         }[self.comboBox.currentText()]
 
-        threading.Thread(target=lambda: connector.
-                         setOnlineAvailability(availability)).start()
+        await connector.setOnlineAvailability(availability)
 
     def __onComboBoxTextChanged(self):
         if self.comboBox.currentIndex == -1:
@@ -634,22 +586,11 @@ class RemoveTokensCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
-        self.pushButton.clicked.connect(lambda: threading.Thread(
-            target=lambda: connector.removeTokens()).start())
+        self.pushButton.clicked.connect(self.__onButtonClicked)
 
-
-class PlayAgainCard(SettingCard):
-
-    def __init__(self, title, content, parent):
-        super().__init__(Icon.ARROWCIRCLE, title, content, parent)
-        self.pushButton = PushButton(self.tr("Fix"))
-        self.pushButton.setMinimumWidth(100)
-
-        self.hBoxLayout.addWidget(self.pushButton)
-        self.hBoxLayout.addSpacing(16)
-
-        self.pushButton.clicked.connect(lambda: threading.Thread(
-            target=lambda: connector.playAgain()).start())
+    @asyncSlot()
+    async def __onButtonClicked(self):
+        await connector.removeTokens()
 
 
 class FixClientDpiCard(SettingCard):
@@ -662,11 +603,11 @@ class FixClientDpiCard(SettingCard):
         self.hBoxLayout.addWidget(self.pushButton)
         self.hBoxLayout.addSpacing(16)
 
-        self.pushButton.clicked.connect(lambda: threading.Thread(
-            self.__OnButtonClicked()).start())
+        self.pushButton.clicked.connect(self.__onButtonClicked)
 
-    def __OnButtonClicked(self):
-        if not fixLeagueClientWindow():
+    @asyncSlot()
+    async def __onButtonClicked(self):
+        if not await fixLeagueClientWindow():
             InfoBar.error(
                 title=self.tr("Permission denied"),
                 content=self.tr("Failed to set window position"),
@@ -756,12 +697,12 @@ class CreatePracticeLobbyCard(ExpandGroupSettingCard):
         enable = self.nameLineEdit.text() != ""
         self.pushButton.setEnabled(enable)
 
-    def __onPushButtonClicked(self):
+    @asyncSlot()
+    async def __onPushButtonClicked(self):
         name = self.nameLineEdit.text()
         password = self.passwordLineEdit.text()
 
-        threading.Thread(target=lambda: connector.
-                         create5v5PracticeLobby(name, password)).start()
+        await connector.create5v5PracticeLobby(name, password)
 
 
 class SpectateCard(ExpandGroupSettingCard):
@@ -817,7 +758,8 @@ class SpectateCard(ExpandGroupSettingCard):
         enable = self.lineEdit.text() != ""
         self.button.setEnabled(enable)
 
-    def __onButtonClicked(self):
+    @asyncSlot()
+    async def __onButtonClicked(self):
         def info(type, title, content):
             f = InfoBar.error if type == 'error' else InfoBar.success
 
@@ -826,7 +768,7 @@ class SpectateCard(ExpandGroupSettingCard):
               parent=self.window().auxiliaryFuncInterface)
 
         try:
-            connector.spectate(self.lineEdit.text())
+            await connector.spectate(self.lineEdit.text())
         except SummonerNotFound:
             info('error', self.tr("Summoner not found"),
                  self.tr("Please check the summoner's name and retry"))
@@ -887,7 +829,6 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
         self.lineEdit.setSingleStep(1)
         self.lineEdit.setMinimumWidth(250)
 
-        self.switchButton.setEnabled(False)
         self.switchButton.setChecked(cfg.get(self.enableConfigItem))
 
         self.lineEdit.valueChanged.connect(self.__onLineEditValueChanged)
@@ -979,7 +920,6 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.lineEdit.setPlaceholderText(self.tr("Champion name"))
         self.lineEdit.setMinimumWidth(250)
         self.lineEdit.setClearButtonEnabled(True)
-        self.lineEdit.setEnabled(False)
 
         self.switchButton.setEnabled(False)
 
@@ -1295,7 +1235,8 @@ class FriendRequestCard(ExpandGroupSettingCard):
         enable = self.lineEdit.text() != ""
         self.button.setEnabled(enable)
 
-    def __onButtonClicked(self):
+    @asyncSlot()
+    async def __onButtonClicked(self):
         def info(type, title, content=None):
             f = InfoBar.error if type == 'error' else InfoBar.success
 
@@ -1304,7 +1245,7 @@ class FriendRequestCard(ExpandGroupSettingCard):
               parent=self.window().auxiliaryFuncInterface)
 
         try:
-            connector.sendFriendRequest(self.lineEdit.text())
+            await connector.sendFriendRequest(self.lineEdit.text())
         except:
             info('error', self.tr("Summoner not found"),
                  self.tr("Please check the summoner's name and retry"))

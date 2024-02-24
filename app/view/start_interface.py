@@ -10,15 +10,13 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
 from ..common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
                             IndeterminateProgressBar)
 
+from ..lol.connector import connector
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
 
 
 class StartInterface(SmoothScrollArea):
-    hideLoadingPage = pyqtSignal(str, str)
-    showLoadingPage = pyqtSignal()
-
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
@@ -60,23 +58,23 @@ class StartInterface(SmoothScrollArea):
         self.label2.setObjectName('label2')
         self.label3.setObjectName("label3")
 
-        self.__onShowLoadingPage()
+        self.showLoadingPage()
 
         StyleSheet.START_INTERFACE.apply(self)
         self.__connectSignalToSlot()
 
-    def __onHideLoadingPage(self, port, token):
+    def hideLoadingPage(self):
         self.processBar.stop()
         self.loading = False
 
         self.label1.setText(self.tr("LOL Client connected") + " 🎉")
         self.label2.setText(
-            f"--app-port = {port}\n--remoting-auth-token = {token}")
+            f"--app-port = {connector.port}\n--remoting-auth-token = {connector.token}")
 
         self.pushButton.setText(self.tr("Copy port and token"))
         self.pushButton.setIcon(Icon.COPY)
 
-    def __onShowLoadingPage(self):
+    def showLoadingPage(self):
         self.processBar.start()
         self.loading = True
 
@@ -90,8 +88,6 @@ class StartInterface(SmoothScrollArea):
 
     def __connectSignalToSlot(self):
         self.pushButton.clicked.connect(self.__onPushButtonClicked)
-        self.hideLoadingPage.connect(self.__onHideLoadingPage)
-        self.showLoadingPage.connect(self.__onShowLoadingPage)
 
     def __onPushButtonClicked(self):
         if self.loading:

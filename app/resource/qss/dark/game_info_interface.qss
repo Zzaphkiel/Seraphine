@@ -93,6 +93,10 @@ Games>#summonerName {
     font: bold 15px 'Microsoft YaHei', 'Segoe UI';
 }
 
+Games>#summonerName:hover {
+    color: --ThemeColorDark1;
+}
+
 Games:hover {
     border: none;
     border-radius: 0;

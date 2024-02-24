@@ -4,6 +4,8 @@ import win32con
 import win32api
 import ctypes
 
+import qasync
+import asyncio
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication
 
@@ -11,7 +13,7 @@ from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector, connector
 
 
-class PositionTranslator(QObject):
+class ToolsTranslator(QObject):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
@@ -20,6 +22,9 @@ class PositionTranslator(QObject):
         self.middle = self.tr("MID")
         self.bottom = self.tr("BOT")
         self.support = self.tr("SUP")
+
+        self.rankedSolo = self.tr('Ranked Solo')
+        self.rankedFlex = self.tr("Ranked Flex")
 
 
 def translateTier(orig: str, short=False) -> str:
@@ -64,7 +69,94 @@ def secsToStr(secs):
     return time.strftime("%M:%S", time.gmtime(secs))
 
 
-def processGameData(game):
+async def getRecentTeammates(games, puuid):
+    summoners = {}
+
+    for game in games:
+        gameId = game['gameId']
+        game = await connector.getGameDetailByGameId(gameId)
+        teammates = getTeammates(game, puuid)
+
+        for p in teammates['summoners']:
+            if p['puuid'] not in summoners:
+                summonerIcon = await connector.getProfileIcon(p['icon'])
+                summoners[p['puuid']] = {
+                    "name": p['name'], 'icon': summonerIcon,
+                    "total": 0, "wins": 0, "losses": 0, "puuid": p["puuid"]}
+
+            summoners[p['puuid']]['total'] += 1
+
+            if not teammates['remake']:
+                if teammates['win']:
+                    summoners[p['puuid']]['wins'] += 1
+                else:
+                    summoners[p['puuid']]['losses'] += 1
+
+    ret = {"puuid": puuid, "summoners": [
+        item for item in summoners.values()]}
+
+    ret['summoners'] = sorted(ret['summoners'],
+                              key=lambda x: x['total'], reverse=True)[:5]
+
+    return ret
+
+
+async def parseSummonerData(summoner):
+    iconId = summoner['profileIconId']
+    icon = await connector.getProfileIcon(iconId)
+    level = summoner['summonerLevel']
+    xpSinceLastLevel = summoner['xpSinceLastLevel']
+    xpUntilNextLevel = summoner['xpUntilNextLevel']
+    rankInfo = await connector.getRankedStatsByPuuid(summoner['puuid'])
+
+    try:
+        gamesInfo = await connector.getSummonerGamesByPuuid(
+            summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1)
+    except:
+        champions = []
+        games = {}
+    else:
+        games = {
+            "gameCount": gamesInfo["gameCount"],
+            "wins": 0,
+            "losses": 0,
+            "kills": 0,
+            "deaths": 0,
+            "assists": 0,
+            "games": [],
+        }
+        for game in gamesInfo["games"]:
+            info = await parseGameData(game)
+            if time.time() - info["timeStamp"] / 1000 > 60 * 60 * 24 * 365:
+                continue
+            if not info["remake"] and info["queueId"] != 0:
+                games["kills"] += info["kills"]
+                games["deaths"] += info["deaths"]
+                games["assists"] += info["assists"]
+                if info["win"]:
+                    games["wins"] += 1
+                else:
+                    games["losses"] += 1
+            games["games"].append(info)
+
+        champions = getRecentChampions(games['games'])
+
+    return {
+        'name': summoner.get("gameName") or summoner['displayName'],
+        'icon': icon,
+        'level': level,
+        'xpSinceLastLevel': xpSinceLastLevel,
+        'xpUntilNextLevel': xpUntilNextLevel,
+        'puuid': summoner['puuid'],
+        'rankInfo': rankInfo,
+        'games': games,
+        'champions': champions,
+        'isPublic': summoner['privacy'] == "PUBLIC",
+        'tagLine': summoner.get("tagLine"),
+    }
+
+
+async def parseGameData(game):
     timeStamp = game["gameCreation"]  # 毫秒级时间戳
     time = timeStampToStr(game['gameCreation'])
     shortTime = timeStampToShortStr(game['gameCreation'])
@@ -82,11 +174,11 @@ def processGameData(game):
 
     participant = game['participants'][0]
     championId = participant['championId']
-    championIcon = connector.getChampionIcon(championId)
+    championIcon = await connector.getChampionIcon(championId)
     spell1Id = participant['spell1Id']
     spell2Id = participant['spell2Id']
-    spell1Icon = connector.getSummonerSpellIcon(spell1Id)
-    spell2Icon = connector.getSummonerSpellIcon(spell2Id)
+    spell1Icon = await connector.getSummonerSpellIcon(spell1Id)
+    spell2Icon = await connector.getSummonerSpellIcon(spell2Id)
     stats = participant['stats']
 
     champLevel = stats['champLevel']
@@ -103,9 +195,9 @@ def processGameData(game):
         stats['item6'],
     ]
 
-    itemIcons = [connector.getItemIcon(itemId) for itemId in itemIds]
+    itemIcons = [await connector.getItemIcon(itemId) for itemId in itemIds]
     runeId = stats['perk0']
-    runeIcon = connector.getRuneIcon(runeId)
+    runeIcon = await connector.getRuneIcon(runeId)
 
     cs = stats['totalMinionsKilled'] + stats['neutralMinionsKilled']
     gold = stats['goldEarned']
@@ -118,7 +210,7 @@ def processGameData(game):
 
     position = None
 
-    pt = PositionTranslator()
+    pt = ToolsTranslator()
 
     if queueId in [420, 440]:
         if lane == 'TOP':
@@ -159,7 +251,7 @@ def processGameData(game):
     }
 
 
-def processGameDetailData(puuid, game):
+async def parseGameDetailData(puuid, game):
     queueId = game['queueId']
     mapId = game['mapId']
 
@@ -170,83 +262,32 @@ def processGameDetailData(puuid, game):
     else:
         mapName = connector.manager.getMapNameById(mapId)
 
-    teams = {
-        100: {
+    def origTeam(teamId):
+        return {
             'win': None,
             'bans': [],
             'baronKills': 0,
-            'baronIcon': "app/resource/images/baron-100.png",
+            'baronIcon': f"app/resource/images/baron-{teamId}.png",
             'dragonKills': 0,
-            'dragonIcon': 'app/resource/images/dragon-100.png',
+            'dragonIcon': f'app/resource/images/dragon-{teamId}.png',
             'riftHeraldKills': 0,
-            'riftHeraldIcon': 'app/resource/images/herald-100.png',
+            'riftHeraldIcon': f'app/resource/images/herald-{teamId}.png',
             'inhibitorKills': 0,
-            'inhibitorIcon': 'app/resource/images/inhibitor-100.png',
+            'inhibitorIcon': f'app/resource/images/inhibitor-{teamId}.png',
             'towerKills': 0,
-            'towerIcon': 'app/resource/images/tower-100.png',
-            'kills': 0,
-            'deaths': 0,
-            'assists': 0,
-            'gold': 0,
-            'summoners': []
-        },
-        200: {
-            'win': None,
-            'bans': [],
-            'baronKills': 0,
-            'baronIcon': "app/resource/images/baron-200.png",
-            'dragonKills': 0,
-            'dragonIcon': 'app/resource/images/dragon-200.png',
-            'riftHeraldKills': 0,
-            'riftHeraldIcon': 'app/resource/images/herald-200.png',
-            'inhibitorKills': 0,
-            'inhibitorIcon': 'app/resource/images/inhibitor-200.png',
-            'towerKills': 0,
-            'towerIcon': 'app/resource/images/tower-200.png',
-            'kills': 0,
-            'deaths': 0,
-            'assists': 0,
-            'gold': 0,
-            'summoners': []
-        },
-        300: {
-            'win': None,
-            'bans': [],
-            'baronKills': 0,
-            'baronIcon': "app/resource/images/baron-100.png",
-            'dragonKills': 0,
-            'dragonIcon': 'app/resource/images/dragon-100.png',
-            'riftHeraldKills': 0,
-            'riftHeraldIcon': 'app/resource/images/herald-100.png',
-            'inhibitorKills': 0,
-            'inhibitorIcon': 'app/resource/images/inhibitor-100.png',
-            'towerKills': 0,
-            'towerIcon': 'app/resource/images/tower-100.png',
-            'kills': 0,
-            'deaths': 0,
-            'assists': 0,
-            'gold': 0,
-            'summoners': []
-        },
-        400: {
-            'win': None,
-            'bans': [],
-            'baronKills': 0,
-            'baronIcon': "app/resource/images/baron-200.png",
-            'dragonKills': 0,
-            'dragonIcon': 'app/resource/images/dragon-200.png',
-            'riftHeraldKills': 0,
-            'riftHeraldIcon': 'app/resource/images/herald-200.png',
-            'inhibitorKills': 0,
-            'inhibitorIcon': 'app/resource/images/inhibitor-200.png',
-            'towerKills': 0,
-            'towerIcon': 'app/resource/images/tower-200.png',
+            'towerIcon': f'app/resource/images/tower-{teamId}.png',
             'kills': 0,
             'deaths': 0,
             'assists': 0,
             'gold': 0,
             'summoners': []
         }
+
+    teams = {
+        100: origTeam("100"),
+        200: origTeam("200"),
+        300: origTeam("100"),
+        400: origTeam("200")
     }
 
     cherryResult = None
@@ -259,7 +300,7 @@ def processGameDetailData(puuid, game):
 
         teams[teamId]['win'] = team['win']
         teams[teamId]['bans'] = [
-            connector.getChampionIcon(item['championId'])
+            await connector.getChampionIcon(item['championId'])
             for item in team['bans']
         ]
         teams[teamId]['baronKills'] = team['baronKills']
@@ -278,8 +319,8 @@ def processGameDetailData(puuid, game):
         if summonerPuuid == '00000000-0000-0000-0000-000000000000':  # AI
             isPublic = True
         else:
-            isPublic = connector.getSummonerByPuuid(
-                summonerPuuid)["privacy"] == "PUBLIC"
+            t = await connector.getSummonerByPuuid(summonerPuuid)
+            isPublic = t["privacy"] == "PUBLIC"
 
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
@@ -300,12 +341,12 @@ def processGameDetailData(puuid, game):
                         cherryResult = subteamPlacement
 
                 championId = summoner['championId']
-                championIcon = connector.getChampionIcon(championId)
+                championIcon = await connector.getChampionIcon(championId)
 
                 spell1Id = summoner['spell1Id']
-                spell1Icon = connector.getSummonerSpellIcon(spell1Id)
+                spell1Icon = await connector.getSummonerSpellIcon(spell1Id)
                 spell2Id = summoner['spell2Id']
-                spell2Icon = connector.getSummonerSpellIcon(spell2Id)
+                spell2Icon = await connector.getSummonerSpellIcon(spell2Id)
 
                 kills = stats['kills']
                 deaths = stats['deaths']
@@ -317,7 +358,7 @@ def processGameDetailData(puuid, game):
                 teams[tid]['assists'] += assists
                 teams[tid]['gold'] += gold
 
-                runeIcon = connector.getRuneIcon(stats['perk0'])
+                runeIcon = await connector.getRuneIcon(stats['perk0'])
 
                 itemIds = [
                     stats['item0'],
@@ -330,15 +371,16 @@ def processGameDetailData(puuid, game):
                 ]
 
                 itemIcons = [
-                    connector.getItemIcon(itemId) for itemId in itemIds
+                    await connector.getItemIcon(itemId) for itemId in itemIds
                 ]
 
                 getRankInfo = cfg.get(cfg.showTierInGameInfo)
 
                 tier, division, lp, rankIcon = None, None, None, None
                 if getRankInfo:
-                    rank = connector.getRankedStatsByPuuid(
-                        summonerPuuid).get('queueMap')
+                    rank = await connector.getRankedStatsByPuuid(
+                        summonerPuuid)
+                    rank = rank.get('queueMap')
 
                     try:
                         if queueId != 1700 and rank:
@@ -410,10 +452,10 @@ def processGameDetailData(puuid, game):
 
 def getTeammates(game, targetPuuid):
     """
-    通过game信息获取目标召唤师的队友
+    通过 game 信息获取目标召唤师的队友
 
     @param game: @see connector.getGameDetailByGameId
-    @param targetPuuid: 目标召唤师puuid
+    @param targetPuuid: 目标召唤师 puuid
     @return: @see res
     """
     targetParticipantId = None
@@ -472,102 +514,6 @@ def getTeammates(game, targetPuuid):
     return res
 
 
-def markTeam(summoners):
-    """
-    标记预组队的召唤师
-
-    在summoners中, teamId是int型数据, 若有效, 则不小于0, 若无此信息, 则被标记为-1;
-
-    该方法会将所有 teamId >= 0 的召唤师名称, 放入一个dict中, key是teamId, value是召唤师名称组成的list;
-
-    如果结果中一个teamId的成员大于1个召唤师, 则判定为是预组队;
-
-    该方法的结果会直接作用于 summoners 上, 以字段teamInfo存储.
-
-    @param summoners:
-    @return:
-    """
-
-    teamInfo = {}
-
-    # 完整迭代一次
-    for summoner in summoners:
-        team_id = summoner.get("teamId", -1)
-        if team_id >= 0:
-            teamInfo.setdefault(team_id, []).append(summoner["name"])
-
-    # 将队伍信息添加到对应的召唤师
-    for summoner in summoners:
-        tmp = teamInfo.get(summoner["teamId"])
-        summoner["teamInfo"] = tmp if len(tmp) > 1 else []
-
-    return summoners
-
-
-def assignTeamId(summoners):
-    """
-    分配队伍ID
-
-    存储于teamId字段, 自1递增的数字, 若无队伍则为None
-
-    ---
-    较此前完善判断逻辑:
-    1. A单向B, B单向C -> ABC都记为 None
-    2. A双向B, B双向C -> ABC记为同一 teamId
-    3. A双向B且单向C -> AB记为同一 teamId, C记为None
-    ---
-
-    @param summoners: 召唤师信息
-     [{
-        "summonerId": 123456,
-        "teammatesMarker": [{'summonerId': 333333, 'cnt': 3, 'name': "召唤师1"}]
-    }, ... ]
-
-    @return: 变更直接作用于入参 :summoners: 同时会return; 两者为同一实例;
-
-    """
-    raise DeprecationWarning(
-        "The method has been enabled, and currently, the \"teamParticipantId\" field is being used to determine team "
-        "information."
-    )
-
-    team_id = 1
-    summoner_to_team = {}
-
-    # 123456: [333333]
-    # key=summonerId
-    # value=teammates
-    summoner_to_teammates = {
-        summoner["summonerId"]: [teammate["summonerId"] for teammate in summoner["teammatesMarker"]] for summoner in
-        summoners}
-
-    for summoner_id, teammates in summoner_to_teammates.items():
-        for teammate_id in teammates:
-            # 检查双向队友
-            if summoner_id in summoner_to_teammates[teammate_id]:
-                # 检查teamId
-                if summoner_id not in summoner_to_team and teammate_id not in summoner_to_team:
-                    summoner_to_team[summoner_id] = team_id
-                    summoner_to_team[teammate_id] = team_id
-                    team_id += 1
-                # summoner已有teamId, 但队友没有时, 为队友分配相同的teamId
-                elif summoner_id in summoner_to_team and teammate_id not in summoner_to_team:
-                    summoner_to_team[teammate_id] = summoner_to_team[summoner_id]
-                # 队友已有teamId, 但summoner没有时, 为summoner分配相同的teamId
-                elif teammate_id in summoner_to_team and summoner_id not in summoner_to_team:
-                    summoner_to_team[summoner_id] = summoner_to_team[teammate_id]
-
-    # 将teamId添加到原始数据中
-    for summoner in summoners:
-        if summoner["summonerId"] in summoner_to_team:
-            summoner["teamId"] = summoner_to_team[summoner["summonerId"]]
-        else:
-            # 无队伍以及单向的标记为 None
-            summoner["teamId"] = None
-
-    return summoners
-
-
 def getRecentChampions(games):
     champions = {}
 
@@ -594,7 +540,7 @@ def getRecentChampions(games):
     return ret if len(ret) < maxLen else ret[:maxLen]
 
 
-def processRankInfo(info):
+def parseRankInfo(info):
     soloRankInfo = info["queueMap"]["RANKED_SOLO_5x5"]
     flexRankInfo = info["queueMap"]["RANKED_FLEX_SR"]
 
@@ -638,12 +584,90 @@ def processRankInfo(info):
     }
 
 
+def parseDetailRankInfo(rankInfo):
+    soloRankInfo = rankInfo['queueMap']['RANKED_SOLO_5x5']
+    soloTier = translateTier(soloRankInfo['tier'])
+    soloDivision = soloRankInfo['division']
+    if soloTier == '--' or soloDivision == 'NA':
+        soloDivision = ""
+
+    soloHighestTier = translateTier(soloRankInfo['highestTier'])
+    soloHighestDivision = soloRankInfo['highestDivision']
+    if soloHighestTier == '--' or soloHighestDivision == 'NA':
+        soloHighestDivision = ""
+
+    solxPreviousSeasonEndTier = translateTier(
+        soloRankInfo['previousSeasonEndTier'])
+    soloPreviousSeasonDivision = soloRankInfo[
+        'previousSeasonEndDivision']
+    if solxPreviousSeasonEndTier == '--' or soloPreviousSeasonDivision == 'NA':
+        soloPreviousSeasonDivision = ""
+
+    soloWins = soloRankInfo['wins']
+    soloLosses = soloRankInfo['losses']
+    soloTotal = soloWins + soloLosses
+    soloWinRate = soloWins * 100 // soloTotal if soloTotal != 0 else 0
+    soloLp = soloRankInfo['leaguePoints']
+
+    flexRankInfo = rankInfo['queueMap']['RANKED_FLEX_SR']
+    flexTier = translateTier(flexRankInfo['tier'])
+    flexDivision = flexRankInfo['division']
+    if flexTier == '--' or flexDivision == 'NA':
+        flexDivision = ""
+
+    flexHighestTier = translateTier(flexRankInfo['highestTier'])
+    flexHighestDivision = flexRankInfo['highestDivision']
+    if flexHighestTier == '--' or flexHighestDivision == 'NA':
+        flexHighestDivision = ""
+
+    flexPreviousSeasonEndTier = translateTier(
+        flexRankInfo['previousSeasonEndTier'])
+    flexPreviousSeasonEndDivision = flexRankInfo[
+        'previousSeasonEndDivision']
+
+    if flexPreviousSeasonEndTier == '--' or flexPreviousSeasonEndDivision == 'NA':
+        flexPreviousSeasonEndDivision = ""
+
+    flexWins = flexRankInfo['wins']
+    flexLosses = flexRankInfo['losses']
+    flexTotal = flexWins + flexLosses
+    flexWinRate = flexWins * 100 // flexTotal if flexTotal != 0 else 0
+    flexLp = flexRankInfo['leaguePoints']
+
+    t = ToolsTranslator()
+
+    return [
+        [
+            t.rankedSolo,
+            str(soloTotal),
+            str(soloWinRate) + ' %' if soloTotal != 0 else '--',
+            str(soloWins),
+            str(soloLosses),
+            f'{soloTier} {soloDivision}',
+            str(soloLp),
+            f'{soloHighestTier} {soloHighestDivision}',
+            f'{solxPreviousSeasonEndTier} {soloPreviousSeasonDivision}',
+        ],
+        [
+            t.rankedFlex,
+            str(flexTotal),
+            str(flexWinRate) + ' %' if flexTotal != 0 else '--',
+            str(flexWins),
+            str(flexLosses),
+            f'{flexTier} {flexDivision}',
+            str(flexLp),
+            f'{flexHighestTier} {flexHighestDivision}',
+            f'{flexPreviousSeasonEndTier} {flexPreviousSeasonEndDivision}',
+        ],
+    ]
+
+
 def parseGames(games, targetId=0):
     f"""
     解析Games数据
 
     @param targetId: 需要查询的游戏模式, 不传则收集所有模式的数据
-    @param games: 由 @see: {processGameData} 获取到的games数据
+    @param games: 由 @see: {parseGameData} 获取到的games数据
     @return: hitGame, K, D, A, win, loss
     @rtype: tuple[list, int, int, int, int, int, int]
     """
@@ -668,7 +692,253 @@ def parseGames(games, targetId=0):
     return hitGames, kills, deaths, assists, wins, losses
 
 
-def fixLeagueClientWindow():
+async def parseAllyGameInfo(session, currentSummonerId):
+    # 排位会有预选位
+    isRank = bool(session["myTeam"][0]["assignedPosition"])
+
+    tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+             for item in session['myTeam']]
+    summoners = await asyncio.gather(*tasks)
+    summoners = [summoner for summoner in summoners if summoner]
+
+    # 按照楼层排序
+    summoners = sorted(
+        summoners, key=lambda x: x["cellId"])
+
+    champions = {summoner['summonerId']: summoner['championId']
+                 for summoner in summoners}
+    order = [summoner['summonerId'] for summoner in summoners]
+
+    return {'summoners': summoners, 'champions': champions, 'order': order}
+
+
+def parseSummonerOrder(team):
+    summoners = [{
+        'summonerId': s['summonerId'],
+        'cellId': s['cellId']
+    } for s in team]
+
+    summoners.sort(key=lambda x: x['cellId'])
+    return [s['summonerId'] for s in summoners if s['summonerId'] != 0]
+
+
+async def parseGameInfoByGameflowSession(session, currentSummonerId, side):
+    data = session['gameData']
+    queueId = data['queue']['id']
+
+    if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配 (排位)
+        return None
+
+    isRank = queueId in (420, 440)
+
+    if side == 'enemy':
+        _, team = separateTeams(data, currentSummonerId)
+    else:
+        team, _ = separateTeams(data, currentSummonerId)
+
+    tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+             for item in team]
+
+    summoners = await asyncio.gather(*tasks)
+    summoners = [summoner for summoner in summoners if summoner]
+
+    if isRank:
+        s = sortedSummonersByGameRole(summoners)
+
+        if s != None:
+            summoners = s
+
+    champions = {summoner['summonerId']: summoner['championId']
+                 for summoner in summoners}
+    order = [summoner['summonerId'] for summoner in summoners]
+
+    return {'summoners': summoners, 'champions': champions, 'order': order}
+
+
+def sortedSummonersByGameRole(summoners: list):
+    position = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]
+
+    if any(x['selectedPosition'] not in position for x in summoners):
+        return None
+
+    return sorted(summoners,
+                  key=lambda x: position.index(x['selectedPosition']))
+
+
+def getAllyOrderByGameRole(session, currentSummonerId):
+    data = session['gameData']
+    queueId = data['queue']['id']
+
+    # 只有排位模式下有返回值
+    if queueId not in (420, 440):
+        return None
+
+    ally, _ = separateTeams(data, currentSummonerId)
+    ally = sortedSummonersByGameRole(ally)
+
+    if ally == None:
+        return None
+
+    return [x['summonerId'] for x in ally]
+
+
+def getTeamColor(session, currentSummonerId):
+    '''
+    输入 session 以及当前召唤师 id，输出 summonerId -> 颜色的映射
+    '''
+    data = session['gameData']
+    ally, enemy = separateTeams(data, currentSummonerId)
+
+    def makeTeam(team):
+        # teamParticipantId => [summonerId]
+        tIdToSIds = {}
+
+        for s in team:
+            summonerId = s.get('summonerId')
+            if not summonerId:
+                continue
+
+            teamParticipantId = s.get('teamParticipantId')
+            if not teamParticipantId:
+                continue
+
+            summoners = tIdToSIds.get(teamParticipantId)
+
+            if not summoners:
+                tIdToSIds[teamParticipantId] = [summonerId]
+            else:
+                tIdToSIds[teamParticipantId].append(summonerId)
+
+        # summonerId => color
+        res = {}
+
+        currentColor = 0
+
+        for ids in tIdToSIds.values():
+            if len(ids) == 1:
+                res[ids[0]] = -1
+            else:
+                for id in ids:
+                    res[id] = currentColor
+
+                currentColor += 1
+
+        return res
+
+    return makeTeam(ally), makeTeam(enemy)
+
+
+def separateTeams(data, currentSummonerId):
+    team1 = data['teamOne']
+    team2 = data['teamTwo']
+    ally = None
+    enemy = None
+
+    for summoner in team1:
+        if summoner.get('summonerId') == currentSummonerId:
+            ally = team1
+            enemy = team2
+            break
+    else:
+        ally = team2
+        enemy = team1
+
+    return ally, enemy
+
+
+async def parseGamesDataConcurrently(games):
+    tasks = [parseGameData(game) for game in games]
+    return await asyncio.gather(*tasks)
+
+
+async def parseSummonerGameInfo(item, isRank, currentSummonerId):
+
+    summonerId = item.get('summonerId')
+
+    if summonerId == 0 or summonerId == None:
+        return None
+
+    summoner = await connector.getSummonerById(summonerId)
+
+    championId = item.get('championId') or 0
+    icon = await connector.getChampionIcon(championId)
+
+    puuid = summoner["puuid"]
+    origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+    rankInfo = parseRankInfo(origRankInfo)
+
+    try:
+        origGamesInfo = await connector.getSummonerGamesByPuuid(
+            puuid, 0, 14)
+
+        if cfg.get(cfg.gameInfoFilter) and isRank:
+            origGamesInfo["games"] = [
+                game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+
+            begIdx = 15
+            while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
+                endIdx = begIdx + 5
+                new = await connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+
+                for game in new:
+                    if game["queueId"] in (420, 440):
+                        origGamesInfo['games'].append(game)
+
+                begIdx = endIdx + 1
+    except:
+        gamesInfo = []
+    else:
+        tasks = [parseGameData(game)
+                 for game in origGamesInfo["games"][:11]]
+        gamesInfo = await asyncio.gather(*tasks)
+
+    _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
+
+    teammatesInfo = [
+        getTeammates(
+            await connector.getGameDetailByGameId(game["gameId"]),
+            puuid
+        ) for game in gamesInfo[:1]  # 避免空报错, 查上一局的队友(对手)
+    ]
+
+    recentlyChampionName = ""
+    fateFlag = None
+
+    if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
+        if currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+            # 上把队友
+            fateFlag = "ally"
+        elif currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+            # 上把对面
+            fateFlag = "enemy"
+        recentlyChampionId = max(
+            teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+        recentlyChampionName = connector.manager.champs.get(
+            recentlyChampionId)
+
+    return {
+        "name": summoner["gameName"] or summoner["displayName"],
+        'tagLine': summoner.get("tagLine"),
+        "icon": icon,
+        'championId': championId,
+        "level": summoner["summonerLevel"],
+        "rankInfo": rankInfo,
+        "gamesInfo": gamesInfo,
+        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+        "puuid": puuid,
+        "summonerId": summonerId,
+        "kda": [kill, deaths, assists],
+        "cellId": item.get("cellId"),
+        "selectedPosition": item.get("selectedPosition"),
+        "fateFlag": fateFlag,
+        "isPublic": summoner["privacy"] == "PUBLIC",
+        # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
+        "recentlyChampionName": recentlyChampionName
+    }
+
+
+async def fixLeagueClientWindow():
     """
     #### 需要管理员权限
 
@@ -715,7 +985,7 @@ def fixLeagueClientWindow():
     if not needResize(windowRect) and not needResize(windowCefRect):
         return True
 
-    clientZoom = int(connector.getClientZoom())
+    clientZoom = int(await connector.getClientZoom())
 
     screenWidth = win32api.GetSystemMetrics(0)
     screenHeight = win32api.GetSystemMetrics(1)

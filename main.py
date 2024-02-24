@@ -1,18 +1,23 @@
 # coding:utf-8
+from app.view.main_window import MainWindow
+from app.common.config import cfg, VERSION
 import sys
 import os
 
+import asyncio
+from qasync import QApplication, QEventLoop
 from app.common.qfluentwidgets import FluentTranslator
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QTranslator
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from app.common.config import cfg
-from app.view.main_window import MainWindow
 
+def main():
+    args = sys.argv
+    if len(args) == 2 and args[1] in ['--version', '-v']:
+        print(VERSION)
+        return
 
-if __name__ == '__main__':
     if cfg.get(cfg.dpiScale) == "Auto":
         QApplication.setHighDpiScaleFactorRoundingPolicy(
             Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
@@ -25,15 +30,26 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)
 
-    locale = cfg.get(cfg.language).value
-    translator = FluentTranslator(locale)
-    lolHelperTranslator = QTranslator()
-    lolHelperTranslator.load(locale, "Seraphine", ".", "./app/resource/i18n")
+    eventLoop = QEventLoop(app)
+    asyncio.set_event_loop(eventLoop)
 
-    app.installTranslator(translator)
-    app.installTranslator(lolHelperTranslator)
+    appCloseEvent = asyncio.Event()
+    app.aboutToQuit.connect(appCloseEvent.set)
+
+    locale = cfg.get(cfg.language).value
+    fluentTranslator = FluentTranslator(locale)
+    seraphineTranslator = QTranslator()
+    seraphineTranslator.load(locale, "Seraphine", ".", "./app/resource/i18n")
+
+    app.installTranslator(fluentTranslator)
+    app.installTranslator(seraphineTranslator)
 
     w = MainWindow()
     w.show()
 
-    app.exec_()
+    eventLoop.run_until_complete(appCloseEvent.wait())
+    eventLoop.close()
+
+
+if __name__ == '__main__':
+    main()
