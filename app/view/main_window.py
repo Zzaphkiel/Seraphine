@@ -36,7 +36,7 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor)
+                         getAllyOrderByGameRole, getTeamColor, autoPickOrBan)
 
 import threading
 
@@ -183,18 +183,6 @@ class MainWindow(FluentWindow):
         signalBus.lcuApiExceptionRaised.connect(
             self.__onShowLcuConnectError)
 
-        self.eventListener.champSelectChanged.connect(
-            self.__onChampSelectChanged
-        )
-
-        self.nameOrIconChanged.connect(self.__onNameOrIconChanged)
-        self.lolInstallFolderChanged.connect(self.__onLolInstallFolderChanged)
-        self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
-        self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
-        self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
-        self.fetchNoticeFailed.connect(self.__onFetchNoticeFailed)
-        self.showLcuConnectError.connect(self.__onShowLcuConnectError)
-
         # From career_interface
         signalBus.careerGameBarClicked.connect(self.__onCareerGameClicked)
 
@@ -212,6 +200,7 @@ class MainWindow(FluentWindow):
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
         self.showNoticeMessageBox.connect(self.__onShowNoticeMessageBox)
         self.checkUpdateFailed.connect(self.__onCheckUpdateFailed)
+        self.fetchNoticeFailed.connect(self.__onFetchNoticeFailed)
         self.stackedWidget.currentChanged.connect(
             self.__onCurrentStackedChanged)
         self.mainWindowHide.connect(self.__onWindowHide)
@@ -726,30 +715,21 @@ class MainWindow(FluentWindow):
 
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
-        async def paintAllySummonersInfo():
-            session = await connector.getChampSelectSession()
+        session = await connector.getChampSelectSession()
 
-            currentSummonerId = self.currentSummoner['summonerId']
-            info = await parseAllyGameInfo(session, currentSummonerId)
-            self.gameInfoInterface.updateAllySummoners(info)
+        currentSummonerId = self.currentSummoner['summonerId']
+        info = await parseAllyGameInfo(session, currentSummonerId)
+        self.gameInfoInterface.updateAllySummoners(info)
 
-        async def selectChampion():
-            if not cfg.get(cfg.enableAutoSelectChampion):
-                return
-
-            champion = cfg.get(cfg.autoSelectChampion)
-            championId = connector.manager.getChampionIdByName(
-                champion)
-
-            await connector.selectChampion(championId)
-
-        await asyncio.gather(paintAllySummonersInfo(), selectChampion())
         self.checkAndSwitchTo(self.gameInfoInterface)
 
     # 英雄选择时，英雄改变 / 楼层改变时触发
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
         team = data['data']["myTeam"]
+
+        # 自动 B/P
+        await autoPickOrBan(data)
 
         # 更新头像
         await self.gameInfoInterface.updateAllyIcon(team)

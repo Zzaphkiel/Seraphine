@@ -479,9 +479,10 @@ class LolClientConnector(QObject):
         reference = await self.__get("/lol-chat/v1/me")
         reference = await reference.json()
 
-        banner = reference['lol']['bannerIdSelected']
+        banner = reference['lol'].get('bannerIdSelected')
 
-        data = {"challengeIds": [], "bannerAccent": str(banner)}
+        data = {"challengeIds": [], "bannerAccent":
+                banner}
         res = await self.__post(
             "/lol-challenges/v1/update-player-preferences/", data=data
         )
@@ -535,30 +536,32 @@ class LolClientConnector(QObject):
         return await res.json()
 
     # 选择英雄
-    def selectChampion(self, actionsId, championId):
+    @retry()
+    async def selectChampion(self, actionsId, championId):
         data = {
             "championId": championId,
             'type': 'pick',
             # 'completed': True,
         }
 
-        res = self.__patch(
-            f"/lol-champ-select/v1/session/actions/{actionsId}", data=data).content
+        res = await self.__patch(
+            f"/lol-champ-select/v1/session/actions/{actionsId}", data=data)
 
-        return res
+        return await res.read()
 
     # 禁用英雄
-    def banChampion(self, actionsId, championId):
+    @retry()
+    async def banChampion(self, actionsId, championId):
         data = {
             "championId": championId,
             'type': 'ban',
             'completed': True
         }
 
-        res = self.__patch(
-            f"/lol-champ-select/v1/session/actions/{actionsId}", data=data).content
+        res = await self.__patch(
+            f"/lol-champ-select/v1/session/actions/{actionsId}", data=data)
 
-        return res.read()
+        return await res.read()
 
     @retry()
     async def getSummonerById(self, summonerId):

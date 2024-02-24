@@ -938,6 +938,49 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     }
 
 
+async def autoPickOrBan(data):
+    isAutoBan = cfg.get(cfg.enableAutoBanChampion)
+    isAutoSelect = cfg.get(cfg.enableAutoSelectChampion)
+    localPlayerCellId = data["data"]["localPlayerCellId"]
+    team = data['data']["myTeam"]
+    actions = data['data']['actions']
+
+    for actionGroup in actions:
+        for action in actionGroup:
+            if (action["actorCellId"] == localPlayerCellId
+                    and not action["completed"]):
+                actionId = action["id"]
+                if isAutoSelect and action["type"] == "pick":
+                    isPicked = False
+                    for player in team:
+                        if player["cellId"] == localPlayerCellId:
+                            isPicked = bool(player["championId"]) or bool(
+                                player["championPickIntent"])
+                            break
+
+                    if not isPicked:
+                        championId = connector.manager.getChampionIdByName(
+                            cfg.get(cfg.autoSelectChampion))
+                        await connector.selectChampion(
+                            actionId, championId)
+
+                elif isAutoBan and action["type"] == "ban":
+                    if action["isInProgress"]:
+                        championId = connector.manager.getChampionIdByName(
+                            cfg.get(cfg.autoBanChampion))
+
+                        isFriendly = cfg.get(cfg.pretentBan)
+                        if isFriendly:
+                            for player in team:
+                                if championId == player["championPickIntent"]:
+                                    championId = 0
+                                    break
+
+                        await connector.banChampion(actionId, championId)
+
+                break
+
+
 async def fixLeagueClientWindow():
     """
     #### 需要管理员权限
