@@ -13,7 +13,6 @@ from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButt
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
 from ..common.signals import signalBus
-from ..components.profile_icon_widget import RoundAvatar
 from ..components.champion_icon_widget import RoundIcon
 from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
@@ -80,6 +79,9 @@ class GameInfoInterface(SmoothScrollArea):
             self.allyOrder = order
 
     def updateAllySummoners(self, info):
+        if len(info['summoners'] > 5):
+            return
+        
         self.allyChampions = info['champions']
         self.allyOrder = info['order']
 
@@ -93,6 +95,9 @@ class GameInfoInterface(SmoothScrollArea):
         self.summonersView.allyButton.setEnabled(True)
 
     def updateEnemySummoners(self, info):
+        if len(info['summoners'] > 5):
+            return
+
         self.summonersView.enemy.updateSummoners(info['summoners'])
         self.enemyGamesView.updateSummoners(info['summoners'])
 

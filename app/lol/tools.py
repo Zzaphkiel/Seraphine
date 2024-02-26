@@ -726,7 +726,7 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side):
     data = session['gameData']
     queueId = data['queue']['id']
 
-    if queueId in (1700, 1090, 1100):  # 斗魂 云顶匹配 (排位)
+    if queueId in (1700, 1090, 1100, 1110, 1130, 1160):  # 斗魂 云顶匹配 (排位)
         return None
 
     isRank = queueId in (420, 440)

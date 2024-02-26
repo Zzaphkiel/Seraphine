@@ -742,6 +742,10 @@ class MainWindow(FluentWindow):
         session = await connector.getGameflowSession()
         currentSummonerId = self.currentSummoner['summonerId']
 
+        queueId = session['gameData']['queue']['id']
+        if queueId in (1700, 1090, 1100, 1110, 1130, 1160):  # 斗魂 云顶匹配 (排位)
+            return
+
         # 如果是进游戏后开的软件，需要先把友方信息更新上去
         async def paintAllySummonersInfo():
             if self.gameInfoInterface.allyChampions:
