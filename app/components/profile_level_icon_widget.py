@@ -6,8 +6,6 @@ from PyQt5.QtCore import Qt, QRectF
 
 from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor
 
-from app.components.profile_icon_widget import RoundAvatar
-
 
 class ProgressArc(ProgressRing):
     def __init__(self, parent=None, useAni=True, text="", fontSize=10):
@@ -17,7 +15,8 @@ class ProgressArc(ProgressRing):
         super().__init__(parent, useAni=useAni)
 
     def paintEvent(self, e):
-        self.drawVal = self.val or self.drawVal  # 有值取值, 没值保持; self.val 在控件刚实例化时, 前几次update可能会为0
+        # 有值取值, 没值保持; self.val 在控件刚实例化时, 前几次update可能会为0
+        self.drawVal = self.val or self.drawVal
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -76,7 +75,6 @@ class RoundLevelAvatar(QWidget):
         self.paintXpUntilNextLevel = None
         self.callUpdate = False
 
-
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
             self.progressRing.setVal(self.xpSinceLastLevel * 100 //
@@ -93,12 +91,12 @@ class RoundLevelAvatar(QWidget):
             self.height() - int(self.sep),
             Qt.AspectRatioMode.KeepAspectRatioByExpanding,
             Qt.TransformationMode.SmoothTransformation)
-        
+
         if 'champion' in self.iconPath:
             scaledImage = scaledImage.scaled(self.width() - int(self.sep) + 8,
-                                      self.height() - int(self.sep) + 8,
-                                      Qt.AspectRatioMode.KeepAspectRatio,
-                                      Qt.TransformationMode.SmoothTransformation)
+                                             self.height() - int(self.sep) + 8,
+                                             Qt.AspectRatioMode.KeepAspectRatio,
+                                             Qt.TransformationMode.SmoothTransformation)
             scaledImage.scroll(-4, -4, scaledImage.rect())
 
         clipPath = QPainterPath()
@@ -144,13 +142,6 @@ if __name__ == "__main__":
                              diameter=70)
     icon1.setParent(window)
 
-    icon2 = RoundAvatar("../resource/images/logo.png",
-                        40,
-                        100,
-                        diameter=70)
-    icon2.setParent(window)
-
     layout.addWidget(icon1)
-    layout.addWidget(icon2)
     window.show()
     sys.exit(app.exec())

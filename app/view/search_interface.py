@@ -296,33 +296,7 @@ class GameDetailView(QFrame):
 
     def updateGame(self, game: dict):
         isCherry = game["queueId"] == 1700
-        mapIcon = QPixmap(game["mapIcon"]).scaled(
-            54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        if game["remake"]:
-            result = self.tr("Remake")
-            color = "162, 162, 162"
-        elif game["win"]:
-            result = self.tr("Win")
-            color = "57, 176, 27"
-        else:
-            result = self.tr("Lose")
-            color = "211, 25, 12"
-
-        if isCherry:
-            cherryResult = game["cherryResult"]
-            if cherryResult == 1:
-                result = self.tr("1st")
-            elif cherryResult == 2:
-                result = self.tr("2nd")
-            elif cherryResult == 3:
-                result = self.tr("3rd")
-            else:
-                result = self.tr("4th")
-
-        self.titleBar.updateTitleBar(
-            mapIcon, result, game["mapName"], game["modeName"], game["gameDuration"], game["gameCreation"],
-            game["gameId"], color
-        )
+        self.titleBar.updateTitleBar(game)
 
         team1 = game["teams"][100]
         team2 = game["teams"][200]
@@ -748,6 +722,9 @@ class GameTitleBar(QFrame):
         self.copyGameIdButton = ToolButton(Icon.COPY)
         self.gameId = None
 
+        self.remake = None
+        self.win = None
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -776,21 +753,61 @@ class GameTitleBar(QFrame):
         self.titleBarLayout.addWidget(self.copyGameIdButton)
         self.titleBarLayout.addSpacing(10)
 
-    def updateTitleBar(self, mapIcon, result, mapName, modeName, duration, creation, gameId, color):
-        self.gameId = gameId
+    def updateTitleBar(self, game):
+        isCherry = game["queueId"] == 1700
+        mapIcon = QPixmap(game["mapIcon"]).scaled(
+            54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+        self.remake = game['remake']
+        self.win = game['win']
+
+        if game["remake"]:
+            result = self.tr("Remake")
+        elif game["win"]:
+            result = self.tr("Win")
+        else:
+            result = self.tr("Lose")
+
+        if isCherry:
+            cherryResult = game["cherryResult"]
+            if cherryResult == 1:
+                result = self.tr("1st")
+            elif cherryResult == 2:
+                result = self.tr("2nd")
+            elif cherryResult == 3:
+                result = self.tr("3rd")
+            else:
+                result = self.tr("4th")
+
+        self.gameId = game['gameId']
+
         self.mapIcon.setPixmap(mapIcon)
         self.resultLabel.setText(result)
         self.infoLabel.setText(
-            f"{mapName}  ·  {modeName}  ·  {duration}  ·  {creation}  ·  " + self.tr("Game ID: ") + f"{gameId}")
+            f"{game['mapName']}  ·  {game['modeName']}  ·  {game['gameDuration']}  ·  {game['gameCreation']}  ·  "
+            + self.tr("Game ID: ") + f"{self.gameId}")
+
         self.copyGameIdButton.setVisible(True)
 
-        self.setStyleSheet(
-            f""" GameTitleBar {{
-            border-radius: 6px;
-            border: 1px solid rgb({color});
-            background-color: rgba({color}, 0.15);
-        }}"""
-        )
+        self.__setColor()
+        signalBus.tabColorChanged.connect(self.__setColor)
+
+    def __setColor(self):
+        if self.remake:
+            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
+        elif self.win:
+            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
+        else:
+            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
+        a /= 255
+
+        self.setStyleSheet(f""" 
+            GameTitleBar {{
+                border-radius: 6px;
+                border: 1px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, {a});
+            }}
+        """)
 
     def __connectSignalToSlot(self):
         self.copyGameIdButton.clicked.connect(
@@ -864,7 +881,11 @@ class GameTab(QFrame):
         else:
             self.resultLabel.setText(self.tr("lose"))
 
-        self.__setColor(game["remake"], game["win"])
+        self.remake = game['remake']
+        self.win = game['win']
+
+        self.__setColor()
+        signalBus.tabColorChanged.connect(self.__setColor)
 
         self.__initWidget()
         self.__initLayout()
@@ -883,40 +904,42 @@ class GameTab(QFrame):
         self.vBoxLayout.addSpacerItem(QSpacerItem(
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
-    def __setColor(self, remake=True, win=True):
-        if remake:
-            r, g, b = 162, 162, 162
-        elif win:
-            r, g, b = 57, 176, 27
+    def __setColor(self):
+        if self.remake:
+            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
+        elif self.win:
+            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
         else:
-            r, g, b = 211, 25, 12
+            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
 
-        f1, f2 = 1.1, 0.8
+        a /= 255
+
+        f1, f2 = 1.1, 0.9
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
         r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
         self.setStyleSheet(f""" 
-        GameTab {{
-            border-radius: 6px;
-            border: 1px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.15);
-        }}
-        GameTab:hover {{
-            border-radius: 6px;
-            border: 1px solid rgb({r1}, {g1}, {b1});
-            background-color: rgba({r1}, {g1}, {b1}, 0.2);
-        }}
-        GameTab[pressed = true] {{
-            border-radius: 6px;
-            border: 1px solid rgb({r2}, {g2}, {b2});
-            background-color: rgba({r2}, {g2}, {b2}, 0.25);
-        }}
-        GameTab[selected = true] {{
-            border-radius: 6px;
-            border: 3px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.15);
-        }}"""
-                           )
+            GameTab {{
+                border-radius: 6px;
+                border: 1px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, {a});
+            }}
+            GameTab:hover {{
+                border-radius: 6px;
+                border: 1px solid rgb({r1}, {g1}, {b1});
+                background-color: rgba({r1}, {g1}, {b1},  {min(a+0.1, 1)});
+            }}
+            GameTab[pressed = true] {{
+                border-radius: 6px;
+                border: 1px solid rgb({r2}, {g2}, {b2});
+                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
+            }}
+            GameTab[selected = true] {{
+                border-radius: 6px;
+                border: 3px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, {a});
+            }}
+        """)
 
     def mousePressEvent(self, a0) -> None:
         self.setProperty("pressed", True)

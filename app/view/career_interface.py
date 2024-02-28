@@ -17,6 +17,7 @@ from ..components.summoner_name_button import SummonerName
 from ..common.style_sheet import StyleSheet
 from ..common.icons import Icon
 from ..common.signals import signalBus
+from ..common.config import cfg
 from ..lol.connector import connector
 from ..lol.tools import (parseGames, parseSummonerData,
                          getRecentTeammates, parseDetailRankInfo)
@@ -106,6 +107,10 @@ class CareerInterface(SmoothScrollArea):
         self.recent20GamesLabel.setObjectName('rencent20GamesLabel')
         self.winsLabel.setObjectName('winsLabel')
         self.lossesLabel.setObjectName('lossesLabel')
+
+        self.__setLabelColor()
+        signalBus.tabColorChanged.connect(self.__setLabelColor)
+
         self.kdaLabel.setObjectName('kdaLabel')
         self.recentInfoHLayout.setObjectName("recentInfoHLayout")
         self.gameInfoArea.setObjectName('gameInfoArea')
@@ -162,6 +167,17 @@ class CareerInterface(SmoothScrollArea):
 
         StyleSheet.CAREER_INTERFACE.apply(self)
         self.initTableStyle()
+
+    def __setLabelColor(self):
+        r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
+        self.winsLabel.setStyleSheet(f"""
+            QLabel {{color: rgb({r}, {g}, {b})}};
+        """)
+
+        r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
+        self.lossesLabel.setStyleSheet(f"""
+            QLabel {{color: rgb({r}, {g}, {b})}};
+        """)
 
     def __initLayout(self):
         self.nameTagLineLayout.setContentsMargins(0, 0, 0, 0)
@@ -612,6 +628,9 @@ class TeammateInfoBar(QFrame):
         self.winsLabel.setObjectName("winsLabel")
         self.lossesLabel.setObjectName("lossesLabel")
 
+        self.__setLabelColor()
+        signalBus.tabColorChanged.connect(self.__setLabelColor)
+
         self.totalTitle.setAlignment(Qt.AlignCenter)
         self.totalLabel.setAlignment(Qt.AlignCenter)
         self.winsTitle.setAlignment(Qt.AlignCenter)
@@ -628,6 +647,17 @@ class TeammateInfoBar(QFrame):
         self.hBoxLayout.addWidget(self.winsLabel)
         self.hBoxLayout.addWidget(self.lossesTitle)
         self.hBoxLayout.addWidget(self.lossesLabel)
+
+    def __setLabelColor(self):
+        r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
+        self.winsLabel.setStyleSheet(f"""
+            QLabel {{color: rgb({r}, {g}, {b})}};
+        """)
+
+        r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
+        self.lossesLabel.setStyleSheet(f"""
+            QLabel {{color: rgb({r}, {g}, {b})}};
+        """)
 
 
 class ChampionsCard(QFrame):

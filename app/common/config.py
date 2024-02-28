@@ -7,7 +7,7 @@ from PyQt5.QtCore import QLocale
 
 from .qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
                              OptionsConfigItem, OptionsValidator, ConfigSerializer,
-                             RangeConfigItem, RangeValidator, EnumSerializer)
+                             RangeConfigItem, RangeValidator, EnumSerializer, ColorConfigItem)
 
 
 class Language(Enum):
@@ -49,6 +49,13 @@ class Config(QConfig):
                                  OptionsValidator(Language),
                                  LanguageSerializer(),
                                  restart=True)
+
+    winCardColor = ColorConfigItem(
+        "Personalization", "WinCardColor", '#2839b01b')
+    loseCardColor = ColorConfigItem(
+        "Personalization", "LoseCardColor", '#28d3190c')
+    remakeCardColor = ColorConfigItem(
+        "Personalization", "RemakeCardColor", '#28a2a2a2')
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 60))

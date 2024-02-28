@@ -9,6 +9,7 @@ SOURCES += app/view/main_window.py \
            app/components/summoner_name_button.py \
            app/components/mode_filter_widget.py \
            app/components/message_box.py \
+           app/components/setting_cards.py \
            app/lol/tools.py \
 
 TRANSLATIONS += app/resource/i18n/Seraphine.zh_CN.ts

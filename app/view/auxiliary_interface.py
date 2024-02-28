@@ -835,16 +835,6 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
         self.switchButton.checkedChanged.connect(
             self.__onSwitchButtonCheckedChanged)
 
-        # 这玩意在 enabled 是 false 的时候边框怪怪的，强行让它不那么怪
-        qss = """
-            SpinBox:disabled {
-                color: rgba(255, 255, 255, 150);
-                border: 1px solid rgba(255, 255, 255, 0.0698);
-                background-color: rgba(255, 255, 255, 0.0419);
-            }
-        """
-        setCustomStyleSheet(self.lineEdit, "", qss)
-
         value, isChecked = self.lineEdit.value(), self.switchButton.isChecked()
         self.__setStatusLableText(value, isChecked)
 

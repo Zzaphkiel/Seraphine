@@ -13,11 +13,11 @@ from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButt
 from ..common.icons import Icon
 from ..common.style_sheet import StyleSheet
 from ..common.signals import signalBus
+from ..common.config import cfg
 from ..components.champion_icon_widget import RoundIcon
 from ..components.profile_level_icon_widget import RoundLevelAvatar
 from ..components.summoner_name_button import SummonerName
 from ..lol.tools import parseSummonerOrder
-
 from ..lol.connector import connector
 
 
@@ -79,9 +79,9 @@ class GameInfoInterface(SmoothScrollArea):
             self.allyOrder = order
 
     def updateAllySummoners(self, info):
-        if len(info['summoners'] > 5):
+        if len(info['summoners']) > 5:
             return
-        
+
         self.allyChampions = info['champions']
         self.allyOrder = info['order']
 
@@ -95,7 +95,7 @@ class GameInfoInterface(SmoothScrollArea):
         self.summonersView.allyButton.setEnabled(True)
 
     def updateEnemySummoners(self, info):
-        if len(info['summoners'] > 5):
+        if len(info['summoners']) > 5:
             return
 
         self.summonersView.enemy.updateSummoners(info['summoners'])
@@ -462,16 +462,18 @@ class SummonerInfoView(QFrame):
         f1, f2 = 1.1, 0.8
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
 
-        self.setStyleSheet(f""" SummonerInfoView {{
-            border-radius: 5px;
-            border: 1px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.15);
-        }}
-        SummonerInfoView:hover {{
-            border-radius: 5px;
-            border: 1px solid rgb({r1}, {g1}, {b1});
-            background-color: rgba({r1}, {g1}, {b1}, 0.2);
-        }}""")
+        self.setStyleSheet(f""" 
+            SummonerInfoView {{
+                border-radius: 6px;
+                border: 1px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, 0.15);
+            }}
+            SummonerInfoView:hover {{
+                border-radius: 6px;
+                border: 1px solid rgb({r1}, {g1}, {b1});
+                background-color: rgba({r1}, {g1}, {b1}, 0.2);
+            }}
+        """)
 
     def updateIcon(self, iconPath: str):
         self.icon.updateIcon(iconPath)
@@ -619,7 +621,12 @@ class GameTab(QFrame):
         else:
             self.resultLabel.setText(self.tr('lose'))
 
-        self.__setColor(game['remake'], game['win'])
+        self.remake = game['remake']
+        self.win = game['win']
+
+        self.__setColor()
+
+        signalBus.tabColorChanged.connect(self.__setColor)
 
         self.__initWidget()
         self.__initLayout()
@@ -641,30 +648,34 @@ class GameTab(QFrame):
         self.hBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
-    def __setColor(self, remake=True, win=True):
-        if remake:
-            r, g, b = 162, 162, 162
-        elif win:
-            r, g, b = 57, 176, 27
+    def __setColor(self):
+        if self.remake:
+            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
+        elif self.win:
+            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
         else:
-            r, g, b = 211, 25, 12
+            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
 
-        f1, f2 = 1.1, 0.8
+        a /= 255
+
+        f1, f2 = 1.1, 0.9
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
         r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
-        self.setStyleSheet(f""" GameTab {{
-            border-radius: 5px;
-            border: 1px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.15);
-        }}
-        GameTab:hover {{
-            border-radius: 5px;
-            border: 1px solid rgb({r1}, {g1}, {b1});
-            background-color: rgba({r1}, {g1}, {b1}, 0.2);
-        }}
-        GameTab[pressed = true] {{
-            border-radius: 5px;
-            border: 1px solid rgb({r2}, {g2}, {b2});
-            background-color: rgba({r2}, {g2}, {b2}, 0.25);
-        }}""")
+        self.setStyleSheet(f""" 
+            GameTab {{
+                border-radius: 6px;
+                border: 1px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, {a});
+            }}
+            GameTab:hover {{
+                border-radius: 6px;
+                border: 1px solid rgb({r1}, {g1}, {b1});
+                background-color: rgba({r1}, {g1}, {b1},  {min(a+0.1, 1)});
+            }}
+            GameTab[pressed = true] {{
+                border-radius: 6px;
+                border: 1px solid rgb({r2}, {g2}, {b2});
+                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
+            }}
+        """)

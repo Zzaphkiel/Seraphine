@@ -1,86 +1,22 @@
 # coding:utf-8
 import os
-from typing import Union
 
 from ..common.qfluentwidgets import (
     SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard, PushSettingCard,
     ExpandLayout, CustomColorSettingCard, InfoBar, setTheme, setThemeColor,
-    SmoothScrollArea, FluentIconBase, PrimaryPushSettingCard,
+    SmoothScrollArea, PrimaryPushSettingCard,
     HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView,
     ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton,
-    qconfig, LineEdit, PushButton, IndicatorPosition, SpinBox)
+    qconfig, LineEdit, PushButton, IndicatorPosition)
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QIcon, QDesktopServices
+from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QHBoxLayout
 
 from ..common.icons import Icon
 from ..common.config import (
     cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
-
-
-class LineEditSettingCard(ExpandGroupSettingCard):
-
-    def __init__(self, configItem, title, hintContent, step, min,
-                 max, icon: Union[str, QIcon, FluentIconBase],
-                 content=None, parent=None):
-        super().__init__(icon, title, content, parent)
-        self.configItem = configItem
-
-        self.inputWidget = QWidget(self.view)
-        self.inputLayout = QHBoxLayout(self.inputWidget)
-
-        self.hintLabel = QLabel(hintContent)
-        self.lineEdit = SpinBox(self)
-
-        self.buttonWidget = QWidget(self.view)
-        self.buttonLayout = QHBoxLayout(self.buttonWidget)
-        self.pushButton = PushButton(self.tr("Apply"))
-
-        self.statusLabel = QLabel(self)
-
-        self.__initLayout()
-        self.__initWidget(step, min, max)
-
-    def __onValueChanged(self):
-        value = self.lineEdit.value()
-        cfg.set(self.configItem, value)
-        self.__setStatusLabelText(value)
-
-    def __initWidget(self, step, min, max):
-        self.lineEdit.setRange(min, max)
-        value = cfg.get(self.configItem)
-        self.__setStatusLabelText(value)
-
-        self.lineEdit.setValue(value)
-        self.lineEdit.setSingleStep(step)
-        self.lineEdit.setMinimumWidth(250)
-        self.pushButton.setMinimumWidth(100)
-        self.pushButton.clicked.connect(self.__onValueChanged)
-
-    def __initLayout(self):
-        self.addWidget(self.statusLabel)
-
-        self.inputLayout.setSpacing(19)
-        self.inputLayout.setAlignment(Qt.AlignTop)
-        self.inputLayout.setContentsMargins(48, 18, 44, 18)
-
-        self.inputLayout.addWidget(
-            self.hintLabel, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
-        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.buttonLayout.setContentsMargins(48, 18, 44, 18)
-        self.buttonLayout.addWidget(self.pushButton, 0, Qt.AlignRight)
-        self.buttonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.viewLayout.setSpacing(0)
-        self.viewLayout.setContentsMargins(0, 0, 0, 0)
-        self.addGroupWidget(self.inputWidget)
-        self.addGroupWidget(self.buttonWidget)
-
-    def __setStatusLabelText(self, value):
-        self.statusLabel.setText(self.tr("Now: ") + str(value))
+from ..components.setting_cards import LineEditSettingCard, gameTabColorSettingCard
 
 
 class SettingInterface(SmoothScrollArea):
@@ -191,10 +127,16 @@ class SettingInterface(SmoothScrollArea):
                 self.tr("Use system setting")
             ],
             parent=self.personalizationGroup)
-        self.themeColorCard = self.themeColorCard = CustomColorSettingCard(
+        self.themeColorCard = CustomColorSettingCard(
             cfg.themeColor, Icon.PALETTE, self.tr("Theme color"),
             self.tr("Change the theme color of Seraphine"),
             self.personalizationGroup)
+        self.gameTabColorSettingCard = gameTabColorSettingCard(
+            self.tr("Game tabs color"),
+            self.tr("Change the color of game tabs"),
+            cfg.winCardColor, cfg.loseCardColor, cfg.remakeCardColor,
+            self.personalizationGroup
+        )
         self.zoomCard = ComboBoxSettingCard(
             cfg.dpiScale,
             Icon.ZOOMFIT,
@@ -280,6 +222,7 @@ class SettingInterface(SmoothScrollArea):
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
         self.personalizationGroup.addSettingCard(self.themeColorCard)
+        self.personalizationGroup.addSettingCard(self.gameTabColorSettingCard)
         self.personalizationGroup.addSettingCard(self.zoomCard)
         self.personalizationGroup.addSettingCard(self.languageCard)
 
@@ -428,16 +371,6 @@ class ProxySettingCard(ExpandGroupSettingCard):
         self.lineEdit.textChanged.connect(self.__onLineEditValueChanged)
         self.switchButton.checkedChanged.connect(
             self.__onSwitchButtonCheckedChanged)
-
-        # 这玩意在 enabled 是 False 的时候边框怪怪的，强行让它不那么怪
-        qss = """
-            SpinBox:disabled {
-                color: rgba(255, 255, 255, 150);
-                border: 1px solid rgba(255, 255, 255, 0.0698);
-                background-color: rgba(255, 255, 255, 0.0419);
-            }
-        """
-        setCustomStyleSheet(self.lineEdit, "", qss)
 
         value, isChecked = self.lineEdit.text(), self.switchButton.isChecked()
         self.__setStatusLableText(value, isChecked)

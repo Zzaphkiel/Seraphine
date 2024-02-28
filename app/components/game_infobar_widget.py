@@ -55,19 +55,19 @@ class ResultModeSpell(QFrame):
         self.spellsLayout = QHBoxLayout()
         self.resultLabel = QLabel()
 
-        if remake:
-            color = "162, 162, 162"
+        self.remake = remake
+        self.win = win
+
+        if self.remake:
             self.resultLabel.setText(self.tr("Remake"))
-        elif win:
-            color = "57, 176, 27"
+        elif self.win:
             self.resultLabel.setText(self.tr("Win"))
         else:
-            color = "211, 25, 12"
             self.resultLabel.setText(self.tr("Lose"))
 
-        self.resultLabel.setStyleSheet(
-            f"QLabel {{color: rgb({color}); font: bold 16px;}}"
-        )
+        self.__setResultColor()
+        signalBus.tabColorChanged.connect(self.__setResultColor)
+
         self.modeLabel = QLabel(mode)
         self.modeLabel.setStyleSheet("QLabel {font: 12px;}")
 
@@ -97,6 +97,18 @@ class ResultModeSpell(QFrame):
         self.__initLayout()
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         # self.setStyleSheet("ResultModeSpell {border: 1px solid black;}")
+
+    def __setResultColor(self):
+        if self.remake:
+            r, g, b, _ = cfg.get(cfg.remakeCardColor).getRgb()
+        elif self.win:
+            r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
+        else:
+            r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
+
+        self.resultLabel.setStyleSheet(
+            f"QLabel {{color: rgb({r}, {g}, {b}); font: bold 16px;}}"
+        )
 
     def __initLayout(self):
         self.setMinimumWidth(100)
@@ -238,6 +250,9 @@ class GameInfoBar(QFrame):
         self.hBoxLayout = QHBoxLayout(self)
 
         self.setProperty('pressed', False)
+        self.remake = game['remake']
+        self.win = game['win']
+
         self.gameId = game['gameId']
 
         self.__initWidget(game)
@@ -265,36 +280,38 @@ class GameInfoBar(QFrame):
         self.mapTime = MapTime(
             game["map"], game['position'], game["time"], game["duration"])
 
-        self.__setColor(game["remake"], game["win"])
+        self.__setColor()
+        signalBus.tabColorChanged.connect(self.__setColor)
 
-    def __setColor(self, remake, win):
-        if remake:
-            r, g, b = 162, 162, 162
-        elif win:
-            r, g, b = 57, 176, 27
+    def __setColor(self):
+        if self.remake:
+            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
+        elif self.win:
+            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
         else:
-            r, g, b = 211, 25, 12
+            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
 
-        f1, f2 = 1.1, 0.8
+        a /= 255
+
+        f1, f2 = 1.1, 0.9
         r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
         r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
 
-        self.setStyleSheet(
-            f""" GameInfoBar {{
-            border-radius: 6px;
-            border: 1px solid rgb({r}, {g}, {b});
-            background-color: rgba({r}, {g}, {b}, 0.15);
-        }}
-        GameInfoBar:hover {{
-            border-radius: 6px;
-            border: 1px solid rgb({r1}, {g1}, {b1});
-            background-color: rgba({r1}, {g1}, {b1}, 0.2);
-        }}
-        GameInfoBar[pressed = true] {{
-            border-radius: 6px;
-            border: 1px solid rgb({r2}, {g2}, {b2});
-            background-color: rgba({r2}, {g2}, {b2}, 0.25);
-        }}""")
+        self.setStyleSheet(f"""
+            GameInfoBar {{
+                border-radius: 6px;
+                border: 1px solid rgb({r}, {g}, {b});
+                background-color: rgba({r}, {g}, {b}, {a});
+            }}
+            GameInfoBar:hover {{
+                border: 1px solid rgb({r1}, {g1}, {b1});
+                background-color: rgba({r1}, {g1}, {b1}, {min(a+0.1, 1)});
+            }}
+            GameInfoBar[pressed = true] {{
+                border: 1px solid rgb({r2}, {g2}, {b2});
+                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
+            }}
+        """)
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(11, 8, 11, 8)

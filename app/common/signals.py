@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QWidget
 
 
@@ -24,6 +25,9 @@ class SignalBus(QObject):
     # jumps:
     toCareerInterface = pyqtSignal(str)
     toSearchInterface = pyqtSignal(str)
+
+    # style:
+    tabColorChanged = pyqtSignal()
 
 
 signalBus = SignalBus()

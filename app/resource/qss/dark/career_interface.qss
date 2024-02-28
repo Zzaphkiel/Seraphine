@@ -24,12 +24,10 @@ QLabel#kdaValLabel {
 
 QLabel#winsLabel {
     font: bold;
-    color: rgb(57, 176, 27);
 }
 
 QLabel#lossesLabel {
     font: bold;
-    color: rgb(211, 25, 12);
 }
 
 QLabel#totalLabel {
@@ -39,12 +37,10 @@ QLabel#totalLabel {
 
 TeammateInfoBar>#winsLabel {
     font: bold;
-    color: rgb(57, 176, 27);
 }
 
 TeammateInfoBar>#lossesLabel {
     font: bold;
-    color: rgb(211, 25, 12);
 }
 
 #gameInfoArea {
