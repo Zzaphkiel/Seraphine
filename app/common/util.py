@@ -72,6 +72,14 @@ def getTasklistPath():
     return None
 
 
+def getLolProcessPidSlowly():
+    for process in psutil.process_iter():
+        if process.name() in ['LeagueClientUx.exe', 'LeagueClientUx']:
+            return process.pid
+
+    return -1
+
+
 def getLolProcessPid(path):
     processes = subprocess.check_output(
         f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)

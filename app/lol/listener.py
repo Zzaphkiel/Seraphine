@@ -14,11 +14,16 @@ TAG = "Listener"
 
 
 class LolProcessExistenceListener(QThread):
-    def __init__(self, tasklistPath, parent):
-        self.tasklistPath = tasklistPath
+    def __init__(self, parent):
+        self.tasklistPath = None
         self.isClientRunning = False
 
         super().__init__(parent)
+
+    def start(self, tasklistPath):
+        self.tasklistPath = tasklistPath
+
+        super().start()
 
     def run(self):
         while True:
@@ -32,7 +37,7 @@ class LolProcessExistenceListener(QThread):
                     self.isClientRunning = False
                     signalBus.lolClientEnded.emit()
 
-            self.msleep(2000)
+            self.msleep(1500)
 
 
 class StoppableThread(QThread):

@@ -13,7 +13,7 @@ from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollAre
                                      PrimaryPushButton)
 
 from app.common.config import VERSION, cfg, LOCAL_PATH
-from app.common.util import github
+from app.common.util import github, getLolProcessPidSlowly
 from app.common.signals import signalBus
 from app.common.update import runUpdater
 
@@ -142,3 +142,54 @@ class NoticeMessageBox(MessageBoxBase):
         self.hideCancelButton()
 
         self.yesButton.setText(self.tr("Ok"))
+
+
+class WaitingForLolMessageBox(MessageBoxBase):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.myYesButton = PrimaryPushButton(
+            self.tr('Connect To Client'), self.buttonGroup)
+        self.myCancelButton = QPushButton(
+            self.tr('Exit Seraphine'), self.buttonGroup)
+
+        self.titleLabel = TitleLabel()
+        self.content = BodyLabel()
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.yesButton.setVisible(False)
+        self.cancelButton.setVisible(False)
+
+        self.myCancelButton.setObjectName("cancelButton")
+        self.buttonLayout.addWidget(self.myYesButton)
+        self.buttonLayout.addWidget(self.myCancelButton)
+
+        self.titleLabel.setText(self.tr('Tasklist is not available'))
+        self.titleLabel.setContentsMargins(5, 0, 5, 0)
+
+        self.content.setText(
+            self.tr('Please clicked "Connect To Client" button manually when LOL launched completely'))
+        self.content.setContentsMargins(8, 0, 5, 0)
+
+        self.myYesButton.clicked.connect(self.__onYesButtonClicked)
+        self.myCancelButton.clicked.connect(self.__onCancelButtonClicked)
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.content)
+
+    def __onYesButtonClicked(self):
+        pid = getLolProcessPidSlowly()
+
+        if pid == -1:
+            return
+
+        self.accept()
+        self.accepted.emit()
+
+    def __onCancelButtonClicked(self):
+        self.reject()
+        self.rejected.emit()

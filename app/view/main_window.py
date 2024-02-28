@@ -28,8 +28,8 @@ from ..common.icons import Icon
 from ..common.config import cfg, VERSION
 from ..common.logger import logger
 from ..common.signals import signalBus
-from ..components.message_box import UpdateMessageBox, NoticeMessageBox
-
+from ..components.message_box import (UpdateMessageBox, NoticeMessageBox,
+                                      WaitingForLolMessageBox)
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                               SummonerNotFound, SummonerNotInGame)
 from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
@@ -70,8 +70,7 @@ class MainWindow(FluentWindow):
 
         # create listener
         self.isClientProcessRunning = False
-        self.processListener = LolProcessExistenceListener(
-            self.tasklistPath, self)
+        self.processListener = LolProcessExistenceListener(self)
         self.checkUpdateThread = StoppableThread(
             target=self.checkUpdate, parent=self)
         self.checkNoticeThread = StoppableThread(
@@ -94,6 +93,9 @@ class MainWindow(FluentWindow):
         self.splashScreen.finish()
 
         logger.critical("Seraphine initialized", TAG)
+
+        if not self.tasklistPath:
+            self.__showWaitingMessageBox()
 
     def __initInterface(self):
         self.__lockInterface()
@@ -231,26 +233,6 @@ class MainWindow(FluentWindow):
         self.show()
         QApplication.processEvents()
 
-        self.tasklistPath = getTasklistPath()
-
-        if not self.tasklistPath:
-            msgBox = MessageBox(
-                self.tr("Error 😫"),
-                self.tr("It seems that tasklist.exe doesn't work on your computer"),
-                self
-            )
-            msgBox.buttonLayout.removeWidget(msgBox.cancelButton)
-            msgBox.cancelButton.deleteLater()
-
-            self.splashScreen.finish()
-            msgBox.exec()
-
-            sys.exit()
-
-        if cfg.get(cfg.enableStartLolWithApp):
-            if getLolProcessPid(self.tasklistPath) == 0:
-                self.__startLolClient()
-
         self.oldHook = sys.excepthook
         sys.excepthook = self.exceptHook
 
@@ -346,6 +328,15 @@ class MainWindow(FluentWindow):
         msgBox = NoticeMessageBox(msg, self.window())
         msgBox.exec()
 
+    def __showWaitingMessageBox(self):
+        msgBox = WaitingForLolMessageBox(self.window())
+
+        if not msgBox.exec():
+            signalBus.terminateListeners.emit()
+            sys.exit()
+        else:
+            signalBus.lolClientStarted.emit(18688)
+
     def gameStartMinimize(self):
         srcWindow = None
 
@@ -421,7 +412,11 @@ class MainWindow(FluentWindow):
         self.trayIcon.show()
 
     def __initListener(self):
-        self.processListener.start()
+        self.tasklistPath = getTasklistPath()
+        self.tasklistPath = None
+        if self.tasklistPath:
+            self.processListener.start(self.tasklistPath)
+
         self.checkUpdateThread.start()
         self.checkNoticeThread.start()
         self.minimizeThread.start()
