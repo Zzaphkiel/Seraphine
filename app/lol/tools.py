@@ -518,6 +518,9 @@ def getRecentChampions(games):
     champions = {}
 
     for game in games:
+        if game['queueId'] == 0:
+            continue
+
         championId = game['championId']
 
         if championId not in champions:
