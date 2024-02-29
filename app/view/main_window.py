@@ -429,7 +429,12 @@ class MainWindow(FluentWindow):
             # 若超出最大尝试次数, 则认为 lcu 未就绪 (如大区排队中),
             # 捕获到该异常时不抛出, 等待下一个 emit
             await connector.close()
-            self.processListener.isClientRunning = False
+
+            if self.processListener.isRunning():
+                self.processListener.isClientRunning = False
+            else:
+                signalBus.tasklistNotFound.emit()
+
             return
 
         self.checkAndSwitchTo(self.careerInterface)
