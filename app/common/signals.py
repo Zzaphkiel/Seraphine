@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QWidget
 
 class SignalBus(QObject):
     # listener:
+    tasklistNotFound = pyqtSignal()
+
     lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
 

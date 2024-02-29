@@ -94,9 +94,6 @@ class MainWindow(FluentWindow):
 
         logger.critical("Seraphine initialized", TAG)
 
-        if not self.tasklistPath:
-            self.__showWaitingMessageBox()
-
     def __initInterface(self):
         self.__lockInterface()
 
@@ -170,8 +167,8 @@ class MainWindow(FluentWindow):
 
     def __conncetSignalToSlot(self):
         # From listener:
-        signalBus.lolClientStarted.connect(
-            self.__onLolClientStarted)
+        signalBus.tasklistNotFound.connect(self.__showWaitingMessageBox)
+        signalBus.lolClientStarted.connect(self.__onLolClientStarted)
         signalBus.lolClientEnded.connect(self.__onLolClientEnded)
         signalBus.terminateListeners.connect(self.__terminateListeners)
 
@@ -334,8 +331,6 @@ class MainWindow(FluentWindow):
         if not msgBox.exec():
             signalBus.terminateListeners.emit()
             sys.exit()
-        else:
-            signalBus.lolClientStarted.emit(18688)
 
     def gameStartMinimize(self):
         srcWindow = None
@@ -412,11 +407,7 @@ class MainWindow(FluentWindow):
         self.trayIcon.show()
 
     def __initListener(self):
-        self.tasklistPath = getTasklistPath()
-        self.tasklistPath = None
-        if self.tasklistPath:
-            self.processListener.start(self.tasklistPath)
-
+        self.processListener.start()
         self.checkUpdateThread.start()
         self.checkNoticeThread.start()
         self.minimizeThread.start()

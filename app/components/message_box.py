@@ -187,6 +187,7 @@ class WaitingForLolMessageBox(MessageBoxBase):
         if pid == -1:
             return
 
+        signalBus.lolClientStarted.emit(pid)
         self.accept()
         self.accepted.emit()
 
