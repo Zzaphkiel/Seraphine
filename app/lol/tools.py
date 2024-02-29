@@ -78,6 +78,9 @@ async def getRecentTeammates(games, puuid):
         teammates = getTeammates(game, puuid)
 
         for p in teammates['summoners']:
+            if p['summonerId'] == 0:
+                continue
+
             if p['puuid'] not in summoners:
                 summonerIcon = await connector.getProfileIcon(p['icon'])
                 summoners[p['puuid']] = {
