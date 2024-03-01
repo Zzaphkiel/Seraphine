@@ -884,7 +884,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
             begIdx = 15
             while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
                 endIdx = begIdx + 5
-                new = await connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx)["games"]
+                new = (await connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx))["games"]
 
                 for game in new:
                     if game["queueId"] in (420, 440):
