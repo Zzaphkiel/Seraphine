@@ -139,6 +139,10 @@ class LcuWebSocket():
         await self.session.close()
 
     async def start(self):
+        if "OnJsonApiEvent" in self.events:
+            raise AssertionError(
+                "You should not use OnJsonApiEvent to subscribe to all events. If you wish to debug "
+                "the program, comment out this line.")
         # 防止阻塞 connector.start()
         self.task = asyncio.create_task(self.runWs())
 
@@ -192,10 +196,9 @@ class LolClientConnector(QObject):
         async def onChampSelectChanged(event):
             signalBus.champSelectChanged.emit(event)
 
-        @self.listener.subscribe(event='', type=())
-        async def onDebugListen(event):
-            ...
-            # print(event)
+        # @self.listener.subscribe(event='OnJsonApiEvent', type=())
+        # async def onDebugListen(event):
+        #     print(event)
 
         await self.listener.start()
 
