@@ -38,7 +38,7 @@ def retry(count=5, retry_sep=0):
 
             # 构建参数字典，将参数名与对应的实参值一一对应
             params_dict = {param: arg for param,
-                           arg in zip(param_names, tmp_args)}
+            arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
 
@@ -51,6 +51,9 @@ def retry(count=5, retry_sep=0):
                 except BaseException as e:
                     time.sleep(retry_sep)
                     exce = e
+
+                    if isinstance(e, SummonerNotFound):  # SummonerNotFound 再重试会报 429 (限流)
+                        raise e
                     continue
                 else:
                     break
@@ -87,7 +90,7 @@ class LcuWebSocket():
         self.events = []
         self.subscribes = []
 
-    def subscribe(self, event: str, uri: str, type: tuple = ('Update', 'Create', 'Delete')):
+    def subscribe(self, event: str, uri: str = '', type: tuple = ('Update', 'Create', 'Delete')):
         def wrapper(func):
             self.events.append(event)
             self.subscribes.append({
@@ -96,15 +99,18 @@ class LcuWebSocket():
                 'callable': func
             })
             return func
+
         return wrapper
 
     def matchUri(self, data):
         for s in self.subscribes:
-            if data.get('uri') == s['uri'] and data.get('eventType') in s['type']:
+            # If the 'uri' or 'type' is empty, it matches any event.
+            if not (s.get('uri') or s.get('type')) or (
+                    data.get('uri') == s['uri'] and data.get('eventType') in s['type']):
                 logger.info(s['uri'], TAG)
                 logger.debug(data, TAG)
                 asyncio.create_task(s['callable'](data))
-                return
+                # return
 
     async def runWs(self):
         self.session = aiohttp.ClientSession(
@@ -133,6 +139,10 @@ class LcuWebSocket():
         await self.session.close()
 
     async def start(self):
+        if "OnJsonApiEvent" in self.events:
+            raise AssertionError(
+                "You should not use OnJsonApiEvent to subscribe to all events. If you wish to debug "
+                "the program, comment out this line.")
         # 防止阻塞 connector.start()
         self.task = asyncio.create_task(self.runWs())
 
@@ -170,21 +180,25 @@ class LolClientConnector(QObject):
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-summoner_v1_current-summoner',
                                  uri='/lol-summoner/v1/current-summoner',
-                                 type=('Update'))
+                                 type=('Update',))
         async def onCurrentSummonerProfileChanged(event):
             signalBus.currentSummonerProfileChanged.emit(event['data'])
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-gameflow_v1_gameflow-phase',
                                  uri='/lol-gameflow/v1/gameflow-phase',
-                                 type=('Update'))
+                                 type=('Update',))
         async def onGameFlowPhaseChanged(event):
             signalBus.gameStatusChanged.emit(event['data'])
 
         @self.listener.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
                                  uri='/lol-champ-select/v1/session',
-                                 type=('Update'))
+                                 type=('Update',))
         async def onChampSelectChanged(event):
             signalBus.champSelectChanged.emit(event)
+
+        # @self.listener.subscribe(event='OnJsonApiEvent', type=())
+        # async def onDebugListen(event):
+        #     print(event)
 
         await self.listener.start()
 
@@ -367,7 +381,8 @@ class LolClientConnector(QObject):
         res = await res.json()
 
         if "errorCode" in res:
-            raise SummonerNotFound()
+            if res["httpStatus"] == 400:
+                raise SummonerNotFound()
 
         return res
 
@@ -537,12 +552,14 @@ class LolClientConnector(QObject):
 
     # 选择英雄
     @retry()
-    async def selectChampion(self, actionsId, championId):
+    async def selectChampion(self, actionsId, championId, completed=None):
         data = {
             "championId": championId,
             'type': 'pick',
-            # 'completed': True,
         }
+
+        if completed:
+            data['completed'] = True
 
         res = await self.__patch(
             f"/lol-champ-select/v1/session/actions/{actionsId}", data=data)
@@ -551,12 +568,14 @@ class LolClientConnector(QObject):
 
     # 禁用英雄
     @retry()
-    async def banChampion(self, actionsId, championId):
+    async def banChampion(self, actionsId, championId, completed=None):
         data = {
             "championId": championId,
             'type': 'ban',
-            'completed': True
         }
+
+        if completed:
+            data['completed'] = completed
 
         res = await self.__patch(
             f"/lol-champ-select/v1/session/actions/{actionsId}", data=data)
@@ -677,7 +696,9 @@ class LolClientConnector(QObject):
                     raise ReferenceError
 
                 return await func(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
     @needLcu()
@@ -724,7 +745,7 @@ class JsonManager:
         for item in skins.values():
             championId = item["id"] // 1000
             self.champions[self.champs[championId]
-                           ]["skins"][item["name"]] = item["id"]
+            ]["skins"][item["name"]] = item["id"]
             self.champions[self.champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():

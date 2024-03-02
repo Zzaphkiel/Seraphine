@@ -119,7 +119,7 @@ class GameInfoInterface(SmoothScrollArea):
 
             newChampionId = new['championId']
 
-            if orig != newChampionId:
+            if orig != newChampionId and newChampionId:  # 若新头像是 0, 那就也不更新
                 icon = await connector.getChampionIcon(newChampionId)
                 self.allyChampions[summonerId] = newChampionId
                 view.updateIcon(icon)

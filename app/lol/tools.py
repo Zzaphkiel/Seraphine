@@ -947,14 +947,19 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
 async def autoPickOrBan(data):
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
     isAutoSelect = cfg.get(cfg.enableAutoSelectChampion)
+    isAutoCompleted = cfg.get(cfg.enableAutoSelectTimeoutCompleted)
     localPlayerCellId = data["data"]["localPlayerCellId"]
     team = data['data']["myTeam"]
     actions = data['data']['actions']
+    timer = data['data']['timer']
+
+    if timer["phase"] != "BAN_PICK":
+        return
 
     for actionGroup in actions:
         for action in actionGroup:
             if (action["actorCellId"] == localPlayerCellId
-                    and not action["completed"]):
+                    and not action["completed"] and action["isInProgress"]):
                 actionId = action["id"]
                 if isAutoSelect and action["type"] == "pick":
                     isPicked = False
@@ -970,19 +975,35 @@ async def autoPickOrBan(data):
                         await connector.selectChampion(
                             actionId, championId)
 
-                elif isAutoBan and action["type"] == "ban":
-                    if action["isInProgress"]:
-                        championId = connector.manager.getChampionIdByName(
-                            cfg.get(cfg.autoBanChampion))
-
-                        isFriendly = cfg.get(cfg.pretentBan)
-                        if isFriendly:
-                            for player in team:
-                                if championId == player["championPickIntent"]:
-                                    championId = 0
+                        # 超时自动锁定
+                        if isAutoCompleted:
+                            totalTime = timer["totalTimeInPhase"]
+                            timeLeft = timer["adjustedTimeLeftInPhase"]
+                            if totalTime - timeLeft > 1000:  # 满足情况时, 可能是别人的timer
+                                return
+                            await asyncio.sleep(int(timeLeft / 1000) - 1)
+                            sess = await connector.getChampSelectSession()
+                            for player in sess["myTeam"]:
+                                if player["cellId"] == localPlayerCellId:  # 找到自己
+                                    if player["championPickIntent"] == championId:  # 如果仍然和自动亮起的英雄一样(上厕所去了), 锁一下
+                                        await connector.selectChampion(actionId, championId, True)
                                     break
 
-                        await connector.banChampion(actionId, championId)
+                elif isAutoBan and action["type"] == "ban":
+                    championId = connector.manager.getChampionIdByName(
+                        cfg.get(cfg.autoBanChampion))
+
+                    # 给队友一点预选的时间
+                    await asyncio.sleep(cfg.get(cfg.autoBanDelay))
+
+                    isFriendly = cfg.get(cfg.pretentBan)
+                    if isFriendly:
+                        for player in team:
+                            if championId == player["championPickIntent"]:
+                                championId = 0
+                                break
+
+                    await connector.banChampion(actionId, championId, True)
 
                 break
 
