@@ -875,18 +875,15 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.lineEdit = LineEdit()
 
         self.switchButtonWidget = QWidget(self.view)
-        self.switchButtonLayout = QVBoxLayout(self.switchButtonWidget)
+        self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
 
-        self.enableButtonWidget = QWidget(self.switchButtonWidget)
-        self.enableButtonLayout = QHBoxLayout(self.enableButtonWidget)
         self.enableLabel = QLabel(self.tr("Enable:"))
         self.enableButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
-        self.timeoutCompletedWidget = QWidget(self.switchButtonWidget)
-        self.timeoutCompletedLayout = QHBoxLayout(self.timeoutCompletedWidget)
         self.timeoutCompletedLabel = QLabel(
             self.tr("Completed before timeout(Switch selection lose efficacy)"))
-        self.timeoutCompletedBtn = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+        self.timeoutCompletedBtn = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
 
         self.completer = None
         self.champions = []
@@ -909,17 +906,17 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
         self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
-        self.enableButtonLayout.addWidget(self.enableLabel, 0, Qt.AlignLeft)
-        self.enableButtonLayout.addWidget(self.enableButton, 0, Qt.AlignRight)
-        self.enableButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+        self.switchButtonLayout.setVerticalSpacing(19)
+        self.switchButtonLayout.addWidget(self.enableLabel, 0, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.enableButton, 0, 1, Qt.AlignRight)
+        self.switchButtonLayout.addWidget(
+            self.timeoutCompletedLabel, 1, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.timeoutCompletedBtn, 1, 1, Qt.AlignRight)
 
-        self.timeoutCompletedLayout.addWidget(self.timeoutCompletedLabel, 0, Qt.AlignLeft)
-        self.timeoutCompletedLayout.addWidget(self.timeoutCompletedBtn, 0, Qt.AlignRight)
-        self.timeoutCompletedLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
         self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
-        self.switchButtonLayout.addWidget(self.enableButtonWidget)
-        self.switchButtonLayout.addWidget(self.timeoutCompletedWidget)
 
         self.viewLayout.setSpacing(0)
         self.viewLayout.setContentsMargins(0, 0, 0, 0)
@@ -939,8 +936,10 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
                       qconfig.get(self.timeoutCompletedCfgItem))
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
-        self.enableButton.checkedChanged.connect(self.__onEnableBtnCheckedChanged)
-        self.timeoutCompletedBtn.checkedChanged.connect(self.__onTimeoutCompletedBtnCheckedChanged)
+        self.enableButton.checkedChanged.connect(
+            self.__onEnableBtnCheckedChanged)
+        self.timeoutCompletedBtn.checkedChanged.connect(
+            self.__onTimeoutCompletedBtnCheckedChanged)
 
     def __setStatusLabelText(self, champion, isChecked):
         if isChecked:
@@ -981,7 +980,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
         self.enableButton.setEnabled(enable)
 
-        self.setValue(text, self.enableButton.isChecked(), self.timeoutCompletedBtn.isChecked())
+        self.setValue(text, self.enableButton.isChecked(),
+                      self.timeoutCompletedBtn.isChecked())
 
     def __onEnableBtnCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)
@@ -990,10 +990,12 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         if not isChecked:
             self.timeoutCompletedBtn.setChecked(False)
 
-        self.setValue(self.lineEdit.text(), isChecked, self.timeoutCompletedBtn.isChecked())
+        self.setValue(self.lineEdit.text(), isChecked,
+                      self.timeoutCompletedBtn.isChecked())
 
     def __onTimeoutCompletedBtnCheckedChanged(self, isChecked: bool):
-        self.setValue(self.lineEdit.text(), self.enableButton.isChecked(), isChecked)
+        self.setValue(self.lineEdit.text(),
+                      self.enableButton.isChecked(), isChecked)
 
 
 # 自动 ban 英雄卡片
@@ -1006,20 +1008,13 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.statusLabel = QLabel(self)
 
         self.inputWidget = QWidget(self.view)
-        self.inputLayout = QVBoxLayout(self.inputWidget)
-
-        self.championsNameWidget = QWidget(self.inputWidget)
-        self.championsNameLayout = QHBoxLayout(self.championsNameWidget)
-
-        self.delayTimeWidget = QWidget(self.inputWidget)
-        self.delayTimeLayout = QHBoxLayout(self.delayTimeWidget)
-
-        self.secondsLabel = QLabel(self.tr("Ban after a delay of seconds:"))
-        self.delayLineEdit = SpinBox()
+        self.inputLayout = QGridLayout(self.inputWidget)
 
         self.championLabel = QLabel(
             self.tr("Champion will be banned automatically:"))
         self.lineEdit = LineEdit()
+        self.secondsLabel = QLabel(self.tr("Ban after a delay of seconds:"))
+        self.delayLineEdit = SpinBox()
 
         self.switchButtonWidget = QWidget(self.view)
         self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
@@ -1045,27 +1040,24 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
     def __initLayout(self):
         self.addWidget(self.statusLabel)
 
-        self.championsNameLayout.setSpacing(19)
-        self.championsNameLayout.setAlignment(Qt.AlignTop)
-        self.championsNameLayout.setContentsMargins(48, 18, 44, 18)
+        self.inputLayout.setVerticalSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
 
-        self.championsNameLayout.addWidget(self.championLabel, alignment=Qt.AlignLeft)
-        self.championsNameLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
-        self.championsNameLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+        self.inputLayout.addWidget(
+            self.championLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.lineEdit, 0, 1, alignment=Qt.AlignRight)
 
-        self.delayTimeLayout.setSpacing(19)
-        self.delayTimeLayout.setAlignment(Qt.AlignTop)
-        self.delayTimeLayout.setContentsMargins(48, 18, 44, 18)
+        self.inputLayout.addWidget(
+            self.secondsLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.delayLineEdit, 1, 1, alignment=Qt.AlignRight)
 
-        self.delayTimeLayout.addWidget(self.secondsLabel, alignment=Qt.AlignLeft)
-        self.delayTimeLayout.addWidget(self.delayLineEdit, alignment=Qt.AlignRight)
-        self.delayTimeLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.inputLayout.addWidget(self.championsNameWidget)
-        self.inputLayout.addWidget(self.delayTimeWidget)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
-        self.switchButtonLayout.setVerticalSpacing(15)
+        self.switchButtonLayout.setVerticalSpacing(19)
         self.switchButtonLayout.addWidget(self.label1, 0, 0, Qt.AlignLeft)
         self.switchButtonLayout.addWidget(
             self.switchButton1, 0, 1, Qt.AlignRight)
