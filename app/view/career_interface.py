@@ -364,15 +364,20 @@ class CareerInterface(SmoothScrollArea):
 
     @asyncSlot()
     async def refresh(self):
-        await self.updateInterface(puuid=self.puuid)
+        if self.puuid:
+            await self.updateInterface(puuid=self.puuid)
 
     async def updateInterface(self, puuid=None, summoner=None):
         '''
         通过 `puuid` 或 `summoner` 更新界面
         '''
+
+        # 不能同时为空
+        assert summoner or puuid
+
         self.setLoadingPageEnabled(True)
 
-        if summoner == None:
+        if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
 
         info = await parseSummonerData(summoner)

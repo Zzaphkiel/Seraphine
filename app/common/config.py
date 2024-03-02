@@ -4,7 +4,6 @@ import sys
 
 from PyQt5.QtCore import QLocale
 
-
 from .qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
                              OptionsConfigItem, OptionsValidator, ConfigSerializer,
                              RangeConfigItem, RangeValidator, EnumSerializer, ColorConfigItem)
@@ -81,12 +80,17 @@ class Config(QConfig):
                                           "EnableAutoSelectChampion", False,
                                           BoolValidator())
 
+    enableAutoSelectTimeoutCompleted = ConfigItem("Functions",
+                                                  "EnableAutoSelectTimeoutCompleted", False,
+                                                  BoolValidator())
+
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
 
     enableAutoBanChampion = ConfigItem(
         "Functions", "EnableAutoBanChampion", False, BoolValidator())
     autoBanChampion = ConfigItem("Functions", "AutoBanChampion", "")
+    autoBanDelay = RangeConfigItem("Functions", "AutoBanDelay", 0, RangeValidator(0, 25))
     pretentBan = ConfigItem("Functions", "PrententBan", False, BoolValidator())
 
     lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
