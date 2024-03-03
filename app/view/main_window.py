@@ -220,9 +220,6 @@ class MainWindow(FluentWindow):
         self.splashScreen.setIconSize(QSize(106, 106))
         self.splashScreen.raise_()
 
-        cfg.themeChanged.connect(
-            lambda: self.setMicaEffectEnabled(self.isMicaEffectEnabled()))
-
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)

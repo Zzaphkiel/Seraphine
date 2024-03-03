@@ -3,8 +3,9 @@ from typing import Union
 
 from ..common.qfluentwidgets import (
     FluentIconBase, ExpandGroupSettingCard, ConfigItem, qconfig, PushButton, SpinBox,
-    ColorDialog, setCustomStyleSheet)
-from PyQt5.QtCore import Qt
+    ColorDialog, LineEdit, SwitchButton,  IndicatorPosition, setCustomStyleSheet,
+    SwitchSettingCard)
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton
 
@@ -77,7 +78,7 @@ class LineEditSettingCard(ExpandGroupSettingCard):
         self.statusLabel.setText(self.tr("Now: ") + str(value))
 
 
-class gameTabColorSettingCard(ExpandGroupSettingCard):
+class GameTabColorSettingCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, winConfigItem: ConfigItem = None,
                  loseConfigItem: ConfigItem = None, remakeConfigItem: ConfigItem = None,
                  parent=None):
@@ -249,3 +250,110 @@ class gameTabColorSettingCard(ExpandGroupSettingCard):
         self.setValue(self.defaultWinColor, self.defaultLoseColor,
                       self.defaultRemakeColor)
         signalBus.tabColorChanged.emit()
+
+
+class ProxySettingCard(ExpandGroupSettingCard):
+    def __init__(self, title, content, enableConfigItem: ConfigItem = None,
+                 addrConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.PLANE, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QHBoxLayout(self.inputWidget)
+
+        self.secondsLabel = QLabel(self.tr("Http proxy:"))
+        self.lineEdit = LineEdit()
+
+        self.switchButtonWidget = QWidget(self.view)
+        self.switchButtonLayout = QHBoxLayout(self.switchButtonWidget)
+
+        self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.enableConfigItem = enableConfigItem
+        self.addrConfigItem = addrConfigItem
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(self.secondsLabel, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
+        self.switchButtonLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.switchButtonWidget)
+
+    def __initWidget(self):
+        self.lineEdit.setText(cfg.get(self.addrConfigItem))
+        self.lineEdit.setMinimumWidth(250)
+        self.lineEdit.setPlaceholderText("127.0.0.1:10809")
+
+        self.switchButton.setChecked(cfg.get(self.enableConfigItem))
+
+        self.lineEdit.textChanged.connect(self.__onLineEditValueChanged)
+        self.switchButton.checkedChanged.connect(
+            self.__onSwitchButtonCheckedChanged)
+
+        value, isChecked = self.lineEdit.text(), self.switchButton.isChecked()
+        self.__setStatusLableText(value, isChecked)
+        self.lineEdit.setEnabled(not isChecked)
+
+    def setValue(self, addr: int, isChecked: bool):
+        qconfig.set(self.addrConfigItem, addr)
+        qconfig.set(self.enableConfigItem, isChecked)
+
+        self.__setStatusLableText(addr, isChecked)
+
+    def __onSwitchButtonCheckedChanged(self, isChecked: bool):
+        self.setValue(self.lineEdit.text(), isChecked)
+        self.lineEdit.setEnabled(not isChecked)
+
+    def __onLineEditValueChanged(self, value):
+        self.setValue(value, self.switchButton.isChecked())
+
+    def __setStatusLableText(self, addr, isChecked):
+        if isChecked:
+            self.statusLabel.setText(self.tr("Enabled, proxy: ") + str(addr))
+        else:
+            self.statusLabel.setText(self.tr("Disabled"))
+
+
+class LooseSwitchSettingCard(SwitchSettingCard):
+    """ 允许bool以外的值来初始化的SwitchSettingCard控件 """
+
+    def __init__(self, icon, title, content=None, configItem: ConfigItem = None, parent=None):
+        super().__init__(icon, title, content, configItem, parent)
+
+        self.switchButton.setOnText(self.tr("On"))
+        self.switchButton.setOffText(self.tr("Off"))
+
+    def setValue(self, isChecked):
+        """
+        为适应 config 中对应字段为任意值时初始化控件;
+
+        若传入 bool 以外的值, 前端将会看到False
+
+        需要设置值, 有以下途径:
+        1. 代码层调用 setValue 时, 以bool传入
+        2. 用户通过前端拨动 SwitchButton
+
+        @param isChecked:
+        @return:
+        """
+        if isinstance(isChecked, bool):
+            super().setValue(isChecked)
+        else:
+            self.switchButton.setChecked(False)
