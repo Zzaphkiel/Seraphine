@@ -969,7 +969,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
     def validate(self):
         text = self.lineEdit.text()
 
-        if text not in self.champions and self.switchButton.checked:
+        if text not in self.champions and self.enableButton.checked:
             self.setValue("", False, False)
 
         self.__onLineEditTextChanged(text)
