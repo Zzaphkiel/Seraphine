@@ -54,7 +54,8 @@ TeammateInfoBar>#lossesLabel {
 }
 
 GameInfoBar {
-    background-color: rgb(39, 39, 39);
+    border-radius: 6px;
+    border: 1px solid;
 }
 
 GameInfoBar>QLabel {
@@ -67,22 +68,33 @@ ItemsKdaCsGold>QLabel {
     font: 16px 'Segoe UI', 'Microsoft YaHei';
 }
 
+ResultModeSpell>ColorLabel {
+    font: bold 16px;
+}
+
 CareerInterface {
     border: none;
     background-color: transparent;
 }
 
 TeammateInfoBar {
-    border: 1px solid rgb(35, 35, 35);
+    border: 1px solid;
     border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.051);
 }
 
-TeammateInfoBar:hover {
+TeammateInfoBar>#winsLabel {
+    font: bold;
+}
+
+TeammateInfoBar>#lossesLabel {
+    font: bold;
+}
+
+/* TeammateInfoBar:hover {
     border: 1px solid rgba(0, 0, 0, 0.095);
     border-radius: 6px;
     background-color: rgba(255, 255, 255, 0.0837);
-}
+} */
 
 SummonerName {
     font: bold 14px 'Segoe UI', 'Microsoft YaHei';

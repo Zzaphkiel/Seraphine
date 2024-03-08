@@ -27,6 +27,15 @@ GamesTab>QLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
 
+GameTab {
+    border: 1px solid;
+    border-radius: 6px;
+}
+
+GameTab[selected=true] {
+    border-width: 3px;
+}
+
 GameTab>QLabel {
     color: white;
     font: 14px 'Segoe UI', 'Microsoft YaHei';
@@ -87,14 +96,8 @@ SummonerInfoBar>QLabel {
 SummonerInfoBar {
     border: 1px solid rgb(92, 92, 92);
     border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.051);
 }
 
-SummonerInfoBar:hover {
-    border: 1px solid rgb(82, 82, 82);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.0837);
-}
 
 SummonerInfoBar>#levelLabel {
     color: white;

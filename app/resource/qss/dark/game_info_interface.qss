@@ -18,12 +18,12 @@ SummonersGamesView {
 SummonerInfoView {
     border-radius: 6px;
     border: 1px solid rgb(82, 82, 82);
-    background-color: rgba(255, 255, 255, 0.051);
+    /* background-color: rgba(255, 255, 255, 0.051); */
 }
 
-SummonerInfoView:enabled:hover {
+/* SummonerInfoView:enabled:hover {
     background-color: rgba(255, 255, 255, 0.0837);
-}
+} */
 
 SummonerName {
     font: bold 13px 'Microsoft YaHei', 'Segoe UI', 'PingFang SC';
@@ -65,6 +65,11 @@ SummonerInfoView>#kdaLabel,
 SummonerInfoView>#kdaValLabel {
     font: 10px 'Segoe UI', 'Microsoft YaHei';
     /* border: 1px solid black; */
+}
+
+GameTab {
+    border-radius: 6px;
+    border: 1px solid;
 }
 
 GameTab>QLabel {

@@ -601,9 +601,9 @@ class MainWindow(FluentWindow):
     @asyncSlot(str)
     async def __switchToSearchInterface(self, name):
         self.searchInterface.searchLineEdit.setText(name)
-        await self.searchInterface.onSearchButtonClicked()
-
         self.checkAndSwitchTo(self.searchInterface)
+
+        await self.searchInterface.onSearchButtonClicked()
 
     @asyncSlot(str)
     async def __switchToCareerInterface(self, puuid):

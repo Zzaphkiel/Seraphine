@@ -10,17 +10,19 @@ from ..common.qfluentwidgets import (TableWidget, PushButton, ComboBox,
                                      ToolTipPosition, ToolButton, IndeterminateProgressRing,
                                      Flyout, FlyoutViewBase, FlyoutAnimationType)
 
-from ..components.game_infobar_widget import GameInfoBar
-from ..components.champion_icon_widget import RoundIcon
-from ..components.profile_level_icon_widget import RoundLevelAvatar
-from ..components.summoner_name_button import SummonerName
-from ..common.style_sheet import StyleSheet
-from ..common.icons import Icon
-from ..common.signals import signalBus
-from ..common.config import cfg
-from ..lol.connector import connector
-from ..lol.tools import (parseGames, parseSummonerData,
-                         getRecentTeammates, parseDetailRankInfo)
+from app.components.game_infobar_widget import GameInfoBar
+from app.components.champion_icon_widget import RoundIcon
+from app.components.profile_level_icon_widget import RoundLevelAvatar
+from app.components.summoner_name_button import SummonerName
+from app.components.color_label import ColorLabel
+from app.components.animation_frame import CardWidget, ColorAnimationFrame
+from app.common.style_sheet import StyleSheet
+from app.common.icons import Icon
+from app.common.signals import signalBus
+from app.common.config import cfg
+from app.lol.connector import connector
+from app.lol.tools import (parseGames, parseSummonerData,
+                           getRecentTeammates, parseDetailRankInfo)
 
 
 class NameLabel(QLabel):
@@ -69,8 +71,8 @@ class CareerInterface(SmoothScrollArea):
         self.recent20GamesLabel = QLabel(
             self.tr('Recent matches') + " " + self.tr('(Last') + " None " +
             self.tr('games)'))
-        self.winsLabel = QLabel(self.tr("Wins:") + " None")
-        self.lossesLabel = QLabel(self.tr("Losses:") + " None")
+        self.winsLabel = ColorLabel(self.tr("Wins:") + " None", 'win')
+        self.lossesLabel = ColorLabel(self.tr("Losses:") + " None", 'lose')
         self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
         self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
@@ -107,9 +109,6 @@ class CareerInterface(SmoothScrollArea):
         self.recent20GamesLabel.setObjectName('rencent20GamesLabel')
         self.winsLabel.setObjectName('winsLabel')
         self.lossesLabel.setObjectName('lossesLabel')
-
-        self.__setLabelColor()
-        signalBus.tabColorChanged.connect(self.__setLabelColor)
 
         self.kdaLabel.setObjectName('kdaLabel')
         self.recentInfoHLayout.setObjectName("recentInfoHLayout")
@@ -167,17 +166,6 @@ class CareerInterface(SmoothScrollArea):
 
         StyleSheet.CAREER_INTERFACE.apply(self)
         self.initTableStyle()
-
-    def __setLabelColor(self):
-        r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
-        self.winsLabel.setStyleSheet(f"""
-            QLabel {{color: rgb({r}, {g}, {b})}};
-        """)
-
-        r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
-        self.lossesLabel.setStyleSheet(f"""
-            QLabel {{color: rgb({r}, {g}, {b})}};
-        """)
 
     def __initLayout(self):
         self.nameTagLineLayout.setContentsMargins(0, 0, 0, 0)
@@ -597,11 +585,12 @@ class TeammatesFlyOut(FlyoutViewBase):
         self.stackedWidget.setCurrentIndex(index)
 
 
-class TeammateInfoBar(QFrame):
+class TeammateInfoBar(ColorAnimationFrame):
     # closed = pyqtSignal()
 
     def __init__(self, summoner, parent=None):
-        super().__init__(parent)
+        super().__init__(type='default', parent=parent)
+        self._pressedBackgroundColor = self._hoverBackgroundColor
 
         self.hBoxLayout = QHBoxLayout(self)
 
@@ -611,9 +600,9 @@ class TeammateInfoBar(QFrame):
         self.totalTitle = QLabel(self.tr("Total: "))
         self.totalLabel = QLabel(str(summoner["total"]))
         self.winsTitle = QLabel(self.tr("Wins: "))
-        self.winsLabel = QLabel(str(summoner['wins']))
+        self.winsLabel = ColorLabel(str(summoner['wins']), 'win')
         self.lossesTitle = QLabel(self.tr("Losses: "))
-        self.lossesLabel = QLabel(str(summoner['losses']))
+        self.lossesLabel = ColorLabel(str(summoner['losses']), 'lose')
 
         self.__initWidget()
         self.__initLayout()
@@ -633,9 +622,6 @@ class TeammateInfoBar(QFrame):
         self.winsLabel.setObjectName("winsLabel")
         self.lossesLabel.setObjectName("lossesLabel")
 
-        self.__setLabelColor()
-        signalBus.tabColorChanged.connect(self.__setLabelColor)
-
         self.totalTitle.setAlignment(Qt.AlignCenter)
         self.totalLabel.setAlignment(Qt.AlignCenter)
         self.winsTitle.setAlignment(Qt.AlignCenter)
@@ -652,17 +638,6 @@ class TeammateInfoBar(QFrame):
         self.hBoxLayout.addWidget(self.winsLabel)
         self.hBoxLayout.addWidget(self.lossesTitle)
         self.hBoxLayout.addWidget(self.lossesLabel)
-
-    def __setLabelColor(self):
-        r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
-        self.winsLabel.setStyleSheet(f"""
-            QLabel {{color: rgb({r}, {g}, {b})}};
-        """)
-
-        r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
-        self.lossesLabel.setStyleSheet(f"""
-            QLabel {{color: rgb({r}, {g}, {b})}};
-        """)
 
 
 class ChampionsCard(QFrame):

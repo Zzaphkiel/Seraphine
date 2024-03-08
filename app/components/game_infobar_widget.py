@@ -2,11 +2,13 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QLabel, QFrame, QSpacerItem, QSizePolicy)
 from PyQt5.QtGui import QPixmap, QPen, QPainter, QColor
-from ..common.qfluentwidgets import isDarkTheme, Theme
 
-from ..common.signals import signalBus
-from ..common.config import cfg
-from ..components.champion_icon_widget import RoundIcon
+from app.common.qfluentwidgets import isDarkTheme, Theme
+from app.common.signals import signalBus
+from app.common.config import cfg
+from app.components.champion_icon_widget import RoundIcon
+from app.components.color_label import ColorLabel
+from app.components.animation_frame import CardWidget, ColorAnimationFrame
 
 
 class RoundLevel(QFrame):
@@ -53,20 +55,16 @@ class ResultModeSpell(QFrame):
 
         self.vBoxLayout = QVBoxLayout(self)
         self.spellsLayout = QHBoxLayout()
-        self.resultLabel = QLabel()
+        self.resultLabel = ColorLabel()
 
-        self.remake = remake
-        self.win = win
-
-        if self.remake:
+        if remake:
             self.resultLabel.setText(self.tr("Remake"))
-        elif self.win:
-            self.resultLabel.setText(self.tr("Win"))
-        else:
-            self.resultLabel.setText(self.tr("Lose"))
+            self.resultLabel.setType('remake')
 
-        self.__setResultColor()
-        signalBus.tabColorChanged.connect(self.__setResultColor)
+        elif win:
+            self.resultLabel = ColorLabel(self.tr("Win"), 'win')
+        else:
+            self.resultLabel = ColorLabel(self.tr("Lose"), 'lose')
 
         self.modeLabel = QLabel(mode)
         self.modeLabel.setStyleSheet("QLabel {font: 12px;}")
@@ -97,18 +95,6 @@ class ResultModeSpell(QFrame):
         self.__initLayout()
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         # self.setStyleSheet("ResultModeSpell {border: 1px solid black;}")
-
-    def __setResultColor(self):
-        if self.remake:
-            r, g, b, _ = cfg.get(cfg.remakeCardColor).getRgb()
-        elif self.win:
-            r, g, b, _ = cfg.get(cfg.winCardColor).getRgb()
-        else:
-            r, g, b, _ = cfg.get(cfg.loseCardColor).getRgb()
-
-        self.resultLabel.setStyleSheet(
-            f"QLabel {{color: rgb({r}, {g}, {b}); font: bold 16px;}}"
-        )
 
     def __initLayout(self):
         self.setMinimumWidth(100)
@@ -244,19 +230,25 @@ class MapTime(QFrame):
         )
 
 
-class GameInfoBar(QFrame):
+class GameInfoBar(ColorAnimationFrame):
     def __init__(self, game: dict = None, parent: QWidget = None):
-        super().__init__(parent=parent)
+        if game['remake']:
+            type = 'remake'
+        elif game['win']:
+            type = 'win'
+        else:
+            type = 'lose'
+
+        super().__init__(type=type, parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
 
         self.setProperty('pressed', False)
-        self.remake = game['remake']
-        self.win = game['win']
-
-        self.gameId = game['gameId']
 
         self.__initWidget(game)
         self.__initLayout()
+
+        self.clicked.connect(
+            lambda: signalBus.careerGameBarClicked.emit(str(self.gameId)))
 
     def __initWidget(self, game):
         self.championIcon = RoundIconWithLevel(
@@ -280,39 +272,6 @@ class GameInfoBar(QFrame):
         self.mapTime = MapTime(
             game["map"], game['position'], game["time"], game["duration"])
 
-        self.__setColor()
-        signalBus.tabColorChanged.connect(self.__setColor)
-
-    def __setColor(self):
-        if self.remake:
-            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
-        elif self.win:
-            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
-        else:
-            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
-
-        a /= 255
-
-        f1, f2 = 1.1, 0.9
-        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
-
-        self.setStyleSheet(f"""
-            GameInfoBar {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
-            }}
-            GameInfoBar:hover {{
-                border: 1px solid rgb({r1}, {g1}, {b1});
-                background-color: rgba({r1}, {g1}, {b1}, {min(a+0.1, 1)});
-            }}
-            GameInfoBar[pressed = true] {{
-                border: 1px solid rgb({r2}, {g2}, {b2});
-                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
-            }}
-        """)
-
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(11, 8, 11, 8)
         self.hBoxLayout.addWidget(self.championIcon)
@@ -327,15 +286,3 @@ class GameInfoBar(QFrame):
         )
         self.hBoxLayout.addSpacing(15)
         self.hBoxLayout.addWidget(self.mapTime)
-
-    def mousePressEvent(self, a0) -> None:
-        self.setProperty("pressed", True)
-        self.style().polish(self)
-        return super().mousePressEvent(a0)
-
-    def mouseReleaseEvent(self, a0) -> None:
-        self.setProperty("pressed", False)
-        self.style().polish(self)
-
-        signalBus.careerGameBarClicked.emit(str(self.gameId))
-        return super().mouseReleaseEvent(a0)

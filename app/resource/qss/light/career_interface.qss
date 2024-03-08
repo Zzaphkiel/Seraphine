@@ -25,12 +25,10 @@ QLabel#kdaValLabel {
 
 QLabel#winsLabel {
     font: bold;
-    color: rgb(57, 176, 27);
 }
 
 QLabel#lossesLabel {
     font: bold;
-    color: rgb(211, 25, 12);
 }
 
 #gameInfoArea {
@@ -44,7 +42,8 @@ QWidget#gameInfoWidget {
 }
 
 GameInfoBar {
-    background-color: rgb(248, 248, 248);
+    border-radius: 6px;
+    border: 1px solid;
 }
 
 GameInfoBar>QLabel {
@@ -56,15 +55,18 @@ ItemsKdaCsGold>QLabel {
     font: 16px 'Segoe UI', 'Microsoft YaHei';
 }
 
+ResultModeSpell>ColorLabel {
+    font: bold 16px;
+}
+
 CareerInterface {
     border: none;
     background-color: transparent;
 }
 
 TeammateInfoBar {
-    border: 1px solid rgba(0, 0, 0, 0.095);
+    border: 1px solid;
     border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.667);
 }
 
 QLabel#totalLabel {
@@ -74,20 +76,12 @@ QLabel#totalLabel {
 
 TeammateInfoBar>#winsLabel {
     font: bold;
-    color: rgb(57, 176, 27);
 }
 
 TeammateInfoBar>#lossesLabel {
     font: bold;
-    color: rgb(211, 25, 12);
 }
 
-
-TeammateInfoBar:hover {
-    border: 1px solid rgba(0, 0, 0, 0.095);
-    border-radius: 6px;
-    background-color: rgba(245, 245, 245, 0.5);
-}
 
 SummonerName {
     font: bold 14px 'Segoe UI', 'Microsoft YaHei';

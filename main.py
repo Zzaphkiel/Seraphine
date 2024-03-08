@@ -8,6 +8,7 @@ import asyncio
 from qasync import QApplication, QEventLoop
 from app.common.qfluentwidgets import FluentTranslator
 from PyQt5.QtCore import Qt, QTranslator
+from PyQt5.QtGui import QFont
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,6 +27,11 @@ def main():
         os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
         os.environ["QT_SCALE_FACTOR"] = str(cfg.get(cfg.dpiScale))
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+
+    font = QFont()
+    font.setStyleStrategy(QFont.PreferAntialias)
+    font.setHintingPreference(QFont.PreferFullHinting)
+    QApplication.setFont(font)
 
     app = QApplication(sys.argv)
     app.setAttribute(Qt.AA_DontCreateNativeWidgetSiblings)

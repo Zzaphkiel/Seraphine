@@ -38,7 +38,7 @@ def retry(count=5, retry_sep=0):
 
             # 构建参数字典，将参数名与对应的实参值一一对应
             params_dict = {param: arg for param,
-            arg in zip(param_names, tmp_args)}
+                           arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
 
@@ -174,6 +174,8 @@ class LolClientConnector(QObject):
         await self.__initManager()
         self.__initFolder()
         await self.__runListener()
+
+        logger.critical(f"connector started, server: {self.server}", TAG)
 
     async def __runListener(self):
         self.listener = LcuWebSocket(self.port, self.token)
@@ -745,7 +747,7 @@ class JsonManager:
         for item in skins.values():
             championId = item["id"] // 1000
             self.champions[self.champs[championId]
-            ]["skins"][item["name"]] = item["id"]
+                           ]["skins"][item["name"]] = item["id"]
             self.champions[self.champs[championId]]["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():

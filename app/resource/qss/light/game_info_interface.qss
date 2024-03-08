@@ -18,14 +18,14 @@ SummonersView {
 SummonerInfoView {
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.095);
-    background-color: rgba(245, 245, 245, 0.667);
+    /* background-color: rgba(245, 245, 245, 0.667); */
 }
 
-SummonerInfoView:enabled:hover {
+/* SummonerInfoView:hover {
     border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.095);
     background-color: rgba(233, 233, 233, 0.5);
-}
+} */
 
 SummonerName {
     font: bold 13px 'Microsoft YaHei', 'Segoe UI';
@@ -70,6 +70,11 @@ SummonerInfoView>#kdaValLabel {
 
 SummonerInfoView>#kdaValLabel {
     font: bold;
+}
+
+GameTab {
+    border-radius: 6px;
+    border: 1px solid;
 }
 
 GameTab>QLabel {

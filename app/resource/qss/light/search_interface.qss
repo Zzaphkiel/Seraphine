@@ -25,6 +25,15 @@ GamesTab>QLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
 
+GameTab {
+    border: 1px solid;
+    border-radius: 6px;
+}
+
+GameTab[selected=true] {
+    border-width: 3px;
+}
+
 GameTab>QLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
 }
@@ -46,6 +55,11 @@ GameTitleBar>#resultLabel {
 
 GameTitleBar>#infoLabel {
     font: 12px 'Segoe UI', 'Microsoft YaHei';
+}
+
+GameTitleBar {
+    border-radius: 6px;
+    border: 1px solid;
 }
 
 GameTitleBar {
@@ -77,14 +91,8 @@ TeamView>QLabel {
 SummonerInfoBar {
     border: 1px solid rgba(0, 0, 0, 0.095);
     border-radius: 6px;
-    background-color: rgba(233, 233, 233, 0.667);
 }
 
-SummonerInfoBar:hover {
-    border: 1px solid rgba(0, 0, 0, 0.095);
-    border-radius: 6px;
-    background-color: rgba(243, 243, 243, 0.5);
-}
 
 SummonerInfoBar>QLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';

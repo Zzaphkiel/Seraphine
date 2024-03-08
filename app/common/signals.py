@@ -29,7 +29,7 @@ class SignalBus(QObject):
     toSearchInterface = pyqtSignal(str)
 
     # style:
-    tabColorChanged = pyqtSignal()
+    customColorChanged = pyqtSignal(str)
 
 
 signalBus = SignalBus()

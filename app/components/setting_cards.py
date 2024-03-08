@@ -9,9 +9,10 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton
 
-from ..common.icons import Icon
-from ..common.config import cfg
-from ..common.signals import signalBus
+from app.common.icons import Icon
+from app.common.config import cfg
+from app.common.signals import signalBus
+from app.components.animation_frame import ColorAnimationFrame
 
 
 class LineEditSettingCard(ExpandGroupSettingCard):
@@ -93,9 +94,9 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         self.loseHintLabel = QLabel(self.tr("Color of losses:"))
         self.remakeHintLabel = QLabel(self.tr("Color of remakes:"))
 
-        self.winSettingButton = PushButton()
-        self.loseSettingButton = PushButton()
-        self.remakeSettingButton = PushButton()
+        self.winSettingButton = ColorAnimationFrame(type='win')
+        self.loseSettingButton = ColorAnimationFrame(type='lose')
+        self.remakeSettingButton = ColorAnimationFrame(type='remake')
 
         self.resetWidget = QWidget()
         self.resetLayout = QHBoxLayout(self.resetWidget)
@@ -109,8 +110,8 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         self.loseConfigItem = loseConfigItem
         self.remakeConfigItem = remakeConfigItem
 
-        self.__initLayout()
         self.__initWidget()
+        self.__initLayout()
 
     def __initLayout(self):
         self.addWidget(self.statusLabel)
@@ -145,9 +146,10 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.resetWidget)
 
     def __initWidget(self):
-        self.winSettingButton.setFixedWidth(100)
-        self.loseSettingButton.setFixedWidth(100)
-        self.remakeSettingButton.setFixedWidth(100)
+        self.winSettingButton.setFixedSize(100, 32)
+        self.loseSettingButton.setFixedSize(100, 32)
+        self.remakeSettingButton.setFixedSize(100, 32)
+
         self.resetButton.setMinimumWidth(100)
 
         self.setValue(qconfig.get(self.winConfigItem),
@@ -174,7 +176,6 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
             qconfig.set(self.remakeConfigItem, remakeColor)
 
         self.__setStatusLabel()
-        self.__setButtonsColor()
 
     def __setStatusLabel(self):
         if (qconfig.get(self.winConfigItem) == self.defaultWinColor and
@@ -185,42 +186,6 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         else:
             self.statusLabel.setText(self.tr("Custom color"))
             self.resetButton.setEnabled(True)
-
-    def __setButtonsColor(self):
-        winColor = qconfig.get(self.winConfigItem)
-        self.__setColor(self.winSettingButton, winColor)
-
-        loseColor = qconfig.get(self.loseConfigItem)
-        self.__setColor(self.loseSettingButton, loseColor)
-
-        remakeColor = qconfig.get(self.remakeConfigItem)
-        self.__setColor(self.remakeSettingButton, remakeColor)
-
-    def __setColor(self, widget, color: QColor):
-        r, g, b, a = color.getRgb()
-        a /= 255
-
-        f1, f2 = 1.1, 0.9
-        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
-
-        qss = f"""
-            QPushButton {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
-            }}
-            QPushButton:hover {{
-                border: 1px solid rgb({r1}, {g1}, {b1});
-                background-color: rgba({r1}, {g1}, {b1}, {min(a+0.1, 1)});
-            }}
-            QPushButton:pressed {{
-                border: 1px solid rgb({r2}, {g2}, {b2});
-                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
-            }}
-        """
-
-        setCustomStyleSheet(widget, qss, qss)
 
     def __onSettingButtonClicked(self, name):
         if name == 'win':
@@ -244,12 +209,15 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         else:
             self.setValue(remakeColor=color)
 
-        signalBus.tabColorChanged.emit()
+        signalBus.customColorChanged.emit(name)
 
     def __reset(self):
         self.setValue(self.defaultWinColor, self.defaultLoseColor,
                       self.defaultRemakeColor)
-        signalBus.tabColorChanged.emit()
+
+        signalBus.customColorChanged.emit('win')
+        signalBus.customColorChanged.emit('lose')
+        signalBus.customColorChanged.emit('remake')
 
 
 class ProxySettingCard(ExpandGroupSettingCard):

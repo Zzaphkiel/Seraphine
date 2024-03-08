@@ -10,15 +10,16 @@ from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFon
 from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                                      ToolTipFilter, ToolTipPosition, setCustomStyleSheet)
 
-from ..common.icons import Icon
-from ..common.style_sheet import StyleSheet
-from ..common.signals import signalBus
-from ..common.config import cfg
-from ..components.champion_icon_widget import RoundIcon
-from ..components.profile_level_icon_widget import RoundLevelAvatar
-from ..components.summoner_name_button import SummonerName
-from ..lol.tools import parseSummonerOrder
-from ..lol.connector import connector
+from app.common.icons import Icon
+from app.common.style_sheet import StyleSheet
+from app.common.signals import signalBus
+from app.common.config import cfg
+from app.components.champion_icon_widget import RoundIcon
+from app.components.profile_level_icon_widget import RoundLevelAvatar
+from app.components.summoner_name_button import SummonerName
+from app.components.animation_frame import CardWidget, ColorAnimationFrame
+from app.lol.tools import parseSummonerOrder
+from app.lol.connector import connector
 
 
 class GameInfoInterface(SmoothScrollArea):
@@ -280,7 +281,7 @@ class TeamSummoners(QFrame):
             if not view:
                 continue
 
-            view.setColor(color)
+            view.updateTeamColor(color)
 
     def clear(self):
         for i in reversed(range(self.vBoxLayout.count())):
@@ -293,7 +294,7 @@ class TeamSummoners(QFrame):
         self.items = {}
 
 
-class SummonerInfoView(QFrame):
+class SummonerInfoView(ColorAnimationFrame):
     """
     对局信息页单个召唤师概览 item
 
@@ -303,7 +304,8 @@ class SummonerInfoView(QFrame):
     """
 
     def __init__(self, info: dict, parent=None):
-        super().__init__(parent)
+        super().__init__(type='default', parent=parent)
+        self._pressedBackgroundColor = self._hoverBackgroundColor
         self.hBoxLayout = QHBoxLayout(self)
         self.icon = RoundLevelAvatar(info['icon'],
                                      info['xpSinceLastLevel'],
@@ -451,29 +453,9 @@ class SummonerInfoView(QFrame):
 
         # self.setFixedHeight(150)
 
-    def setColor(self, color):
-        if color == 0:
-            r, g, b = 255, 176, 27
-        elif color == 1:
-            r, g, b = 255, 51, 153
-        else:
-            return
-
-        f1, f2 = 1.1, 0.8
-        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-
-        self.setStyleSheet(f""" 
-            SummonerInfoView {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, 0.15);
-            }}
-            SummonerInfoView:hover {{
-                border-radius: 6px;
-                border: 1px solid rgb({r1}, {g1}, {b1});
-                background-color: rgba({r1}, {g1}, {b1}, 0.2);
-            }}
-        """)
+    def updateTeamColor(self, team):
+        if team in [0, 1]:
+            self.setType(f"team{team+1}")
 
     def updateIcon(self, iconPath: str):
         self.icon.updateIcon(iconPath)
@@ -594,12 +576,18 @@ class Games(QFrame):
             self.gamesLayout.addSpacing(5)
 
 
-class GameTab(QFrame):
+class GameTab(ColorAnimationFrame):
 
     def __init__(self, game=None, parent=None):
-        super().__init__(parent)
-        # self.setMinimumHeight(20)
-        # self.setFixedWidth(129)
+        if game['remake']:
+            type = 'remake'
+        elif game['win']:
+            type = 'win'
+        else:
+            type = 'lose'
+
+        super().__init__(type=type, parent=parent)
+        self._pressedBackgroundColor = self._hoverBackgroundColor
 
         self.hBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
@@ -624,10 +612,6 @@ class GameTab(QFrame):
         self.remake = game['remake']
         self.win = game['win']
 
-        self.__setColor()
-
-        signalBus.tabColorChanged.connect(self.__setColor)
-
         self.__initWidget()
         self.__initLayout()
 
@@ -647,35 +631,3 @@ class GameTab(QFrame):
 
         self.hBoxLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
-
-    def __setColor(self):
-        if self.remake:
-            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
-        elif self.win:
-            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
-        else:
-            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
-
-        a /= 255
-
-        f1, f2 = 1.1, 0.9
-        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
-
-        self.setStyleSheet(f""" 
-            GameTab {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
-            }}
-            GameTab:hover {{
-                border-radius: 6px;
-                border: 1px solid rgb({r1}, {g1}, {b1});
-                background-color: rgba({r1}, {g1}, {b1},  {min(a+0.1, 1)});
-            }}
-            GameTab[pressed = true] {{
-                border-radius: 6px;
-                border: 1px solid rgb({r2}, {g2}, {b2});
-                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
-            }}
-        """)

@@ -31,3 +31,8 @@ QLabel#settingLabel {
     background-color: transparent;
     color: white;
 }
+
+ColorAnimationFrame {
+    border: 1px solid;
+    border-radius: 6px;
+}

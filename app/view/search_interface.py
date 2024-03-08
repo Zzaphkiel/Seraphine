@@ -7,22 +7,23 @@ import asyncio
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
                              QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 from ..common.qfluentwidgets import (SmoothScrollArea, PushButton, ToolButton, InfoBar,
                                      InfoBarPosition, ToolTipFilter, ToolTipPosition,
                                      isDarkTheme, FlyoutViewBase, Flyout, Theme,
                                      IndeterminateProgressRing, ComboBox, StateToolTip)
 
-from ..common.style_sheet import StyleSheet
-from ..common.icons import Icon
-from ..common.config import cfg
-from ..common.signals import signalBus
-from ..components.champion_icon_widget import RoundIcon
-from ..components.search_line_edit import SearchLineEdit
-from ..components.summoner_name_button import SummonerName
-from ..lol.connector import connector
-from ..lol.exceptions import SummonerGamesNotFound, SummonerNotFound
-from ..lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
+from app.common.style_sheet import StyleSheet, ColorChangeable
+from app.common.icons import Icon
+from app.common.config import cfg
+from app.common.signals import signalBus
+from app.components.champion_icon_widget import RoundIcon
+from app.components.search_line_edit import SearchLineEdit
+from app.components.summoner_name_button import SummonerName
+from app.components.animation_frame import ColorAnimationFrame, CardWidget
+from app.lol.connector import connector
+from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
+from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
 
 
 class GamesTab(QFrame):
@@ -573,9 +574,11 @@ class BansFlyoutView(FlyoutViewBase):
             self.hBoxLayout.addWidget(icon)
 
 
-class SummonerInfoBar(QFrame):
+class SummonerInfoBar(CardWidget):
     def __init__(self, summoner, parent=None):
         super().__init__(parent)
+        self._pressedBackgroundColor = self._hoverBackgroundColor
+
         self.setFixedHeight(39)
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -709,9 +712,10 @@ class SummonerInfoBar(QFrame):
         self.hBoxLayout.addWidget(self.demageLabel)
 
 
-class GameTitleBar(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+class GameTitleBar(QFrame, ColorChangeable):
+    def __init__(self, type: str = None, parent=None):
+        QFrame.__init__(self, parent=parent)
+        ColorChangeable.__init__(self, type)
 
         self.setFixedHeight(78)
         self.titleBarLayout = QHBoxLayout(self)
@@ -763,10 +767,13 @@ class GameTitleBar(QFrame):
 
         if game["remake"]:
             result = self.tr("Remake")
+            self.setType('remake')
         elif game["win"]:
             result = self.tr("Win")
+            self.setType('win')
         else:
             result = self.tr("Lose")
+            self.setType('lose')
 
         if isCherry:
             cherryResult = game["cherryResult"]
@@ -789,23 +796,11 @@ class GameTitleBar(QFrame):
 
         self.copyGameIdButton.setVisible(True)
 
-        self.__setColor()
-        signalBus.tabColorChanged.connect(self.__setColor)
-
-    def __setColor(self):
-        if self.remake:
-            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
-        elif self.win:
-            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
-        else:
-            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
-        a /= 255
-
-        self.setStyleSheet(f""" 
+    def setColor(self, c1: QColor, c2, c3, c4):
+        self.setStyleSheet(f"""
             GameTitleBar {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
+                background-color: {c1.name(QColor.HexArgb)};
+                border-color: {c4.name(QColor.HexArgb)}
             }}
         """)
 
@@ -853,13 +848,20 @@ class GamesView(QFrame):
         self.stackWidget.setCurrentIndex(index)
 
 
-class GameTab(QFrame):
+class GameTab(ColorAnimationFrame):
     def __init__(self, game=None, parent=None):
-        super().__init__(parent)
+        if game['remake']:
+            type = 'remake'
+        elif game['win']:
+            type = 'win'
+        else:
+            type = 'lose'
+
+        super().__init__(type=type, parent=parent)
+
         self.setFixedHeight(54)
         self.setFixedWidth(141)
 
-        self.setProperty("pressed", False)
         self.setProperty("selected", False)
 
         self.vBoxLayout = QHBoxLayout(self)
@@ -884,11 +886,10 @@ class GameTab(QFrame):
         self.remake = game['remake']
         self.win = game['win']
 
-        self.__setColor()
-        signalBus.tabColorChanged.connect(self.__setColor)
-
         self.__initWidget()
         self.__initLayout()
+
+        self.clicked.connect(lambda: signalBus.gameTabClicked.emit(self))
 
     def __initWidget(self):
         self.time.setObjectName("time")
@@ -903,57 +904,6 @@ class GameTab(QFrame):
 
         self.vBoxLayout.addSpacerItem(QSpacerItem(
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
-
-    def __setColor(self):
-        if self.remake:
-            r, g, b, a = cfg.get(cfg.remakeCardColor).getRgb()
-        elif self.win:
-            r, g, b, a = cfg.get(cfg.winCardColor).getRgb()
-        else:
-            r, g, b, a = cfg.get(cfg.loseCardColor).getRgb()
-
-        a /= 255
-
-        f1, f2 = 1.1, 0.9
-        r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-        r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
-
-        self.setStyleSheet(f""" 
-            GameTab {{
-                border-radius: 6px;
-                border: 1px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
-            }}
-            GameTab:hover {{
-                border-radius: 6px;
-                border: 1px solid rgb({r1}, {g1}, {b1});
-                background-color: rgba({r1}, {g1}, {b1},  {min(a+0.1, 1)});
-            }}
-            GameTab[pressed = true] {{
-                border-radius: 6px;
-                border: 1px solid rgb({r2}, {g2}, {b2});
-                background-color: rgba({r2}, {g2}, {b2}, {min(a+0.2, 1)});
-            }}
-            GameTab[selected = true] {{
-                border-radius: 6px;
-                border: 3px solid rgb({r}, {g}, {b});
-                background-color: rgba({r}, {g}, {b}, {a});
-            }}
-        """)
-
-    def mousePressEvent(self, a0) -> None:
-        self.setProperty("pressed", True)
-        self.style().polish(self)
-        return super().mousePressEvent(a0)
-
-    def mouseReleaseEvent(self, a0) -> None:
-        self.setProperty("pressed", False)
-        self.setProperty("selected", True)
-        self.style().polish(self)
-
-        signalBus.gameTabClicked.emit(self)
-
-        return super().mouseReleaseEvent(a0)
 
 
 class SearchInterface(SmoothScrollArea):
@@ -1075,6 +1025,9 @@ class SearchInterface(SmoothScrollArea):
         games = await parseGamesDataConcurrently(games['games'])
 
         if len(games) == 0:
+            self.gamesView.gamesTab.nextButton.setVisible(False)
+            self.gamesView.gamesTab.prevButton.setVisible(False)
+            self.filterComboBox.setEnabled(False)
             self.gamesView.setLoadingPageEnable(False)
             return False
 
@@ -1164,6 +1117,9 @@ class SearchInterface(SmoothScrollArea):
 
         if tab is cur:
             return
+
+        tab.setProperty("selected", True)
+        tab.style().polish(tab)
 
         if cur:
             cur.setProperty("selected", False)
