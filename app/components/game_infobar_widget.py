@@ -239,6 +239,8 @@ class GameInfoBar(ColorAnimationFrame):
         else:
             type = 'lose'
 
+        self.gameId = game['gameId']
+
         super().__init__(type=type, parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
 
