@@ -420,18 +420,8 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(int)
     async def __onLolClientStarted(self, pid):
-        try:
-            await connector.start(pid)
-        except RetryMaximumAttempts:
-            # 若超出最大尝试次数, 则认为 lcu 未就绪 (如大区排队中),
-            # 捕获到该异常时不抛出, 等待下一个 emit
-            await connector.close()
-
-            if self.processListener.isRunning():
-                self.processListener.isClientRunning = False
-            else:
-                signalBus.tasklistNotFound.emit()
-
+        res = await self.__startConnector(pid)
+        if not res:
             return
 
         self.checkAndSwitchTo(self.careerInterface)
@@ -445,16 +435,31 @@ class MainWindow(FluentWindow):
         folder, status = await asyncio.gather(connector.getInstallFolder(),
                                               connector.getGameStatus())
 
-        if folder != cfg.get(cfg.lolFolder):
-            self.__onLolInstallFolderChanged(folder)
+        self.__setLolInstallFolder(folder)
 
-            self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
-            self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
-            self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
-            self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
+        self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
+        self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
+        self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
+        self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
         self.__onGameStatusChanged(status)
         self.__unlockInterface()
+
+    async def __startConnector(self, pid):
+        try:
+            await connector.start(pid)
+            return True
+        except RetryMaximumAttempts:
+            # 若超出最大尝试次数, 则认为 lcu 未就绪 (如大区排队中),
+            # 捕获到该异常时不抛出, 等待下一个 emit
+            await connector.close()
+
+            if self.processListener.isRunning():
+                self.processListener.isClientRunning = False
+            else:
+                signalBus.tasklistNotFound.emit()
+
+            return False
 
     @asyncSlot()
     async def __onLolClientEnded(self):
@@ -493,7 +498,7 @@ class MainWindow(FluentWindow):
 
         self.avatarWidget.repaint()
 
-    def __onLolInstallFolderChanged(self, folder: str):
+    def __setLolInstallFolder(self, folder: str):
         folder = folder.replace("\\", "/")
         folder = folder.replace("LeagueClient", "TCLS")
         folder = f"{folder[:1].upper()}{folder[1:]}"

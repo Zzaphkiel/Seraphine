@@ -112,7 +112,7 @@ SummonerInfoBar#currentSummonerWidget>#levelLabel {
 SummonerName {
     font: 14px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
     text-align: left;
-    padding: 0px 6px 3px 6px;
+    padding: 0px 6px 2px 6px;
     color: white;
     border: none;
     background-color: transparent;
