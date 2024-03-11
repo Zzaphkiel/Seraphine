@@ -788,12 +788,11 @@ class MainWindow(FluentWindow):
     async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
+        self.checkAndSwitchTo(self.searchInterface)
 
         await self.searchInterface.searchAndShowFirstPage()
         await self.searchInterface.updateGameDetailView(gameId)
         self.searchInterface.waitingForDrawSelect(gameId)
-
-        self.checkAndSwitchTo(self.searchInterface)
 
     @asyncSlot()
     async def __refreshCareerInterface(self):
