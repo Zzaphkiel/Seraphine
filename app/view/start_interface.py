@@ -7,13 +7,14 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
                              QSpacerItem, QSizePolicy)
 
-from ..common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
-                            IndeterminateProgressBar)
+from app.common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
+                                       IndeterminateProgressBar)
 
-from ..lol.connector import connector
-from ..common.config import cfg
-from ..common.style_sheet import StyleSheet
-from ..common.icons import Icon
+from app.lol.connector import connector
+from app.common.config import cfg
+from app.common.style_sheet import StyleSheet
+from app.common.icons import Icon
+from app.components.message_box import ChangeClientMessageBox
 
 
 class StartInterface(SmoothScrollArea):
@@ -69,10 +70,11 @@ class StartInterface(SmoothScrollArea):
 
         self.label1.setText(self.tr("LOL Client connected") + " 🎉")
         self.label2.setText(
-            f"--app-port = {connector.port}\n--remoting-auth-token = {connector.token}")
+            f"PID = {connector.pid}\n--app-port = {connector.port}\n--remoting-auth-token = {connector.token}")
+        self.label3.setVisible(False)
 
-        self.pushButton.setText(self.tr("Copy port and token"))
-        self.pushButton.setIcon(Icon.COPY)
+        self.pushButton.setText(self.tr("Change client connected"))
+        self.pushButton.setIcon(Icon.DUALSCREEN)
 
     def showLoadingPage(self):
         self.processBar.start()
@@ -98,7 +100,8 @@ class StartInterface(SmoothScrollArea):
             else:
                 self.__showLolClientPathErrorInfo()
         else:
-            pyperclip.copy(self.label2.text())
+            box = ChangeClientMessageBox(parent=self.window())
+            box.exec()
 
     def __showStartLolSuccessInfo(self):
         InfoBar.success(title=self.tr('Start LOL successfully'),

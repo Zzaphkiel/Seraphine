@@ -21,7 +21,7 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
-from ..common.util import github, getLolProcessPid, getTasklistPath
+from ..common.util import github, getLolClientPid, getTasklistPath
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
@@ -170,6 +170,7 @@ class MainWindow(FluentWindow):
         signalBus.tasklistNotFound.connect(self.__showWaitingMessageBox)
         signalBus.lolClientStarted.connect(self.__onLolClientStarted)
         signalBus.lolClientEnded.connect(self.__onLolClientEnded)
+        signalBus.lolClientChanged.connect(self.__onLolClientChanged)
         signalBus.terminateListeners.connect(self.__terminateListeners)
 
         # From connector
@@ -461,9 +462,15 @@ class MainWindow(FluentWindow):
 
             return False
 
+    @asyncSlot(int)
+    async def __onLolClientChanged(self, pid):
+        await self.__onLolClientEnded()
+        await self.__onLolClientStarted(pid)
+
     @asyncSlot()
     async def __onLolClientEnded(self):
-        # self.searchInterface.loadGamesThreadStop.set()  # 停掉战绩查询加载
+        if self.searchInterface.gameLoadingTask:
+            self.searchInterface.gameLoadingTask.cancel()
 
         logger.critical("League of Legends client ended", TAG)
         await connector.close()

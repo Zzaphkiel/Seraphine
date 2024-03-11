@@ -72,7 +72,7 @@ def getTasklistPath():
     return None
 
 
-def getLolProcessPidSlowly():
+def getLolClientPidSlowly():
     for process in psutil.process_iter():
         if process.name() in ['LeagueClientUx.exe', 'LeagueClientUx']:
             return process.pid
@@ -80,7 +80,7 @@ def getLolProcessPidSlowly():
     return -1
 
 
-def getLolProcessPid(path):
+def getLolClientPid(path):
     processes = subprocess.check_output(
         f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
 
@@ -93,6 +93,33 @@ def getLolProcessPid(path):
             raise ValueError(f"Subprocess return exception: {processes}")
     else:
         return 0
+
+
+def getLolClientPids(path):
+    processes = subprocess.check_output(
+        f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
+
+    if not b'LeagueClientUx.exe' in processes:
+        return 0
+
+    pids = []
+    arr = processes.split()
+
+    for i, s in enumerate(arr):
+        if s == b'LeagueClientUx.exe':
+            pids.append(int(arr[i + 1]))
+
+    return pids
+
+
+def getLolClientPidsSlowly():
+    pids = []
+
+    for process in psutil.process_iter():
+        if process.name() in ['LeagueClientUx.exe', 'LeagueClientUx']:
+            pids.append(process.pid)
+
+    return pids
 
 
 def isLolGameProcessExist(path):

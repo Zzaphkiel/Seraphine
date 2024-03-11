@@ -163,6 +163,7 @@ class LolClientConnector(QObject):
         self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
 
     async def start(self, pid):
+        self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
         self.sess = aiohttp.ClientSession(
             base_url=f'https://127.0.0.1:{self.port}',

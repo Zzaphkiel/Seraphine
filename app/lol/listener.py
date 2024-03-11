@@ -8,7 +8,7 @@ import aiohttp
 
 from app.common.logger import logger
 from app.common.signals import signalBus
-from app.common.util import getLolProcessPid, isLolGameProcessExist, getTasklistPath
+from app.common.util import getLolClientPid, isLolGameProcessExist, getTasklistPath
 
 TAG = "Listener"
 
@@ -27,7 +27,7 @@ class LolProcessExistenceListener(QThread):
             return
 
         while True:
-            pid = getLolProcessPid(path)
+            pid = getLolClientPid(path)
             if pid != 0:
                 if not self.isClientRunning:
                     self.isClientRunning = True

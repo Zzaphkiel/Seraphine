@@ -10,12 +10,14 @@ from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton
 from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
                                      SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
                                      CheckBox, setCustomStyleSheet, ProgressBar,
-                                     PrimaryPushButton)
+                                     PrimaryPushButton, ComboBox)
 
 from app.common.config import VERSION, cfg, LOCAL_PATH
-from app.common.util import github, getLolProcessPidSlowly
+from app.common.util import (github, getLolClientPidSlowly, getPortTokenServerByPid,
+                             getTasklistPath, getLolClientPids, getLolClientPidsSlowly)
 from app.common.signals import signalBus
 from app.common.update import runUpdater
+from app.lol.connector import connector
 
 
 class UpdateMessageBox(MessageBoxBase):
@@ -182,12 +184,86 @@ class WaitingForLolMessageBox(MessageBoxBase):
         self.viewLayout.addWidget(self.content)
 
     def __onYesButtonClicked(self):
-        pid = getLolProcessPidSlowly()
+        pid = getLolClientPidSlowly()
 
         if pid == -1:
             return
 
         signalBus.lolClientStarted.emit(pid)
+        self.accept()
+        self.accepted.emit()
+
+    def __onCancelButtonClicked(self):
+        self.reject()
+        self.rejected.emit()
+
+
+class ChangeClientMessageBox(MessageBoxBase):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.myYesButton = PrimaryPushButton(
+            self.tr('Reconnect'), self.buttonGroup)
+        self.myCancelButton = QPushButton(
+            self.tr('Cancel'), self.buttonGroup)
+
+        self.titleLabel = TitleLabel()
+        self.content = BodyLabel()
+
+        self.comboBox = ComboBox()
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.yesButton.setVisible(False)
+        self.cancelButton.setVisible(False)
+
+        self.myCancelButton.setObjectName("cancelButton")
+        self.buttonLayout.addWidget(self.myYesButton)
+        self.buttonLayout.addWidget(self.myCancelButton)
+
+        self.titleLabel.setText(self.tr('Change client'))
+        self.titleLabel.setContentsMargins(5, 0, 5, 0)
+
+        self.content.setText(
+            self.tr('Please select the target LOL client:'))
+        self.content.setContentsMargins(8, 0, 5, 0)
+
+        path = getTasklistPath()
+
+        if path:
+            self.pids = getLolClientPids(path)
+        else:
+            self.pids = getLolClientPidsSlowly()
+
+        for i, pid in enumerate(self.pids):
+            _, _, server = getPortTokenServerByPid(pid)
+            item = self.tr("PID: ") + str(pid) + self.tr(", ") + \
+                self.tr("server: ") + server
+
+            if pid == connector.pid:
+                item += " " + self.tr("(current)")
+                currentIdx = i
+
+            self.comboBox.addItem(item)
+
+        self.comboBox.setCurrentIndex(currentIdx)
+        self.comboBox.setMinimumWidth(400)
+
+        self.myYesButton.clicked.connect(self.__onYesButtonClicked)
+        self.myCancelButton.clicked.connect(self.__onCancelButtonClicked)
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.content)
+        self.viewLayout.addWidget(self.comboBox)
+
+    def __onYesButtonClicked(self):
+        pid = self.pids[self.comboBox.currentIndex()]
+        if connector.pid != pid:
+            signalBus.lolClientChanged.emit(pid)
+
         self.accept()
         self.accepted.emit()
 

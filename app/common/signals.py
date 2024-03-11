@@ -9,6 +9,7 @@ class SignalBus(QObject):
 
     lolClientStarted = pyqtSignal(int)
     lolClientEnded = pyqtSignal()
+    lolClientChanged = pyqtSignal(int)
 
     terminateListeners = pyqtSignal()
 
