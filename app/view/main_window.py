@@ -475,6 +475,7 @@ class MainWindow(FluentWindow):
         logger.critical("League of Legends client ended", TAG)
         await connector.close()
 
+        self.processListener.isClientRunning = False
         self.isClientProcessRunning = False
         self.currentSummoner = None
         self.careerInterface.setCurrentSummonerName(None)

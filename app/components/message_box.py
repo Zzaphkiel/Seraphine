@@ -199,13 +199,15 @@ class WaitingForLolMessageBox(MessageBoxBase):
 
 
 class ChangeClientMessageBox(MessageBoxBase):
-    def __init__(self, parent=None):
+    def __init__(self, pids, parent=None):
         super().__init__(parent)
 
         self.myYesButton = PrimaryPushButton(
             self.tr('Reconnect'), self.buttonGroup)
         self.myCancelButton = QPushButton(
             self.tr('Cancel'), self.buttonGroup)
+
+        self.pids = pids
 
         self.titleLabel = TitleLabel()
         self.content = BodyLabel()
@@ -218,6 +220,8 @@ class ChangeClientMessageBox(MessageBoxBase):
     def __initWidget(self):
         self.yesButton.setVisible(False)
         self.cancelButton.setVisible(False)
+        self.myYesButton.clicked.connect(self.__onYesButtonClicked)
+        self.myCancelButton.clicked.connect(self.__onCancelButtonClicked)
 
         self.myCancelButton.setObjectName("cancelButton")
         self.buttonLayout.addWidget(self.myYesButton)
@@ -229,13 +233,6 @@ class ChangeClientMessageBox(MessageBoxBase):
         self.content.setText(
             self.tr('Please select the target LOL client:'))
         self.content.setContentsMargins(8, 0, 5, 0)
-
-        path = getTasklistPath()
-
-        if path:
-            self.pids = getLolClientPids(path)
-        else:
-            self.pids = getLolClientPidsSlowly()
 
         for i, pid in enumerate(self.pids):
             _, _, server = getPortTokenServerByPid(pid)
@@ -250,9 +247,6 @@ class ChangeClientMessageBox(MessageBoxBase):
 
         self.comboBox.setCurrentIndex(currentIdx)
         self.comboBox.setMinimumWidth(400)
-
-        self.myYesButton.clicked.connect(self.__onYesButtonClicked)
-        self.myCancelButton.clicked.connect(self.__onCancelButtonClicked)
 
     def __initLayout(self):
         self.viewLayout.addWidget(self.titleLabel)

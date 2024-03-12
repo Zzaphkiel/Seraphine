@@ -14,6 +14,8 @@ from app.lol.connector import connector
 from app.common.config import cfg
 from app.common.style_sheet import StyleSheet
 from app.common.icons import Icon
+from app.common.util import getTasklistPath, getLolClientPids, getLolClientPidsSlowly
+from app.common.signals import signalBus
 from app.components.message_box import ChangeClientMessageBox
 
 
@@ -100,8 +102,29 @@ class StartInterface(SmoothScrollArea):
             else:
                 self.__showLolClientPathErrorInfo()
         else:
-            box = ChangeClientMessageBox(parent=self.window())
-            box.exec()
+            path = getTasklistPath()
+            if path:
+                pids = getLolClientPids(path)
+            else:
+                pids = getLolClientPidsSlowly()
+
+            if len(pids) == 0:
+                signalBus.lolClientEnded.emit()
+            elif len(pids) == 1:
+                self.__showCantChangeLolClientInfo()
+            else:
+                box = ChangeClientMessageBox(pids=pids, parent=self.window())
+                box.exec()
+
+    def __showCantChangeLolClientInfo(self):
+        InfoBar.error(
+            title=self.tr("Can't change LOL Client"),
+            content=self.tr('Only one client is running'),
+            orient=Qt.Vertical,
+            isClosable=True,
+            position=InfoBarPosition.BOTTOM_RIGHT,
+            duration=5000,
+            parent=self)
 
     def __showStartLolSuccessInfo(self):
         InfoBar.success(title=self.tr('Start LOL successfully'),
