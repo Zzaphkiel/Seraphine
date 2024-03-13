@@ -148,8 +148,6 @@ pip install pyinstaller==5.13
   - https://fluenticons.co/outlined
   - https://github.com/microsoft/fluentui-system-icons/blob/main/icons_regular.md
 
-
-
 ## 点个 Star 支持我们 ⭐
 <p align='center'>
   <a href="https://github.com/Zzaphkiel/Seraphine/stargazers">
@@ -164,8 +162,22 @@ pip install pyinstaller==5.13
   </a>
 </p>
 
-## 免责声明
+## Riot 声明
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
+
+**参考译文**：Seraphine 未经 Riot Games 认可，也不代表 Riot Games 或任何官方参与制作或管理 Riot Games 产品的人的观点或意见。Riot Games 及其所有相关产物均为 Riot Games，Inc 的商标或注册商标。
+
+## 免责声明
+本声明旨在让用户更加全面详尽地了解 Seraphine 以及可能风险，以便用户在使用本程序（“本程序” 一词指在 GitHub 仓库 [Zzaphkiel/Seraphine](https://github.com/Zzaphkiel/Seraphine) 开源的代码，以及在 [Release](https://github.com/Zzaphkiel/Seraphine/releases) 中上传的二进制文件，下文中的所有该词均为这一含义）前及过程中做出充分的风险评估和明智的决策。
+
+1. 本程序的目的是通过为游戏玩家提供**游戏外**辅助功能，从而给玩家提供更好的游戏体验。我们不鼓励不支持任何违反 Riot 以及腾讯规定或任何可能导致游戏环境不公平的行为。
+2. 本程序的代码实现遵守 [Riot Policies](https://developer.riotgames.com/policies/general) 的规定，提供的功能符合 [《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml) 的要求。
+3. 本程序是基于 Riot 提供的 League Client Update (LCU) API 开发的工具，其代码与行为均不含任何侵入性的手段，因此在理论上并不会做出任何破坏客户端以及游戏完整性的行为，包括但不限于客户端文件内容的修改或游戏进程内存的读写等。
+4. 我们尽力保证本程序软件本体以及使用时游戏客户端的稳定性，但尽管如此，在具体的游戏环境以及 Riot 或腾讯提供的服务更新的过程中（如反作弊系统或其他保护手段的更新），使用 Seraphine 可能会对您的游戏体验产生负面影响，如客户端崩溃 (#158)、账号封禁 (#104) 等。
+5. 使用本程序所产生的一切后果将由您自行承担，我们不对因使用本程序而产生的任何直接或间接损失负责，用户在决定使用本程序时，应充分考虑并自行承担由此产生的所有风险和后果。
+6. 我们保留随时修改本免责声明的权利，请定期查阅此页面以获取最新信息。
+
+在您使用 Seraphine 之前，请确保您已经详细**阅读**、**理解**并**同意**免责声明中的条款；同时，请遵守相关游戏规则，共同维护健康和公平的游戏环境。
 
 ## 许可证 ⚖️
 Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，**源代码**以及二**进制文件不可商用**。宣传或转载时请带上[本页链接](https://github.com/Zzaphkiel/Seraphine)。
