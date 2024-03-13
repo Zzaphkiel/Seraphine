@@ -53,10 +53,11 @@ class AuxiliaryInterface(SmoothScrollArea):
             self.tr("Remove challenge tokens"),
             self.tr("Remove all challenge tokens from your profile"),
             self.profileGroup)
-        # self.addFriendCard = FriendRequestCard(
-        #     self.tr("Send friend request"),
-        #     self.tr("Send friend request by summoner's name"),
-        #     self.profileGroup)
+        self.removePrestigeCrestCard = RemovePrestigeCrestCard(
+            self.tr("Remove prestige crest"),
+            self.tr(
+                "Remove prestige crest from your profile icon (need your summoner level >= 525)"),
+            self.profileGroup)
         self.lockConfigCard = LockConfigCard(
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
@@ -125,7 +126,7 @@ class AuxiliaryInterface(SmoothScrollArea):
         self.profileGroup.addSettingCard(self.profileTierCard)
         self.profileGroup.addSettingCard(self.onlineAvailabilityCard)
         self.profileGroup.addSettingCard(self.removeTokensCard)
-        # self.profileGroup.addSettingCard(self.addFriendCard)
+        self.profileGroup.addSettingCard(self.removePrestigeCrestCard)
 
         # BP
         self.bpGroup.addSettingCard(self.autoAcceptMatchingCard)
@@ -592,6 +593,23 @@ class RemoveTokensCard(SettingCard):
     @asyncSlot()
     async def __onButtonClicked(self):
         await connector.removeTokens()
+
+
+class RemovePrestigeCrestCard(SettingCard):
+
+    def __init__(self, title, content, parent):
+        super().__init__(Icon.CIRCLELINE, title, content, parent)
+        self.pushButton = PushButton(self.tr("Remove"))
+        self.pushButton.setMinimumWidth(100)
+
+        self.hBoxLayout.addWidget(self.pushButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.pushButton.clicked.connect(self.__onButtonClicked)
+
+    @asyncSlot()
+    async def __onButtonClicked(self):
+        await connector.removePrestigeCrest()
 
 
 class FixClientDpiCard(SettingCard):

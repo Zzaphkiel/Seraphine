@@ -166,7 +166,7 @@ class SettingInterface(SmoothScrollArea):
             cfg.enableCheckUpdate
         )
         self.httpProxyCard = ProxySettingCard(
-            self.tr("Http proxy"), self.tr(
+            self.tr("HTTP proxy"), self.tr(
                 "Using a proxy when connecting to GitHub"),
             cfg.enableProxy, cfg.proxyAddr, self.updateGroup)
 
@@ -245,7 +245,8 @@ class SettingInterface(SmoothScrollArea):
     def __connectSignalToSlot(self):
         self.lolFolderCard.clicked.connect(self.__onLolFolderCardClicked)
 
-        self.themeCard.comboBox.currentIndexChanged.connect(lambda: setTheme(cfg.get(cfg.themeMode)))
+        self.themeCard.comboBox.currentIndexChanged.connect(
+            lambda: setTheme(cfg.get(cfg.themeMode)))
         self.themeColorCard.colorChanged.connect(setThemeColor)
 
         cfg.appRestartSig.connect(self.__showRestartToolTip)

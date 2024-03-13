@@ -230,7 +230,7 @@ class ProxySettingCard(ExpandGroupSettingCard):
         self.inputWidget = QWidget(self.view)
         self.inputLayout = QHBoxLayout(self.inputWidget)
 
-        self.secondsLabel = QLabel(self.tr("Http proxy:"))
+        self.secondsLabel = QLabel(self.tr("HTTP proxy:"))
         self.lineEdit = LineEdit()
 
         self.switchButtonWidget = QWidget(self.view)

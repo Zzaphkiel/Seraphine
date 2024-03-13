@@ -55,6 +55,7 @@ class Icon(FluentIconBase, Enum):
     SQUARECROSS = "SquareCross"
     BACKGROUNDCOLOR = 'BackgroundColor'
     DUALSCREEN = 'DualScreen'
+    CIRCLELINE = 'CircleLine'
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

@@ -499,13 +499,31 @@ class LolClientConnector(QObject):
 
         banner = reference['lol'].get('bannerIdSelected')
 
-        data = {"challengeIds": [], "bannerAccent":
-                banner}
+        data = {
+            "challengeIds": [],
+            "bannerAccent": banner,
+        }
+
         res = await self.__post(
             "/lol-challenges/v1/update-player-preferences/", data=data
         )
 
         return await res.read()
+
+    @retry()
+    async def removePrestigeCrest(self):
+        ref = await self.__get('/lol-regalia/v2/current-summoner/regalia')
+        ref = await ref.json()
+        bannerType = ref.get("preferredBannerType")
+
+        data = {
+            "preferredCrestType": "prestige",
+            "preferredBannerType": bannerType,
+            'selectedPrestigeCrest': 22
+        }
+
+        res = await self.__put('/lol-regalia/v2/current-summoner/regalia', data=data)
+        return await res.json()
 
     @retry()
     async def create5v5PracticeLobby(self, lobbyName, password):
