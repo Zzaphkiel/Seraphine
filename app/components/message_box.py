@@ -2,7 +2,7 @@ from qasync import asyncSlot
 import aiohttp
 import os
 import zipfile
-import subprocess
+import shutil
 import sys
 
 from PyQt5.QtCore import Qt
@@ -91,13 +91,21 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setVisible(True)
         self.bar.setVisible(True)
 
+        zipPath = f'{LOCAL_PATH}/Seraphine.zip'
+        if os.path.exists(zipPath):
+            os.remove(zipPath)
+
+        dirPath = f'{LOCAL_PATH}/temp'
+        if os.path.exists(dirPath):
+            shutil.rmtree(dirPath, ignore_errors=True)
+
         async with aiohttp.ClientSession() as sess:
             resp = await sess.get(url)
             length = int(resp.headers['content-length'])
             self.bar.setMaximum(length)
             cur = 0
 
-            with open(f'{LOCAL_PATH}/Seraphine.zip', 'wb') as f:
+            with open(zipPath, 'wb') as f:
                 async for chunk in resp.content.iter_chunked(1024*1024):
                     f.write(chunk)
 
@@ -109,10 +117,10 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setText(
             self.tr("Downloading finished, decompressing..."))
 
-        with zipfile.ZipFile(f'{LOCAL_PATH}/Seraphine.zip', 'r') as z:
-            z.extractall(f'{LOCAL_PATH}/temp')
+        with zipfile.ZipFile(zipPath, 'r') as z:
+            z.extractall(dirPath)
 
-        os.remove(f'{LOCAL_PATH}/Seraphine.zip')
+        os.remove(zipPath)
         self.infoLabel.setText("Waiting for restart...")
 
         # 覆盖自己
