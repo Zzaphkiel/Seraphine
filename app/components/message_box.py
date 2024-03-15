@@ -84,6 +84,15 @@ class UpdateMessageBox(MessageBoxBase):
 
     @asyncSlot()
     async def __onYesButtonClicked(self):
+        '''
+        该函数负责
+        1. 删除 `LOCAL_PATH` 中之前可能下载过的文件
+        2. 重新下载新版本压缩包
+        3. 解压缩，并删除压缩包
+        4. 释放并运行 bat 文件，关闭自己
+        5. 删除当前文件夹下的自己，并将解压好的新版本拷贝进来
+        6. 重新运行自己
+        '''
         url = f"{github.proxyApi}/{self.info['assets'][0]['browser_download_url']}"
         self.myYesButton.setEnabled(False)
         self.myCancelButton.setEnabled(False)

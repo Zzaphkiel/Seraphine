@@ -58,7 +58,7 @@ class Config(QConfig):
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 60))
-    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 2,
+    apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
                                            RangeValidator(1, 5), restart=True)
 
     gameInfoFilter = ConfigItem(
@@ -125,7 +125,7 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.10.3"
+VERSION = "0.11.0"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"
