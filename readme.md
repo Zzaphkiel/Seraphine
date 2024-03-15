@@ -79,7 +79,7 @@ python main.py
 
 ## 常见问题 FAQ 🧐
 ### Q：我会因为使用 Seraphine 而被封号吗 😨？
-由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为（详情见下方[套盾环节](https://github.com/Zzaphkiel/Seraphine?tab=readme-ov-file#%E5%A5%97%E7%9B%BE%E7%8E%AF%E8%8A%82-)）。因此仅使用 Seraphine 时极大概率不会被封号，但**并不保证**一定不会封号。
+由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为（详情见下方[套盾环节](https://github.com/Zzaphkiel/Seraphine?tab=readme-ov-file#%E5%A5%97%E7%9B%BE%E7%8E%AF%E8%8A%82-%EF%B8%8F)）。因此仅使用 Seraphine 时极大概率不会被封号，但**并不保证**一定不会封号。
 
 ### Q：真的被封号了怎么办？
 根据反馈，目前有被封 1 小时的情况发生，申诉或等待解封吧 😭
