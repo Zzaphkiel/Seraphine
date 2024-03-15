@@ -74,11 +74,12 @@ python main.py
     - 修改个人签名 ✅
     - 伪造个人状态卡片中的段位显示 ✅
     - 一键卸下勋章 ✅
+    - 一键卸下头像框 ✅
 
 
 ## 常见问题 FAQ 🧐
 ### Q：我会因为使用 Seraphine 而被封号吗 😨？
-由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为。因此仅使用 Seraphine 时极大概率（99.99%）不会被封号，但**并不保证**一定不会封号。
+由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为（详情见下方[套盾环节](https://github.com/Zzaphkiel/Seraphine?tab=readme-ov-file#%E5%A5%97%E7%9B%BE%E7%8E%AF%E8%8A%82-)）。因此仅使用 Seraphine 时极大概率不会被封号，但**并不保证**一定不会封号。
 
 ### Q：真的被封号了怎么办？
 根据反馈，目前有被封 1 小时的情况发生，申诉或等待解封吧 😭
@@ -162,13 +163,13 @@ pip install pyinstaller==5.13
   </a>
 </p>
 
-## Riot 声明
+## Riot 声明 📢
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc
 
 **参考译文**：Seraphine 未经 Riot Games 认可，也不代表 Riot Games 或任何官方参与制作或管理 Riot Games 产品的人的观点或意见。Riot Games 及其所有相关产物均为 Riot Games，Inc 的商标或注册商标。
 
-## 免责声明
-本声明旨在让用户更加全面详尽地了解 Seraphine 以及可能风险，以便用户在使用本程序（“本程序” 一词指在 GitHub 仓库 [Zzaphkiel/Seraphine](https://github.com/Zzaphkiel/Seraphine) 开源的代码，以及在 [Release](https://github.com/Zzaphkiel/Seraphine/releases) 中上传的二进制文件，下文中的所有该词均为这一含义）前及过程中做出充分的风险评估和明智的决策。
+## 套盾环节 🛡️
+本程序为在 GitHub 仓库 [Zzaphkiel/Seraphine](https://github.com/Zzaphkiel/Seraphine) 开源的代码，以及在 [Release](https://github.com/Zzaphkiel/Seraphine/releases) 中上传的二进制文件。本环节旨在让用户更加全面详尽地了解本程序以及可能风险，以便用户在使用本程序前及过程中做出充分的风险评估和明智的决策。
 
 1. 本程序的目的是通过为游戏玩家提供**游戏外**辅助功能，从而给玩家提供更好的游戏体验。我们不鼓励不支持任何违反 Riot 以及腾讯规定或任何可能导致游戏环境不公平的行为。
 2. 本程序的代码实现遵守 [Riot Policies](https://developer.riotgames.com/policies/general) 的规定，提供的功能符合 [《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml) 的要求。
@@ -177,7 +178,7 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 5. 使用本程序所产生的一切后果将由您自行承担，我们不对因使用本程序而产生的任何直接或间接损失负责，用户在决定使用本程序时，应充分考虑并自行承担由此产生的所有风险和后果。
 6. 我们保留随时修改本免责声明的权利，请定期查阅此页面以获取最新信息。
 
-在您使用 Seraphine 之前，请确保您已经详细**阅读**、**理解**并**同意**免责声明中的条款；同时，请遵守相关游戏规则，共同维护健康和公平的游戏环境。
+在您使用本程序之前，请确保您已经详细**阅读**、**理解**并**同意**免责声明中的条款；同时，请遵守相关游戏规则，共同维护健康和公平的游戏环境。
 
 ## 许可证 ⚖️
 Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证，**源代码**以及二**进制文件不可商用**。宣传或转载时请带上[本页链接](https://github.com/Zzaphkiel/Seraphine)。
