@@ -1,3 +1,7 @@
+"""
+该模块用于在 GitHub 发布新 Release 时，同步上传到 Gitee 上
+"""
+
 import argparse
 import os
 import requests
@@ -54,15 +58,16 @@ def create_new_release(owner, repo):
         raise requests.HTTPError("create release on gitee failed.")
 
 
-def upload_file(release_id):
-    url = f"https://gitee.com/api/v5/repos/coolkiid/Macast/releases/{release_id}/attach_files"
+def upload_file(onwer, repo, release_id):
+    url = f"https://gitee.com/api/v5/repos/{onwer}/{repo}/releases/{release_id}/attach_files"
     files = {"file": open(FILE_PATH, "rb")}
     response = requests.post(url, files=files, headers=HEADERS, timeout=30)
+
     if 200 <= response.status_code < 300:
         return response.json()["browser_download_url"]
     else:
         print(response.json())
-        raise requests.HTTPError("push release file to gitee failed.")
+        raise requests.HTTPError("push release file to Gitee failed.")
 
 
 release_id = create_new_release(GITEE_OWNER, GITEE_REPO)
