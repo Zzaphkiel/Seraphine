@@ -456,7 +456,7 @@ class MainWindow(FluentWindow):
             await connector.close()
 
             if self.processListener.isRunning():
-                self.processListener.isClientRunning = False
+                self.processListener.runningPid = 0
             else:
                 signalBus.tasklistNotFound.emit()
 
@@ -465,6 +465,7 @@ class MainWindow(FluentWindow):
     @asyncSlot(int)
     async def __onLolClientChanged(self, pid):
         await self.__onLolClientEnded()
+        self.processListener.runningPid = pid
         await self.__onLolClientStarted(pid)
 
     @asyncSlot()
@@ -475,7 +476,6 @@ class MainWindow(FluentWindow):
         logger.critical("League of Legends client ended", TAG)
         await connector.close()
 
-        self.processListener.isClientRunning = False
         self.isClientProcessRunning = False
         self.currentSummoner = None
         self.careerInterface.setCurrentSummonerName(None)
