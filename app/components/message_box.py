@@ -6,7 +6,7 @@ import shutil
 import sys
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton
+from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton, QVBoxLayout, QWidget
 from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
                                      SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
                                      CheckBox, setCustomStyleSheet, ProgressBar,
@@ -281,3 +281,30 @@ class ChangeClientMessageBox(MessageBoxBase):
     def __onCancelButtonClicked(self):
         self.reject()
         self.rejected.emit()
+
+
+class ExceptionMessageBox(MessageBoxBase):
+    def __init__(self, title, content, parent):
+        super().__init__(parent=parent)
+
+        self.titleLabel = TitleLabel(title)
+        self.textEdit = TextEdit()
+        self.textEdit.setText(content)
+
+        self.scrollArea = SmoothScrollArea()
+        self.scrollWidget = QWidget()
+        self.scrollLayout = QVBoxLayout()
+
+        self.__intiWidget()
+        self.__initLayout()
+
+    def __intiWidget(self):
+        self.yesButton.setText(self.tr('Copy to clipboard and exit'))
+        self.cancelButton.setText(self.tr('Exit'))
+
+        self.textEdit.setFixedWidth(int(self.width() * .6))
+        self.textEdit.setFixedHeight(int(self.height() * .4))
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.textEdit)

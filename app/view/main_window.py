@@ -29,7 +29,7 @@ from ..common.config import cfg, VERSION
 from ..common.logger import logger
 from ..common.signals import signalBus
 from ..components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                      WaitingForLolMessageBox)
+                                      WaitingForLolMessageBox, ExceptionMessageBox)
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                               SummonerNotFound, SummonerNotInGame)
 from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
@@ -817,15 +817,13 @@ class MainWindow(FluentWindow):
         title = self.tr('Exception occurred 😥')
         content = "".join(tracebackFormat)
 
-        w = MessageBox(title, content, self.window())
-
-        w.yesButton.setText(self.tr('Copy to clipboard and exit'))
-        w.cancelButton.setText(self.tr('Exit'))
+        w = ExceptionMessageBox(title, content, self.window())
 
         if w.exec():
             pyperclip.copy(content)
 
         self.oldHook(ty, value, tb)
+        signalBus.terminateListeners.emit()
         sys.exit()
 
     def __onCurrentStackedChanged(self, index):
