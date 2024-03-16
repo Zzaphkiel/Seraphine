@@ -62,3 +62,14 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         replacesArtifacts: false
         artifacts: Seraphine.zip
+    - name: Sync to Gitee
+      if: env.UPDATED == 'true'
+      env:
+        GITEE_OWNER: Zzaphkiel
+        GITEE_REPO: Seraphine
+        GITEE_USERNAME: ${{ secrets.GITEE_USERNAME }}
+        GITEE_PASSWORD: ${{ secrets.GITEE_PASSWORD }}
+        GITEE_CLIENT_ID: ${{ secrets.GITEE_CLIENT_ID }}
+        GITEE_CLIENT_SECRET: ${{ secrets.GITEE_CLIENT_SECRET }}
+      run: |
+        python3 sync.py --tag "$VERSION"
