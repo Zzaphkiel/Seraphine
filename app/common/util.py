@@ -99,10 +99,11 @@ def getLolClientPids(path):
     processes = subprocess.check_output(
         f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
 
-    if not b'LeagueClientUx.exe' in processes:
-        return 0
-
     pids = []
+
+    if not b'LeagueClientUx.exe' in processes:
+        return pids
+
     arr = processes.split()
 
     for i, s in enumerate(arr):
