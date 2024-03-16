@@ -739,6 +739,11 @@ class LolClientConnector(QObject):
     async def __patch(self, path, data=None):
         return await self.sess.patch(path, json=data, ssl=False)
 
+    def getLoginSummonerByPid(self, pid):
+        port, token, _ = getPortTokenServerByPid(pid)
+        url = f'https://riot:{token}@127.0.0.1:{port}/lol-summoner/v1/current-summoner'
+        return requests.get(url, verify=False).json()
+
 
 class JsonManager:
     # 曾经奥恩可以升级的杰作装备

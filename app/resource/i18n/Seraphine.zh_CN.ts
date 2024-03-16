@@ -454,7 +454,7 @@
     <message>
         <location filename="../../components/message_box.py" line="250"/>
         <source>Please select the target LOL client:</source>
-        <translation>请选择目标客户端进程 ID：</translation>
+        <translation>请选择目标客户端：</translation>
     </message>
     <message>
         <location filename="../../components/message_box.py" line="243"/>
@@ -474,12 +474,17 @@
     <message>
         <location filename="../../components/message_box.py" line="257"/>
         <source>server: </source>
-        <translation>服务器：</translation>
+        <translation type="obsolete">服务器：</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="260"/>
+        <location filename="../../components/message_box.py" line="261"/>
         <source>(current)</source>
         <translation>（当前连接）</translation>
+    </message>
+    <message>
+        <location filename="../../components/message_box.py" line="258"/>
+        <source>Summoner: </source>
+        <translation>召唤师名：</translation>
     </message>
 </context>
 <context>
@@ -521,12 +526,12 @@
 <context>
     <name>ExceptionMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="302"/>
+        <location filename="../../components/message_box.py" line="303"/>
         <source>Copy to clipboard and exit</source>
         <translation>复制错误信息并退出</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="303"/>
+        <location filename="../../components/message_box.py" line="304"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>

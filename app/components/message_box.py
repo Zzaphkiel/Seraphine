@@ -252,9 +252,9 @@ class ChangeClientMessageBox(MessageBoxBase):
         self.content.setContentsMargins(8, 0, 5, 0)
 
         for i, pid in enumerate(self.pids):
-            _, _, server = getPortTokenServerByPid(pid)
-            item = self.tr("PID: ") + str(pid) + self.tr(", ") + \
-                self.tr("server: ") + server
+            summoner = connector.getLoginSummonerByPid(pid)
+            item = (summoner.get("gameName") or summoner['displayName']) + \
+                self.tr(", ") + self.tr("PID: ") + str(pid)
 
             if pid == connector.pid:
                 item += " " + self.tr("(current)")
