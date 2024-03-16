@@ -36,7 +36,7 @@ ACCESS_TOKEN = requests.post(
 TAG_NAME = args.tag
 NAME = TAG_NAME
 BODY = f"Seraphine {TAG_NAME}"
-TARGET_COMMITISH = "main"
+TARGET_COMMITISH = "master"
 FILE_PATH = "Seraphine.zip"
 
 HEADERS = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
