@@ -93,7 +93,14 @@ class UpdateMessageBox(MessageBoxBase):
         5. 删除当前文件夹下的自己，并将解压好的新版本拷贝进来
         6. 重新运行自己
         '''
-        url = f"{github.proxyApi}/{self.info['assets'][0]['browser_download_url']}"
+
+        # url = f"{github.proxyApi}/{self.info['assets'][0]['browser_download_url']}"
+
+        # 把下载地址换成 Gitee 的
+        url: str = self.info['assets'][0]['browser_download_url']
+        url = url.replace("github", "gitee")
+        url = url.replace("Zzaphkiel/Seraphine", "Zzaphkiel/seraphine")
+
         self.myYesButton.setEnabled(False)
         self.myCancelButton.setEnabled(False)
 
