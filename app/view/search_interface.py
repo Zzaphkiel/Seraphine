@@ -208,6 +208,9 @@ class GamesTab(QFrame):
     def clear(self):
         self.pageLabel.setText(" ")
 
+        self.prevButton.setVisible(False)
+        self.nextButton.setVisible(False)
+
         self.queueId = -1
         self.games = []
         self.queueIdMap = {-1: []}
@@ -961,6 +964,7 @@ class SearchInterface(SmoothScrollArea):
 
     def setEnabled(self, a0: bool) -> None:
         self.gamesView.gameDetailView.clear()
+        self.gamesView.gamesTab.clear()
         self.searchLineEdit.clear()
 
         self.searchLineEdit.setEnabled(a0)
