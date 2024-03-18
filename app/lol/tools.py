@@ -942,19 +942,55 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
         # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
         "recentlyChampionName": recentlyChampionName
     }
+async def autoSwap(data):
+    isAutoSwap = True # todo: 读取配置
+    if not isAutoSwap:
+        return
+    for pickOrderSwap in data['pickOrderSwaps']:
+        if 'RECEIVED' == pickOrderSwap['state']:
+            connector.acceptTrade(pickOrderSwap['id'])
+            break
 
+async def autoTrade(data):
+    isAutoTrade = True # todo: 读取配置
+    if not isAutoTrade:
+        return
+    for trade in data['trades']:
+        if 'RECEIVED' == trade['state']:
+            connector.acceptTrade(trade['id'])
+            break
 
-async def autoPickOrBan(data):
+async def autoPick(data):
+    isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
+    if not isAutoPick:
+        return
+
+    localPlayerCellId = data['localPlayerCellId']
+    for actionGroup in reversed(data['actions']):
+        for action in actionGroup:
+            if (action["actorCellId"] == localPlayerCellId
+                    and action['type'] == "pick"):
+                isPicked = False
+                for player in data['myTeam']:
+                    if player["cellId"] == localPlayerCellId:
+                        isPicked = bool(player["championId"]) or bool(
+                            player["championPickIntent"])
+                        break
+
+                if not isPicked:
+                    championId = connector.manager.getChampionIdByName(cfg.get(cfg.autoSelectChampion))
+                    await connector.selectChampion(action['id'], championId)
+
+                return
+
+async def autoBanPick(data):
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
     isAutoSelect = cfg.get(cfg.enableAutoSelectChampion)
     isAutoCompleted = cfg.get(cfg.enableAutoSelectTimeoutCompleted)
-    localPlayerCellId = data["data"]["localPlayerCellId"]
-    team = data['data']["myTeam"]
-    actions = data['data']['actions']
-    timer = data['data']['timer']
-
-    if timer["phase"] != "BAN_PICK":
-        return
+    localPlayerCellId = data['localPlayerCellId']
+    team = data['myTeam']
+    actions = data['actions']
+    timer = data['timer']
 
     for actionGroup in actions:
         for action in actionGroup:

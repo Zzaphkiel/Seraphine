@@ -36,7 +36,7 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor, autoPickOrBan)
+                         getAllyOrderByGameRole, getTeamColor, autoBanPick, autoPick, autoSwap, autoTrade)
 
 import threading
 
@@ -727,16 +727,22 @@ class MainWindow(FluentWindow):
     # 英雄选择时，英雄改变 / 楼层改变时触发
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
-        team = data['data']["myTeam"]
+        data = data['data']
 
-        # 自动 B/P
-        await autoPickOrBan(data)
+        phase = {
+            'PLANNING': [autoPick, autoSwap],
+            'BAN_PICK': [autoBanPick, autoSwap],
+            'FINALIZATION': [autoTrade]
+        }
+
+        for func in phase.get(data['timer']['phase']):
+            await func(data)
 
         # 更新头像
-        await self.gameInfoInterface.updateAllyIcon(team)
+        await self.gameInfoInterface.updateAllyIcon(data['myTeam'])
 
         # 更新楼层顺序
-        self.gameInfoInterface.updateAllySummonersOrder(team)
+        self.gameInfoInterface.updateAllySummonersOrder(data['myTeam'])
 
     # 进入游戏后触发
     async def __onGameStart(self):
