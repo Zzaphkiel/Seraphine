@@ -86,6 +86,7 @@ class StartInterface(SmoothScrollArea):
         self.label2.setText(self.tr("LOL client folder:") +
                             f" {cfg.get(cfg.lolFolder)}")
         self.label3.setText(self.tr("(You can launch LOL by other means)"))
+        self.label3.setVisible(True)
 
         self.pushButton.setIcon(Icon.CIRCLERIGHT)
         self.pushButton.setText(self.tr("Start LOL Client"))
