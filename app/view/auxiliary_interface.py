@@ -91,6 +91,12 @@ class AuxiliaryInterface(SmoothScrollArea):
                 "Accept match making automatically after the number of seconds you set"),
             cfg.enableAutoAcceptMatching, cfg.autoAcceptMatchingDelay,
             self.bpGroup)
+        self.autoAcceptSwapingCard = AutoAcceptSwapingCard(
+            self.tr("Auto accept swaping"),
+            self.tr(
+                "Accept ceil or champion swaping requests during B/P"),
+            cfg.autoAcceptCeilSwap, cfg.autoAcceptChampTrade,
+            self.bpGroup)
         self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
             self.tr("Auto select champion when your selection begin"),
@@ -130,6 +136,7 @@ class AuxiliaryInterface(SmoothScrollArea):
 
         # BP
         self.bpGroup.addSettingCard(self.autoAcceptMatchingCard)
+        self.bpGroup.addSettingCard(self.autoAcceptSwapingCard)
         self.bpGroup.addSettingCard(self.autoSelectChampionCard)
         self.bpGroup.addSettingCard(self.autoBanChampionCard)
 
@@ -873,6 +880,80 @@ class AutoAcceptMatchingCard(ExpandGroupSettingCard):
         if isChecked:
             self.statusLabel.setText(self.tr("Enabled, delay: ") + str(delay) +
                                      self.tr(" seconds"))
+        else:
+            self.statusLabel.setText(self.tr("Disabled"))
+
+
+class AutoAcceptSwapingCard(ExpandGroupSettingCard):
+    def __init__(self, title, content, enableCeilSwapItem: ConfigItem = None,
+                 enableChampSwapItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.TEXTCHECK, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.switchButtonWidget = QWidget(self.view)
+        self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
+
+        self.label1 = QLabel(self.tr("Enable auto accept cail swap request:"))
+        self.label2 = QLabel(
+            self.tr("Enable auto accept champion trade request:"))
+
+        self.switchButton1 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+        self.switchButton2 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
+        self.enableCeilSwapItem = enableCeilSwapItem
+        self.enableChampSwapItem = enableChampSwapItem
+
+        self.__initLayout()
+        self.__initWidget()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.switchButtonLayout.setVerticalSpacing(19)
+        self.switchButtonLayout.addWidget(self.label1, 0, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.switchButton1, 0, 1, Qt.AlignRight)
+        self.switchButtonLayout.addWidget(
+            self.label2, 1, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(
+            self.switchButton2, 1, 1, Qt.AlignRight)
+
+        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+        self.switchButtonLayout.setContentsMargins(48, 24, 44, 28)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.switchButtonWidget)
+
+    def __initWidget(self):
+        ceilSwap = cfg.get(cfg.autoAcceptCeilSwap)
+        champTrade = cfg.get(cfg.autoAcceptChampTrade)
+
+        self.switchButton1.setChecked(ceilSwap)
+        self.switchButton2.setChecked(champTrade)
+
+        self.__setStatusLableText()
+
+        self.switchButton1.checkedChanged.connect(
+            self.__onSwichButton1CheckedChanged)
+        self.switchButton2.checkedChanged.connect(
+            self.__onSwichButton2CheckedChanged)
+
+    def __onSwichButton1CheckedChanged(self, isChecked: bool):
+        cfg.set(cfg.autoAcceptCeilSwap, isChecked)
+        self.__setStatusLableText()
+
+    def __onSwichButton2CheckedChanged(self, isChecked: bool):
+        cfg.set(cfg.autoAcceptChampTrade, isChecked)
+        self.__setStatusLableText()
+
+    def __setStatusLableText(self):
+        ceilSwap = self.switchButton1.isChecked()
+        champTrade = self.switchButton2.isChecked()
+
+        if any([ceilSwap, champTrade]):
+            self.statusLabel.setText(self.tr("Enabled"))
         else:
             self.statusLabel.setText(self.tr("Disabled"))
 

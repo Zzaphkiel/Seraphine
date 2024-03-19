@@ -943,40 +943,60 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
         "recentlyChampionName": recentlyChampionName
     }
 
-# 选用顺序交换请求发生时，自动接受
+
 async def autoSwap(data):
-    isAutoSwap = True # todo: 读取配置
+    '''
+    选用顺序交换请求发生时，自动接受
+    '''
+    isAutoSwap = cfg.get(cfg.autoAcceptCeilSwap)
+
     if not isAutoSwap:
         return
+
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
             connector.acceptTrade(pickOrderSwap['id'])
             break
 
-# 自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
+
 async def autoBenchSwap(data):
+    """
+    自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
+    """
     isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
+
     if not isAutoPick or not data['benchEnabled']:
         return
+
     championId = connector.manager.getChampionIdByName(
         cfg.get(cfg.autoSelectChampion))
+
     for benchChampion in data['benchChampions']:
         if benchChampion['championId'] == championId:
             connector.benchSwap(championId)
             break
 
-# 英雄交换请求发生时，自动接受
+
 async def autoTrade(data):
-    isAutoTrade = True # todo: 读取配置
+    """
+    英雄交换请求发生时，自动接受
+    """
+    isAutoTrade = cfg.get(cfg.autoAcceptChampTrade)
+
     if not isAutoTrade:
         return
+
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
             connector.acceptTrade(trade['id'])
             break
 
-# 自动选用
+
 async def autoPick(data):
+    '''
+    自动选用英雄
+    '''
+
     isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
     if not isAutoPick:
         return
@@ -997,13 +1017,16 @@ async def autoPick(data):
 
             if not isPicked:
                 championId = connector.manager.getChampionIdByName(
-                        cfg.get(cfg.autoSelectChampion))
+                    cfg.get(cfg.autoSelectChampion))
                 await connector.selectChampion(action['id'], championId)
 
             return
 
-# 超时自动选定（当前选中英雄）
+
 async def autoCompleted(data):
+    """
+    超时自动选定（当前选中英雄）
+    """
     isAutoCompleted = cfg.get(cfg.enableAutoSelectTimeoutCompleted)
     if not isAutoCompleted:
         return
@@ -1011,6 +1034,7 @@ async def autoCompleted(data):
     timer = data['timer']
     totalTime = timer['totalTimeInPhase']
     timeLeft = timer['adjustedTimeLeftInPhase']
+
     if totalTime - timeLeft > 1000:
         # 满足情况时, 可能是别人的timer
         return
@@ -1026,8 +1050,11 @@ async def autoCompleted(data):
                 await connector.selectChampion(action['id'], action['championId'], True)
                 return
 
-# 自动禁用
+
 async def autoBan(data):
+    """
+    自动禁用
+    """
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
     if not isAutoBan:
         return
@@ -1057,6 +1084,7 @@ async def autoBan(data):
                 await connector.banChampion(action['id'], championId, True)
 
             return
+
 
 async def fixLeagueClientWindow():
     """

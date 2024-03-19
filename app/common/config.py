@@ -94,6 +94,11 @@ class Config(QConfig):
         "Functions", "AutoBanDelay", 0, RangeValidator(0, 25))
     pretentBan = ConfigItem("Functions", "PrententBan", False, BoolValidator())
 
+    autoAcceptCeilSwap = ConfigItem(
+        "Functions", "AutoAcceptCeilSwap", False, BoolValidator())
+    autoAcceptChampTrade = ConfigItem(
+        "Functions", "AutoAcceptChampTrade", False, BoolValidator())
+
     lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
 
     lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())

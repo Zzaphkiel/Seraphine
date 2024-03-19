@@ -1,5 +1,6 @@
 QLabel#titleLabel {
-    font: 33px 'Microsoft YaHei';
+    font: 33px 'Microsoft YaHei', 'Segoe UI';
+    color: black;
     background-color: transparent;
 }
 
