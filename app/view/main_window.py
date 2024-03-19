@@ -728,7 +728,6 @@ class MainWindow(FluentWindow):
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
         data = data['data']
-        print(data)
 
         phase = {
             'PLANNING': [autoPick],
