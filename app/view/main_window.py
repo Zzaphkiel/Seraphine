@@ -21,7 +21,7 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
-from ..common.util import github, getLolClientPid, getTasklistPath
+from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
@@ -84,11 +84,13 @@ class MainWindow(FluentWindow):
 
         self.isGaming = False
         self.isTrayExit = False
+        self.tasklistEnabled = True
 
         self.__initInterface()
         self.__initNavigation()
         self.__initListener()
         self.__conncetSignalToSlot()
+        self.__autoStartLolClient()
 
         self.splashScreen.finish()
 
@@ -324,6 +326,7 @@ class MainWindow(FluentWindow):
         msgBox.exec()
 
     def __showWaitingMessageBox(self):
+        self.tasklistEnabled = False
         msgBox = WaitingForLolMessageBox(self.window())
 
         if not msgBox.exec():
@@ -524,6 +527,22 @@ class MainWindow(FluentWindow):
                              self.careerInterface.updateNameIconExp(data))
 
         logger.debug(f"Update Summoner Info : {data}", TAG)
+
+    def __autoStartLolClient(self):
+        if self.isClientProcessRunning:
+            return
+
+        if not cfg.get(cfg.enableStartLolWithApp):
+            return
+
+        if self.tasklistEnabled:
+            path = getTasklistPath()
+            pid = getLolClientPid(path)
+        else:
+            pid = getLolClientPidSlowly()
+
+        if pid == 0:
+            self.__startLolClient()
 
     def __startLolClient(self):
         path = f"{cfg.get(cfg.lolFolder)}/client.exe"
