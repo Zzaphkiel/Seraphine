@@ -980,7 +980,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.enableButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
         self.timeoutCompletedLabel = QLabel(
-            self.tr("Completed before timeout (Switch selection lose efficacy)"))
+            self.tr("Completed before timeout:"))
         self.timeoutCompletedBtn = SwitchButton(
             indicatorPos=IndicatorPosition.RIGHT)
 
