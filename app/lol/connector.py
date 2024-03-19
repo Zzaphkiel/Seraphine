@@ -577,6 +577,11 @@ class LolClientConnector(QObject):
         res = await self.__post(f"/lol-champ-select/v1/session/trades/{id}/accept")
         return await res.json()
 
+    # 备战席交换
+    async def benchSwap(self, championId):
+        res = await self.__post(f"/lol-champ-select/v1/session/bench/swap/{championId}")
+        return await res.json()
+
     # 选择英雄
     @retry()
     async def selectChampion(self, actionsId, championId, completed=None):
