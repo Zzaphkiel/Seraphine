@@ -36,7 +36,7 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor, autoBanPick, autoPick, autoSwap, autoTrade)
+                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoCompleted, autoSwap, autoTrade, autoBenchSwap)
 
 import threading
 
@@ -728,11 +728,12 @@ class MainWindow(FluentWindow):
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
         data = data['data']
+        print(data)
 
         phase = {
-            'PLANNING': [autoPick, autoSwap],
-            'BAN_PICK': [autoBanPick, autoSwap],
-            'FINALIZATION': [autoTrade]
+            'PLANNING': [autoPick],
+            'BAN_PICK': [autoBan, autoPick, autoCompleted, autoSwap],
+            'FINALIZATION': [autoTrade, autoBenchSwap]
         }
 
         for func in phase.get(data['timer']['phase']):
