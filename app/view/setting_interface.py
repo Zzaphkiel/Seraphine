@@ -47,7 +47,7 @@ class SettingInterface(SmoothScrollArea):
             cfg.careerGamesNumber,
             self.tr("Default games number"),
             self.tr("Number of games:"),
-            10, 10, 60,
+            10, 10, 100,
             Icon.SLIDESEARCH,
             self.tr("Setting the maximum number of games shows in the career interface"), self.functionGroup)
 

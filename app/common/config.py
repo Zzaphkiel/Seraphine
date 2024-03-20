@@ -57,7 +57,7 @@ class Config(QConfig):
         "Personalization", "RemakeCardColor", '#28a2a2a2')
 
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
-                                        RangeValidator(10, 60))
+                                        RangeValidator(10, 100))
     apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
                                            RangeValidator(1, 5), restart=True)
 
