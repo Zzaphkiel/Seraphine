@@ -1066,6 +1066,7 @@ class SearchInterface(SmoothScrollArea):
                 tabs.currentTabSelected = widget
                 widget.setProperty("selected", True)
                 widget.style().polish(widget)
+                widget.repaint()
 
                 break
 

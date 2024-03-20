@@ -961,7 +961,8 @@ class AutoAcceptSwapingCard(ExpandGroupSettingCard):
 # 自动选择英雄卡片
 class AutoSelectChampionCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
-                 championConfigItem: ConfigItem = None, timeoutCompletedCfgItem: ConfigItem = None, parent=None):
+                 championConfigItem: ConfigItem = None,
+                 timeoutCompletedCfgItem: ConfigItem = None, parent=None):
         super().__init__(Icon.CHECK, title, content, parent)
 
         self.statusLabel = QLabel(self)
