@@ -1,6 +1,6 @@
-<h1 align='center'>
-  Seraphine
-</h1>
+<p align='center'>
+  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/78c14456-8f8e-4137-a6bc-20896c382c1a">
+</p>
 
 <p align='center'>
   基于 LCU API 实现的英雄联盟战绩查询工具
@@ -19,10 +19,6 @@
   <a href="https://github.com/Zzaphkiel/Seraphine/releases">
     <img src="https://img.shields.io/github/downloads/Zzaphkiel/Seraphine/total?style=flat&label=Downloads">
   </a>
-</p>
-
-<p align='center'>
-  <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/2c053134-25e1-4a1b-aa9c-4f77cf9522f2">
 </p>
 
 ## 快速上手 🤗
