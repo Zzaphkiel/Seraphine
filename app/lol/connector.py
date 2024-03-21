@@ -721,6 +721,22 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
+    async def getGameReplay(self, gameId):
+        data = {"componentType": "replay-button_match-history", "gameId": gameId}
+        res = await self.__post(f"/lol-replays/v1/rofls/{gameId}/download", data=data)
+
+        return res
+
+    async def getReplayMetadata(self, gameId):
+        res = await self.__get(f"/lol-replays/v1/metadata/{gameId}")
+
+        return await res.json()
+
+    async def getReplayPath(self):
+        res = await self.__get("/lol-replays/v1/rofls/path")
+
+        return await res.json()
+
     def needLcu():
         def decorator(func):
             async def wrapper(*args, **kwargs):
