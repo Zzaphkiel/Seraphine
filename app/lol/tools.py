@@ -945,11 +945,10 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
 
 
 async def autoSwap(data):
-    '''
+    """
     选用顺序交换请求发生时，自动接受
-    '''
+    """
     isAutoSwap = cfg.get(cfg.autoAcceptCeilSwap)
-
     if not isAutoSwap:
         return
 
@@ -964,7 +963,6 @@ async def autoBenchSwap(data):
     自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
     """
     isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
-
     if not isAutoPick or not data['benchEnabled']:
         return
 
@@ -982,7 +980,6 @@ async def autoTrade(data):
     英雄交换请求发生时，自动接受
     """
     isAutoTrade = cfg.get(cfg.autoAcceptChampTrade)
-
     if not isAutoTrade:
         return
 
@@ -993,32 +990,30 @@ async def autoTrade(data):
 
 
 async def autoPick(data):
-    '''
+    """
     自动选用英雄
-    '''
-
+    """
     isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
     if not isAutoPick:
         return
 
     localPlayerCellId = data['localPlayerCellId']
+
+    for player in data['myTeam']:
+        if player["cellId"] == localPlayerCellId:
+            if (bool(player["championId"])
+                    or bool(player["championPickIntent"])):
+                return
+
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action["actorCellId"] != localPlayerCellId
                     or action['type'] != "pick"):
                 continue
 
-            isPicked = False
-            for player in data['myTeam']:
-                if player["cellId"] == localPlayerCellId:
-                    isPicked = bool(player["championId"]) or bool(
-                        player["championPickIntent"])
-                    break
-
-            if not isPicked:
-                championId = connector.manager.getChampionIdByName(
+            championId = connector.manager.getChampionIdByName(
                     cfg.get(cfg.autoSelectChampion))
-                await connector.selectChampion(action['id'], championId)
+            await connector.selectChampion(action['id'], championId)
 
             return
 
@@ -1070,11 +1065,11 @@ async def autoBan(data):
                 championId = connector.manager.getChampionIdByName(
                     cfg.get(cfg.autoBanChampion))
 
+                # 给队友一点预选的时间
+                await asyncio.sleep(cfg.get(cfg.autoBanDelay))
+
                 isFriendly = cfg.get(cfg.pretentBan)
                 if isFriendly:
-                    # 给队友一点预选的时间
-                    await asyncio.sleep(cfg.get(cfg.autoBanDelay))
-
                     data = await connector.getChampSelectSession()
                     for player in data['myTeam']:
                         if player["championPickIntent"] == championId:
