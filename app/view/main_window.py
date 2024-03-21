@@ -754,7 +754,7 @@ class MainWindow(FluentWindow):
             'FINALIZATION': [autoTrade, autoBenchSwap]
         }
 
-        for func in phase.get(data['timer']['phase'], lambda d: d):
+        for func in phase.get(data['timer']['phase'], []):
             await func(data)
 
         # 更新头像

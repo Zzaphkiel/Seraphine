@@ -1195,6 +1195,29 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.switchButton2.checkedChanged.connect(self.__onPrententChanged)
         self.delayLineEdit.valueChanged.connect(self.__onDelayTimeChanged)
 
+        self.__fixStyleSheetError()
+
+    def __fixStyleSheetError(self):
+
+        light = """
+            SpinBox:disabled {
+                color: rgba(0, 0, 0, 150);
+                background-color: rgba(249, 249, 249, 0.3);
+                border: 1px solid rgba(0, 0, 0, 13);
+                border-bottom: 1px solid rgba(0, 0, 0, 13);
+            }
+        """
+
+        dark = """
+            SpinBox:disabled {    
+                color: rgba(255, 255, 255, 150);
+                background-color: rgba(255, 255, 255, 0.0419);
+                border: 1px solid rgba(255, 255, 255, 0.0698);
+            }
+        """
+
+        setCustomStyleSheet(self.delayLineEdit, light, dark)
+
     def __setStatusLabelText(self, champion, isChecked):
         if isChecked:
             self.statusLabel.setText(self.tr("Enabled, champion: ") + champion)
