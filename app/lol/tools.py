@@ -1076,6 +1076,16 @@ async def autoBan(data):
 
                 return
 
+async def rollAndSwapBack():
+    """
+    摇骰子并切换回之前的英雄
+    """
+    championId = await connector.getCurrentChampion()
+
+    await connector.reroll()
+
+    await connector.benchSwap(championId)
+
 async def fixLeagueClientWindow():
     """
     #### 需要管理员权限
