@@ -954,7 +954,7 @@ async def autoSwap(data):
 
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
-            connector.acceptTrade(pickOrderSwap['id'])
+            await connector.acceptTrade(pickOrderSwap['id'])
             break
 
 
@@ -971,7 +971,7 @@ async def autoBenchSwap(data):
 
     for benchChampion in data['benchChampions']:
         if benchChampion['championId'] == championId:
-            connector.benchSwap(championId)
+            await connector.benchSwap(championId)
             break
 
 
@@ -985,7 +985,7 @@ async def autoTrade(data):
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
-            connector.acceptTrade(trade['id'])
+            await connector.acceptTrade(trade['id'])
             break
 
 
@@ -1007,16 +1007,13 @@ async def autoPick(data):
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
-            if (action["actorCellId"] != localPlayerCellId
-                    or action['type'] != "pick"):
-                continue
-
-            championId = connector.manager.getChampionIdByName(
+            if (action["actorCellId"] == localPlayerCellId
+                    and action['type'] == "pick"):
+                championId = connector.manager.getChampionIdByName(
                     cfg.get(cfg.autoSelectChampion))
-            await connector.selectChampion(action['id'], championId)
+                await connector.selectChampion(action['id'], championId)
 
-            return
-
+                return
 
 async def autoCompleted(data):
     """
@@ -1057,11 +1054,10 @@ async def autoBan(data):
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in data['actions']:
         for action in actionGroup:
-            if (action["actorCellId"] != localPlayerCellId
-                    or action['type'] != 'ban'):
-                continue
-
-            if action["isInProgress"]:
+            if (action["actorCellId"] == localPlayerCellId
+                    and action['type'] == 'ban' 
+                    and action["isInProgress"]):
+                
                 championId = connector.manager.getChampionIdByName(
                     cfg.get(cfg.autoBanChampion))
 
@@ -1078,8 +1074,17 @@ async def autoBan(data):
 
                 await connector.banChampion(action['id'], championId, True)
 
-            return
+                return
 
+async def rollAndSwapBack():
+    """
+    摇骰子并切换回之前的英雄
+    """
+    championId = await connector.getCurrentChampion()
+
+    await connector.reroll()
+
+    await connector.benchSwap(championId)
 
 async def fixLeagueClientWindow():
     """

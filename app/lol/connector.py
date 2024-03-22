@@ -582,6 +582,18 @@ class LolClientConnector(QObject):
         res = await self.__post(f"/lol-champ-select/v1/session/bench/swap/{championId}")
         return await res.json()
 
+    # 获取当前选择英雄
+    @retry()
+    async def getCurrentChampion(self):
+        res = await self.__get("/lol-champ-select/v1/current-champion")
+        return await res.json()
+
+    # 摇骰子
+    @retry()
+    async def reroll(self):
+        res = await self.__post("/lol-champ-select/v1/session/my-selection/reroll")
+        return await res.json()
+
     # 选择英雄
     @retry()
     async def selectChampion(self, actionsId, championId, completed=None):

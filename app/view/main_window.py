@@ -751,7 +751,7 @@ class MainWindow(FluentWindow):
         phase = {
             'PLANNING': [autoPick],
             'BAN_PICK': [autoBan, autoPick, autoCompleted, autoSwap],
-            'FINALIZATION': [autoTrade, autoBenchSwap]
+            'FINALIZATION': [autoTrade]
         }
 
         for func in phase.get(data['timer']['phase'], []):
