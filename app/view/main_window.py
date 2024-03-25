@@ -36,7 +36,7 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoCompleted, autoSwap, autoTrade, autoSelectSkinRandom)
+                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete, autoSwap, autoTrade, autoSelectSkinRandom)
 
 import threading
 
@@ -764,7 +764,7 @@ class MainWindow(FluentWindow):
 
         phase = {
             'PLANNING': [autoPick],
-            'BAN_PICK': [autoBan, autoPick, autoCompleted, autoSwap],
+            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap],
             'FINALIZATION': [autoTrade, autoSelectSkinRandom],
             # 'GAME_STARTING': []
         }

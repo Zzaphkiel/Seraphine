@@ -957,6 +957,7 @@ async def autoSwap(data, selection):
         if 'RECEIVED' == pickOrderSwap['state']:
             await asyncio.sleep(1)
             await connector.acceptTrade(pickOrderSwap['id'])
+            selection.isChampionPickedCompleted = False
             return True
 
 
@@ -1019,7 +1020,7 @@ async def autoPick(data, selection):
                 selection.isChampionPicked = True
                 return True
 
-async def autoCompleted(data, selection):
+async def autoComplete(data, selection):
     """
     超时自动选定（当前选中英雄）
     """
@@ -1027,28 +1028,19 @@ async def autoCompleted(data, selection):
     if not isAutoCompleted or selection.isChampionPickedCompleted:
         return
 
-    timer = data['timer']
-    totalTime = timer['totalTimeInPhase']
-    timeLeft = timer['adjustedTimeLeftInPhase']
-
-    if totalTime - timeLeft > 1000:
-        # 满足情况时, 可能是别人的timer
-        return
-    selection.isChampionPickedCompleted = True
-
-    await asyncio.sleep(int(timeLeft / 1000) - 1)
-
-    data = await connector.getChampSelectSession()
-    # 选人阶段中途有人退出，而如果刚好sleep完后到这里来，获取信息会报错
-    if 'errorCode' in data:
-        return
-
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action['actorCellId'] == localPlayerCellId
+                    and action['type'] == "pick"
+                    and action['isInProgress']
                     and not action['completed']):
-                await connector.selectChampion(action['id'], action['championId'], True)
+                selection.isChampionPickedCompleted = True
+                await asyncio.sleep(int(data['timer']['adjustedTimeLeftInPhase'] / 1000) - 1)
+
+                if selection.isChampionPickedCompleted:
+                    await connector.selectChampion(action['id'], action['championId'], True)
+
                 return True
 
 
@@ -1089,6 +1081,7 @@ async def autoBan(data, selection):
 async def rollAndSwapBack():
     """
     摇骰子并切换回之前的英雄
+    todo: 界面
     """
     championId = await connector.getCurrentChampion()
 
@@ -1099,8 +1092,9 @@ async def rollAndSwapBack():
 async def autoSelectSkinRandom(data, selection):
     """
     随机选皮肤
+    todo: 界面
     """
-    isAutoSelectSkinRandom = True
+    isAutoSelectSkinRandom = False# todo: 读取配置
     if not isAutoSelectSkinRandom or selection.isSkinPicked:
         return
     selection.isSkinPicked = True
