@@ -626,6 +626,32 @@ class LolClientConnector(QObject):
 
         return await res.read()
 
+    # 获取皮肤轮盘
+    @retry()
+    async def getSkinCarousel(self):
+        # res = await self.__get("/lol-champ-select/v1/pickable-skin-ids") //这个是所有可用的皮肤，不是自己可用的皮肤--!
+        res = await self.__get("/lol-champ-select/v1/skin-carousel-skins")
+        return await res.json()
+
+    # 选皮肤、召唤师技能
+    @retry()
+    async def selectConfig(self, skinId, spell1Id=None, spell2Id=None, wardSkinId=None):
+        data = {
+            "selectedSkinId": skinId
+        }
+
+        # 4-点燃 12-闪现 14-传送 **推测未验证**
+        if spell1Id:
+            data["spell1Id"] = spell1Id
+        if spell2Id:
+            data["spell2Id"] = spell2Id
+        if wardSkinId:
+            # 不知道是什么，默认-1
+            data["wardSkinId"] = wardSkinId
+
+        res = await self.__patch("/lol-champ-select/v1/session/my-selection", data)
+        return await res.json()
+
     @retry()
     async def getSummonerById(self, summonerId):
         res = await self.__get(f"/lol-summoner/v1/summoners/{summonerId}")

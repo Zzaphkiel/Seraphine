@@ -1,3 +1,4 @@
+import random
 import time
 import win32gui
 import win32con
@@ -1092,6 +1093,35 @@ async def rollAndSwapBack():
     await connector.reroll()
 
     await connector.benchSwap(championId)
+
+async def autoSelectSkinRandom(data, selection):
+    """
+    随机选皮肤
+    """
+    isAutoSelectSkinRandom = True
+    if not isAutoSelectSkinRandom or selection.isSkinPicked:
+        return
+    selection.isSkinPicked = True
+
+    skinCarousel = await connector.getSkinCarousel()
+    pickableSkinIds = []
+    for skin in skinCarousel:
+        if skin['disabled']:
+            continue
+
+        if not skin['ownership']['owned']:
+            continue
+        pickableSkinIds.append(skin['id'])
+
+        if len(skin['childSkins']) > 0:
+            for childSkin in skin['childSkins']:
+                if skin['ownership']['owned']:
+                    pickableSkinIds.append(childSkin['id'])
+
+    length = len(pickableSkinIds)
+    if length > 1:
+        await connector.selectConfig(pickableSkinIds[random.randint(0, length - 1)])
+        return True
 
 async def fixLeagueClientWindow():
     """
