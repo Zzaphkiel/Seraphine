@@ -955,6 +955,7 @@ async def autoSwap(data, selection):
 
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
+            await asyncio.sleep(1)
             await connector.acceptTrade(pickOrderSwap['id'])
             return True
 
@@ -986,6 +987,7 @@ async def autoTrade(data, selection):
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
+            await asyncio.sleep(1)
             await connector.acceptTrade(trade['id'])
             return True
 
