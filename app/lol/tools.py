@@ -944,7 +944,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     }
 
 
-async def autoSwap(data):
+async def autoSwap(data, selection):
     """
     选用顺序交换请求发生时，自动接受
     """
@@ -955,10 +955,10 @@ async def autoSwap(data):
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
             await connector.acceptTrade(pickOrderSwap['id'])
-            break
+            return True
 
 
-async def autoBenchSwap(data):
+async def autoBenchSwap(data, selection):
     """
     自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
     """
@@ -972,10 +972,10 @@ async def autoBenchSwap(data):
     for benchChampion in data['benchChampions']:
         if benchChampion['championId'] == championId:
             await connector.benchSwap(championId)
-            break
+            return True
 
 
-async def autoTrade(data):
+async def autoTrade(data, selection):
     """
     英雄交换请求发生时，自动接受
     """
@@ -986,15 +986,15 @@ async def autoTrade(data):
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
             await connector.acceptTrade(trade['id'])
-            break
+            return True
 
 
-async def autoPick(data):
+async def autoPick(data, selection):
     """
     自动选用英雄
     """
     isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
-    if not isAutoPick:
+    if not isAutoPick or selection.isChampionPicked:
         return
 
     localPlayerCellId = data['localPlayerCellId']
@@ -1013,14 +1013,15 @@ async def autoPick(data):
                     cfg.get(cfg.autoSelectChampion))
                 await connector.selectChampion(action['id'], championId)
 
-                return
+                selection.isChampionPicked = True
+                return True
 
-async def autoCompleted(data):
+async def autoCompleted(data, selection):
     """
     超时自动选定（当前选中英雄）
     """
     isAutoCompleted = cfg.get(cfg.enableAutoSelectTimeoutCompleted)
-    if not isAutoCompleted:
+    if not isAutoCompleted or selection.isChampionPickedCompleted:
         return
 
     timer = data['timer']
@@ -1030,26 +1031,32 @@ async def autoCompleted(data):
     if totalTime - timeLeft > 1000:
         # 满足情况时, 可能是别人的timer
         return
+    selection.isChampionPickedCompleted = True
 
     await asyncio.sleep(int(timeLeft / 1000) - 1)
 
     data = await connector.getChampSelectSession()
+    # 选人阶段中途有人退出，而如果刚好sleep完后到这里来，获取信息会报错
+    if 'errorCode' in data:
+        return
+
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action['actorCellId'] == localPlayerCellId
                     and not action['completed']):
                 await connector.selectChampion(action['id'], action['championId'], True)
-                return
+                return True
 
 
-async def autoBan(data):
+async def autoBan(data, selection):
     """
-    自动禁用
+    自动禁用英雄
     """
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
-    if not isAutoBan:
+    if not isAutoBan or selection.isChampionBanned:
         return
+    selection.isChampionBanned = True
 
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in data['actions']:
@@ -1074,7 +1081,7 @@ async def autoBan(data):
 
                 await connector.banChampion(action['id'], championId, True)
 
-                return
+                return True
 
 async def rollAndSwapBack():
     """

@@ -735,6 +735,20 @@ class MainWindow(FluentWindow):
 
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
+        class ChampionSelection:
+            def __init__(self):
+                self.isChampionBanned = False
+                self.isChampionPicked = False
+                self.isChampionPickedCompleted = False
+                self.isSkinPicked = False
+
+            def reset(self):
+                self.isChampionBanned = False
+                self.isChampionPicked = False
+                self.isChampionPickedCompleted = False
+                self.isSkinPicked = False
+        self.championSelection = ChampionSelection()
+
         session = await connector.getChampSelectSession()
 
         currentSummonerId = self.currentSummoner['summonerId']
@@ -752,10 +766,12 @@ class MainWindow(FluentWindow):
             'PLANNING': [autoPick],
             'BAN_PICK': [autoBan, autoPick, autoCompleted, autoSwap],
             'FINALIZATION': [autoTrade]
+            # 'GAME_STARTING': []
         }
 
         for func in phase.get(data['timer']['phase'], []):
-            await func(data)
+            if await func(data, self.championSelection):
+                break
 
         # 更新头像
         await self.gameInfoInterface.updateAllyIcon(data['myTeam'])
