@@ -680,12 +680,16 @@ class LolClientConnector(QObject):
 
     async def spectate(self, summonerName):
         info = await self.getSummonerByName(summonerName)
+        puuid = info.get('puuid')
+
+        if not puuid:
+            raise SummonerNotFound()
 
         data = {
             'allowObserveMode': 'ALL',
             'dropInSpectateGameId': summonerName,
             'gameQueueType': "",
-            'puuid': info['puuid'],
+            'puuid': puuid,
         }
 
         res = await self.__post(
