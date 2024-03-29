@@ -207,7 +207,7 @@ class LolClientConnector(QObject):
 
     async def close(self):
         try:
-            self.listener.close()
+            await self.listener.close()
         except:
             pass
 
