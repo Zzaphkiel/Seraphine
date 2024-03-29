@@ -407,6 +407,12 @@ class MainWindow(FluentWindow):
         ) if reason == QSystemTrayIcon.DoubleClick else None)
         self.trayIcon.show()
 
+    def show(self):
+        self.activateWindow()
+        self.setWindowState(self.windowState() & ~
+                            Qt.WindowMinimized | Qt.WindowActive)
+        self.showNormal()
+
     def __initListener(self):
         self.processListener.start()
         self.checkUpdateThread.start()
