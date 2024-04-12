@@ -1,5 +1,5 @@
-### 2024 / 3 / 16
+### 2024 / 4 / 12
 
-- **v0.11.0 版本已发布，因更换了底层架构，如遇任何问题请立即反馈，感谢！** 
-- 本程序**开源且免费**，开源在 https://github.com/Zzaphkiel/Seraphine
-- 遇到问题请查询 https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue 或按照模板提交反馈
+- 本程序是**开源**且**免费**的，如果您是从闲鱼 / 淘宝等平台**通过付费渠道**获取的该程序，请立即**退款**
+- 本程序开源在 https://github.com/Zzaphkiel/Seraphine
+- BUG 已经在修了，修完就发新版

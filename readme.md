@@ -177,4 +177,7 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 在您使用本程序之前，请确保您已经详细**阅读**、**理解**并**同意**免责声明中的条款；同时，请遵守相关游戏规则，共同维护健康和公平的游戏环境。
 
 ## 许可证 ⚖️
-Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证。
+- 对于非商用行为，Seraphine 使用 [GPLv3](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE) 许可证。
+- 禁止一切针对代码以及二进制文件的商用行为。
+
+
