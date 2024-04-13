@@ -1,5 +1,6 @@
 import threading
 import time
+from asyncio import CancelledError
 
 import pyperclip
 from qasync import asyncSlot
@@ -149,7 +150,7 @@ class GamesTab(QFrame):
         self.prevButton.setEnabled(prevEnable)
 
         nextEnable = len(
-            self.queueIdMap[self.queueId]) > self.currentPageNum * 10
+            self.queueIdMap.get(self.queueId, [])) > self.currentPageNum * 10
         self.nextButton.setEnabled(nextEnable)
 
     def prepareNextPage(self):
@@ -928,6 +929,9 @@ class SearchInterface(SmoothScrollArea):
         self.gamesView = GamesView()
         self.currentSummonerName = None
 
+        self.detailViewLoadTask = None
+        self.loadingGameId = 0
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -1020,7 +1024,7 @@ class SearchInterface(SmoothScrollArea):
         self.__addSearchHistroy(name)
 
         # 停止已有的加载任务
-        if self.gameLoadingTask != None:
+        if self.gameLoadingTask:
             self.gameLoadingTask.cancel()
             self.gameLoadingTask = None
 
@@ -1082,9 +1086,13 @@ class SearchInterface(SmoothScrollArea):
 
     async def __loadGames(self, puuid):
         begIdx = 20
-        endIdx = 59
+        endIdx = 29
 
         while True:
+            # 为加载战绩详情让行
+            while self.detailViewLoadTask and not self.detailViewLoadTask.done():
+                await asyncio.sleep(.2)
+
             try:
                 games = await connector.getSummonerGamesByPuuidSlowly(
                     puuid, begIdx, endIdx)
@@ -1105,12 +1113,12 @@ class SearchInterface(SmoothScrollArea):
             # 而现在，由于新的两页对局数据加载好了，可以绘制上去了，要让 button 变得可用
             self.gamesView.gamesTab.resetButtonEnabled()
 
-            # 如果长度小于 40，也说明搜完了已经
-            if len(games) < 40:
+            # 如果长度小于 10，也说明搜完了已经
+            if len(games) < 10:
                 return
 
             begIdx = endIdx + 1
-            endIdx = begIdx + 39
+            endIdx = begIdx + 9
 
             # 睡不睡都行
             await asyncio.sleep(.1)
@@ -1123,6 +1131,8 @@ class SearchInterface(SmoothScrollArea):
         if tab is cur:
             return
 
+        self.gamesView.gameDetailView.clear()
+
         tab.setProperty("selected", True)
         tab.style().polish(tab)
 
@@ -1131,6 +1141,7 @@ class SearchInterface(SmoothScrollArea):
             cur.style().polish(cur)
 
         tabs.currentTabSelected = tab
+        self.loadingGameId = tab.gameId
         await self.updateGameDetailView(tab.gameId)
 
     async def updateGameDetailView(self, gameId):
@@ -1139,6 +1150,8 @@ class SearchInterface(SmoothScrollArea):
 
         game = await connector.getGameDetailByGameId(gameId)
         game = await parseGameDetailData(self.puuid, game)
+        if gameId != self.loadingGameId:
+            return
         self.gamesView.gameDetailView.updateGame(game)
 
         if cfg.get(cfg.showTierInGameInfo):
