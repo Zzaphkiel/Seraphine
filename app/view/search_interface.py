@@ -928,6 +928,8 @@ class SearchInterface(SmoothScrollArea):
         self.gamesView = GamesView()
         self.currentSummonerName = None
 
+        self.detailViewLoadTask = None
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -1120,6 +1122,10 @@ class SearchInterface(SmoothScrollArea):
         tabs: GamesTab = self.gamesView.gamesTab
         cur: GameTab = tabs.currentTabSelected
 
+        self.gamesView.gameDetailView.clear()
+        if self.gameLoadingTask:
+            self.gameLoadingTask.cancel()
+
         if tab is cur:
             return
 
@@ -1131,7 +1137,7 @@ class SearchInterface(SmoothScrollArea):
             cur.style().polish(cur)
 
         tabs.currentTabSelected = tab
-        await self.updateGameDetailView(tab.gameId)
+        self.detailViewLoadTask = asyncio.create_task(self.updateGameDetailView(tab.gameId))
 
     async def updateGameDetailView(self, gameId):
         if cfg.get(cfg.showTierInGameInfo):
