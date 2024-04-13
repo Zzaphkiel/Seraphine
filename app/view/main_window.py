@@ -873,6 +873,7 @@ class MainWindow(FluentWindow):
         self.checkAndSwitchTo(self.searchInterface)
 
         await self.searchInterface.searchAndShowFirstPage()
+        self.searchInterface.loadingGameId = gameId
         await self.searchInterface.updateGameDetailView(gameId)
         self.searchInterface.waitingForDrawSelect(gameId)
 
