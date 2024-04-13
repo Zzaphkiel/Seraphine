@@ -3,6 +3,8 @@ import os
 import json
 import threading
 import traceback
+from collections import deque
+
 import requests
 import time
 
@@ -21,6 +23,32 @@ requests.packages.urllib3.disable_warnings()
 TAG = "Connector"
 
 
+class PastRequest:
+    def __init__(self, func: str, params_dict, kwargs):
+        self.func = func  # 此处需要func.__name__ 而不是func本身的obj
+        self.params_dict = params_dict
+        self.kwargs = kwargs
+        self.response = None
+        self.timestamp = time.time()
+
+    def __str__(self):
+        attrs = [f"{k}={v!r}" for k, v in self.__dict__.items() if v is not None]
+        return f"PastRequest(\n  {', '.join(attrs)}\n)"
+
+
+def needLcu():
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            if connector.sess is None:
+                raise ReferenceError
+
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 def retry(count=5, retry_sep=0):
     def decorator(func):
         async def wrapper(*args, **kwargs):
@@ -37,12 +65,19 @@ def retry(count=5, retry_sep=0):
                 tmp_args = args[1:]
 
             # 构建参数字典，将参数名与对应的实参值一一对应
-            params_dict = {param: arg for param,
-                           arg in zip(param_names, tmp_args)}
+            params_dict = {param: arg for param, arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
-
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
+
+            with connector.dq_lock:
+                req_obj = PastRequest(
+                    func.__name__,
+                    params_dict,
+                    kwargs
+                )
+                connector.call_stack.append(req_obj)
+
             exce = None
             for _ in range(count):
                 try:
@@ -68,9 +103,15 @@ def retry(count=5, retry_sep=0):
                     signalBus.lcuApiExceptionRaised.emit(
                         func.__name__, exce)
 
+                with connector.dq_lock:
+                    req_obj.response = res
+
                 logger.exception(f"exit {func.__name__}", exce, TAG)
 
                 raise exce
+
+            with connector.dq_lock:
+                req_obj.response = res
 
             logger.info(f"exit {func.__name__}", TAG)
             logger.debug(f"result = {res}", TAG)
@@ -154,6 +195,7 @@ class LcuWebSocket():
 class LolClientConnector(QObject):
 
     def __init__(self):
+        super().__init__()
         self.sess = None
         self.port = None
         self.token = None
@@ -161,6 +203,9 @@ class LolClientConnector(QObject):
 
         self.manager = None
         self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
+
+        self.dq_lock = threading.Lock()
+        self.call_stack = deque(maxlen=10)
 
     async def start(self, pid):
         self.pid = pid
@@ -782,18 +827,6 @@ class LolClientConnector(QObject):
         res = await self.__get("/lol-replays/v1/rofls/path")
 
         return await res.json()
-
-    def needLcu():
-        def decorator(func):
-            async def wrapper(*args, **kwargs):
-                if connector.sess is None:
-                    raise ReferenceError
-
-                return await func(*args, **kwargs)
-
-            return wrapper
-
-        return decorator
 
     @needLcu()
     async def __get(self, path, params=None):

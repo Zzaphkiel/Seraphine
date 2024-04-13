@@ -452,8 +452,35 @@ class MainWindow(FluentWindow):
         self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
-        self.__onGameStatusChanged(status)
+        # ---- 240413 ---- By Hpero4
+        # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
+        #     t = self.__onGameStatusChanged(status)
+        #     self.__unlockInterface()
+        #     await t
+        #
+        # 如果你希望等待 self.__onGameStatusChanged(status) 返回之后再执行 self.__unlockInterface() 可以这样使用:
+        #     await self.__onGameStatusChanged(status)
+        #     self.__unlockInterface()
+        #
+        # 而不是直接调用:
+        #     self.__onGameStatusChanged(status)
+        #     self.__unlockInterface()
+        #
+        # 此外 self.__onGameStatusChanged(status) 本身不是一个常规的异步函数, 它是使用 asyncSlot 装饰的槽函数,
+        #   内部封装了task的新建过程, 并且会被立即加入到 QEventLoop 等待执行, 并返回一个Task实例;
+        #
+        # 如果 func a 是一个常规异步函数, func b 是一个常规的同步函数, 你应该这样使用它:
+        #     t = asyncio.create_task(a())
+        #     b()
+        #     await t
+        #
+        # 项目中还有其他异步函数使用了await进行了额外的等待, 亦或是直接调用异步函数而没有使用await保证竞态的情况,
+        # 这可能导致性能或是其他不可预期的问题, 这是只是一个例子;
+        # ---- 240413 ---- By Hpero4
+
+        t = self.__onGameStatusChanged(status)
         self.__unlockInterface()
+        await t
 
     async def __startConnector(self, pid):
         try:
@@ -863,6 +890,11 @@ class MainWindow(FluentWindow):
         tracebackFormat = traceback.format_exception(ty, value, tb)
         title = self.tr('Exception occurred 😥')
         content = "".join(tracebackFormat)
+
+        logger.error("connector call_stack -------------- ↓", "Crash")
+        for call in connector.call_stack:
+            logger.error(call, "Crash")
+        logger.error("connector call_stack -------------- ↑", "Crash")
 
         w = ExceptionMessageBox(title, content, self.window())
 
