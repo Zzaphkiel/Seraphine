@@ -105,17 +105,15 @@ async def getRecentTeammates(games, puuid):
     return ret
 
 
-async def parseSummonerData(summoner):
+async def parseSummonerData(summoner, rankTask, gameTask):
     iconId = summoner['profileIconId']
     icon = await connector.getProfileIcon(iconId)
     level = summoner['summonerLevel']
     xpSinceLastLevel = summoner['xpSinceLastLevel']
     xpUntilNextLevel = summoner['xpUntilNextLevel']
-    rankInfo = await connector.getRankedStatsByPuuid(summoner['puuid'])
 
     try:
-        gamesInfo = await connector.getSummonerGamesByPuuid(
-            summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1)
+        gamesInfo = await gameTask
     except:
         champions = []
         games = {}
@@ -152,7 +150,7 @@ async def parseSummonerData(summoner):
         'xpSinceLastLevel': xpSinceLastLevel,
         'xpUntilNextLevel': xpUntilNextLevel,
         'puuid': summoner['puuid'],
-        'rankInfo': rankInfo,
+        'rankInfo': await rankTask,
         'games': games,
         'champions': champions,
         'isPublic': summoner['privacy'] == "PUBLIC",

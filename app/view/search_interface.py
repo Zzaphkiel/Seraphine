@@ -291,6 +291,7 @@ class GameDetailView(QFrame):
 
         # self.vBoxLayout.addSpacerItem(
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
     def setLoadingPageEnabled(self, enable: bool):
         if enable:
             index = 0
@@ -1090,7 +1091,11 @@ class SearchInterface(SmoothScrollArea):
 
         while True:
             # 为加载战绩详情让行
-            while self.detailViewLoadTask and not self.detailViewLoadTask.done():
+            while (
+                (self.detailViewLoadTask and not self.detailViewLoadTask.done())
+                or
+                (self.window().careerInterface.loadGamesTask and not self.window().careerInterface.loadGamesTask.done())
+            ):
                 await asyncio.sleep(.2)
 
             try:

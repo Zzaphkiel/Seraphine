@@ -88,6 +88,8 @@ class CareerInterface(SmoothScrollArea):
 
         self.games = []
 
+        self.loadGamesTask = None
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -367,8 +369,10 @@ class CareerInterface(SmoothScrollArea):
 
         if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
+        self.loadGamesTask = asyncio.create_task(connector.getSummonerGamesByPuuid(summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1))
+        rankTask = asyncio.create_task(connector.getRankedStatsByPuuid(summoner['puuid']))
 
-        info = await parseSummonerData(summoner)
+        info = await parseSummonerData(summoner, rankTask, self.loadGamesTask)
         await self.repaintInterface(info)
 
     async def repaintInterface(self, info):

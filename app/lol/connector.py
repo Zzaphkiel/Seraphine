@@ -196,6 +196,7 @@ class LolClientConnector(QObject):
 
     def __init__(self):
         super().__init__()
+        self.semaphore = None
         self.sess = None
         self.port = None
         self.token = None
