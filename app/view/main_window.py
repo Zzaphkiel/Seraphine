@@ -6,6 +6,7 @@ import webbrowser
 import pyperclip
 
 import asyncio
+from aiohttp.client_exceptions import ClientConnectorError
 from qasync import asyncClose, asyncSlot
 import pygetwindow as gw
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
@@ -896,6 +897,9 @@ class MainWindow(FluentWindow):
         for call in connector.call_stack:
             logger.error(call, "Crash")
         logger.error("connector call_stack -------------- ↑", "Crash")
+
+        if ty in [ConnectionRefusedError, ClientConnectorError]:
+            return
 
         w = ExceptionMessageBox(title, content, self.window())
 
