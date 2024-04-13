@@ -104,7 +104,7 @@ def retry(count=5, retry_sep=0):
                         func.__name__, exce)
 
                 with connector.dq_lock:
-                    req_obj.response = res
+                    req_obj.response = exce
 
                 logger.exception(f"exit {func.__name__}", exce, TAG)
 
