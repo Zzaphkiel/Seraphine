@@ -149,7 +149,7 @@ class GamesTab(QFrame):
         self.prevButton.setEnabled(prevEnable)
 
         nextEnable = len(
-            self.queueIdMap[self.queueId]) > self.currentPageNum * 10
+            self.queueIdMap.get(self.queueId, [])) > self.currentPageNum * 10
         self.nextButton.setEnabled(nextEnable)
 
     def prepareNextPage(self):
