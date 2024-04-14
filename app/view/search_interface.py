@@ -25,6 +25,7 @@ from app.components.animation_frame import ColorAnimationFrame, CardWidget
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
+from ..components.SeraphineInterface import SeraphineInterface
 
 
 class GamesTab(QFrame):
@@ -911,7 +912,7 @@ class GameTab(ColorAnimationFrame):
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
 
-class SearchInterface(SmoothScrollArea):
+class SearchInterface(SeraphineInterface):
     summonerPuuidGetted = pyqtSignal(str)
     gamesNotFound = pyqtSignal()
 

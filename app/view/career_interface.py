@@ -23,6 +23,7 @@ from app.common.config import cfg
 from app.lol.connector import connector
 from app.lol.tools import (parseGames, parseSummonerData,
                            getRecentTeammates, parseDetailRankInfo)
+from ..components.SeraphineInterface import SeraphineInterface
 
 
 class NameLabel(QLabel):
@@ -35,7 +36,7 @@ class TagLineLabel(QLabel):
         return super().text().replace(" ", '')
 
 
-class CareerInterface(SmoothScrollArea):
+class CareerInterface(SeraphineInterface):
     gameInfoBarClicked = pyqtSignal(str)
     iconLevelExpChanged = pyqtSignal(dict)
 

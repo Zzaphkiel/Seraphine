@@ -441,6 +441,7 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(int)
     async def __onLolClientStarted(self, pid):
+        logger.info(f"League of Legends client started: {pid}", TAG)
         res = await self.__startConnector(pid)
         if not res:
             return
@@ -511,6 +512,7 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(int)
     async def __onLolClientChanged(self, pid):
+        logger.critical(f"League of Legends client changed: {pid}", TAG)
         await self.__onLolClientEnded()
         self.processListener.runningPid = pid
         await self.__onLolClientStarted(pid)
@@ -903,13 +905,19 @@ class MainWindow(FluentWindow):
         title = self.tr('Exception occurred 😥')
         content = "".join(tracebackFormat)
 
+        if ty in [ConnectionRefusedError, ClientConnectorError]:
+            return
+
         logger.error("connector call_stack -------------- ↓", "Crash")
         for call in connector.call_stack:
             logger.error(call, "Crash")
         logger.error("connector call_stack -------------- ↑", "Crash")
 
-        if ty in [ConnectionRefusedError, ClientConnectorError]:
-            return
+        logger.error(str(self.searchInterface), "Crash")
+        logger.error(str(self.gameInfoInterface), "Crash")
+        logger.error(str(self.careerInterface), "Crash")
+        logger.error(str(self.auxiliaryFuncInterface), "Crash")
+        logger.error(str(self.settingInterface), "Crash")
 
         w = ExceptionMessageBox(title, content, self.window())
 
