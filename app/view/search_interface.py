@@ -1030,8 +1030,12 @@ class SearchInterface(SmoothScrollArea):
             self.gameLoadingTask = None
 
         # 先加载两页，让用户看着
-        games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
-        games = await parseGamesDataConcurrently(games['games'])
+        try:
+            games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
+        except SummonerGamesNotFound:
+            games = []
+        else:
+            games = await parseGamesDataConcurrently(games['games'])
 
         if len(games) == 0:
             self.gamesView.gamesTab.nextButton.setVisible(False)
@@ -1089,7 +1093,12 @@ class SearchInterface(SmoothScrollArea):
         begIdx = 20
         endIdx = 29
 
-        while True:
+        # 若之前正在查, 先等task被release掉
+        while self.gameLoadingTask and not self.gameLoadingTask.done():
+            await asyncio.sleep(.2)
+
+        # 连续查多个人时, 将前面正在查的task给release掉
+        while self.puuid == puuid:
             # 为加载战绩详情让行
             while (
                 (self.detailViewLoadTask and not self.detailViewLoadTask.done())
@@ -1101,8 +1110,10 @@ class SearchInterface(SmoothScrollArea):
             try:
                 games = await connector.getSummonerGamesByPuuidSlowly(
                     puuid, begIdx, endIdx)
-            except:
-                # TODO 这里可以弹个窗
+            except SummonerGamesNotFound:
+                # TODO 这里可以弹个窗  -- By Zzaphkiel
+                # NOTE 触发 SummonerGamesNotFound 时, 异常信息会通过 connector 下发到 main_window 的 __onShowLcuConnectError
+                #  理论上会有弹框提示  -- By Hpero4
                 return
 
             # 1000 局搜完了，或者正好上一次就是最后
@@ -1173,6 +1184,8 @@ class SearchInterface(SmoothScrollArea):
 
         self.gamesView.setLoadingPageEnable(True)
 
+        # FIXME
+        #  需要全部加载完才会展示筛选
         await self.gameLoadingTask
 
         enable = tabs.queueIdMap.get(tabs.queueId) != None
