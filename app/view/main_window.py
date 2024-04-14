@@ -32,7 +32,7 @@ from ..common.signals import signalBus
 from ..components.message_box import (UpdateMessageBox, NoticeMessageBox,
                                       WaitingForLolMessageBox, ExceptionMessageBox)
 from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
-                              SummonerNotFound, SummonerNotInGame)
+                              SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
@@ -86,6 +86,9 @@ class MainWindow(FluentWindow):
         self.isGaming = False
         self.isTrayExit = False
         self.tasklistEnabled = True
+
+        self.lastTipsTime = time.time()
+        self.lastTipsType = None
 
         self.__initInterface()
         self.__initNavigation()
@@ -236,7 +239,14 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(str, BaseException)
     async def __onShowLcuConnectError(self, api, obj):
-        if type(obj) is SummonerGamesNotFound:
+        # 同类错误限制弹出频率(1.5秒每次)
+        if time.time() - self.lastTipsTime < 1.5 and self.lastTipsType is type(obj):
+            return
+        else:
+            self.lastTipsTime = time.time()
+            self.lastTipsType = type(obj)
+
+        if type(obj) in [SummonerGamesNotFound, SummonerRankInfoNotFound]:
             msg = self.tr(
                 "The server returned abnormal content, which may be under maintenance.")
         elif type(obj) is RetryMaximumAttempts:
@@ -431,6 +441,7 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(int)
     async def __onLolClientStarted(self, pid):
+        logger.info(f"League of Legends client started: {pid}", TAG)
         res = await self.__startConnector(pid)
         if not res:
             return
@@ -501,6 +512,7 @@ class MainWindow(FluentWindow):
 
     @asyncSlot(int)
     async def __onLolClientChanged(self, pid):
+        logger.critical(f"League of Legends client changed: {pid}", TAG)
         await self.__onLolClientEnded()
         self.processListener.runningPid = pid
         await self.__onLolClientStarted(pid)
@@ -893,13 +905,19 @@ class MainWindow(FluentWindow):
         title = self.tr('Exception occurred 😥')
         content = "".join(tracebackFormat)
 
+        if ty in [ConnectionRefusedError, ClientConnectorError]:
+            return
+
         logger.error("connector call_stack -------------- ↓", "Crash")
         for call in connector.call_stack:
             logger.error(call, "Crash")
         logger.error("connector call_stack -------------- ↑", "Crash")
 
-        if ty in [ConnectionRefusedError, ClientConnectorError]:
-            return
+        logger.error(str(self.searchInterface), "Crash")
+        logger.error(str(self.gameInfoInterface), "Crash")
+        logger.error(str(self.careerInterface), "Crash")
+        logger.error(str(self.auxiliaryFuncInterface), "Crash")
+        logger.error(str(self.settingInterface), "Crash")
 
         w = ExceptionMessageBox(title, content, self.window())
 

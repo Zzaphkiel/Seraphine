@@ -20,9 +20,10 @@ from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
+from ..components.SeraphineInterface import SeraphineInterface
 
 
-class GameInfoInterface(SmoothScrollArea):
+class GameInfoInterface(SeraphineInterface):
 
     def __init__(self, parent=None):
         super().__init__(parent)

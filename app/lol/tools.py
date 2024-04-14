@@ -10,6 +10,7 @@ import asyncio
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QApplication
 
+from .exceptions import SummonerRankInfoNotFound
 from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector, connector
 
@@ -105,17 +106,15 @@ async def getRecentTeammates(games, puuid):
     return ret
 
 
-async def parseSummonerData(summoner):
+async def parseSummonerData(summoner, rankTask, gameTask):
     iconId = summoner['profileIconId']
     icon = await connector.getProfileIcon(iconId)
     level = summoner['summonerLevel']
     xpSinceLastLevel = summoner['xpSinceLastLevel']
     xpUntilNextLevel = summoner['xpUntilNextLevel']
-    rankInfo = await connector.getRankedStatsByPuuid(summoner['puuid'])
 
     try:
-        gamesInfo = await connector.getSummonerGamesByPuuid(
-            summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1)
+        gamesInfo = await gameTask
     except:
         champions = []
         games = {}
@@ -144,6 +143,11 @@ async def parseSummonerData(summoner):
             games["games"].append(info)
 
         champions = getRecentChampions(games['games'])
+
+    try:
+        rankInfo = await rankTask
+    except SummonerRankInfoNotFound:
+        rankInfo = {}
 
     return {
         'name': summoner.get("gameName") or summoner['displayName'],
@@ -380,14 +384,16 @@ async def parseGameDetailData(puuid, game):
 
                 getRankInfo = cfg.get(cfg.showTierInGameInfo)
 
-                tier, division, lp, rankIcon = None, None, None, None
+                tier = division = lp = rankIcon = ""
                 if getRankInfo:
-                    rank = await connector.getRankedStatsByPuuid(
-                        summonerPuuid)
-                    rank = rank.get('queueMap')
-
                     try:
-                        if queueId != 1700 and rank:
+                        rank = await connector.getRankedStatsByPuuid(
+                            summonerPuuid)
+                    except SummonerRankInfoNotFound:
+                        ...
+                    else:
+                        rank = rank['queueMap']
+                        if queueId != 1700:
                             rankInfo = rank[
                                 'RANKED_FLEX_SR'] if queueId == 440 else rank['RANKED_SOLO_5x5']
 
@@ -406,8 +412,6 @@ async def parseGameDetailData(puuid, game):
                         else:
                             rankInfo = rank["CHERRY"]
                             lp = rankInfo['ratedRating']
-                    except KeyError:
-                        ...
 
                 item = {
                     'summonerName': summonerName,
@@ -548,32 +552,48 @@ def getRecentChampions(games):
 
 
 def parseRankInfo(info):
-    soloRankInfo = info["queueMap"]["RANKED_SOLO_5x5"]
-    flexRankInfo = info["queueMap"]["RANKED_FLEX_SR"]
+    """
+    解析 getRankedStatsByPuuid 的数据;
+    /lol-ranked/v1/ranked-stats/{puuid}
 
-    soloTier = soloRankInfo["tier"]
-    soloDivision = soloRankInfo["division"]
+    :param info: 接口返回值, 允许为空 (接口异常时抛出SummonerRankInfoNotFound, 需要捕获置空)
 
-    if soloTier == "":
-        soloIcon = "app/resource/images/UNRANKED.svg"
-        soloTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
-    else:
-        soloIcon = f"app/resource/images/{soloTier}.svg"
-        soloTier = translateTier(soloTier, True)
-    if soloDivision == "NA":
-        soloDivision = ""
+    """
+    soloIcon = flexIcon = "app/resource/images/UNRANKED.svg"
+    # FIXME 中英以外的语言? -- By Hpero4
+    soloTier = flexTier = "Unknown" if cfg.language.value == Language.ENGLISH else "无数据"
+    soloDivision = flexDivision = ""
+    soloRankInfo = flexRankInfo = {"leaguePoints": ""}
 
-    flexTier = flexRankInfo["tier"]
-    flexDivision = flexRankInfo["division"]
+    if info:
+        soloRankInfo = info["queueMap"]["RANKED_SOLO_5x5"]
+        flexRankInfo = info["queueMap"]["RANKED_FLEX_SR"]
 
-    if flexTier == "":
-        flexIcon = "app/resource/images/UNRANKED.svg"
-        flexTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
-    else:
-        flexIcon = f"app/resource/images/{flexTier}.svg"
-        flexTier = translateTier(flexTier, True)
-    if flexDivision == "NA":
-        flexDivision = ""
+        soloTier = soloRankInfo["tier"]
+        soloDivision = soloRankInfo["division"]
+
+        if soloTier == "":
+            soloIcon = "app/resource/images/UNRANKED.svg"
+            # FIXME 中英以外的语言? -- By Hpero4
+            soloTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+        else:
+            soloIcon = f"app/resource/images/{soloTier}.svg"
+            soloTier = translateTier(soloTier, True)
+        if soloDivision == "NA":
+            soloDivision = ""
+
+        flexTier = flexRankInfo["tier"]
+        flexDivision = flexRankInfo["division"]
+
+        if flexTier == "":
+            flexIcon = "app/resource/images/UNRANKED.svg"
+            # FIXME 中英以外的语言? -- By Hpero4
+            flexTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+        else:
+            flexIcon = f"app/resource/images/{flexTier}.svg"
+            flexTier = translateTier(flexTier, True)
+        if flexDivision == "NA":
+            flexDivision = ""
 
     return {
         "solo": {
@@ -871,7 +891,11 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     icon = await connector.getChampionIcon(championId)
 
     puuid = summoner["puuid"]
-    origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+    try:
+        origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+    except SummonerRankInfoNotFound:
+        origRankInfo = None
+
     rankInfo = parseRankInfo(origRankInfo)
 
     try:
