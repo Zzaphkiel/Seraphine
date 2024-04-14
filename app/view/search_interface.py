@@ -1,5 +1,6 @@
 import threading
 import time
+from asyncio import CancelledError
 
 import pyperclip
 from qasync import asyncSlot
@@ -24,6 +25,7 @@ from app.components.animation_frame import ColorAnimationFrame, CardWidget
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
+from ..components.SeraphineInterface import SeraphineInterface
 
 
 class GamesTab(QFrame):
@@ -149,7 +151,7 @@ class GamesTab(QFrame):
         self.prevButton.setEnabled(prevEnable)
 
         nextEnable = len(
-            self.queueIdMap[self.queueId]) > self.currentPageNum * 10
+            self.queueIdMap.get(self.queueId, [])) > self.currentPageNum * 10
         self.nextButton.setEnabled(nextEnable)
 
     def prepareNextPage(self):
@@ -290,6 +292,7 @@ class GameDetailView(QFrame):
 
         # self.vBoxLayout.addSpacerItem(
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
     def setLoadingPageEnabled(self, enable: bool):
         if enable:
             index = 0
@@ -909,7 +912,7 @@ class GameTab(ColorAnimationFrame):
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
 
 
-class SearchInterface(SmoothScrollArea):
+class SearchInterface(SeraphineInterface):
     summonerPuuidGetted = pyqtSignal(str)
     gamesNotFound = pyqtSignal()
 
@@ -927,6 +930,9 @@ class SearchInterface(SmoothScrollArea):
 
         self.gamesView = GamesView()
         self.currentSummonerName = None
+
+        self.detailViewLoadTask = None
+        self.loadingGameId = 0
 
         self.__initWidget()
         self.__initLayout()
@@ -1020,13 +1026,17 @@ class SearchInterface(SmoothScrollArea):
         self.__addSearchHistroy(name)
 
         # 停止已有的加载任务
-        if self.gameLoadingTask != None:
+        if self.gameLoadingTask:
             self.gameLoadingTask.cancel()
             self.gameLoadingTask = None
 
         # 先加载两页，让用户看着
-        games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
-        games = await parseGamesDataConcurrently(games['games'])
+        try:
+            games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
+        except SummonerGamesNotFound:
+            games = []
+        else:
+            games = await parseGamesDataConcurrently(games['games'])
 
         if len(games) == 0:
             self.gamesView.gamesTab.nextButton.setVisible(False)
@@ -1082,14 +1092,29 @@ class SearchInterface(SmoothScrollArea):
 
     async def __loadGames(self, puuid):
         begIdx = 20
-        endIdx = 59
+        endIdx = 29
 
-        while True:
+        # 若之前正在查, 先等task被release掉
+        while self.gameLoadingTask and not self.gameLoadingTask.done():
+            await asyncio.sleep(.2)
+
+        # 连续查多个人时, 将前面正在查的task给release掉
+        while self.puuid == puuid:
+            # 为加载战绩详情让行
+            while (
+                (self.detailViewLoadTask and not self.detailViewLoadTask.done())
+                or
+                (self.window().careerInterface.loadGamesTask and not self.window().careerInterface.loadGamesTask.done())
+            ):
+                await asyncio.sleep(.2)
+
             try:
                 games = await connector.getSummonerGamesByPuuidSlowly(
                     puuid, begIdx, endIdx)
-            except:
-                # TODO 这里可以弹个窗
+            except SummonerGamesNotFound:
+                # TODO 这里可以弹个窗  -- By Zzaphkiel
+                # NOTE 触发 SummonerGamesNotFound 时, 异常信息会通过 connector 下发到 main_window 的 __onShowLcuConnectError
+                #  理论上会有弹框提示  -- By Hpero4
                 return
 
             # 1000 局搜完了，或者正好上一次就是最后
@@ -1105,12 +1130,12 @@ class SearchInterface(SmoothScrollArea):
             # 而现在，由于新的两页对局数据加载好了，可以绘制上去了，要让 button 变得可用
             self.gamesView.gamesTab.resetButtonEnabled()
 
-            # 如果长度小于 40，也说明搜完了已经
-            if len(games) < 40:
+            # 如果长度小于 10，也说明搜完了已经
+            if len(games) < 10:
                 return
 
             begIdx = endIdx + 1
-            endIdx = begIdx + 39
+            endIdx = begIdx + 9
 
             # 睡不睡都行
             await asyncio.sleep(.1)
@@ -1123,6 +1148,8 @@ class SearchInterface(SmoothScrollArea):
         if tab is cur:
             return
 
+        self.gamesView.gameDetailView.clear()
+
         tab.setProperty("selected", True)
         tab.style().polish(tab)
 
@@ -1131,6 +1158,7 @@ class SearchInterface(SmoothScrollArea):
             cur.style().polish(cur)
 
         tabs.currentTabSelected = tab
+        self.loadingGameId = tab.gameId
         await self.updateGameDetailView(tab.gameId)
 
     async def updateGameDetailView(self, gameId):
@@ -1139,6 +1167,8 @@ class SearchInterface(SmoothScrollArea):
 
         game = await connector.getGameDetailByGameId(gameId)
         game = await parseGameDetailData(self.puuid, game)
+        if gameId != self.loadingGameId:
+            return
         self.gamesView.gameDetailView.updateGame(game)
 
         if cfg.get(cfg.showTierInGameInfo):
@@ -1155,6 +1185,8 @@ class SearchInterface(SmoothScrollArea):
 
         self.gamesView.setLoadingPageEnable(True)
 
+        # FIXME
+        #  需要全部加载完才会展示筛选
         await self.gameLoadingTask
 
         enable = tabs.queueIdMap.get(tabs.queueId) != None

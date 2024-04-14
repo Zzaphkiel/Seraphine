@@ -23,6 +23,7 @@ from app.common.config import cfg
 from app.lol.connector import connector
 from app.lol.tools import (parseGames, parseSummonerData,
                            getRecentTeammates, parseDetailRankInfo)
+from ..components.SeraphineInterface import SeraphineInterface
 
 
 class NameLabel(QLabel):
@@ -35,7 +36,7 @@ class TagLineLabel(QLabel):
         return super().text().replace(" ", '')
 
 
-class CareerInterface(SmoothScrollArea):
+class CareerInterface(SeraphineInterface):
     gameInfoBarClicked = pyqtSignal(str)
     iconLevelExpChanged = pyqtSignal(dict)
 
@@ -87,6 +88,8 @@ class CareerInterface(SmoothScrollArea):
         self.progressRing = IndeterminateProgressRing()
 
         self.games = []
+
+        self.loadGamesTask = None
 
         self.__initWidget()
         self.__initLayout()
@@ -367,8 +370,10 @@ class CareerInterface(SmoothScrollArea):
 
         if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
+        self.loadGamesTask = asyncio.create_task(connector.getSummonerGamesByPuuid(summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1))
+        rankTask = asyncio.create_task(connector.getRankedStatsByPuuid(summoner['puuid']))
 
-        info = await parseSummonerData(summoner)
+        info = await parseSummonerData(summoner, rankTask, self.loadGamesTask)
         await self.repaintInterface(info)
 
     async def repaintInterface(self, info):

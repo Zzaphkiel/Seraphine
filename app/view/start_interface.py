@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
 
 from app.common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
                                        IndeterminateProgressBar)
+from app.components.SeraphineInterface import SeraphineInterface
 
 from app.lol.connector import connector
 from app.common.config import cfg
@@ -19,7 +20,7 @@ from app.common.signals import signalBus
 from app.components.message_box import ChangeClientMessageBox
 
 
-class StartInterface(SmoothScrollArea):
+class StartInterface(SeraphineInterface):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 

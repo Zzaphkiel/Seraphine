@@ -16,11 +16,12 @@ from ..common.icons import Icon
 from ..common.config import (
     cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
 from ..common.style_sheet import StyleSheet
+from ..components.SeraphineInterface import SeraphineInterface
 from ..components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
                                         LooseSwitchSettingCard, ProxySettingCard)
 
 
-class SettingInterface(SmoothScrollArea):
+class SettingInterface(SeraphineInterface):
     """ Setting interface """
 
     def __init__(self, parent=None):

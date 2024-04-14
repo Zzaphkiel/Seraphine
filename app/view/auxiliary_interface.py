@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit
 from qasync import asyncSlot
 
+from ..components.SeraphineInterface import SeraphineInterface
 from ..lol.tools import fixLeagueClientWindow
 from ..common.icons import Icon
 from ..common.config import cfg
@@ -19,7 +20,7 @@ from ..lol.connector import connector
 from ..lol.exceptions import *
 
 
-class AuxiliaryInterface(SmoothScrollArea):
+class AuxiliaryInterface(SeraphineInterface):
 
     def __init__(self, parent=None):
         super().__init__(parent)

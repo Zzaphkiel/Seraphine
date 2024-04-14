@@ -32,6 +32,7 @@ class PastRequest:
         self.timestamp = time.time()
 
     def __str__(self):
+        # 如果是None的成员, 不会被打印; 没打印response就是没有响应;
         attrs = [f"{k}={v!r}" for k, v in self.__dict__.items()
                  if v is not None]
         return f"PastRequest(\n  {', '.join(attrs)}\n)"
@@ -198,6 +199,7 @@ class LolClientConnector(QObject):
 
     def __init__(self):
         super().__init__()
+        self.semaphore = None
         self.sess = None
         self.port = None
         self.token = None
@@ -504,7 +506,12 @@ class LolClientConnector(QObject):
     async def getRankedStatsByPuuid(self, puuid):
         res = await self.__get(f"/lol-ranked/v1/ranked-stats/{puuid}")
 
-        return await res.json()
+        res = await res.json()
+
+        if "errorCode" in res:
+            raise SummonerRankInfoNotFound()
+
+        return res
 
     @retry()
     async def setProfileBackground(self, skinId):
