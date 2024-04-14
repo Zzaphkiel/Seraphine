@@ -1095,7 +1095,7 @@ class SearchInterface(SeraphineInterface):
         endIdx = 29
 
         # 若之前正在查, 先等task被release掉
-        while self.gameLoadingTask and not self.gameLoadingTask.done():
+        while self.gameLoadingTask and not self.gameLoadingTask.done() and self.puuid != puuid:
             await asyncio.sleep(.2)
 
         # 连续查多个人时, 将前面正在查的task给release掉
