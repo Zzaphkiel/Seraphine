@@ -32,7 +32,8 @@ class PastRequest:
         self.timestamp = time.time()
 
     def __str__(self):
-        attrs = [f"{k}={v!r}" for k, v in self.__dict__.items() if v is not None]
+        attrs = [f"{k}={v!r}" for k, v in self.__dict__.items()
+                 if v is not None]
         return f"PastRequest(\n  {', '.join(attrs)}\n)"
 
 
@@ -65,7 +66,8 @@ def retry(count=5, retry_sep=0):
                 tmp_args = args[1:]
 
             # 构建参数字典，将参数名与对应的实参值一一对应
-            params_dict = {param: arg for param, arg in zip(param_names, tmp_args)}
+            params_dict = {param: arg for param,
+                           arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
@@ -825,6 +827,11 @@ class LolClientConnector(QObject):
 
     async def getReplayPath(self):
         res = await self.__get("/lol-replays/v1/rofls/path")
+
+        return await res.json()
+
+    async def getSGPtoken(self):
+        res = await self.__get("/entitlements/v1/token")
 
         return await res.json()
 
