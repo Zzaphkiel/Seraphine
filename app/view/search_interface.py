@@ -1,6 +1,7 @@
 import threading
 import time
-from asyncio import CancelledError
+from asyncio import CancelledError, LifoQueue
+from collections import OrderedDict
 
 import pyperclip
 from qasync import asyncSlot
@@ -61,10 +62,10 @@ class GamesTab(QFrame):
         self.currentTabSelected = None
 
         # 所有的对局记录
-        self.games = []
+        self.games = LifoQueue()  # LifoQueue 保证线程安全 -- By Hpero4
 
         # queueId 到对应 self.games 下标数组的映射
-        self.queueIdMap = {-1: []}
+        self.queueIdMap = OrderedDict({-1: []})  # OrderedDict 保证线程安全 -- By Hpero4
 
         self.__initWidget()
         self.__initLayout()
@@ -1063,6 +1064,9 @@ class SearchInterface(SeraphineInterface):
         tabs = self.gamesView.gamesTab
 
         # 遍历一下目前已经画好的第一页有没有这个 tab，有的话就直接画上
+        # FIXME -- By Hpero4
+        #  如果在绘制前Tabs的StackWidget改变, 会导致画错框甚至找不到绘制对象 AttributeError
+        #  必须保证绘制时界面没有被改变; (目前暂时是将耗时操作移到画框后面)
         layout = tabs.stackWidget.widget(1).layout()
         for i in range(layout.count()):
             item = layout.itemAt(i)
@@ -1087,6 +1091,7 @@ class SearchInterface(SeraphineInterface):
     async def onSearchButtonClicked(self):
         if not await self.searchAndShowFirstPage():
             return
+        self.filterComboBox.setCurrentIndex(0)  # 将筛选条件回调至"全部" -- By Hpero4
 
         self.gamesView.gamesTab.clickFirstTab()
 
@@ -1185,11 +1190,10 @@ class SearchInterface(SeraphineInterface):
 
         self.gamesView.setLoadingPageEnable(True)
 
-        # FIXME
-        #  需要全部加载完才会展示筛选
-        await self.gameLoadingTask
+        while len(self.gamesView.gamesTab.queueIdMap.get(tabs.queueId, [])) < 10:
+            await asyncio.sleep(.2)
 
-        enable = tabs.queueIdMap.get(tabs.queueId) != None
+        enable = tabs.queueIdMap.get(tabs.queueId) is not None
         tabs.prevButton.setVisible(enable)
         tabs.nextButton.setVisible(enable)
         tabs.nextButton.setVisible(enable)
