@@ -857,7 +857,7 @@ class MainWindow(FluentWindow):
                 return
 
             interface = self.gameInfoInterface
-            if order == interface.allyOrder:
+            if order == interface.allyOrder or len(order) != len(interface.allyOrder):
                 return
 
             interface.summonersView.ally.updateSummonersOrder(order)
