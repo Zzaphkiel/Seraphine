@@ -519,10 +519,12 @@ class MainWindow(FluentWindow):
 
     @asyncSlot()
     async def __onLolClientEnded(self):
-        if self.searchInterface.gameLoadingTask:
-            self.searchInterface.gameLoadingTask.cancel()
-
         logger.critical("League of Legends client ended", TAG)
+
+        if self.searchInterface.gameLoadingTask:
+            self.searchInterface.puuid = 0
+            self.searchInterface.gameLoadingTask = None
+
         await connector.close()
 
         self.isClientProcessRunning = False

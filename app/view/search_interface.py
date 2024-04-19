@@ -26,7 +26,7 @@ from app.components.animation_frame import ColorAnimationFrame, CardWidget
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
-from ..components.SeraphineInterface import SeraphineInterface
+from ..components.seraphine_interface import SeraphineInterface
 
 
 class GamesTab(QFrame):
@@ -920,6 +920,7 @@ class SearchInterface(SeraphineInterface):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.puuid = 0
         self.gameLoadingTask: asyncio.Task = None
 
         self.vBoxLayout = QVBoxLayout(self)
@@ -1025,11 +1026,6 @@ class SearchInterface(SeraphineInterface):
         self.gamesView.gamesTab.clear()
 
         self.__addSearchHistroy(name)
-
-        # 停止已有的加载任务
-        if self.gameLoadingTask:
-            self.gameLoadingTask.cancel()
-            self.gameLoadingTask = None
 
         # 先加载两页，让用户看着
         try:
