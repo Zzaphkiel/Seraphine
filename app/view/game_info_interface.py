@@ -75,7 +75,7 @@ class GameInfoInterface(SeraphineInterface):
 
         order = parseSummonerOrder(team)
 
-        if order != self.allyOrder:
+        if order != self.allyOrder and len(order) == len(self.allyOrder):
             self.summonersView.ally.updateSummonersOrder(order)
             self.allyGamesView.updateOrder(order)
             self.allyOrder = order
