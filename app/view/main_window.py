@@ -519,10 +519,12 @@ class MainWindow(FluentWindow):
 
     @asyncSlot()
     async def __onLolClientEnded(self):
-        if self.searchInterface.gameLoadingTask:
-            self.searchInterface.gameLoadingTask.cancel()
-
         logger.critical("League of Legends client ended", TAG)
+
+        if self.searchInterface.gameLoadingTask:
+            self.searchInterface.puuid = 0
+            self.searchInterface.gameLoadingTask = None
+
         await connector.close()
 
         self.isClientProcessRunning = False
@@ -883,13 +885,13 @@ class MainWindow(FluentWindow):
     async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
-        self.checkAndSwitchTo(self.searchInterface)
         self.searchInterface.filterComboBox.setCurrentIndex(0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
 
         await self.searchInterface.searchAndShowFirstPage()
+        self.checkAndSwitchTo(self.searchInterface)  # 先加载完再切换, 避免加载过程中换搜索目标导致puuid出错 -- By Hpero4
         self.searchInterface.loadingGameId = gameId
         self.searchInterface.waitingForDrawSelect(gameId)  # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
-        await self.searchInterface.updateGameDetailView(gameId)
+        await self.searchInterface.updateGameDetailView(gameId, self.careerInterface.puuid)
 
     @asyncSlot()
     async def __refreshCareerInterface(self):

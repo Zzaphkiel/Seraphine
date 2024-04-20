@@ -20,7 +20,7 @@ from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
-from ..components.SeraphineInterface import SeraphineInterface
+from ..components.seraphine_interface import SeraphineInterface
 
 
 class GameInfoInterface(SeraphineInterface):

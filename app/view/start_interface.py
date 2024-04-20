@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
 
 from app.common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
                                        IndeterminateProgressBar)
-from app.components.SeraphineInterface import SeraphineInterface
+from app.components.seraphine_interface import SeraphineInterface
 
 from app.lol.connector import connector
 from app.common.config import cfg

@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit
 from qasync import asyncSlot
 
-from ..components.SeraphineInterface import SeraphineInterface
+from ..components.seraphine_interface import SeraphineInterface
 from ..lol.tools import fixLeagueClientWindow
 from ..common.icons import Icon
 from ..common.config import cfg
