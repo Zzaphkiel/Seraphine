@@ -1096,7 +1096,7 @@ class SearchInterface(SeraphineInterface):
         endIdx = 29
 
         # 若之前正在查, 先等task被release掉
-        while self.gameLoadingTask and not self.gameLoadingTask.done() and self.puuid != puuid:
+        while self.gameLoadingTask and not self.gameLoadingTask.done():
             await asyncio.sleep(.2)
 
         # 连续查多个人时, 将前面正在查的task给release掉
@@ -1119,7 +1119,8 @@ class SearchInterface(SeraphineInterface):
                 return
 
             # 1000 局搜完了，或者正好上一次就是最后
-            if games['gameCount'] == 0:
+            # 在切换了puuid时, 就不要再把数据刷到Games上了 -- By Hpero4
+            if games['gameCount'] == 0 or self.puuid != puuid:
                 return
 
             # 处理数据，交给 gamesTab，更新其 games 成员以及 queueIdMap
@@ -1160,17 +1161,18 @@ class SearchInterface(SeraphineInterface):
 
         tabs.currentTabSelected = tab
         self.loadingGameId = tab.gameId
-        await self.updateGameDetailView(tab.gameId)
+        await self.updateGameDetailView(tab.gameId, self.puuid)
 
-    async def updateGameDetailView(self, gameId):
+    async def updateGameDetailView(self, gameId, puuid):
         if cfg.get(cfg.showTierInGameInfo):
             self.gamesView.gameDetailView.setLoadingPageEnabled(True)
 
         game = await connector.getGameDetailByGameId(gameId)
-        game = await parseGameDetailData(self.puuid, game)
-        if gameId != self.loadingGameId:
-            return
-        self.gamesView.gameDetailView.updateGame(game)
+
+        # 加载GameDetail的过程中, 切换了搜索对象(self.puuid变更), 将后续任务pass -- By Hpero4
+        if puuid == self.puuid:
+            game = await parseGameDetailData(puuid, game)
+            self.gamesView.gameDetailView.updateGame(game)
 
         if cfg.get(cfg.showTierInGameInfo):
             self.gamesView.gameDetailView.setLoadingPageEnabled(False)
