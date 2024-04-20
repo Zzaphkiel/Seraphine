@@ -1092,7 +1092,7 @@ async def autoBan(data, selection):
 
                 isFriendly = cfg.get(cfg.pretentBan)
                 if isFriendly:
-                    myTeam = await connector.getChampSelectSession().get("myTeam")
+                    myTeam = (await connector.getChampSelectSession()).get("myTeam")
                     if not myTeam:
                         return
                     for player in myTeam:
