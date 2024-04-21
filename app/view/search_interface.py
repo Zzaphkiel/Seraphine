@@ -1,6 +1,7 @@
 import threading
 import time
-from asyncio import CancelledError
+from asyncio import CancelledError, LifoQueue
+from collections import OrderedDict
 
 import pyperclip
 from qasync import asyncSlot
@@ -25,7 +26,7 @@ from app.components.animation_frame import ColorAnimationFrame, CardWidget
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
-from ..components.SeraphineInterface import SeraphineInterface
+from ..components.seraphine_interface import SeraphineInterface
 
 
 class GamesTab(QFrame):
@@ -61,10 +62,10 @@ class GamesTab(QFrame):
         self.currentTabSelected = None
 
         # 所有的对局记录
-        self.games = []
+        self.games = LifoQueue()  # LifoQueue 保证线程安全 -- By Hpero4
 
         # queueId 到对应 self.games 下标数组的映射
-        self.queueIdMap = {-1: []}
+        self.queueIdMap = OrderedDict({-1: []})  # OrderedDict 保证线程安全 -- By Hpero4
 
         self.__initWidget()
         self.__initLayout()
@@ -919,6 +920,7 @@ class SearchInterface(SeraphineInterface):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.puuid = 0
         self.gameLoadingTask: asyncio.Task = None
 
         self.vBoxLayout = QVBoxLayout(self)
@@ -1025,11 +1027,6 @@ class SearchInterface(SeraphineInterface):
 
         self.__addSearchHistroy(name)
 
-        # 停止已有的加载任务
-        if self.gameLoadingTask:
-            self.gameLoadingTask.cancel()
-            self.gameLoadingTask = None
-
         # 先加载两页，让用户看着
         try:
             games = await connector.getSummonerGamesByPuuid(self.puuid, 0, 19)
@@ -1063,6 +1060,9 @@ class SearchInterface(SeraphineInterface):
         tabs = self.gamesView.gamesTab
 
         # 遍历一下目前已经画好的第一页有没有这个 tab，有的话就直接画上
+        # FIXME -- By Hpero4
+        #  如果在绘制前Tabs的StackWidget改变, 会导致画错框甚至找不到绘制对象 AttributeError
+        #  必须保证绘制时界面没有被改变; (目前暂时是将耗时操作移到画框后面)
         layout = tabs.stackWidget.widget(1).layout()
         for i in range(layout.count()):
             item = layout.itemAt(i)
@@ -1087,6 +1087,7 @@ class SearchInterface(SeraphineInterface):
     async def onSearchButtonClicked(self):
         if not await self.searchAndShowFirstPage():
             return
+        self.filterComboBox.setCurrentIndex(0)  # 将筛选条件回调至"全部" -- By Hpero4
 
         self.gamesView.gamesTab.clickFirstTab()
 
@@ -1095,7 +1096,7 @@ class SearchInterface(SeraphineInterface):
         endIdx = 29
 
         # 若之前正在查, 先等task被release掉
-        while self.gameLoadingTask and not self.gameLoadingTask.done() and self.puuid != puuid:
+        while self.gameLoadingTask and not self.gameLoadingTask.done():
             await asyncio.sleep(.2)
 
         # 连续查多个人时, 将前面正在查的task给release掉
@@ -1118,7 +1119,8 @@ class SearchInterface(SeraphineInterface):
                 return
 
             # 1000 局搜完了，或者正好上一次就是最后
-            if games['gameCount'] == 0:
+            # 在切换了puuid时, 就不要再把数据刷到Games上了 -- By Hpero4
+            if games['gameCount'] == 0 or self.puuid != puuid:
                 return
 
             # 处理数据，交给 gamesTab，更新其 games 成员以及 queueIdMap
@@ -1159,17 +1161,18 @@ class SearchInterface(SeraphineInterface):
 
         tabs.currentTabSelected = tab
         self.loadingGameId = tab.gameId
-        await self.updateGameDetailView(tab.gameId)
+        await self.updateGameDetailView(tab.gameId, self.puuid)
 
-    async def updateGameDetailView(self, gameId):
+    async def updateGameDetailView(self, gameId, puuid):
         if cfg.get(cfg.showTierInGameInfo):
             self.gamesView.gameDetailView.setLoadingPageEnabled(True)
 
         game = await connector.getGameDetailByGameId(gameId)
-        game = await parseGameDetailData(self.puuid, game)
-        if gameId != self.loadingGameId:
-            return
-        self.gamesView.gameDetailView.updateGame(game)
+
+        # 加载GameDetail的过程中, 切换了搜索对象(self.puuid变更), 将后续任务pass -- By Hpero4
+        if puuid == self.puuid:
+            game = await parseGameDetailData(puuid, game)
+            self.gamesView.gameDetailView.updateGame(game)
 
         if cfg.get(cfg.showTierInGameInfo):
             self.gamesView.gameDetailView.setLoadingPageEnabled(False)
@@ -1185,11 +1188,10 @@ class SearchInterface(SeraphineInterface):
 
         self.gamesView.setLoadingPageEnable(True)
 
-        # FIXME
-        #  需要全部加载完才会展示筛选
-        await self.gameLoadingTask
+        while len(self.gamesView.gamesTab.queueIdMap.get(tabs.queueId, [])) < 10:
+            await asyncio.sleep(.2)
 
-        enable = tabs.queueIdMap.get(tabs.queueId) != None
+        enable = tabs.queueIdMap.get(tabs.queueId) is not None
         tabs.prevButton.setVisible(enable)
         tabs.nextButton.setVisible(enable)
         tabs.nextButton.setVisible(enable)

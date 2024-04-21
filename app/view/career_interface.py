@@ -23,7 +23,7 @@ from app.common.config import cfg
 from app.lol.connector import connector
 from app.lol.tools import (parseGames, parseSummonerData,
                            getRecentTeammates, parseDetailRankInfo)
-from ..components.SeraphineInterface import SeraphineInterface
+from ..components.seraphine_interface import SeraphineInterface
 
 
 class NameLabel(QLabel):
