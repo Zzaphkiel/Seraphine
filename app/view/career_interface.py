@@ -370,8 +370,11 @@ class CareerInterface(SeraphineInterface):
 
         if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
-        self.loadGamesTask = asyncio.create_task(connector.getSummonerGamesByPuuid(summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1))
-        rankTask = asyncio.create_task(connector.getRankedStatsByPuuid(summoner['puuid']))
+
+        self.loadGamesTask = asyncio.create_task(
+            connector.getSummonerGamesByPuuid(summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1))
+        rankTask = asyncio.create_task(
+            connector.getRankedStatsByPuuid(summoner['puuid']))
 
         info = await parseSummonerData(summoner, rankTask, self.loadGamesTask)
         await self.repaintInterface(info)
@@ -389,6 +392,9 @@ class CareerInterface(SeraphineInterface):
         if len(info['tagLine']):
             self.showTagLine = True
             self.tagLineLabel.setText(f"# {info['tagLine']}")
+        else:
+            self.showTagLine = False
+            self.tagLineLabel.setText("")
 
         levelStr = str(level) if level != -1 else "None"
         self.icon.updateIcon(icon, xpSinceLastLevel,
