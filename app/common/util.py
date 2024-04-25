@@ -140,6 +140,7 @@ def getPortTokenServerByPid(pid):
     cmdline = process.cmdline()
 
     for cmd in cmdline:
+
         p = cmd.find("--app-port=")
         if p != -1:
             port = cmd[11:]

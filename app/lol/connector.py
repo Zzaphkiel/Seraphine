@@ -41,7 +41,7 @@ class PastRequest:
 def needLcu():
     def decorator(func):
         async def wrapper(*args, **kwargs):
-            if connector.sess is None:
+            if connector.lcuSess is None:
                 raise ReferenceError
 
             return await func(*args, **kwargs)
@@ -200,7 +200,8 @@ class LolClientConnector(QObject):
     def __init__(self):
         super().__init__()
         self.semaphore = None
-        self.sess = None
+        self.lcuSess = None
+        self.sgpSess = None
         self.port = None
         self.token = None
         self.server = None
@@ -214,9 +215,12 @@ class LolClientConnector(QObject):
     async def start(self, pid):
         self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
-        self.sess = aiohttp.ClientSession(
+        self.lcuSess = aiohttp.ClientSession(
             base_url=f'https://127.0.0.1:{self.port}',
             auth=aiohttp.BasicAuth('riot', self.token)
+        )
+        self.sgpSess = aiohttp.ClientSession(
+            base_url=f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
         )
 
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
@@ -260,7 +264,7 @@ class LolClientConnector(QObject):
         except:
             pass
 
-        await self.sess.close()
+        await self.lcuSess.close()
 
         self.__init__()
 
@@ -837,27 +841,45 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
+    @retry()
     async def getSGPtoken(self):
         res = await self.__get("/entitlements/v1/token")
 
         return await res.json()
 
+    async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
+        url = f"/match-history-query/v1/products/lol/player/{puuid}/SUMMARY"
+        params = {
+            'startIndex': begIdx,
+            'count': endIdx - begIdx + 1,
+        }
+
+        res = await self.__sgp__get(url, token, params)
+        return await res.json()
+
     @needLcu()
     async def __get(self, path, params=None):
-        return await self.sess.get(path, params=params, ssl=False)
+        return await self.lcuSess.get(path, params=params, ssl=False)
 
     @needLcu()
     async def __post(self, path, data=None):
         headers = {"Content-type": "application/json"}
-        return await self.sess.post(path, json=data, headers=headers, ssl=False)
+        return await self.lcuSess.post(path, json=data, headers=headers, ssl=False)
 
     @needLcu()
     async def __put(self, path, data=None):
-        return await self.sess.put(path, json=data, ssl=False)
+        return await self.lcuSess.put(path, json=data, ssl=False)
 
     @needLcu()
     async def __patch(self, path, data=None):
-        return await self.sess.patch(path, json=data, ssl=False)
+        return await self.lcuSess.patch(path, json=data, ssl=False)
+
+    async def __sgp__get(self, path, token, params=None):
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+
+        return await self.sgpSess.get(path, params=params, ssl=False, headers=headers)
 
     def getLoginSummonerByPid(self, pid):
         port, token, _ = getPortTokenServerByPid(pid)
