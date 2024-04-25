@@ -265,6 +265,7 @@ class LolClientConnector(QObject):
             pass
 
         await self.lcuSess.close()
+        await self.sgpSess.close()
 
         self.__init__()
 
