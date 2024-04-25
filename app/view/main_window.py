@@ -764,6 +764,9 @@ class MainWindow(FluentWindow):
             await asyncio.sleep(timeDelay)
             status = await connector.getReadyCheckStatus()
 
+            if status.get("errorCode"):
+                return
+
             if not status['playerResponse'] == 'Declined':
                 await connector.acceptMatchMaking()
 
