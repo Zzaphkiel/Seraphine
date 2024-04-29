@@ -65,7 +65,8 @@ class GamesTab(QFrame):
         self.games = LifoQueue()  # LifoQueue 保证线程安全 -- By Hpero4
 
         # queueId 到对应 self.games 下标数组的映射
-        self.queueIdMap = OrderedDict({-1: []})  # OrderedDict 保证线程安全 -- By Hpero4
+        # OrderedDict 保证线程安全 -- By Hpero4
+        self.queueIdMap = OrderedDict({-1: []})
 
         self.__initWidget()
         self.__initLayout()
@@ -1096,16 +1097,19 @@ class SearchInterface(SeraphineInterface):
         endIdx = 29
 
         # 若之前正在查, 先等task被release掉
-        while self.gameLoadingTask and not self.gameLoadingTask.done():
+        while self.gameLoadingTask and not self.gameLoadingTask.done() and puuid != self.puuid:
             await asyncio.sleep(.2)
 
         # 连续查多个人时, 将前面正在查的task给release掉
         while self.puuid == puuid:
+            print(f"{begIdx = }, {endIdx = }")
+
             # 为加载战绩详情让行
             while (
                 (self.detailViewLoadTask and not self.detailViewLoadTask.done())
                 or
-                (self.window().careerInterface.loadGamesTask and not self.window().careerInterface.loadGamesTask.done())
+                (self.window().careerInterface.loadGamesTask and not self.window(
+                ).careerInterface.loadGamesTask.done())
             ):
                 await asyncio.sleep(.2)
 
