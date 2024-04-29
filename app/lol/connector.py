@@ -73,13 +73,13 @@ def retry(count=5, retry_sep=0):
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
 
-            with connector.dq_lock:
+            with connector.dqLock:
                 req_obj = PastRequest(
                     func.__name__,
                     params_dict,
                     kwargs
                 )
-                connector.call_stack.append(req_obj)
+                connector.callStack.append(req_obj)
 
             exce = None
             for _ in range(count):
@@ -106,14 +106,14 @@ def retry(count=5, retry_sep=0):
                     signalBus.lcuApiExceptionRaised.emit(
                         func.__name__, exce)
 
-                with connector.dq_lock:
+                with connector.dqLock:
                     req_obj.response = exce
 
                 logger.exception(f"exit {func.__name__}", exce, TAG)
 
                 raise exce
 
-            with connector.dq_lock:
+            with connector.dqLock:
                 req_obj.response = res
 
             logger.info(f"exit {func.__name__}", TAG)
@@ -205,12 +205,13 @@ class LolClientConnector(QObject):
         self.port = None
         self.token = None
         self.server = None
+        self.inMainLand = False
 
         self.manager = None
         self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
 
-        self.dq_lock = threading.Lock()
-        self.call_stack = deque(maxlen=10)
+        self.dqLock = threading.Lock()
+        self.callStack = deque(maxlen=10)
 
     async def start(self, pid):
         self.pid = pid
@@ -225,6 +226,7 @@ class LolClientConnector(QObject):
 
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
+        self.__initPlatformInfo()
         await self.__initManager()
         self.__initFolder()
         await self.__runListener()
@@ -296,6 +298,12 @@ class LolClientConnector(QObject):
 
         self.manager = JsonManager(
             items, spells, runes, queues, champions, skins)
+
+    def __initPlatformInfo(self):
+        mainLandPlatforms = {'tj100', 'hn1', 'cq100',
+                             'gz100', 'nj100', 'bgp2', 'hn10', 'tj101'}
+
+        self.inMainLand = self.server.lower() in mainLandPlatforms
 
     async def __json_retry_get(self, url, max_retries=5):
         """
@@ -441,11 +449,20 @@ class LolClientConnector(QObject):
         res = await self.__get(f"/lol-summoner/v2/summoners/puuid/{puuid}")
         res = await res.json()
 
-        if "errorCode" in res:
-            if res["httpStatus"] == 400:
-                raise SummonerNotFound()
+        if "errorCode" in res and res["httpStatus"] == 400:
+            raise SummonerNotFound()
 
         return res
+
+    async def getSummonerByPuuidViaSGP(self, token, puuid):
+        """
+        该接口的返回值与 `self.getSummonerByPuuid()` 相比，拿不到召唤师的 `tagLine`
+        即数字编号信息
+        """
+        url = f"/summoner-ledge/v1/regions/{self.server.lower()}/summoners/puuid/{puuid}"
+
+        res = await self.__sgp__get(url, token)
+        return await res.json()
 
     @retry(5, 1)
     async def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
@@ -845,8 +862,9 @@ class LolClientConnector(QObject):
     @retry()
     async def getSGPtoken(self):
         res = await self.__get("/entitlements/v1/token")
+        res = await res.json()
 
-        return await res.json()
+        return res['accessToken']
 
     async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
         url = f"/match-history-query/v1/products/lol/player/{puuid}/SUMMARY"
@@ -857,6 +875,15 @@ class LolClientConnector(QObject):
 
         res = await self.__sgp__get(url, token, params)
         return await res.json()
+
+    async def getRankedStatsByPuuidViaSGP(self, token, puuid):
+        url = f'/leagues-ledge/v2/leagueLadders/puuid/{puuid}'
+        res = await self.__sgp__get(url, token)
+
+        return await res.json()
+
+    def isInMainLand(self):
+        return self.inMainLand
 
     @needLcu()
     async def __get(self, path, params=None):

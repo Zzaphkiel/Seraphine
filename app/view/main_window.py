@@ -37,7 +37,8 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete, autoSwap, autoTrade, autoSelectSkinRandom)
+                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
+                         autoSwap, autoTrade, autoSelectSkinRandom)
 
 import threading
 
@@ -798,12 +799,13 @@ class MainWindow(FluentWindow):
                 self.isChampionPicked = False
                 self.isChampionPickedCompleted = False
                 self.isSkinPicked = False
+
         self.championSelection = ChampionSelection()
 
         session = await connector.getChampSelectSession()
 
         currentSummonerId = self.currentSummoner['summonerId']
-        info = await parseAllyGameInfo(session, currentSummonerId)
+        info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
         self.gameInfoInterface.updateAllySummoners(info)
 
         self.checkAndSwitchTo(self.gameInfoInterface)
@@ -845,13 +847,14 @@ class MainWindow(FluentWindow):
                 return
 
             info = await parseGameInfoByGameflowSession(
-                session, currentSummonerId, "ally")
+                session, currentSummonerId, "ally", useSGP=True)
             self.gameInfoInterface.updateAllySummoners(info)
 
         # 将敌方的召唤师基本信息绘制上去
         async def paintEnemySummonersInfo():
             info = await parseGameInfoByGameflowSession(
-                session, currentSummonerId, 'enemy')
+                session, currentSummonerId, 'enemy', useSGP=True)
+
             # 这个 info 是已经按照游戏位置排序过的了（若排位）
             self.gameInfoInterface.updateEnemySummoners(info)
 
@@ -888,12 +891,15 @@ class MainWindow(FluentWindow):
     async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.filterComboBox.setCurrentIndex(0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
+        self.searchInterface.filterComboBox.setCurrentIndex(
+            0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
 
         await self.searchInterface.searchAndShowFirstPage()
-        self.checkAndSwitchTo(self.searchInterface)  # 先加载完再切换, 避免加载过程中换搜索目标导致puuid出错 -- By Hpero4
+        # 先加载完再切换, 避免加载过程中换搜索目标导致puuid出错 -- By Hpero4
+        self.checkAndSwitchTo(self.searchInterface)
         self.searchInterface.loadingGameId = gameId
-        self.searchInterface.waitingForDrawSelect(gameId)  # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
+        # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
+        self.searchInterface.waitingForDrawSelect(gameId)
         await self.searchInterface.updateGameDetailView(gameId, self.careerInterface.puuid)
 
     @asyncSlot()
@@ -915,7 +921,7 @@ class MainWindow(FluentWindow):
             return
 
         logger.error("connector call_stack -------------- ↓", "Crash")
-        for call in connector.call_stack:
+        for call in connector.callStack:
             logger.error(call, "Crash")
         logger.error("connector call_stack -------------- ↑", "Crash")
 

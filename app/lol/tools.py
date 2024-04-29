@@ -691,7 +691,7 @@ def parseDetailRankInfo(rankInfo):
 
 def parseGames(games, targetId=0):
     f"""
-    解析Games数据
+    解析 Games 数据
 
     @param targetId: 需要查询的游戏模式, 不传则收集所有模式的数据
     @param games: 由 @see: {parseGameData} 获取到的games数据
@@ -719,13 +719,30 @@ def parseGames(games, targetId=0):
     return hitGames, kills, deaths, assists, wins, losses
 
 
-async def parseAllyGameInfo(session, currentSummonerId):
+async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
     # 排位会有预选位
     isRank = bool(session["myTeam"][0]["assignedPosition"])
 
-    tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
-             for item in session['myTeam']]
-    summoners = await asyncio.gather(*tasks)
+    if useSGP and connector.isInMainLand():
+        # 如果是国服就优先尝试 SGP
+        try:
+            token = await connector.getSGPtoken()
+            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
+                     for item in session['myTeam']]
+            summoners = await asyncio.gather(*tasks)
+
+            print('sgp api called')
+
+        except:
+            tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+                     for item in session['myTeam']]
+            summoners = await asyncio.gather(*tasks)
+
+    else:
+        tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+                 for item in session['myTeam']]
+        summoners = await asyncio.gather(*tasks)
+
     summoners = [summoner for summoner in summoners if summoner]
 
     # 按照楼层排序
@@ -749,7 +766,7 @@ def parseSummonerOrder(team):
     return [s['summonerId'] for s in summoners if s['summonerId'] != 0]
 
 
-async def parseGameInfoByGameflowSession(session, currentSummonerId, side):
+async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSGP=False):
     data = session['gameData']
     queueId = data['queue']['id']
 
@@ -763,10 +780,25 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side):
     else:
         team, _ = separateTeams(data, currentSummonerId)
 
-    tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
-             for item in team]
+    if useSGP and connector.isInMainLand():
+        # 如果是国服就优先尝试 SGP
+        try:
+            token = await connector.getSGPtoken()
+            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
+                     for item in team]
+            summoners = await asyncio.gather(*tasks)
+            print('sgp api called')
 
-    summoners = await asyncio.gather(*tasks)
+        except:
+            tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+                     for item in team]
+            summoners = await asyncio.gather(*tasks)
+
+    else:
+        tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+                 for item in team]
+        summoners = await asyncio.gather(*tasks)
+
     summoners = [summoner for summoner in summoners if summoner]
 
     if isRank:
@@ -879,7 +911,6 @@ async def parseGamesDataConcurrently(games):
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
-
     summonerId = item.get('summonerId')
 
     if summonerId == 0 or summonerId == None:
@@ -891,6 +922,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     icon = await connector.getChampionIcon(championId)
 
     puuid = summoner["puuid"]
+
     try:
         origRankInfo = await connector.getRankedStatsByPuuid(puuid)
     except SummonerRankInfoNotFound:
@@ -969,6 +1001,268 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     }
 
 
+async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
+    '''
+    使用 SGP 接口取战绩信息
+
+    目前不知道如何使用 SGP 接口得到召唤师的排位段位信息
+    其需要调用 LCU API 得到 TAT
+    '''
+
+    puuid = item.get('puuid')
+
+    if puuid == "00000000-0000-0000-0000-000000000000":
+        return
+
+    championId = item.get('championId') or 0
+    icon = await connector.getChampionIcon(championId)
+    summoner = await connector.getSummonerByPuuidViaSGP(token, puuid)
+
+    try:
+        origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+    except SummonerRankInfoNotFound:
+        origRankInfo = None
+
+    rankInfo = parseRankInfo(origRankInfo)
+
+    try:
+        origGamesInfo = await connector.getSummonerGamesByPuuidViaSGP(
+            token, puuid, 0, 14)
+
+        if cfg.get(cfg.gameInfoFilter) and isRank:
+            origGamesInfo["games"] = [
+                game for game in origGamesInfo["games"] if game['json']["queueId"] in (420, 440)]
+
+            begIdx = 15
+            while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
+                endIdx = begIdx + 10
+                new = (await connector.getSummonerGamesByPuuidViaSGP(token, puuid, begIdx, endIdx))["games"]
+
+                for game in new:
+                    if game['json']["queueId"] in (420, 440):
+                        origGamesInfo['games'].append(game)
+
+                begIdx = endIdx + 1
+    except:
+        gamesInfo = []
+    else:
+        tagLine = getTagLineFromGame(origGamesInfo['games'][0], puuid)
+
+        tasks = [parseGamesDataFromSGP(game, puuid)
+                 for game in origGamesInfo["games"][:11]]
+        gamesInfo = await asyncio.gather(*tasks)
+
+    _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
+
+    teammatesInfo = [
+        getTeammatesFromSGPGame(
+            game,
+            puuid
+        ) for game in origGamesInfo['games'][:1]  # 避免空报错, 查上一局的队友(对手)
+    ]
+
+    recentlyChampionName = ""
+    fateFlag = None
+
+    if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
+        if currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+            # 上把队友
+            fateFlag = "ally"
+        elif currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+            # 上把对面
+            fateFlag = "enemy"
+        recentlyChampionId = max(
+            teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+        recentlyChampionName = connector.manager.champs.get(
+            recentlyChampionId)
+
+    return {
+        "name": summoner["name"],
+        'tagLine': tagLine,
+        "icon": icon,
+        'championId': championId,
+        "level": summoner["level"],
+        "rankInfo": rankInfo,
+        "gamesInfo": gamesInfo,
+        "xpSinceLastLevel": summoner["expPoints"],
+        "xpUntilNextLevel": summoner["expToNextLevel"],
+        "puuid": puuid,
+        "summonerId": summoner['id'],
+        "kda": [kill, deaths, assists],
+        "cellId": item.get("cellId"),
+        "selectedPosition": item.get("selectedPosition"),
+        "fateFlag": fateFlag,
+        "isPublic": summoner["privacy"] == "PUBLIC",
+        # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
+        "recentlyChampionName": recentlyChampionName
+    }
+
+
+def getTeammatesFromSGPGame(game, puuid):
+    json = game['json']
+    queueId = json['queueId']
+
+    for player in json['participants']:
+        if player['puuid'] == puuid:
+            if queueId != 1700:
+                tid = player['teamId']
+            else:  # 斗魂竞技场
+                tid = player['subteamPlacement']
+
+            win = player['win']
+            remake = player['teamEarlySurrendered']
+
+            break
+
+    res = {
+        'queueId': queueId,
+        'win': win,
+        'remake': remake,
+        'summoners': [],  # 队友召唤师 (由于兼容性, 未修改字段名)
+        'enemies': []  # 对面召唤师, 若有多个队伍会全放这里面
+    }
+
+    for player in json['participants']:
+        if queueId != 1700:
+            cmp = player['teamId']
+        else:
+            cmp = player['subteamPlacement']
+
+        if cmp == tid:
+            if player['puuid'] != puuid:
+                res['summoners'].append({
+                    'summonerId': player['summonerId'],
+                    'name': player['summonerName'],
+                    'puuid': player['puuid'],
+                    'icon': player['profileIcon']
+                })
+            else:
+                # 当前召唤师在该对局使用的英雄, 自定义对局没有该字段
+                res["championId"] = player.get('championId', -1)
+        else:
+            res['enemies'].append({
+                'summonerId': player['summonerId'],
+                'name': player['summonerName'],
+                'puuid': player['puuid'],
+                'icon': player['profileIcon']
+            })
+
+    return res
+
+
+async def parseGamesDataFromSGP(game, puuid):
+    """
+    解析由 SGP 接口得到的具体到某一局的对局记录信息
+    """
+
+    game = game['json']
+
+    timeStamp = game["gameCreation"]  # 毫秒级时间戳
+    time = timeStampToStr(game['gameCreation'])
+    shortTime = timeStampToShortStr(game['gameCreation'])
+    gameId = game['gameId']
+    duration = secsToStr(game['gameDuration'])
+    queueId = game['queueId']
+
+    nameAndMap = connector.manager.getNameMapByQueueId(queueId)
+    modeName = nameAndMap['name']
+
+    if queueId != 0:
+        mapName = nameAndMap['map']
+    else:
+        mapName = connector.manager.getMapNameById(game['mapId'])
+
+    participant = None
+    for p in game['participants']:
+        if p['puuid'] == puuid:
+            participant = p
+
+    championId = participant['championId']
+    championIcon = await connector.getChampionIcon(championId)
+    spell1Id = participant['spell1Id']
+    spell2Id = participant['spell2Id']
+    spell1Icon = await connector.getSummonerSpellIcon(spell1Id)
+    spell2Icon = await connector.getSummonerSpellIcon(spell2Id)
+
+    champLevel = participant['champLevel']
+    kills = participant['kills']
+    deaths = participant['deaths']
+    assists = participant['assists']
+
+    itemIds = [
+        participant['item0'],
+        participant['item1'],
+        participant['item2'],
+        participant['item3'],
+        participant['item4'],
+        participant['item5'],
+        participant['item6'],
+    ]
+
+    itemIcons = [await connector.getItemIcon(itemId) for itemId in itemIds]
+    runeId = participant['perks']['styles'][0]['selections'][0]['perk']
+    runeIcon = await connector.getRuneIcon(runeId)
+
+    cs = participant['totalMinionsKilled'] + \
+        participant['neutralMinionsKilled']
+    gold = participant['goldEarned']
+    remake = participant['gameEndedInEarlySurrender']
+    win = participant['win']
+
+    lane = participant['lane']
+    role = participant['role']
+
+    position = None
+
+    pt = ToolsTranslator()
+
+    if queueId in [420, 440]:
+        if lane == 'TOP':
+            position = pt.top
+        elif lane == "JUNGLE":
+            position = pt.jungle
+        elif lane == 'MIDDLE':
+            position = pt.middle
+        elif role == 'SUPPORT':
+            position = pt.support
+        elif lane == 'BOTTOM' and role == 'CARRY':
+            position = pt.bottom
+
+    return {
+        'queueId': queueId,
+        'gameId': gameId,
+        'time': time,
+        'shortTime': shortTime,
+        'name': modeName,
+        'map': mapName,
+        'duration': duration,
+        'remake': remake,
+        'win': win,
+        'championId': championId,
+        'championIcon': championIcon,
+        'spell1Icon': spell1Icon,
+        'spell2Icon': spell2Icon,
+        'champLevel': champLevel,
+        'kills': kills,
+        'deaths': deaths,
+        'assists': assists,
+        'itemIcons': itemIcons,
+        'runeIcon': runeIcon,
+        'cs': cs,
+        'gold': gold,
+        'timeStamp': timeStamp,
+        'position': position,
+    }
+
+
+def getTagLineFromGame(game, puuid):
+    for player in game['json']['participants']:
+        if player['puuid'] == puuid:
+            return player['riotIdTagline']
+
+    return None
+
+
 async def autoSwap(data, selection):
     """
     选用顺序交换请求发生时，自动接受
@@ -1044,6 +1338,7 @@ async def autoPick(data, selection):
                 selection.isChampionPicked = True
                 return True
 
+
 async def autoComplete(data, selection):
     """
     超时自动选定（当前选中英雄）
@@ -1081,9 +1376,9 @@ async def autoBan(data, selection):
     for actionGroup in data['actions']:
         for action in actionGroup:
             if (action["actorCellId"] == localPlayerCellId
-                    and action['type'] == 'ban' 
+                    and action['type'] == 'ban'
                     and action["isInProgress"]):
-                
+
                 championId = connector.manager.getChampionIdByName(
                     cfg.get(cfg.autoBanChampion))
 
@@ -1104,6 +1399,7 @@ async def autoBan(data, selection):
 
                 return True
 
+
 async def rollAndSwapBack():
     """
     摇骰子并切换回之前的英雄
@@ -1115,12 +1411,13 @@ async def rollAndSwapBack():
 
     await connector.benchSwap(championId)
 
+
 async def autoSelectSkinRandom(data, selection):
     """
     随机选皮肤
     todo: 界面
     """
-    isAutoSelectSkinRandom = False# todo: 读取配置
+    isAutoSelectSkinRandom = False  # todo: 读取配置
     if not isAutoSelectSkinRandom or selection.isSkinPicked:
         return
     selection.isSkinPicked = True
@@ -1144,6 +1441,7 @@ async def autoSelectSkinRandom(data, selection):
     if length > 1:
         await connector.selectConfig(pickableSkinIds[random.randint(0, length - 1)])
         return True
+
 
 async def fixLeagueClientWindow():
     """
