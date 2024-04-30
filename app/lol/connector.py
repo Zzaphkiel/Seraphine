@@ -998,7 +998,9 @@ class JsonManager:
         if cfg.language.value == Language.ENGLISH:
             with open("app/resource/i18n/gamemodes.json", encoding="utf-8") as f:
                 translate = json.loads(f.read())
-                name = translate[name]
+
+                if name in translate:
+                    name = translate[name]
 
         map = self.getMapNameById(mapId)
 
