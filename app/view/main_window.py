@@ -740,7 +740,10 @@ class MainWindow(FluentWindow):
             title = self.tr("Lobby")
             await self.__onGameEnd()
             await self.careerInterface.refresh()
-            self.switchTo(self.careerInterface)
+
+            if self.stackedWidget.currentWidget() is self.gameInfoInterface:
+                self.switchTo(self.careerInterface)
+
         elif status == 'ReadyCheck':
             title = self.tr("Ready check")
             await self.__onMatchMade()
