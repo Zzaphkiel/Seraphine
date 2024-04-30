@@ -913,7 +913,8 @@ async def parseGamesDataConcurrently(games):
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
-    summonerId = item.get('summonerId')
+    summonerId = item.get('summonerId', None) or item.get(
+        "obfuscatedSummonerId", None)
 
     if summonerId == 0 or summonerId == None:
         return None
@@ -923,7 +924,8 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     championId = item.get('championId') or 0
     icon = await connector.getChampionIcon(championId)
 
-    puuid = summoner["puuid"]
+    puuid = summoner.get("puuid", None) or summoner.get(
+        'obfuscatedPuuid', None)
 
     try:
         origRankInfo = await connector.getRankedStatsByPuuid(puuid)
@@ -1010,10 +1012,9 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
     目前不知道如何使用 SGP 接口得到召唤师的排位段位信息
     其需要调用 LCU API 得到 TAT
     '''
-
     puuid = item.get('puuid')
 
-    if puuid == "00000000-0000-0000-0000-000000000000":
+    if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
         return
 
     championId = item.get('championId') or 0

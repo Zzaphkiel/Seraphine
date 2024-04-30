@@ -81,7 +81,7 @@ class GameInfoInterface(SeraphineInterface):
             self.allyOrder = order
 
     def updateAllySummoners(self, info):
-        if len(info['summoners']) > 5:
+        if not info or len(info['summoners']) > 5:
             return
 
         self.allyChampions = info['champions']
@@ -97,7 +97,7 @@ class GameInfoInterface(SeraphineInterface):
         self.summonersView.allyButton.setEnabled(True)
 
     def updateEnemySummoners(self, info):
-        if len(info['summoners']) > 5:
+        if not info or len(info['summoners']) > 5:
             return
 
         self.summonersView.enemy.updateSummoners(info['summoners'])
