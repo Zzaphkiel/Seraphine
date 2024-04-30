@@ -242,11 +242,19 @@ class GameDetailView(QFrame):
         self.vBoxLayout = QVBoxLayout(self.infoPage)
         self.titleBar = GameTitleBar()
 
+        self.scrollWidget = QWidget()
+        self.scrollArea = SmoothScrollArea()
+        self.scrollLayout = QVBoxLayout()
+
         self.teamView1 = TeamView()
         self.teamView2 = TeamView()
 
         self.extraTeamView1 = TeamView()
         self.extraTeamView2 = TeamView()
+        self.extraTeamView3 = TeamView()
+        self.extraTeamView4 = TeamView()
+        self.extraTeamView5 = TeamView()
+        self.extraTeamView6 = TeamView()
 
         self.loadingPage = QWidget()
         self.loadingPageLayout = QHBoxLayout(self.loadingPage)
@@ -264,26 +272,52 @@ class GameDetailView(QFrame):
 
         self.titleBar = GameTitleBar()
 
+        self.scrollWidget = QWidget()
+        self.scrollArea = SmoothScrollArea()
+        self.scrollLayout = QVBoxLayout()
+
         self.teamView1 = TeamView()
         self.teamView2 = TeamView()
 
         self.extraTeamView1 = TeamView()
         self.extraTeamView2 = TeamView()
+        self.extraTeamView3 = TeamView()
+        self.extraTeamView4 = TeamView()
+        self.extraTeamView5 = TeamView()
+        self.extraTeamView6 = TeamView()
 
         self.__initLayout()
 
     def __initLayout(self):
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollWidget.setObjectName("scrollWidget")
+
+        self.scrollWidget.setLayout(self.scrollLayout)
+        self.scrollArea.setWidget(self.scrollWidget)
+        self.scrollArea.setWidgetResizable(True)
+
         self.loadingPageLayout.addWidget(self.processRing)
 
         self.vBoxLayout.addWidget(self.titleBar)
-        self.vBoxLayout.addWidget(self.teamView1)
-        self.vBoxLayout.addWidget(self.teamView2)
 
-        self.vBoxLayout.addWidget(self.extraTeamView1)
-        self.vBoxLayout.addWidget(self.extraTeamView2)
+        self.scrollLayout.addWidget(self.teamView1)
+        self.scrollLayout.addWidget(self.teamView2)
+
+        self.scrollLayout.addWidget(self.extraTeamView1)
+        self.scrollLayout.addWidget(self.extraTeamView2)
+        self.scrollLayout.addWidget(self.extraTeamView3)
+        self.scrollLayout.addWidget(self.extraTeamView4)
+        self.scrollLayout.addWidget(self.extraTeamView5)
+        self.scrollLayout.addWidget(self.extraTeamView6)
+
+        self.vBoxLayout.addWidget(self.scrollArea)
 
         self.extraTeamView1.setVisible(False)
         self.extraTeamView2.setVisible(False)
+        self.extraTeamView3.setVisible(False)
+        self.extraTeamView4.setVisible(False)
+        self.extraTeamView5.setVisible(False)
+        self.extraTeamView6.setVisible(False)
 
         self.stackedWidget.addWidget(self.loadingPage)
         self.stackedWidget.addWidget(self.infoPage)
@@ -318,16 +352,36 @@ class GameDetailView(QFrame):
 
         self.extraTeamView1.setVisible(isCherry)
         self.extraTeamView2.setVisible(isCherry)
+        self.extraTeamView3.setVisible(isCherry)
+        self.extraTeamView4.setVisible(isCherry)
+        self.extraTeamView5.setVisible(isCherry)
+        self.extraTeamView6.setVisible(isCherry)
 
         if isCherry:
             team3 = game["teams"][300]
             team4 = game["teams"][400]
+            team5 = game["teams"][500]
+            team6 = game["teams"][600]
+            team7 = game["teams"][700]
+            team8 = game["teams"][800]
 
             self.extraTeamView1.updateTeam(team3, isCherry, self.tr("3rd"))
             self.extraTeamView1.updateSummoners(team3["summoners"])
 
             self.extraTeamView2.updateTeam(team4, isCherry, self.tr("4th"))
             self.extraTeamView2.updateSummoners(team4["summoners"])
+
+            self.extraTeamView3.updateTeam(team5, isCherry, self.tr("5th"))
+            self.extraTeamView3.updateSummoners(team5["summoners"])
+
+            self.extraTeamView4.updateTeam(team6, isCherry, self.tr("6th"))
+            self.extraTeamView4.updateSummoners(team6["summoners"])
+
+            self.extraTeamView5.updateTeam(team7, isCherry, self.tr("7th"))
+            self.extraTeamView5.updateSummoners(team7["summoners"])
+
+            self.extraTeamView6.updateTeam(team8, isCherry, self.tr("8th"))
+            self.extraTeamView6.updateSummoners(team8["summoners"])
 
 
 class TeamView(QFrame):
@@ -443,7 +497,7 @@ class TeamView(QFrame):
             self.dmgIconLabel, 500, ToolTipPosition.TOP))
 
     def __initLayout(self):
-        self.teamResultLabel.setFixedHeight(43)
+        self.teamResultLabel.setFixedHeight(39)
         self.teamResultLabel.setFixedWidth(55)
 
         self.titleBarLayout.setSpacing(0)
@@ -477,6 +531,7 @@ class TeamView(QFrame):
         self.titleBarLayout.addSpacing(7)
 
         self.summonersLayout.setContentsMargins(0, 0, 0, 0)
+        self.summonersLayout.setSpacing(4)
 
         self.vBoxLayout.setContentsMargins(11, 0, 11, 11)
         self.vBoxLayout.addLayout(self.titleBarLayout)
@@ -791,8 +846,16 @@ class GameTitleBar(QFrame, ColorChangeable):
                 result = self.tr("2nd")
             elif cherryResult == 3:
                 result = self.tr("3rd")
+            elif cherryResult == 4:
+                result = self.tr("4rd")
+            elif cherryResult == 5:
+                result = self.tr("5rd")
+            elif cherryResult == 6:
+                result = self.tr("6rd")
+            elif cherryResult == 7:
+                result = self.tr("7rd")
             else:
-                result = self.tr("4th")
+                result = self.tr("8th")
 
         self.gameId = game['gameId']
 

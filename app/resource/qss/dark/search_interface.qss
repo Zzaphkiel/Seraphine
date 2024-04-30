@@ -54,7 +54,7 @@ GameDetailView {
 
 GameTitleBar>#resultLabel {
     color: white;
-    font: bold 32px 'Segoe UI', 'Microsoft YaHei';
+    font: bold 28px 'Segoe UI', 'Microsoft YaHei';
 }
 
 GameTitleBar>#infoLabel {
@@ -117,6 +117,17 @@ SummonerName {
     border: none;
     background-color: transparent;
 }
+
+#scrollArea {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+#scrollWidget {
+    background: transparent;
+}
+
 
 SummonerName:hover {
     color: --ThemeColorDark1;

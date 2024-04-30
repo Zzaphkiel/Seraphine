@@ -295,7 +295,11 @@ async def parseGameDetailData(puuid, game):
         100: origTeam("100"),
         200: origTeam("200"),
         300: origTeam("100"),
-        400: origTeam("200")
+        400: origTeam("200"),
+        500: origTeam("100"),
+        600: origTeam("200"),
+        700: origTeam("100"),
+        800: origTeam("200"),
     }
 
     cherryResult = None
