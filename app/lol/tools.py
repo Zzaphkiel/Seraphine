@@ -397,7 +397,11 @@ async def parseGameDetailData(puuid, game):
                         ...
                     else:
                         rank = rank['queueMap']
-                        if queueId != 1700:
+
+                        if queueId == 1700 and 'CHERRY' in rank:
+                            rankInfo = rank["CHERRY"]
+                            lp = rankInfo['ratedRating']
+                        else:
                             rankInfo = rank[
                                 'RANKED_FLEX_SR'] if queueId == 440 else rank['RANKED_SOLO_5x5']
 
@@ -413,9 +417,6 @@ async def parseGameDetailData(puuid, game):
 
                             if division == 'NA':
                                 division = ''
-                        else:
-                            rankInfo = rank["CHERRY"]
-                            lp = rankInfo['ratedRating']
 
                 item = {
                     'summonerName': summonerName,
