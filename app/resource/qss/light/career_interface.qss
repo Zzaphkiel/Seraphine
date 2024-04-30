@@ -56,7 +56,7 @@ ItemsKdaCsGold>QLabel {
 }
 
 ResultModeSpell>ColorLabel {
-    font: bold 16px;
+    font: bold 17px 'Segoe UI', 'Microsoft YaHei';
 }
 
 CareerInterface {

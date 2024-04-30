@@ -75,7 +75,8 @@ TeamView {
 }
 
 TeamView>#teamResult {
-    font: 18px 'Segoe UI', 'Microsoft YaHei';
+    font: bold 18px 'Segoe UI', 'Microsoft YaHei';
+    padding-left: 1px;
 }
 
 TeamView>#dmgIconLabel {

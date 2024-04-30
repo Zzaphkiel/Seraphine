@@ -498,7 +498,7 @@ class TeamView(QFrame):
 
     def __initLayout(self):
         self.teamResultLabel.setFixedHeight(39)
-        self.teamResultLabel.setFixedWidth(55)
+        self.teamResultLabel.setFixedWidth(60)
 
         self.titleBarLayout.setSpacing(0)
         self.titleBarLayout.addWidget(self.teamResultLabel)
@@ -533,7 +533,7 @@ class TeamView(QFrame):
         self.summonersLayout.setContentsMargins(0, 0, 0, 0)
         self.summonersLayout.setSpacing(4)
 
-        self.vBoxLayout.setContentsMargins(11, 0, 11, 11)
+        self.vBoxLayout.setContentsMargins(7, 0, 7, 6)
         self.vBoxLayout.addLayout(self.titleBarLayout)
         self.vBoxLayout.addLayout(self.summonersLayout)
         # self.vBoxLayout.addSpacerItem(
