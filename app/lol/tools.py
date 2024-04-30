@@ -731,8 +731,6 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
 
-            print('sgp api called')
-
         except:
             tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
@@ -787,7 +785,6 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSG
             tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
                      for item in team]
             summoners = await asyncio.gather(*tasks)
-            print('sgp api called')
 
         except:
             tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)

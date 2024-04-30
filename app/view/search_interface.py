@@ -1102,8 +1102,6 @@ class SearchInterface(SeraphineInterface):
 
         # 连续查多个人时, 将前面正在查的task给release掉
         while self.puuid == puuid:
-            print(f"{begIdx = }, {endIdx = }")
-
             # 为加载战绩详情让行
             while (
                 (self.detailViewLoadTask and not self.detailViewLoadTask.done())
