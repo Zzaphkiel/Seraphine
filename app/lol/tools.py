@@ -913,8 +913,10 @@ async def parseGamesDataConcurrently(games):
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
-    summonerId = item.get('summonerId', None) or item.get(
-        "obfuscatedSummonerId", None)
+    summonerId = item.get('summonerId', None)
+
+    if item.get('nameVisibilityType') == 'HIDDEN':
+        return None
 
     if summonerId == 0 or summonerId == None:
         return None
@@ -924,8 +926,10 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     championId = item.get('championId') or 0
     icon = await connector.getChampionIcon(championId)
 
-    puuid = summoner.get("puuid", None) or summoner.get(
-        'obfuscatedPuuid', None)
+    puuid = summoner.get("puuid", None)
+
+    if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
+        return None
 
     try:
         origRankInfo = await connector.getRankedStatsByPuuid(puuid)
@@ -984,7 +988,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
             recentlyChampionId)
 
     return {
-        "name": summoner["gameName"] or summoner["displayName"],
+        "name": summoner["gameName"] or summoner["displayName"] or item['summonerName'],
         'tagLine': summoner.get("tagLine"),
         "icon": icon,
         'championId': championId,
@@ -1014,8 +1018,11 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
     '''
     puuid = item.get('puuid')
 
+    if item.get('nameVisibilityType') == 'HIDDEN':
+        return None
+
     if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
-        return
+        return None
 
     championId = item.get('championId') or 0
     icon = await connector.getChampionIcon(championId)
@@ -1080,7 +1087,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
             recentlyChampionId)
 
     return {
-        "name": summoner["name"],
+        "name": summoner["gameName"] or summoner["displayName"] or item['summonerName'],
         'tagLine': tagLine,
         "icon": icon,
         'championId': championId,
