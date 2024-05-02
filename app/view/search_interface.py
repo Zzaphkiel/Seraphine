@@ -23,6 +23,7 @@ from app.components.champion_icon_widget import RoundIcon
 from app.components.search_line_edit import SearchLineEdit
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import ColorAnimationFrame, CardWidget
+from app.components.color_label import ColorLabel
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
@@ -392,7 +393,7 @@ class TeamView(QFrame):
         self.titleBarLayout = QHBoxLayout()
         self.summonersLayout = QVBoxLayout()
 
-        self.teamResultLabel = QLabel()
+        self.teamResultLabel = ColorLabel()
         self.towerIconLabel = QLabel()
         self.towerKillsLabel = QLabel()
         self.inhibitorIconLabel = QLabel()
@@ -564,8 +565,10 @@ class TeamView(QFrame):
             self.teamResultLabel.setText(result)
         elif win == "Win":
             self.teamResultLabel.setText(self.tr("Winner"))
+            self.teamResultLabel.setType('win')
         else:
             self.teamResultLabel.setText(self.tr("Loser"))
+            self.teamResultLabel.setType('lose')
 
         self.towerKillsLabel.setText(str(towerKills))
         self.inhibitorKillsLabel.setText(str(inhibitorKills))
