@@ -454,16 +454,6 @@ class LolClientConnector(QObject):
 
         return res
 
-    async def getSummonerByPuuidViaSGP(self, token, puuid):
-        """
-        该接口的返回值与 `self.getSummonerByPuuid()` 相比，拿不到召唤师的 `tagLine`
-        即数字编号信息
-        """
-        url = f"/summoner-ledge/v1/regions/{self.server.lower()}/summoners/puuid/{puuid}"
-
-        res = await self.__sgp__get(url, token)
-        return await res.json()
-
     @retry(5, 1)
     async def getSummonerGamesByPuuidSlowly(self, puuid, begIndex=0, endIndex=4):
         """
@@ -866,6 +856,7 @@ class LolClientConnector(QObject):
 
         return res['accessToken']
 
+    @retry(count=2)
     async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
         url = f"/match-history-query/v1/products/lol/player/{puuid}/SUMMARY"
         params = {
@@ -876,10 +867,22 @@ class LolClientConnector(QObject):
         res = await self.__sgp__get(url, token, params)
         return await res.json()
 
+    @retry(count=2)
     async def getRankedStatsByPuuidViaSGP(self, token, puuid):
         url = f'/leagues-ledge/v2/leagueLadders/puuid/{puuid}'
         res = await self.__sgp__get(url, token)
 
+        return await res.json()
+
+    @retry(count=2)
+    async def getSummonerByPuuidViaSGP(self, token, puuid):
+        """
+        该接口的返回值与 `self.getSummonerByPuuid()` 相比，拿不到召唤师的 `tagLine`
+        即数字编号信息
+        """
+        url = f"/summoner-ledge/v1/regions/{self.server.lower()}/summoners/puuid/{puuid}"
+
+        res = await self.__sgp__get(url, token)
         return await res.json()
 
     def isInMainLand(self):
