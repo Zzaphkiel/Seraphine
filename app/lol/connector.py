@@ -885,7 +885,7 @@ class LolClientConnector(QObject):
         res = await self.__sgp__get(url, token)
         return await res.json()
 
-    def isInMainLand(self):
+    def isInMainland(self):
         return self.inMainLand
 
     @needLcu()

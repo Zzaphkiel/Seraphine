@@ -130,7 +130,7 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zaphkiel"
-VERSION = "0.11.1"
+VERSION = "0.12.0"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"

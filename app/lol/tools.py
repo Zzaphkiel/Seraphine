@@ -728,7 +728,7 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
     # 排位会有预选位
     isRank = bool(session["myTeam"][0]["assignedPosition"])
 
-    if useSGP and connector.isInMainLand():
+    if useSGP and connector.isInMainland():
         # 如果是国服就优先尝试 SGP
         try:
             token = await connector.getSGPtoken()
@@ -783,7 +783,7 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSG
     else:
         team, _ = separateTeams(data, currentSummonerId)
 
-    if useSGP and connector.isInMainLand():
+    if useSGP and connector.isInMainland():
         # 如果是国服就优先尝试 SGP
         try:
             token = await connector.getSGPtoken()
