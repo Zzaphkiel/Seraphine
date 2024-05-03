@@ -1235,11 +1235,14 @@ class SearchInterface(SeraphineInterface):
         if cfg.get(cfg.showTierInGameInfo):
             self.gamesView.gameDetailView.setLoadingPageEnabled(True)
 
-        game = await connector.getGameDetailByGameId(gameId)
+        # NOTE self.detailViewLoadTask 用于标记详情正在加载, self.loadGame会为其让行 -- By Hpero4
+        self.detailViewLoadTask = asyncio.create_task(connector.getGameDetailByGameId(gameId))
+        game = await self.detailViewLoadTask
 
         # 加载GameDetail的过程中, 切换了搜索对象(self.puuid变更), 将后续任务pass -- By Hpero4
         if puuid == self.puuid:
-            game = await parseGameDetailData(puuid, game)
+            self.detailViewLoadTask = asyncio.create_task(parseGameDetailData(puuid, game))
+            game = await self.detailViewLoadTask
             self.gamesView.gameDetailView.updateGame(game)
 
         if cfg.get(cfg.showTierInGameInfo):
