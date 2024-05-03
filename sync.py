@@ -71,7 +71,7 @@ def upload_file(onwer, repo, release_id):
 
 
 release_id = create_new_release(GITEE_OWNER, GITEE_REPO)
-download_url = upload_file(release_id)
+download_url = upload_file(GITEE_OWNER, GITEE_REPO, release_id)
 print(
     f"latest GitHub Release has been synced to Gitee Release, download url is {download_url}"
 )
