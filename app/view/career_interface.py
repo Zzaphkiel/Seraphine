@@ -8,7 +8,8 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from ..common.qfluentwidgets import (TableWidget, PushButton, ComboBox,
                                      SmoothScrollArea, ToolTipFilter, setCustomStyleSheet,
                                      ToolTipPosition, ToolButton, IndeterminateProgressRing,
-                                     Flyout, FlyoutViewBase, FlyoutAnimationType)
+                                     Flyout, FlyoutViewBase, FlyoutAnimationType, InfoBar,
+                                     InfoBarPosition)
 
 from app.components.game_infobar_widget import GameInfoBar
 from app.components.champion_icon_widget import RoundIcon
@@ -370,6 +371,17 @@ class CareerInterface(SeraphineInterface):
 
         if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
+
+        if 'errorCode' in summoner:
+            InfoBar.error(self.tr("Get summoner infomation error"),
+                          self.tr("The server returned abnormal content."),
+                          orient=Qt.Vertical,
+                          position=InfoBarPosition.BOTTOM_RIGHT,
+                          duration=5000,
+                          parent=self.window())
+
+            self.setLoadingPageEnabled(False)
+            return
 
         self.loadGamesTask = asyncio.create_task(
             connector.getSummonerGamesByPuuid(summoner['puuid'], 0, cfg.get(cfg.careerGamesNumber) - 1))

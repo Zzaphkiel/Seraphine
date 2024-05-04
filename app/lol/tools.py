@@ -332,7 +332,7 @@ async def parseGameDetailData(puuid, game):
             isPublic = True
         else:
             t = await connector.getSummonerByPuuid(summonerPuuid)
-            isPublic = t["privacy"] == "PUBLIC"
+            isPublic = t.get("privacy") == "PUBLIC"
 
         for summoner in game['participants']:
             if summoner['participantId'] == participantId:
