@@ -1500,13 +1500,15 @@ async def fixLeagueClientWindow():
     if not needResize(windowRect) and not needResize(windowCefRect):
         return True
 
-    clientZoom = int(await connector.getClientZoom())
+    clientZoom = float(await connector.getClientZoom())
 
     screenWidth = win32api.GetSystemMetrics(0)
     screenHeight = win32api.GetSystemMetrics(1)
 
-    targetWindowWidth = 1280 * clientZoom
-    targetWindowHeight = 720 * clientZoom
+    targetWindowWidth = int(1280 * clientZoom)
+    targetWindowHeight = int(720 * clientZoom)
+
+    print(targetWindowWidth, targetWindowHeight)
 
     def patchDpiChangedMessage(hWnd):
         dpi = ctypes.windll.user32.GetDpiForWindow(hWnd)
@@ -1529,6 +1531,8 @@ async def fixLeagueClientWindow():
             targetWindowWidth, targetWindowHeight,
             SWP_SHOWWINDOW
         )
+
+        print('hi')
 
         win32gui.SetWindowPos(
             windowCefHWnd,
