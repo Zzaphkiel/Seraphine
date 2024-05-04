@@ -38,7 +38,7 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                          getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                         autoSwap, autoTrade, autoSelectSkinRandom)
+                         autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection)
 
 import threading
 
@@ -87,6 +87,7 @@ class MainWindow(FluentWindow):
         self.isGaming = False
         self.isTrayExit = False
         self.tasklistEnabled = True
+        self.championSelection = ChampionSelection()
 
         self.lastTipsTime = time.time()
         self.lastTipsType = None
@@ -794,20 +795,7 @@ class MainWindow(FluentWindow):
 
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
-        class ChampionSelection:
-            def __init__(self):
-                self.isChampionBanned = False
-                self.isChampionPicked = False
-                self.isChampionPickedCompleted = False
-                self.isSkinPicked = False
-
-            def reset(self):
-                self.isChampionBanned = False
-                self.isChampionPicked = False
-                self.isChampionPickedCompleted = False
-                self.isSkinPicked = False
-
-        self.championSelection = ChampionSelection()
+        self.championSelection.reset()
 
         session = await connector.getChampSelectSession()
 

@@ -1273,6 +1273,20 @@ def getTagLineFromGame(game, puuid):
     return None
 
 
+class ChampionSelection:
+    def __init__(self):
+        self.isChampionBanned = False
+        self.isChampionPicked = False
+        self.isChampionPickedCompleted = False
+        self.isSkinPicked = False
+
+    def reset(self):
+        self.isChampionBanned = False
+        self.isChampionPicked = False
+        self.isChampionPickedCompleted = False
+        self.isSkinPicked = False
+
+
 async def autoSwap(data, selection):
     """
     选用顺序交换请求发生时，自动接受
@@ -1430,6 +1444,7 @@ async def autoSelectSkinRandom(data, selection):
     isAutoSelectSkinRandom = False  # todo: 读取配置
     if not isAutoSelectSkinRandom or selection.isSkinPicked:
         return
+
     selection.isSkinPicked = True
 
     skinCarousel = await connector.getSkinCarousel()
