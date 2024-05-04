@@ -846,8 +846,11 @@ class MainWindow(FluentWindow):
 
         # 如果是进游戏后开的软件，需要先把友方信息更新上去
         async def paintAllySummonersInfo():
-            if self.gameInfoInterface.allyChampions:
-                return
+            self.gameInfoInterface.allyChampions = {}
+            self.gameInfoInterface.allyOrder = []
+
+            self.gameInfoInterface.summonersView.ally.clear()
+            self.gameInfoInterface.allyGamesView.clear()
 
             info = await parseGameInfoByGameflowSession(
                 session, currentSummonerId, "ally", useSGP=True)
