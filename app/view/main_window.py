@@ -846,6 +846,9 @@ class MainWindow(FluentWindow):
 
         # 如果是进游戏后开的软件，需要先把友方信息更新上去
         async def paintAllySummonersInfo():
+            if self.gameInfoInterface.allyOrder and len(self.gameInfoInterface.allyOrder) == 5:
+                return
+
             self.gameInfoInterface.allyChampions = {}
             self.gameInfoInterface.allyOrder = []
 

@@ -869,6 +869,11 @@ class LolClientConnector(QObject):
         res = await res.json()
 
         return res['accessToken']
+    
+    async def restartClient(self):
+        res = await self.__post("/riotclient/kill-and-restart-ux")
+
+        return res
 
     async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
         logger.debug(
