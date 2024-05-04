@@ -544,10 +544,14 @@ class MainWindow(FluentWindow):
 
     async def __updateAvatarIconName(self):
         if self.currentSummoner:
-            iconId = self.currentSummoner['profileIconId']
-            icon = await connector.getProfileIcon(iconId)
-            name = (self.currentSummoner.get("gameName")
-                    or self.currentSummoner['displayName'])
+            try:
+                iconId = self.currentSummoner['profileIconId']
+                icon = await connector.getProfileIcon(iconId)
+                name = (self.currentSummoner.get("gameName")
+                        or self.currentSummoner['displayName'])
+            except:
+                icon = "app/resource/images/game.png"
+                name = self.tr("Start LOL")
         else:
             icon = "app/resource/images/game.png"
             name = self.tr("Start LOL")
