@@ -216,13 +216,16 @@ class LolClientConnector(QObject):
     async def start(self, pid):
         self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
+
         self.lcuSess = aiohttp.ClientSession(
             base_url=f'https://127.0.0.1:{self.port}',
             auth=aiohttp.BasicAuth('riot', self.token)
         )
-        self.sgpSess = aiohttp.ClientSession(
-            base_url=f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
-        )
+
+        if self.server:
+            self.sgpSess = aiohttp.ClientSession(
+                base_url=f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
+            )
 
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
@@ -300,10 +303,11 @@ class LolClientConnector(QObject):
             items, spells, runes, queues, champions, skins)
 
     def __initPlatformInfo(self):
-        mainLandPlatforms = {'tj100', 'hn1', 'cq100',
-                             'gz100', 'nj100', 'bgp2', 'hn10', 'tj101'}
+        if self.server:
+            mainlandPlatforms = {'tj100', 'hn1', 'cq100',
+                                 'gz100', 'nj100', 'bgp2', 'hn10', 'tj101'}
 
-        self.inMainLand = self.server.lower() in mainLandPlatforms
+            self.inMainLand = self.server.lower() in mainlandPlatforms
 
     async def __json_retry_get(self, url, max_retries=5):
         """
@@ -906,6 +910,8 @@ class LolClientConnector(QObject):
         return await self.lcuSess.patch(path, json=data, ssl=False)
 
     async def __sgp__get(self, path, token, params=None):
+        assert self.inMainLand
+
         headers = {
             "Authorization": f"Bearer {token}"
         }
