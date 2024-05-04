@@ -216,19 +216,9 @@ class LolClientConnector(QObject):
     async def start(self, pid):
         self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
-
-        self.lcuSess = aiohttp.ClientSession(
-            base_url=f'https://127.0.0.1:{self.port}',
-            auth=aiohttp.BasicAuth('riot', self.token)
-        )
-
-        if self.server:
-            self.sgpSess = aiohttp.ClientSession(
-                base_url=f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
-            )
-
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
+        self.__initSessions()
         self.__initPlatformInfo()
         await self.__initManager()
         self.__initFolder()
@@ -273,6 +263,24 @@ class LolClientConnector(QObject):
         await self.sgpSess.close()
 
         self.__init__()
+
+    def __initSessions(self):
+        self.lcuSess = aiohttp.ClientSession(
+            base_url=f'https://127.0.0.1:{self.port}',
+            auth=aiohttp.BasicAuth('riot', self.token)
+        )
+
+        if not self.server:
+            return
+
+        if self.server.lower() in ('hn1', 'hn10'):
+            url = f'https://{self.server.lower()}-cloud-sgp.lol.qq.com:21019'
+        else:
+            url = f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
+
+        self.sgpSess = aiohttp.ClientSession(
+            base_url=url
+        )
 
     def __initFolder(self):
         if not os.path.exists("app/resource/game"):
@@ -860,8 +868,10 @@ class LolClientConnector(QObject):
 
         return res['accessToken']
 
-    @retry(count=2)
     async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
+        logger.debug(
+            f"getSummonerGamesByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+
         url = f"/match-history-query/v1/products/lol/player/{puuid}/SUMMARY"
         params = {
             'startIndex': begIdx,
@@ -871,19 +881,23 @@ class LolClientConnector(QObject):
         res = await self.__sgp__get(url, token, params)
         return await res.json()
 
-    @retry(count=2)
     async def getRankedStatsByPuuidViaSGP(self, token, puuid):
+        logger.debug(
+            f"getRankedStatsByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+
         url = f'/leagues-ledge/v2/leagueLadders/puuid/{puuid}'
         res = await self.__sgp__get(url, token)
 
         return await res.json()
 
-    @retry(count=2)
     async def getSummonerByPuuidViaSGP(self, token, puuid):
         """
         该接口的返回值与 `self.getSummonerByPuuid()` 相比，拿不到召唤师的 `tagLine`
         即数字编号信息
         """
+        logger.debug(
+            f"getSummonerByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+
         url = f"/summoner-ledge/v1/regions/{self.server.lower()}/summoners/puuid/{puuid}"
 
         res = await self.__sgp__get(url, token)
