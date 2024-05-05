@@ -177,8 +177,8 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 在您使用本程序之前，请确保您已经详细**阅读**、**理解**并**同意**免责声明中的条款；同时，请遵守相关游戏规则，共同维护健康和公平的游戏环境。
 
 ## 交流群
-Seraphine 交流 1 群（QQ）：727219078（已满）
-Seraphine 交流 2 群（QQ）：713137623
+- Seraphine 交流 1 群（QQ）：727219078（已满）
+- Seraphine 交流 2 群（QQ）：713137623
 
 
 ## 许可证 ⚖️
