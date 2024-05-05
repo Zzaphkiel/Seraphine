@@ -357,7 +357,10 @@ class CareerInterface(SeraphineInterface):
     @asyncSlot()
     async def refresh(self):
         if self.puuid:
+            tmp_filter_idx = self.filterComboBox.currentIndex()
             await self.updateInterface(puuid=self.puuid)
+            self.filterComboBox.setCurrentIndex(tmp_filter_idx)
+            self.__onfilterComboBoxChanged(tmp_filter_idx)
 
     async def updateInterface(self, puuid=None, summoner=None):
         '''
