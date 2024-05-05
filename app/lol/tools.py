@@ -449,7 +449,7 @@ async def parseGameDetailData(puuid, game):
 
     mapIcon = connector.manager.getMapIconByMapId(mapId, win)
 
-    if not win:
+    if win == None:
         return None
 
     return {
