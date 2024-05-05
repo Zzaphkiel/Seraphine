@@ -331,14 +331,20 @@ class GameDetailView(QFrame):
         #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def setLoadingPageEnabled(self, enable: bool):
-        if enable:
-            index = 0
-        else:
-            index = 1
-
+        index = 0 if enable else 1
         self.stackedWidget.setCurrentIndex(index)
 
-    def updateGame(self, game: dict):
+    def updateGame(self, game):
+        if not game:
+            InfoBar.error(self.tr("Get game infomation failed"),
+                          self.tr("The server returned abnormal content."),
+                          orient=Qt.Vertical,
+                          duration=5000,
+                          position=InfoBarPosition.BOTTOM_RIGHT,
+                          parent=self.window())
+
+            return
+
         isCherry = game["queueId"] == 1700
         self.titleBar.updateTitleBar(game)
 
@@ -1236,12 +1242,14 @@ class SearchInterface(SeraphineInterface):
             self.gamesView.gameDetailView.setLoadingPageEnabled(True)
 
         # NOTE self.detailViewLoadTask 用于标记详情正在加载, self.loadGame会为其让行 -- By Hpero4
-        self.detailViewLoadTask = asyncio.create_task(connector.getGameDetailByGameId(gameId))
+        self.detailViewLoadTask = asyncio.create_task(
+            connector.getGameDetailByGameId(gameId))
         game = await self.detailViewLoadTask
 
         # 加载GameDetail的过程中, 切换了搜索对象(self.puuid变更), 将后续任务pass -- By Hpero4
         if puuid == self.puuid:
-            self.detailViewLoadTask = asyncio.create_task(parseGameDetailData(puuid, game))
+            self.detailViewLoadTask = asyncio.create_task(
+                parseGameDetailData(puuid, game))
             game = await self.detailViewLoadTask
             self.gamesView.gameDetailView.updateGame(game)
 

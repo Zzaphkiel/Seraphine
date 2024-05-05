@@ -303,6 +303,7 @@ async def parseGameDetailData(puuid, game):
     }
 
     cherryResult = None
+    win = None
 
     for team in game['teams']:
         teamId = team['teamId']
@@ -447,6 +448,9 @@ async def parseGameDetailData(puuid, game):
                 break
 
     mapIcon = connector.manager.getMapIconByMapId(mapId, win)
+
+    if not win:
+        return None
 
     return {
         'gameId': game['gameId'],
