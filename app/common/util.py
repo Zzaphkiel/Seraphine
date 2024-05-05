@@ -9,7 +9,7 @@ from app.common.config import cfg, VERSION
 
 
 class Github:
-    def __init__(self, user="Hpero4", repositories="Seraphine"):
+    def __init__(self, user="Zzaphkiel", repositories="Seraphine"):
         self.githubApi = "http://api.github.com"
         self.giteeApi = "http://gitee.com/api"
 
