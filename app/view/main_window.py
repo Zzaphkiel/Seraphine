@@ -932,6 +932,8 @@ class MainWindow(FluentWindow):
         logger.error(str(self.auxiliaryFuncInterface), "Crash")
         logger.error(str(self.settingInterface), "Crash")
 
+        logger.error(f"Exception occurred: {content}")
+
         w = ExceptionMessageBox(title, content, self.window())
 
         if w.exec():
