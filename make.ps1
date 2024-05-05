@@ -35,6 +35,12 @@ rm -Path .\dist\Seraphine\app\resource\game* -r
 rm -r .\dist\Seraphine\app\resource\i18n\Seraphine.zh_CN.ts
 rm -r .\dist\Seraphine\app\view
 
+$files = Get-ChildItem -Path ".\dist\Seraphine\*" -Recurse |
+    Select-Object -ExpandProperty FullName |
+    ForEach-Object { $_.Replace((Resolve-Path ".\dist\Seraphine").Path + "\", "") }
+
+$files | Out-File -FilePath ".\dist\Seraphine\filelist.txt" -Encoding UTF8
+
 if (! $dbg) {
     7z a $dest\Seraphine.zip .\dist\Seraphine\* -r
     rm -r .\dist

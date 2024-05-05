@@ -35,7 +35,7 @@ class PastRequest:
         # 如果是None的成员, 不会被打印; 没打印response就是没有响应;
         attrs = [f"{k}={v!r}" for k, v in self.__dict__.items()
                  if v is not None]
-        return f"PastRequest(\n  {', '.join(attrs)}\n)"
+        return f"PastRequest({', '.join(attrs)})"
 
 
 def needLcu():
