@@ -661,44 +661,54 @@
         <translation type="obsolete">重开</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="348"/>
+        <location filename="../../view/search_interface.py" line="354"/>
         <source>1st</source>
         <translation>第一名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="351"/>
+        <location filename="../../view/search_interface.py" line="357"/>
         <source>2nd</source>
         <translation>第二名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="369"/>
+        <location filename="../../view/search_interface.py" line="375"/>
         <source>3rd</source>
         <translation>第三名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="372"/>
+        <location filename="../../view/search_interface.py" line="378"/>
         <source>4th</source>
         <translation>第四名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="375"/>
+        <location filename="../../view/search_interface.py" line="381"/>
         <source>5th</source>
         <translation>第五名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="378"/>
+        <location filename="../../view/search_interface.py" line="384"/>
         <source>6th</source>
         <translation>第六名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="381"/>
+        <location filename="../../view/search_interface.py" line="387"/>
         <source>7th</source>
         <translation>第七名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="384"/>
+        <location filename="../../view/search_interface.py" line="390"/>
         <source>8th</source>
         <translation>第八名</translation>
+    </message>
+    <message>
+        <location filename="../../view/search_interface.py" line="339"/>
+        <source>Get game infomation failed</source>
+        <translation>获取对局详细信息失败</translation>
+    </message>
+    <message>
+        <location filename="../../view/search_interface.py" line="339"/>
+        <source>The server returned abnormal content.</source>
+        <translation>服务器返回了不正常的内容</translation>
     </message>
 </context>
 <context>
@@ -760,42 +770,42 @@
 <context>
     <name>GameTitleBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="807"/>
+        <location filename="../../view/search_interface.py" line="813"/>
         <source>Copy game ID</source>
         <translation>复制游戏 ID</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="867"/>
+        <location filename="../../view/search_interface.py" line="873"/>
         <source>Game ID: </source>
         <translation>游戏 ID：</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="835"/>
+        <location filename="../../view/search_interface.py" line="841"/>
         <source>Remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="838"/>
+        <location filename="../../view/search_interface.py" line="844"/>
         <source>Win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="841"/>
+        <location filename="../../view/search_interface.py" line="847"/>
         <source>Lose</source>
         <translation>失败</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="847"/>
+        <location filename="../../view/search_interface.py" line="853"/>
         <source>1st</source>
         <translation>第一名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="849"/>
+        <location filename="../../view/search_interface.py" line="855"/>
         <source>2nd</source>
         <translation>第二名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="851"/>
+        <location filename="../../view/search_interface.py" line="857"/>
         <source>3rd</source>
         <translation>第三名</translation>
     </message>
@@ -805,27 +815,27 @@
         <translation type="obsolete">第四名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="853"/>
+        <location filename="../../view/search_interface.py" line="859"/>
         <source>4rd</source>
         <translation>第四名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="855"/>
+        <location filename="../../view/search_interface.py" line="861"/>
         <source>5rd</source>
         <translation>第五名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="857"/>
+        <location filename="../../view/search_interface.py" line="863"/>
         <source>6rd</source>
         <translation>第六名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="859"/>
+        <location filename="../../view/search_interface.py" line="865"/>
         <source>7rd</source>
         <translation>第七名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="861"/>
+        <location filename="../../view/search_interface.py" line="867"/>
         <source>8th</source>
         <translation>第八名</translation>
     </message>
@@ -1450,12 +1460,12 @@
 <context>
     <name>SearchInterface</name>
     <message>
-        <location filename="../../view/search_interface.py" line="997"/>
+        <location filename="../../view/search_interface.py" line="1003"/>
         <source>Career</source>
         <translation>生涯</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1072"/>
         <source>Summoner not found</source>
         <translation>召唤师未找到</translation>
     </message>
@@ -1465,32 +1475,32 @@
         <translation type="obsolete">请检查召唤师名后重试</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1013"/>
+        <location filename="../../view/search_interface.py" line="1019"/>
         <source>Please input summoner name</source>
         <translation>请输入召唤师名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1020"/>
+        <location filename="../../view/search_interface.py" line="1026"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1020"/>
+        <location filename="../../view/search_interface.py" line="1026"/>
         <source>Normal</source>
         <translation>匹配模式</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1020"/>
+        <location filename="../../view/search_interface.py" line="1026"/>
         <source>A.R.A.M.</source>
         <translation>极地大乱斗</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1020"/>
+        <location filename="../../view/search_interface.py" line="1026"/>
         <source>Ranked Solo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1020"/>
+        <location filename="../../view/search_interface.py" line="1026"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
@@ -1505,7 +1515,7 @@
         <translation type="obsolete">没有找到该玩家相关对局</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1072"/>
         <source>Please check the summoner&apos;s name and retry</source>
         <translation>请检查召唤师名后重试</translation>
     </message>
@@ -1937,7 +1947,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SummonerInfoBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="719"/>
+        <location filename="../../view/search_interface.py" line="725"/>
         <source>Unranked</source>
         <translation>未定级</translation>
     </message>
@@ -1971,52 +1981,52 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>TeamView</name>
     <message>
-        <location filename="../../view/search_interface.py" line="567"/>
+        <location filename="../../view/search_interface.py" line="573"/>
         <source>Winner</source>
         <translation>胜方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="570"/>
+        <location filename="../../view/search_interface.py" line="576"/>
         <source>Loser</source>
         <translation>败方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="473"/>
+        <location filename="../../view/search_interface.py" line="479"/>
         <source>Tower destroyed</source>
         <translation>摧毁防御塔</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="474"/>
+        <location filename="../../view/search_interface.py" line="480"/>
         <source>Inhibitor destroyed</source>
         <translation>摧毁召唤水晶</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="475"/>
+        <location filename="../../view/search_interface.py" line="481"/>
         <source>Baron Nashor killed</source>
         <translation>击杀男爵</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="476"/>
+        <location filename="../../view/search_interface.py" line="482"/>
         <source>Dragon killed</source>
         <translation>击杀巨龙</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="477"/>
+        <location filename="../../view/search_interface.py" line="483"/>
         <source>Rift Herald killed</source>
         <translation>击杀峡谷先锋</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="490"/>
+        <location filename="../../view/search_interface.py" line="496"/>
         <source>Minions killed</source>
         <translation>小兵及野怪击杀</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="491"/>
+        <location filename="../../view/search_interface.py" line="497"/>
         <source>Gold earned</source>
         <translation>获取金钱</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="492"/>
+        <location filename="../../view/search_interface.py" line="498"/>
         <source>Damage dealed to champions</source>
         <translation>对英雄造成伤害</translation>
     </message>
