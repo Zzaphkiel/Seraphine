@@ -1,53 +1,53 @@
 import subprocess
 
-bat = '''@echo off
+bat = '''
+# 等待 Seraphine.exe 退出
+while ((Get-Process Seraphine -ErrorAction SilentlyContinue) -ne $null) {
+    Write-Host "Seraphine is running, waiting..."
+    Start-Sleep -Seconds 1
+}
 
-:start
+$fileList = Get-Content -Path "filelist.txt"
 
-@REM 等待 Seraphine.exe 退出
-tasklist | find /i "Seraphine.exe" > nul
-if NOT errorlevel 1 (
-    echo Seraphine is running, waiting...
-    timeout /t 1 > nul
-    goto start
-)
+# 遍历文件列表
+foreach ($file in $fileList) {
+    # 检查文件或目录是否存在
+    if (Test-Path -Path $file) {
+        # 删除文件或目录
+        Remove-Item -Path $file -Recurse -Force
+        Write-Output "Removed: $file"
+    } else {
+        Write-Output "NotFound: $file"
+    }
+}
 
-@REM 删除当前目录下所有文件夹
-for /d %%i in (*) do (
-    rmdir "%%~fi" /s /q
-)
+# 设置源路径
+$src = "$env:AppData\\Seraphine\\temp"
 
-@REM 删除当前目录下除了自己的所有文件
-for %%i in (*) do (
-    if NOT "%%i" equ "updater.bat" (
-        del "%%i" /s /q
-    )
-)
+# 移动目录
+Get-ChildItem -Path $src -Directory | ForEach-Object {
+    Move-Item -Path $_.FullName -Destination '.' -Force
+}
 
-@REM 将解压好的文件和文件夹拷贝到当前文件夹内
-set src=%AppData%\\Seraphine\\temp
+# 移动文件
+Get-ChildItem -Path $src -File | ForEach-Object {
+    Move-Item -Path $_.FullName -Destination '.' -Force
+}
 
-for /D %%a in (%src%\\*) do (
-    move %%a .
-)
+# 删除更新解压的临时文件夹
+Remove-Item -Path $src -Recurse -Force
 
-for %%a in (%src%\\*) do (
-    move %%a .
-)
+# 启动新版本的 Seraphine.exe
+Start-Process -FilePath ".\Seraphine.exe" -NoNewWindow
 
-@REM 删除原来的那堆东西
-rmdir %src% /s /q
+# 删除自身脚本文件
+Remove-Item -Path $MyInvocation.MyCommand.Definition -Force
 
-@REM 启动一下新版本
-start /b .\Seraphine.exe
-
-@REM 删除自己
-del %0
 '''
 
 
 def runUpdater():
-    with open("updater.bat", 'w', encoding='utf-8') as f:
+    with open("updater.ps1", 'w', encoding='utf-8') as f:
         f.write(bat)
 
-    subprocess.Popen("updater.bat")
+    subprocess.Popen("PowerShell.exe -ExecutionPolicy Bypass -File updater.ps1")
