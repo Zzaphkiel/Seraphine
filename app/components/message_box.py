@@ -75,6 +75,9 @@ class UpdateMessageBox(MessageBoxBase):
 
             self.myYesButton.setEnabled(False)
 
+        # 当前版本被禁用时, 不允许忽略版本
+        self.myCancelButton.setEnabled(not self.info["forbidden"])
+
     def __initLayout(self):
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.content)

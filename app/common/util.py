@@ -1,3 +1,5 @@
+import json
+
 import requests
 import base64
 import subprocess
@@ -7,7 +9,7 @@ from app.common.config import cfg, VERSION
 
 
 class Github:
-    def __init__(self, user="Zzaphkiel", repositories="Seraphine"):
+    def __init__(self, user="Hpero4", repositories="Seraphine"):
         self.githubApi = "http://api.github.com"
         self.giteeApi = "http://gitee.com/api"
 
@@ -34,9 +36,26 @@ class Github:
         """
         info = self.getReleasesInfo()
 
+        ver_info = self.__get_ver_info()
+        info["forbidden"] = ver_info.get("forbidden", False)
+
         if info.get("tag_name")[1:] != VERSION:
             return info
         return None
+
+    def __get_ver_info(self):
+        url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/ver.json'
+        if cfg.get(cfg.enableProxy):
+            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        else:
+            proxy = None
+
+        res = self.sess.get(url, proxies=proxy).json()
+
+        json_data = json.loads(str(base64.b64decode(res['content']), encoding='utf-8'))
+
+        return json_data.get(VERSION, {})
+
 
     def getNotice(self):
         url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/notice.md'
