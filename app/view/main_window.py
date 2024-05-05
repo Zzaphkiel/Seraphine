@@ -921,18 +921,16 @@ class MainWindow(FluentWindow):
         if ty in [ConnectionRefusedError, ClientConnectorError]:
             return
 
-        logger.error("connector call_stack -------------- ↓", "Crash")
+        logger.error(f"Exception occurred:\n{content}", "Crash")
+
         for call in connector.callStack:
             logger.error(call, "Crash")
-        logger.error("connector call_stack -------------- ↑", "Crash")
 
         logger.error(str(self.searchInterface), "Crash")
         logger.error(str(self.gameInfoInterface), "Crash")
         logger.error(str(self.careerInterface), "Crash")
         logger.error(str(self.auxiliaryFuncInterface), "Crash")
         logger.error(str(self.settingInterface), "Crash")
-
-        logger.error(f"Exception occurred: {content}")
 
         w = ExceptionMessageBox(title, content, self.window())
 
@@ -941,6 +939,7 @@ class MainWindow(FluentWindow):
 
         self.oldHook(ty, value, tb)
         signalBus.terminateListeners.emit()
+        logger.error("Abnormal exit", "Crash")
         sys.exit()
 
     def __onCurrentStackedChanged(self, index):
