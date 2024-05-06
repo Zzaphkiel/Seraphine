@@ -14,6 +14,19 @@ from .exceptions import SummonerRankInfoNotFound
 from ..common.config import cfg, Language
 from ..lol.connector import LolClientConnector, connector
 
+SERVERS_NAME = {
+    "NJ100": "联盟一区", "GZ100": "联盟二区", "CQ100": "联盟三区", "TJ100": "联盟四区", "TJ101": "联盟五区",
+    "HN10": "黑色玫瑰", "HN1": "艾欧尼亚", "BGP2": "峡谷之巅"
+}
+
+SERVERS_SUBSET = {
+    "NJ100": ["祖安", "皮尔特沃夫", "巨神峰", "教育网", "男爵领域", "均衡教派", "影流", "守望之海"],
+    "GZ100": ["卡拉曼达", "暗影岛", "征服之海", "诺克萨斯", "战争学院", "雷瑟守备"],
+    "CQ100": ["班德尔城", "裁决之地", "水晶之痕", "钢铁烈阳", "皮城警备"],
+    "TJ100": ["比尔吉沃特", "弗雷尔卓德", "扭曲丛林"],
+    "TJ101": ["德玛西亚", "无畏先锋", "恕瑞玛", "巨龙之巢"]
+}
+
 
 class ToolsTranslator(QObject):
     def __init__(self, parent=None):
