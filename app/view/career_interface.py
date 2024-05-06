@@ -23,7 +23,7 @@ from app.common.signals import signalBus
 from app.common.config import cfg
 from app.lol.connector import connector
 from app.lol.tools import (parseGames, parseSummonerData,
-                           getRecentTeammates, parseDetailRankInfo)
+                           getRecentTeammates, parseDetailRankInfo, SERVERS_NAME, SERVERS_SUBSET)
 from ..components.seraphine_interface import SeraphineInterface
 
 
@@ -55,10 +55,12 @@ class CareerInterface(SeraphineInterface):
                                      1,
                                      parent=self)
         self.name = NameLabel(self.tr("Connecting..."))
+        self.serviceLabel = QLabel()
         self.tagLineLabel = TagLineLabel()
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
         self.nameTagLineLayout = QVBoxLayout()
+        self.subtitleLayout = QHBoxLayout()
 
         self.buttonsLayout = QVBoxLayout()
         self.backToMeButton = PushButton(self.tr("Back to me"))
@@ -97,8 +99,12 @@ class CareerInterface(SeraphineInterface):
         self.__connectSignalToSlot()
 
     def __initWidget(self):
+        self.serviceLabel.setAlignment(Qt.AlignRight)
+        self.serviceLabel.setObjectName("tagLineLabel")
+        self.serviceLabel.setContentsMargins(0, 0, 5, 0)
+
         self.tagLineLabel.setVisible(False)
-        self.tagLineLabel.setAlignment(Qt.AlignCenter)
+        self.tagLineLabel.setAlignment(Qt.AlignLeft)
 
         self.copyButton.setFixedSize(26, 26)
         self.copyButton.setEnabled(False)
@@ -107,6 +113,7 @@ class CareerInterface(SeraphineInterface):
             ToolTipFilter(self.copyButton, 500, ToolTipPosition.TOP))
 
         self.name.setObjectName("name")
+        self.name.setAlignment(Qt.AlignCenter)
         self.tagLineLabel.setObjectName("tagLineLabel")
         self.nameLevelVLayout.setObjectName("nameLevelVLayout")
 
@@ -172,9 +179,13 @@ class CareerInterface(SeraphineInterface):
         self.initTableStyle()
 
     def __initLayout(self):
+        self.subtitleLayout.setContentsMargins(0, 0, 0, 0)
+        self.subtitleLayout.addWidget(self.serviceLabel)
+        self.subtitleLayout.addWidget(self.tagLineLabel)
+
         self.nameTagLineLayout.setContentsMargins(0, 0, 0, 0)
         self.nameTagLineLayout.addWidget(self.name)
-        self.nameTagLineLayout.addWidget(self.tagLineLabel)
+        self.nameTagLineLayout.addLayout(self.subtitleLayout)
         self.nameTagLineLayout.setSpacing(0)
 
         self.nameButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -403,6 +414,13 @@ class CareerInterface(SeraphineInterface):
         puuid = info['puuid']
         rankInfo = info['rankInfo']
         games = info['games']
+
+        self.serviceLabel.setText(SERVERS_NAME.get(connector.server) or connector.server)
+        subset = SERVERS_SUBSET.get(connector.server)
+        if subset:
+            self.serviceLabel.setToolTip(" ".join(subset))
+            self.serviceLabel.installEventFilter(
+                ToolTipFilter(self.serviceLabel, 500, ToolTipPosition.BOTTOM))
 
         if len(info['tagLine']):
             self.showTagLine = True
