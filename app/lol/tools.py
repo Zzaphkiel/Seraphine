@@ -1568,3 +1568,10 @@ async def fixLeagueClientWindow():
         return False
 
     return True
+
+
+async def fixLCUWindowViaExe():
+    zoom = await connector.getClientZoom()
+
+    ctypes.windll.shell32.ShellExecuteW(
+        None, "runas", "app\\resource\\bin\\fix_lcu_window.exe", f"{zoom}", None, 0)

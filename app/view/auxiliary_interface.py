@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayou
 from qasync import asyncSlot
 
 from ..components.seraphine_interface import SeraphineInterface
-from ..lol.tools import fixLeagueClientWindow
+from ..lol.tools import fixLCUWindowViaExe
 from ..common.icons import Icon
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
@@ -634,16 +634,7 @@ class FixClientDpiCard(SettingCard):
 
     @asyncSlot()
     async def __onButtonClicked(self):
-        if not await fixLeagueClientWindow():
-            InfoBar.error(
-                title=self.tr("Permission denied"),
-                content=self.tr("Failed to set window position"),
-                orient=Qt.Vertical,
-                isClosable=True,
-                position=InfoBarPosition.BOTTOM_RIGHT,
-                duration=5000,
-                parent=self.window().auxiliaryFuncInterface,
-            )
+        await fixLCUWindowViaExe()
 
 
 class CreatePracticeLobbyCard(ExpandGroupSettingCard):
