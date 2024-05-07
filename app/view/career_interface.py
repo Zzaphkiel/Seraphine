@@ -55,7 +55,7 @@ class CareerInterface(SeraphineInterface):
                                      1,
                                      parent=self)
         self.name = NameLabel(self.tr("Connecting..."))
-        self.serviceLabel = QLabel()
+        # self.serviceLabel = QLabel()
         self.tagLineLabel = TagLineLabel()
         self.copyButton = ToolButton(Icon.COPY)
         self.nameButtonLayout = QHBoxLayout()
@@ -99,12 +99,12 @@ class CareerInterface(SeraphineInterface):
         self.__connectSignalToSlot()
 
     def __initWidget(self):
-        self.serviceLabel.setAlignment(Qt.AlignRight)
-        self.serviceLabel.setObjectName("tagLineLabel")
-        self.serviceLabel.setContentsMargins(0, 0, 5, 0)
+        # self.serviceLabel.setAlignment(Qt.AlignRight)
+        # self.serviceLabel.setObjectName("tagLineLabel")
+        # self.serviceLabel.setContentsMargins(0, 0, 5, 0)
 
         self.tagLineLabel.setVisible(False)
-        self.tagLineLabel.setAlignment(Qt.AlignLeft)
+        self.tagLineLabel.setAlignment(Qt.AlignCenter)
 
         self.copyButton.setFixedSize(26, 26)
         self.copyButton.setEnabled(False)
@@ -180,7 +180,7 @@ class CareerInterface(SeraphineInterface):
 
     def __initLayout(self):
         self.subtitleLayout.setContentsMargins(0, 0, 0, 0)
-        self.subtitleLayout.addWidget(self.serviceLabel)
+        # self.subtitleLayout.addWidget(self.serviceLabel)
         self.subtitleLayout.addWidget(self.tagLineLabel)
 
         self.nameTagLineLayout.setContentsMargins(0, 0, 0, 0)
@@ -415,12 +415,13 @@ class CareerInterface(SeraphineInterface):
         rankInfo = info['rankInfo']
         games = info['games']
 
-        self.serviceLabel.setText(SERVERS_NAME.get(connector.server) or connector.server)
-        subset = SERVERS_SUBSET.get(connector.server)
-        if subset:
-            self.serviceLabel.setToolTip(" ".join(subset))
-            self.serviceLabel.installEventFilter(
-                ToolTipFilter(self.serviceLabel, 500, ToolTipPosition.BOTTOM))
+        # self.serviceLabel.setText(SERVERS_NAME.get(
+        #     connector.server) or connector.server)
+        # subset = SERVERS_SUBSET.get(connector.server)
+        # if subset:
+        #     self.serviceLabel.setToolTip(" ".join(subset))
+        #     self.serviceLabel.installEventFilter(
+        #         ToolTipFilter(self.serviceLabel, 500, ToolTipPosition.BOTTOM))
 
         if len(info['tagLine']):
             self.showTagLine = True

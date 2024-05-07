@@ -14,7 +14,7 @@ from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 from ..common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                                      FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                                     ToolTipFilter, FluentIcon)
+                                     ToolTipFilter, FluentIcon, ToolTipPosition)
 
 from .start_interface import StartInterface
 from .setting_interface import SettingInterface
@@ -38,7 +38,8 @@ from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
 from ..lol.connector import connector
 from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                          getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                         autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection)
+                         autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
+                         SERVERS_SUBSET)
 
 import threading
 
@@ -550,12 +551,28 @@ class MainWindow(FluentWindow):
                 icon = await connector.getProfileIcon(iconId)
                 name = (self.currentSummoner.get("gameName")
                         or self.currentSummoner['displayName'])
+
+                server = SERVERS_NAME.get(connector.server) or connector.server
+                name += self.tr(" (") + server + self.tr(")")
+
+                subset = SERVERS_SUBSET.get(connector.server)
+
+                if subset and not self.avatarWidget.toolTip():
+                    tooltip = self.tr(", ").join(subset)
+                    self.avatarWidget.setToolTip(tooltip)
+                    self.avatarWidget.installEventFilter(
+                        ToolTipFilter(self.avatarWidget, 0,
+                                      ToolTipPosition.TOP)
+                    )
+
             except:
                 icon = "app/resource/images/game.png"
                 name = self.tr("Start LOL")
+                self.avatarWidget.setToolTip("")
         else:
             icon = "app/resource/images/game.png"
             name = self.tr("Start LOL")
+            self.avatarWidget.setToolTip("")
 
         self.avatarWidget.avatar = QImage(icon).scaled(
             24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -892,7 +909,8 @@ class MainWindow(FluentWindow):
     async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.filterComboBox.setCurrentIndex(0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
+        self.searchInterface.filterComboBox.setCurrentIndex(
+            0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
 
         await self.searchInterface.searchAndShowFirstPage(self.careerInterface.puuid)
         # 先加载完再切换, 避免加载过程中换搜索目标导致puuid出错 -- By Hpero4
