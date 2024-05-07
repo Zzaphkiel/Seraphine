@@ -7,7 +7,7 @@ from ..common.qfluentwidgets import (
     SmoothScrollArea, PrimaryPushSettingCard,
     HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView,
     ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton,
-    qconfig, LineEdit, PushButton, IndicatorPosition)
+    qconfig, LineEdit, PushButton, IndicatorPosition, FluentIcon)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QHBoxLayout
@@ -177,6 +177,13 @@ class SettingInterface(SeraphineInterface):
             self.tr('Provide feedback'),
             self.tr('Help us improve Seraphine by providing feedback'),
             self.aboutGroup)
+        self.viewLogBtn = PushButton(FluentIcon.LINK, "View Log", self.feedbackCard)
+        self.viewLogBtn.clicked.connect(lambda: os.system(f'explorer {os.getcwd()}\\log'))
+        self.feedbackCard.hBoxLayout.removeWidget(self.feedbackCard.button)  # Note 它在右边会更协调些, 一会儿加回来
+        self.feedbackCard.hBoxLayout.addWidget(self.viewLogBtn)
+        self.feedbackCard.hBoxLayout.addSpacing(16)
+        self.feedbackCard.hBoxLayout.addWidget(self.feedbackCard.button)
+        self.feedbackCard.hBoxLayout.addSpacing(16)
         self.aboutCard = HyperlinkCard(
             GITHUB_URL, self.tr("View GitHub"), Icon.INFO, self.tr('About'),
             self.tr('Copyright') + ' © ' + f"{YEAR}, {AUTHOR}. " +
