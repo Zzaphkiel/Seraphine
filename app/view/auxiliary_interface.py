@@ -5,7 +5,8 @@ import stat
 from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                                      SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                                      PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                                     IndicatorPosition, InfoBar, InfoBarPosition, SpinBox, ExpandGroupSettingCard)
+                                     IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
+                                     ExpandGroupSettingCard)
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit
@@ -35,6 +36,8 @@ class AuxiliaryInterface(SeraphineInterface):
         self.gameGroup = SettingCardGroup(self.tr("Game"), self.scrollWidget)
         self.bpGroup = SettingCardGroup(
             self.tr("Ban / Pick"), self.scrollWidget)
+        self.clientGroup = SettingCardGroup(
+            self.tr("Client"), self.scrollWidget)
 
         self.onlineStatusCard = OnlineStatusCard(
             title=self.tr("Online status"),
@@ -63,11 +66,17 @@ class AuxiliaryInterface(SeraphineInterface):
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
             cfg.lockConfig, self.gameGroup)
+
         self.fixDpiCard = FixClientDpiCard(
             self.tr("Fix client window"),
             self.tr(
                 "Fix incorrect client window size caused by DirectX 9 (need UAC)"),
-            self.gameGroup
+            self.clientGroup
+        )
+        self.restartClientCard = RestartClientCard(
+            self.tr("Restart client"),
+            self.tr("Restart the LOL client without re queuing"),
+            self.clientGroup
         )
 
         self.createPracticeLobbyCard = CreatePracticeLobbyCard(
@@ -146,12 +155,15 @@ class AuxiliaryInterface(SeraphineInterface):
         self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
-        self.gameGroup.addSettingCard(self.fixDpiCard)
+
+        self.clientGroup.addSettingCard(self.fixDpiCard)
+        self.clientGroup.addSettingCard(self.restartClientCard)
 
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
         self.expandLayout.addWidget(self.bpGroup)
         self.expandLayout.addWidget(self.gameGroup)
+        self.expandLayout.addWidget(self.clientGroup)
         self.expandLayout.addWidget(self.profileGroup)
 
 
@@ -635,6 +647,23 @@ class FixClientDpiCard(SettingCard):
     @asyncSlot()
     async def __onButtonClicked(self):
         await fixLCUWindowViaExe()
+
+
+class RestartClientCard(SettingCard):
+
+    def __init__(self, title, content, parent):
+        super().__init__(Icon.ARROWREPEAT, title, content, parent)
+        self.pushButton = PushButton(self.tr("Restart"))
+        self.pushButton.setMinimumWidth(100)
+
+        self.hBoxLayout.addWidget(self.pushButton)
+        self.hBoxLayout.addSpacing(16)
+
+        self.pushButton.clicked.connect(self.__onButtonClicked)
+
+    @asyncSlot()
+    async def __onButtonClicked(self):
+        await connector.restartClient()
 
 
 class CreatePracticeLobbyCard(ExpandGroupSettingCard):
