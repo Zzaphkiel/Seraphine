@@ -88,6 +88,16 @@ class SettingInterface(SeraphineInterface):
             self.tr('The level of logging for Seraphine (take effect after restart)'),
             texts=["Debug", "Info", "Warning", "Error"],
             parent=self.generalGroup)
+        self.viewLogCard = PushSettingCard(
+            self.tr("Open"), Icon.DOCUMENT, self.tr("Log file"),
+            self.
+            tr("Open log directory"),
+            self.generalGroup)
+        self.viewLogCard.button.setFixedWidth(100)
+
+        # 这玩意左右 padding 大的离谱，手动给它改了
+        self.viewLogCard.button.setStyleSheet(
+            "QPushButton {padding-left: 0; padding-right: 0;}")
 
         self.enableStartLolWithApp = SwitchSettingCard(
             Icon.CIRCLERIGHT,
@@ -100,6 +110,11 @@ class SettingInterface(SeraphineInterface):
             self.
             tr("Delete all game resources (Apply it when game resources update)"
                ), self.generalGroup)
+
+        self.deleteResourceCard.button.setFixedWidth(100)
+        self.deleteResourceCard.button.setStyleSheet(
+            "QPushButton {padding-left: 0; padding-right: 0;}")
+
         self.enableCloseToTray = LooseSwitchSettingCard(
             Icon.EXIT,
             self.tr("Minimize to tray on close"),
@@ -172,18 +187,16 @@ class SettingInterface(SeraphineInterface):
             cfg.enableProxy, cfg.proxyAddr, self.updateGroup)
 
         self.aboutGroup = SettingCardGroup(self.tr("About"), self.scrollWidget)
+
         self.feedbackCard = PrimaryPushSettingCard(
             self.tr('Provide feedback'), Icon.FEEDBACK,
             self.tr('Provide feedback'),
             self.tr('Help us improve Seraphine by providing feedback'),
             self.aboutGroup)
-        self.viewLogBtn = PushButton(FluentIcon.LINK, "View Log", self.feedbackCard)
-        self.viewLogBtn.clicked.connect(lambda: os.system(f'explorer {os.getcwd()}\\log'))
-        self.feedbackCard.hBoxLayout.removeWidget(self.feedbackCard.button)  # Note 它在右边会更协调些, 一会儿加回来
-        self.feedbackCard.hBoxLayout.addWidget(self.viewLogBtn)
-        self.feedbackCard.hBoxLayout.addSpacing(16)
-        self.feedbackCard.hBoxLayout.addWidget(self.feedbackCard.button)
-        self.feedbackCard.hBoxLayout.addSpacing(16)
+
+        # 让它和上面的按钮宽度一样，看起来顺眼点
+        self.feedbackCard.button.setFixedWidth(100)
+
         self.aboutCard = HyperlinkCard(
             GITHUB_URL, self.tr("View GitHub"), Icon.INFO, self.tr('About'),
             self.tr('Copyright') + ' © ' + f"{YEAR}, {AUTHOR}. " +
@@ -227,6 +240,7 @@ class SettingInterface(SeraphineInterface):
         self.generalGroup.addSettingCard(self.enableCloseToTray)
         self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
         self.generalGroup.addSettingCard(self.logLevelCard)
+        self.generalGroup.addSettingCard(self.viewLogCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
@@ -263,6 +277,9 @@ class SettingInterface(SeraphineInterface):
         self.feedbackCard.clicked.connect(
             lambda: QDesktopServices.openUrl(QUrl(FEEDBACK_URL)))
         self.deleteResourceCard.clicked.connect(self.__showFlyout)
+        self.viewLogCard.clicked.connect(
+            lambda: os.system(f'explorer {os.getcwd()}\\log')
+        )
 
     def __onLolFolderCardClicked(self):
         folder = QFileDialog.getExistingDirectory(

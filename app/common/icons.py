@@ -57,6 +57,8 @@ class Icon(FluentIconBase, Enum):
     DUALSCREEN = 'DualScreen'
     CIRCLELINE = 'CircleLine'
     TEXTCHECK = 'TextCheck'
+    DOCUMENT = 'Document'
+    ARROWREPEAT = "ArrowRepeat"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'
