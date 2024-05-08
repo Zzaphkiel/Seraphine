@@ -1123,7 +1123,7 @@ class SearchInterface(SeraphineInterface):
 
             # 启动任务，往 gamesTab 里丢数据
             self.gameLoadingTask = asyncio.create_task(
-                self.__loadGames(puuid))
+                self.__loadGames(self.puuid))  # NOTE 既然创建新任务, 并且刷新了self.puuid 就应该用self的, 否则就违背了loadGames判断的初衷
 
         self.gamesView.gamesTab.showTheFirstPage()
         self.gamesView.setLoadingPageEnable(False)
