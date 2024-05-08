@@ -1,3 +1,4 @@
+import itertools
 import random
 import time
 import win32gui
@@ -1368,13 +1369,20 @@ async def autoPick(data, selection):
                     or bool(player["championPickIntent"])):
                 return
 
+    bans = itertools.chain(data["bans"]['myTeamBans'], data["bans"]['theirTeamBans'])
+    champion_names = cfg.get(cfg.autoSelectChampion).split('>')
+    champion_id = 0
+    for champion_name in champion_names:
+        cid = connector.manager.getChampionIdByName(champion_name)
+        if cid not in bans:
+            champion_id = cid
+            break
+
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action["actorCellId"] == localPlayerCellId
                     and action['type'] == "pick"):
-                championId = connector.manager.getChampionIdByName(
-                    cfg.get(cfg.autoSelectChampion))
-                await connector.selectChampion(action['id'], championId)
+                await connector.selectChampion(action['id'], champion_id)
 
                 selection.isChampionPicked = True
                 return True

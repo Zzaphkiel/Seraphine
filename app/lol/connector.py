@@ -1064,5 +1064,10 @@ class JsonManager:
     def getChampionIdByName(self, championName):
         return self.champions[championName]["id"]
 
+    def getChampionNameById(self, championId):
+        for cid in self.champs.keys():
+            if cid == championId:
+                return self.champs[cid]
+
 
 connector = LolClientConnector()

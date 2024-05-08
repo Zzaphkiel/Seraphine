@@ -463,7 +463,6 @@ class MainWindow(FluentWindow):
         self.__setLolInstallFolder(folder)
 
         self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
-        self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
