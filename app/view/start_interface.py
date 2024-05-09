@@ -97,10 +97,12 @@ class StartInterface(SeraphineInterface):
 
     def __onPushButtonClicked(self):
         if self.loading:
-            path = f'{cfg.get(cfg.lolFolder)}/client.exe'
-            if os.path.exists(path):
-                os.popen(f'"{path}"')
-                self.__showStartLolSuccessInfo()
+            for clientName in ("client.exe", "LeagueClient.exe"):
+                path = f'{cfg.get(cfg.lolFolder)}/{clientName}'
+                if os.path.exists(path):
+                    os.popen(f'"{path}"')
+                    self.__showStartLolSuccessInfo()
+                    break
             else:
                 self.__showLolClientPathErrorInfo()
         else:

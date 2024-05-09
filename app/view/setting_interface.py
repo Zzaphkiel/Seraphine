@@ -291,6 +291,7 @@ class SettingInterface(SeraphineInterface):
 
         cfg.set(cfg.lolFolder, folder)
         self.lolFolderCard.setContent(folder)
+        self.window().startInterface.label2.setText(folder)
 
     def __showRestartToolTip(self):
         InfoBar.success(self.tr("Updated successfully"),
