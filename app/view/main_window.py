@@ -949,6 +949,8 @@ class MainWindow(FluentWindow):
         logger.error(str(self.auxiliaryFuncInterface), "Crash")
         logger.error(str(self.settingInterface), "Crash")
 
+        content = f"Seraphine ver.{VERSION}\n{'-'*5}\n{content}"
+
         w = ExceptionMessageBox(title, content, self.window())
 
         if w.exec():
