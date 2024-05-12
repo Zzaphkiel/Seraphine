@@ -22,7 +22,7 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
-from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly
+from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly, AramHome
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
@@ -467,6 +467,9 @@ class MainWindow(FluentWindow):
         self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
+        # 加载大乱斗buff -- By Hpero4
+        aramInitT = asyncio.create_task(AramHome.checkAndUpdate())
+
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
         #     t = self.__onGameStatusChanged(status)
@@ -495,6 +498,7 @@ class MainWindow(FluentWindow):
 
         t = self.__onGameStatusChanged(status)
         self.__unlockInterface()
+        await aramInitT
         await t
 
     async def __startConnector(self, pid):

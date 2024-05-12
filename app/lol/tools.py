@@ -773,7 +773,7 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
                  for summoner in summoners}
     order = [summoner['summonerId'] for summoner in summoners]
 
-    return {'summoners': summoners, 'champions': champions, 'order': order}
+    return {'summoners': summoners, 'champions': champions, 'order': order, "isAram": session.get('benchEnabled', False)}
 
 
 def parseSummonerOrder(team):

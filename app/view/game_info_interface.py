@@ -20,6 +20,7 @@ from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
+from ..common.util import AramHome
 from ..components.seraphine_interface import SeraphineInterface
 
 
@@ -28,6 +29,7 @@ class GameInfoInterface(SeraphineInterface):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.isAram = False
         self.hBoxLayout = QHBoxLayout(self)
 
         self.summonersView = SummonersView()
@@ -84,11 +86,13 @@ class GameInfoInterface(SeraphineInterface):
         if not info or len(info['summoners']) > 5:
             return
 
+        self.isAram = info.get("isAram", False)
+
         self.allyChampions = info['champions']
         self.allyOrder = info['order']
 
         # 概览栏 (左侧)
-        self.summonersView.ally.updateSummoners(info['summoners'])
+        self.summonersView.ally.updateSummoners(info['summoners'], self.isAram)
         # 战绩栏 (右侧)
         self.allyGamesView.updateSummoners(info['summoners'])
 
@@ -125,10 +129,14 @@ class GameInfoInterface(SeraphineInterface):
                 icon = await connector.getChampionIcon(newChampionId)
                 self.allyChampions[summonerId] = newChampionId
                 view.updateIcon(icon)
+                if self.isAram:
+                    view.updateAramInfo(AramHome.getInfoByHeroId(str(newChampionId)))
 
     async def clear(self):
         self.allyChampions = {}
         self.allyOrder = []
+
+        self.isAram = False
 
         self.summonersView.ally.clear()
         self.summonersView.enemy.clear()
@@ -258,14 +266,19 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
             self.vBoxLayout.addStretch(5 - len(order))
 
-    def updateSummoners(self, summoners):
+    def updateSummoners(self, summoners, isAram=False):
         self.clear()
 
         for summoner in summoners:
             if not summoner:
                 continue
 
-            summonerView = SummonerInfoView(summoner, self)
+            if isAram and summoner["championId"]:
+                aramInfo = AramHome.getInfoByHeroId(str(summoner["championId"]))
+            else:
+                aramInfo = None
+
+            summonerView = SummonerInfoView(summoner, aramInfo, self)
 
             # 用 summonerId 避免空字符串
             self.items[summoner["summonerId"]] = summonerView
@@ -304,14 +317,14 @@ class SummonerInfoView(ColorAnimationFrame):
     显示了 KDA, 召唤师名称, 经验, 头像 等信息
     """
 
-    def __init__(self, info: dict, parent=None):
+    def __init__(self, info: dict, aramInfo=None, parent=None):
         super().__init__(type='default', parent=parent)
         self._pressedBackgroundColor = self._hoverBackgroundColor
         self.hBoxLayout = QHBoxLayout(self)
         self.icon = RoundLevelAvatar(info['icon'],
                                      info['xpSinceLastLevel'],
                                      info['xpUntilNextLevel'],
-                                     70, info["level"])
+                                     70, info["level"], aramInfo=aramInfo)
 
         self.infoVBoxLayout = QVBoxLayout()
 
@@ -460,6 +473,9 @@ class SummonerInfoView(ColorAnimationFrame):
 
     def updateIcon(self, iconPath: str):
         self.icon.updateIcon(iconPath)
+
+    def updateAramInfo(self, info):
+        self.icon.updateAramInfo(info)
 
 
 class SummonersGamesView(QFrame):
