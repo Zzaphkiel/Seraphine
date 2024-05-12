@@ -178,7 +178,8 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 
 ## 交流群
 - Seraphine 交流 1 群（QQ）：[727219078](https://qm.qq.com/cgi-bin/qm/qr?k=Mwab2whh-JA0iN8Mo2tH7aTuPq1g_it_&jump_from=webapi&authKey=jxyQ13rrw9zoOneS0C4fg5aKLjQjS3jIvk5ZNhbtojO++rroMjapo039n7x88nuM) （已满）
-- Seraphine 交流 2 群（QQ）：[713137623](https://qm.qq.com/cgi-bin/qm/qr?k=zypLD0CKYoyZFr5zTzMQLCVqadOTNoEI&jump_from=webapi&authKey=AXbec8gokYxzCmcpfPJ7IIYyq1Bcp4mvthZ7+98zzKCup9jnujz0DW+OyC+EbhZL)
+- Seraphine 交流 2 群（QQ）：[713137623](https://qm.qq.com/cgi-bin/qm/qr?k=zypLD0CKYoyZFr5zTzMQLCVqadOTNoEI&jump_from=webapi&authKey=AXbec8gokYxzCmcpfPJ7IIYyq1Bcp4mvthZ7+98zzKCup9jnujz0DW+OyC+EbhZL) （已满）
+- Seraphine 交流 3 群（QQ）：[960701964](https://qm.qq.com/cgi-bin/qm/qr?k=3xZaM9nJAyfSnsnUvG-8uFeKrc2Oqtxa&jump_from=webapi&authKey=YisQRRT0pKOSJyUyz3Mm1SNqBzFDgW/9gYb+O4liOSPM6q9/eIcp4qBdIWdWxH2I)
 
 
 ## 许可证 ⚖️
