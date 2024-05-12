@@ -988,7 +988,11 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
                                 if game["queueId"] in (420, 440):
                                     origGamesInfo['games'].append(game)
 
-                        page_index += 1
+                        # 最多只查5页，防止遇到很久不打排位的人非常耗时
+                        if page_index >= 5:
+                            break
+                        else:
+                            page_index += 1
             except SummonerGamesNotFound:
                 pass
             finally:
