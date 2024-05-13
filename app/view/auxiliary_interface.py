@@ -1104,7 +1104,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         text = self.lineEdit.text()
 
         if text not in self.champions and self.enableButton.checked:
-            self.setValue("", False, False)
+            self.setValue("", False, False, self.randomSkinBtn.isChecked())
 
         self.__onLineEditTextChanged(text)
         self.__onEnableBtnCheckedChanged(self.enableButton.isChecked())
