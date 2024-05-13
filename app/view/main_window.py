@@ -78,8 +78,9 @@ class MainWindow(FluentWindow):
             target=self.checkUpdate, parent=self)
         self.checkNoticeThread = StoppableThread(
             target=lambda: self.checkNotice(False), parent=self)
-        self.minimizeThread = StoppableThread(
-            target=self.gameStartMinimize, parent=self)
+        # 该功能不再支持 -- By Hpero4
+        # self.minimizeThread = StoppableThread(
+        #     target=self.gameStartMinimize, parent=self)
 
         logger.critical("Seraphine listerners started", TAG)
 
@@ -431,7 +432,7 @@ class MainWindow(FluentWindow):
         self.processListener.start()
         self.checkUpdateThread.start()
         self.checkNoticeThread.start()
-        self.minimizeThread.start()
+        # self.minimizeThread.start()  # 该功能不再支持 -- By Hpero4
 
     async def __changeCareerToCurrentSummoner(self):
         summoner = await connector.getCurrentSummoner()
@@ -671,13 +672,12 @@ class MainWindow(FluentWindow):
     def __lockInterface(self):
         self.searchInterface.setEnabled(False)
         self.auxiliaryFuncInterface.setEnabled(False)
-        # pass
 
     def __terminateListeners(self):
         self.processListener.terminate()
         self.checkUpdateThread.terminate()
         self.checkNoticeThread.terminate()
-        self.minimizeThread.terminate()
+        # self.minimizeThread.terminate()  # 该功能不再支持 -- By Hpero4
 
     @asyncClose
     async def closeEvent(self, a0) -> None:

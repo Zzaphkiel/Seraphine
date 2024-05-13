@@ -238,7 +238,7 @@ class SettingInterface(SeraphineInterface):
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
-        self.generalGroup.addSettingCard(self.gameStartMinimizeCard)
+        # self.generalGroup.addSettingCard(self.gameStartMinimizeCard)  # 该功能不再支持, 隐藏它 -- By Hpero4
         self.generalGroup.addSettingCard(self.logLevelCard)
         self.generalGroup.addSettingCard(self.viewLogCard)
 
