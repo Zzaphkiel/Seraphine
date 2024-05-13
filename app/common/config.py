@@ -84,6 +84,8 @@ class Config(QConfig):
                                                   "EnableAutoSelectTimeoutCompleted", False,
                                                   BoolValidator())
 
+    enableRandomSkin = ConfigItem("Functions", "enableRandomSkin", False, BoolValidator())
+
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
 

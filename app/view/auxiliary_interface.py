@@ -111,7 +111,7 @@ class AuxiliaryInterface(SeraphineInterface):
             self.tr("Auto select champion"),
             self.tr("Auto select champion when your selection begin"),
             cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
-            cfg.enableAutoSelectTimeoutCompleted,
+            cfg.enableAutoSelectTimeoutCompleted, cfg.enableRandomSkin,
             self.bpGroup)
         self.autoBanChampionCard = AutoBanChampionCard(
             self.tr("Auto ban champion"),
@@ -981,9 +981,12 @@ class AutoAcceptSwapingCard(ExpandGroupSettingCard):
 
 # 自动选择英雄卡片
 class AutoSelectChampionCard(ExpandGroupSettingCard):
-    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
+    def __init__(self, title, content=None,
+                 enableConfigItem: ConfigItem = None,
                  championConfigItem: ConfigItem = None,
-                 timeoutCompletedCfgItem: ConfigItem = None, parent=None):
+                 timeoutCompletedCfgItem: ConfigItem = None,
+                 randomSkinCfgItem: ConfigItem=None,
+                 parent=None):
         super().__init__(Icon.CHECK, title, content, parent)
 
         self.statusLabel = QLabel(self)
@@ -1006,12 +1009,16 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.timeoutCompletedBtn = SwitchButton(
             indicatorPos=IndicatorPosition.RIGHT)
 
+        self.randomSkinLabel = QLabel("【选择困难福音】随机选一个已拥有皮肤（包括炫彩）：")
+        self.randomSkinBtn = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
+
         self.completer = None
         self.champions = []
 
         self.enableConfigItem = enableConfigItem
         self.championConfigItem = championConfigItem
         self.timeoutCompletedCfgItem = timeoutCompletedCfgItem
+        self.randomSkinCfgItem = randomSkinCfgItem
 
         self.__initLayout()
         self.__initWidget()
@@ -1035,6 +1042,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.timeoutCompletedLabel, 1, 0, Qt.AlignLeft)
         self.switchButtonLayout.addWidget(
             self.timeoutCompletedBtn, 1, 1, Qt.AlignRight)
+        self.switchButtonLayout.addWidget(self.randomSkinLabel, 2, 0, Qt.AlignLeft)
+        self.switchButtonLayout.addWidget(self.randomSkinBtn, 2, 1, Qt.AlignRight)
 
         self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
         self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
@@ -1054,13 +1063,15 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
         self.setValue(qconfig.get(self.championConfigItem),
                       qconfig.get(self.enableConfigItem),
-                      qconfig.get(self.timeoutCompletedCfgItem))
+                      qconfig.get(self.timeoutCompletedCfgItem),
+                      qconfig.get(self.randomSkinCfgItem))
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.enableButton.checkedChanged.connect(
             self.__onEnableBtnCheckedChanged)
         self.timeoutCompletedBtn.checkedChanged.connect(
             self.__onTimeoutCompletedBtnCheckedChanged)
+        self.randomSkinBtn.checkedChanged.connect(self._onclick_random_skin)
 
     def __setStatusLabelText(self, champion, isChecked):
         if isChecked:
@@ -1076,14 +1087,16 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
         self.validate()
 
-    def setValue(self, championName: str, isChecked: bool, isTimeoutCompleted: bool):
+    def setValue(self, championName: str, isChecked: bool, isTimeoutCompleted: bool, isRandomSkin: bool):
         qconfig.set(self.championConfigItem, championName)
         qconfig.set(self.enableConfigItem, isChecked)
         qconfig.set(self.timeoutCompletedCfgItem, isTimeoutCompleted)
+        qconfig.set(self.randomSkinCfgItem, isRandomSkin)
 
         self.lineEdit.setText(championName)
         self.enableButton.setChecked(isChecked)
         self.timeoutCompletedBtn.setChecked(isTimeoutCompleted)
+        self.randomSkinBtn.setChecked(isRandomSkin)
 
         self.__setStatusLabelText(championName, isChecked)
 
@@ -1102,7 +1115,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.enableButton.setEnabled(enable)
 
         self.setValue(text, self.enableButton.isChecked(),
-                      self.timeoutCompletedBtn.isChecked())
+                      self.timeoutCompletedBtn.isChecked(),
+                      self.randomSkinBtn.isChecked())
 
     def __onEnableBtnCheckedChanged(self, isChecked: bool):
         self.lineEdit.setEnabled(not isChecked)
@@ -1112,11 +1126,19 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.timeoutCompletedBtn.setChecked(False)
 
         self.setValue(self.lineEdit.text(), isChecked,
-                      self.timeoutCompletedBtn.isChecked())
+                      self.timeoutCompletedBtn.isChecked(),
+                      self.randomSkinBtn.isChecked())
 
     def __onTimeoutCompletedBtnCheckedChanged(self, isChecked: bool):
         self.setValue(self.lineEdit.text(),
-                      self.enableButton.isChecked(), isChecked)
+                      self.enableButton.isChecked(), isChecked,
+                      self.randomSkinBtn.isChecked())
+
+    def _onclick_random_skin(self, isChecked: bool):
+        self.setValue(self.lineEdit.text(),
+                      self.enableButton.isChecked(),
+                      self.timeoutCompletedBtn.isChecked(),
+                      isChecked)
 
 
 # 自动 ban 英雄卡片

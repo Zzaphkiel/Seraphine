@@ -1454,9 +1454,8 @@ async def rollAndSwapBack():
 async def autoSelectSkinRandom(data, selection):
     """
     随机选皮肤
-    todo: 界面
     """
-    isAutoSelectSkinRandom = False  # todo: 读取配置
+    isAutoSelectSkinRandom = cfg.get(cfg.enableRandomSkin)
     if not isAutoSelectSkinRandom or selection.isSkinPicked:
         return
 
