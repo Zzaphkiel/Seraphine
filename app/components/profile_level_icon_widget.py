@@ -1,9 +1,10 @@
 import sys
 
 from PyQt5.QtCore import Qt, QRectF, QPoint
-from PyQt5.QtGui import QPainter, QPainterPath, QPen, QFont, QPixmap
+from PyQt5.QtGui import QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QLabel, QVBoxLayout, QGridLayout
 
+from app.common.util import AramHome
 from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor, \
     FlyoutViewBase, TextWrap
 
@@ -80,6 +81,8 @@ class RoundLevelAvatar(QWidget):
         self.mFlyout = None
         self.aramInfo = aramInfo
 
+        # self.aramInfo = AramHome.getInfoByHeroId("75")  # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
+
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
             self.progressRing.setVal(self.xpSinceLastLevel * 100 //
@@ -141,7 +144,7 @@ class RoundLevelAvatar(QWidget):
                 self.mFlyout = AramFlyout(
                     info=self.aramInfo,
                     target=self,
-                    parent=self.window()
+                    parent=None
                 )
                 self.mFlyout.show()
                 # TODO Animation -- By Hpero4
@@ -160,6 +163,13 @@ class RoundLevelAvatar(QWidget):
 class AramFlyout(FlyoutViewBase):
     def __init__(self, info, target, parent=None):
         super().__init__(parent=parent)
+
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
+
         self.info = info
         self.target = target
 
@@ -199,9 +209,8 @@ class AramFlyout(FlyoutViewBase):
 
     def calcPoints(self):
         pos = self.target.mapToGlobal(QPoint())
-        windowPos = self.window().mapToGlobal(QPoint())
-        x = pos.x() + self.target.width() // 2 - self.sizeHint().width() // 2 - windowPos.x()
-        y = pos.y() - self.sizeHint().height() - 12 - windowPos.y()
+        x = pos.x() + self.target.width() // 2 - self.sizeHint().width() // 2
+        y = pos.y() - self.sizeHint().height() - 12
 
         if x < 5:
             x = 5
