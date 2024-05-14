@@ -18,6 +18,7 @@ class StyleSheet(StyleSheetBase, Enum):
     SEARCH_INTERFACE = 'search_interface'
     GAME_INFO_INTERFACE = 'game_info_interface'
     AUXILIARY_INTERFACE = 'auxiliary_interface'
+    ARAM_FLYOUT = 'aram_flyout'
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
@@ -148,6 +149,12 @@ def __getDefaultColor():
     ) else QColor(0, 0, 0, 25)
 
     return color, c1, c2, c3
+
+
+@colorManager.registerColor("text")
+def __getTextColor():
+    color = QColor('white') if isDarkTheme() else QColor('black')
+    return color, color, color, color
 
 
 @colorManager.registerColor('team1')
