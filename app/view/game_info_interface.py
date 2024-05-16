@@ -82,7 +82,7 @@ class GameInfoInterface(SeraphineInterface):
             self.allyGamesView.updateOrder(order)
             self.allyOrder = order
 
-    def updateAllySummoners(self, info):
+    async def updateAllySummoners(self, info):
         if not info or len(info['summoners']) > 5:
             return
 
@@ -94,18 +94,18 @@ class GameInfoInterface(SeraphineInterface):
         # 概览栏 (左侧)
         self.summonersView.ally.updateSummoners(info['summoners'], self.isAram)
         # 战绩栏 (右侧)
-        self.allyGamesView.updateSummoners(info['summoners'])
+        await self.allyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
         self.summonersView.allyButton.setEnabled(True)
 
-    def updateEnemySummoners(self, info):
+    async def updateEnemySummoners(self, info):
         if not info or len(info['summoners']) > 5:
             return
 
         self.summonersView.enemy.updateSummoners(info['summoners'])
-        self.enemyGamesView.updateSummoners(info['summoners'])
+        await self.enemyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
@@ -515,13 +515,17 @@ class SummonersGamesView(QFrame):
             self.hBoxLayout.addSpacing(self.hBoxLayout.spacing())
             self.hBoxLayout.addStretch(5 - len(order))
 
-    def updateSummoners(self, summoners):
+    async def updateSummoners(self, summoners):
         self.clear()
 
         for i, summoner in enumerate(summoners):
             if not summoner:
                 continue
-
+            if summoner["tagLine"] is None or len(str(summoner["tagLine"]).strip()) == 0:
+                # 现在全区都有编号了 万一对局信息中没包含编号 走别的接口单独查一次
+                if summoner['puuid'] and len(str(summoner['puuid']).strip()) != 0:
+                    summonerForTagLine = await connector.getSummonerByPuuid(summoner['puuid'])
+                    summoner['tagLine'] = summonerForTagLine['tagLine']
             games = Games(summoner)
             self.items[summoner["summonerId"]] = games
 
