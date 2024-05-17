@@ -609,6 +609,9 @@ class Games(QFrame):
                     else:
                         self.summonerName.setEnabled(True)
                         return
+                else:
+                    self.summonerName.setEnabled(True)
+                    return
             self.qtimerSummonerNameClick.singleShot(1000, lambda: self.summonerName.setEnabled(True))
             signalBus.toSearchInterface.emit(self.summonerName.text())
 
