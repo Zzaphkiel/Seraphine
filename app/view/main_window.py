@@ -822,7 +822,7 @@ class MainWindow(FluentWindow):
 
         currentSummonerId = self.currentSummoner['summonerId']
         info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
-        await self.gameInfoInterface.updateAllySummoners(info)
+        self.gameInfoInterface.updateAllySummoners(info)
 
         self.checkAndSwitchTo(self.gameInfoInterface)
 
@@ -867,7 +867,7 @@ class MainWindow(FluentWindow):
 
             info = await parseGameInfoByGameflowSession(
                 session, currentSummonerId, "ally", useSGP=True)
-            await self.gameInfoInterface.updateAllySummoners(info)
+            self.gameInfoInterface.updateAllySummoners(info)
 
         # 将敌方的召唤师基本信息绘制上去
         async def paintEnemySummonersInfo():
@@ -875,7 +875,7 @@ class MainWindow(FluentWindow):
                 session, currentSummonerId, 'enemy', useSGP=True)
 
             # 这个 info 是已经按照游戏位置排序过的了（若排位）
-            await self.gameInfoInterface.updateEnemySummoners(info)
+            self.gameInfoInterface.updateEnemySummoners(info)
 
         # 更新己方召唤师楼层顺序至角色顺序
         async def sortAllySummonersByGameRole():

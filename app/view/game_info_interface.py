@@ -1,11 +1,12 @@
 import copy
 from typing import Dict
 
-from PyQt5.QtCore import pyqtSignal, Qt, QPropertyAnimation, QRect
+from PyQt5.QtCore import pyqtSignal, Qt, QPropertyAnimation, QRect, QTimer
 from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QFrame, QVBoxLayout,
                              QSpacerItem, QSizePolicy, QStackedWidget,
                              QGridLayout, QSplitter, QApplication, QWidget)
 from PyQt5.QtGui import QPixmap, QFont, QPainter, QColor, QPalette, QImage, QFontMetrics
+from qasync import asyncSlot
 
 from ..common.qfluentwidgets import (SmoothScrollArea, TransparentTogglePushButton,
                                      ToolTipFilter, ToolTipPosition, setCustomStyleSheet)
@@ -82,7 +83,7 @@ class GameInfoInterface(SeraphineInterface):
             self.allyGamesView.updateOrder(order)
             self.allyOrder = order
 
-    async def updateAllySummoners(self, info):
+    def updateAllySummoners(self, info):
         if not info or len(info['summoners']) > 5:
             return
 
@@ -94,18 +95,18 @@ class GameInfoInterface(SeraphineInterface):
         # 概览栏 (左侧)
         self.summonersView.ally.updateSummoners(info['summoners'], self.isAram)
         # 战绩栏 (右侧)
-        await self.allyGamesView.updateSummoners(info['summoners'])
+        self.allyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
         self.summonersView.allyButton.setEnabled(True)
 
-    async def updateEnemySummoners(self, info):
+    def updateEnemySummoners(self, info):
         if not info or len(info['summoners']) > 5:
             return
 
         self.summonersView.enemy.updateSummoners(info['summoners'])
-        await self.enemyGamesView.updateSummoners(info['summoners'])
+        self.enemyGamesView.updateSummoners(info['summoners'])
 
         self.summonersView.allyButton.setVisible(True)
         self.summonersView.enemyButton.setVisible(True)
@@ -515,17 +516,12 @@ class SummonersGamesView(QFrame):
             self.hBoxLayout.addSpacing(self.hBoxLayout.spacing())
             self.hBoxLayout.addStretch(5 - len(order))
 
-    async def updateSummoners(self, summoners):
+    def updateSummoners(self, summoners):
         self.clear()
 
         for i, summoner in enumerate(summoners):
             if not summoner:
                 continue
-            if summoner["tagLine"] is None or len(str(summoner["tagLine"]).strip()) == 0:
-                # 现在全区都有编号了 万一对局信息中没包含编号 走别的接口单独查一次
-                if summoner['puuid'] and len(str(summoner['puuid']).strip()) != 0:
-                    summonerForTagLine = await connector.getSummonerByPuuid(summoner['puuid'])
-                    summoner['tagLine'] = summonerForTagLine['tagLine']
             games = Games(summoner)
             self.items[summoner["summonerId"]] = games
 
@@ -562,6 +558,8 @@ class Games(QFrame):
 
         self.gamesLayout = QVBoxLayout()
 
+        self.qtimerSummonerNameClick = QTimer()
+
         # self.setSizePolicy(QSizePolicy.Policy.Expanding,
         #                    QSizePolicy.Policy.Fixed)
 
@@ -570,12 +568,13 @@ class Games(QFrame):
         nameColor = None
         if fateFlag:
             nameColor = "#bf242a" if fateFlag == "enemy" else "#057748"
+        self.summonerPuuid = summoner['puuid']
         self.summonerName = SummonerName(
-            name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'], tips=summoner["recentlyChampionName"])
+            name, isPublic=summoner["isPublic"], color=nameColor, tagLine=summoner['tagLine'],
+            tips=summoner["recentlyChampionName"])
         self.summonerName.setObjectName("summonerName")
 
-        self.summonerName.clicked.connect(
-            lambda: signalBus.toSearchInterface.emit(self.summonerName.text()))
+        self.summonerName.clicked.connect(self.__onSummonerNameClicked)
 
         self.summonerName.setFixedHeight(60)
 
@@ -595,6 +594,23 @@ class Games(QFrame):
         if len(games) < 11:
             self.gamesLayout.addStretch(11-len(games))
             self.gamesLayout.addSpacing(5)
+
+    @asyncSlot()
+    async def __onSummonerNameClicked(self):
+        if not self.qtimerSummonerNameClick.isActive():  # 防止短时间内多次点击
+            self.summonerName.setDisabled(True)
+            tagLine = self.summonerName.tagLine
+            if tagLine is None or len(str(tagLine).strip()) == 0:
+                # 现在全区都有编号了 万一对局信息中没包含编号 走别的接口单独查一次
+                if self.summonerPuuid and len(str(self.summonerPuuid).strip()) != 0:
+                    summonerForTagLine = await connector.getSummonerByPuuid(self.summonerPuuid)
+                    if summonerForTagLine['tagLine'] and len(str(summonerForTagLine['tagLine'])) != 0:
+                        self.summonerName.tagLine = summonerForTagLine['tagLine']
+                    else:
+                        self.summonerName.setEnabled(True)
+                        return
+            self.qtimerSummonerNameClick.singleShot(1000, lambda: self.summonerName.setEnabled(True))
+            signalBus.toSearchInterface.emit(self.summonerName.text())
 
 
 class GameTab(ColorAnimationFrame):
