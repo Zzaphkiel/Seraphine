@@ -5,8 +5,10 @@ from PyQt5.QtGui import QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QLabel, QVBoxLayout, QGridLayout
 
 from app.common.util import AramHome
-from ..common.qfluentwidgets import ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor, \
-    FlyoutViewBase, TextWrap
+from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor,
+                                       FlyoutViewBase, TextWrap)
+from app.components.color_label import ColorLabel
+from app.common.style_sheet import StyleSheet
 
 
 class ProgressArc(ProgressRing):
@@ -81,7 +83,8 @@ class RoundLevelAvatar(QWidget):
         self.mFlyout = None
         self.aramInfo = aramInfo
 
-        # self.aramInfo = AramHome.getInfoByHeroId("75")  # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
+        # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
+        # self.aramInfo = AramHome.getInfoByHeroId("75")
 
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
@@ -168,7 +171,6 @@ class AramFlyout(FlyoutViewBase):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setStyleSheet("background-color: rgba(255, 255, 255, 0);")
 
         self.info = info
         self.target = target
@@ -185,27 +187,35 @@ class AramFlyout(FlyoutViewBase):
         self.vBoxLayout = QVBoxLayout(self)
         self.gridBox = QGridLayout()
 
-        self.titleLabel = QLabel(self)  # 英雄名字(带称号)
-        self.damageDealtLabel = QLabel(self.tr('Damage Dealt'), self)  # 造成伤害的权重
-        self.damageReceivedLabel = QLabel(self.tr('Damage Received'), self)  # 受到伤害的权重
-        self.healingIncreaseLabel = QLabel(self.tr('Healing Increase'), self)  # 治疗增益的权重
-        self.shieldIncreaseLabel = QLabel(self.tr('Shield Increase'), self)  # 护盾增益的权重
-        self.abilityHasteLabel = QLabel(self.tr('Ability Haste'), self)  # 技能急速的权重, 是正向属性, 值越大cd越短
-        self.tenacityLabel = QLabel(self.tr('Tenacity'), self)  # 韧性的权重
+        self.titleLabel = QLabel(parent=self)  # 英雄名字(带称号)
+        self.damageDealtLabel = QLabel(
+            self.tr('Damage Dealt: '), parent=self)  # 造成伤害的权重
+        self.damageReceivedLabel = QLabel(
+            self.tr('Damage Received: '), parent=self)  # 受到伤害的权重
+        self.healingIncreaseLabel = QLabel(
+            self.tr('Healing Increase: '), parent=self)  # 治疗增益的权重
+        self.shieldIncreaseLabel = QLabel(
+            self.tr('Shield Increase: '), parent=self)  # 护盾增益的权重
+        self.abilityHasteLabel = QLabel(
+            self.tr('Ability Haste: '), parent=self)  # 技能急速的权重, 是正向属性, 值越大cd越短
+        self.tenacityLabel = QLabel(
+            self.tr('Tenacity: '), parent=self)  # 韧性的权重
 
-        self.damageDealtValueLabel = QLabel(self)  # 造成伤害的权重
-        self.damageReceivedValueLabel = QLabel(self)  # 受到伤害的权重
-        self.healingIncreaseValueLabel = QLabel(self)  # 治疗增益的权重
-        self.shieldIncreaseValueLabel = QLabel(self)  # 护盾增益的权重
-        self.abilityHasteValueLabel = QLabel(self)  # 技能急速的权重, 是正向属性, 值越大cd越短
-        self.tenacityValueLabel = QLabel(self)  # 韧性的权重
+        self.damageDealtValueLabel = ColorLabel(parent=self)  # 造成伤害的权重
+        self.damageReceivedValueLabel = ColorLabel(parent=self)  # 受到伤害的权重
+        self.healingIncreaseValueLabel = ColorLabel(parent=self)  # 治疗增益的权重
+        self.shieldIncreaseValueLabel = ColorLabel(parent=self)  # 护盾增益的权重
+        self.abilityHasteValueLabel = ColorLabel(
+            parent=self)  # 技能急速的权重, 是正向属性, 值越大cd越短
+        self.tenacityValueLabel = ColorLabel(parent=self)  # 韧性的权重
 
-        self.descriptionLabel = QLabel(self)  # 额外调整
-        self.powerByLabel = QLabel("Power By jddld.com", self)
+        self.descriptionLabel = QLabel(parent=self)  # 额外调整
+        self.powerByLabel = QLabel(self.tr("Powered by: jddld.com"))
 
         self.updateInfo(info)
 
         self.__initWidgets()
+        StyleSheet.ARAM_FLYOUT.apply(self)
 
     def calcPoints(self):
         pos = self.target.mapToGlobal(QPoint())
@@ -218,6 +228,26 @@ class AramFlyout(FlyoutViewBase):
         return QPoint(x, y)
 
     def __initWidgets(self):
+        self.titleLabel.setObjectName("titleLabel")
+
+        self.damageDealtLabel.setObjectName("damageDealtLabel")
+        self.damageReceivedLabel.setObjectName("damageReceivedLabel")
+        self.healingIncreaseLabel.setObjectName("healingIncreaseLabel")
+        self.shieldIncreaseLabel.setObjectName("shieldIncreaseLabel")
+        self.abilityHasteLabel.setObjectName("abilityHasteLabel")
+        self.tenacityLabel.setObjectName("tenacityLabel")
+
+        self.damageDealtValueLabel.setObjectName("damageDealtValueLabel")
+        self.damageReceivedValueLabel.setObjectName("damageReceivedValueLabel")
+        self.healingIncreaseValueLabel.setObjectName(
+            "healingIncreaseValueLabel")
+        self.shieldIncreaseValueLabel.setObjectName("shieldIncreaseValueLabel")
+        self.abilityHasteValueLabel.setObjectName("abilityHasteValueLabel")
+        self.tenacityValueLabel.setObjectName("tenacityValueLabel")
+
+        self.descriptionLabel.setObjectName("descriptionLabel")
+        self.powerByLabel.setObjectName("powerByLabel")
+
         self.titleLabel.setVisible(True)
         self.damageDealtLabel.setVisible(True)
         self.damageReceivedLabel.setVisible(True)
@@ -226,29 +256,17 @@ class AramFlyout(FlyoutViewBase):
         self.abilityHasteLabel.setVisible(True)
         self.tenacityLabel.setVisible(True)
 
-        self.descriptionLabel.setStyleSheet("border-top: 1px solid rgba(0, 0, 0, 80);")
-        self.powerByLabel.setStyleSheet("color: rgba(0, 0, 0, 70);")
-
-        self.titleLabel.setFont(QFont('Microsoft YaHei', 11, QFont.Bold))
         self.titleLabel.setAlignment(Qt.AlignCenter)
         self.powerByLabel.setAlignment(Qt.AlignCenter)
-        self.descriptionLabel.setFont(QFont('Microsoft YaHei', 9))
-        self.powerByLabel.setFont(QFont('Microsoft YaHei', 8))
-
-        self.damageDealtLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
-        self.damageReceivedLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
-        self.healingIncreaseLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
-        self.shieldIncreaseLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
-        self.abilityHasteLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
-        self.tenacityLabel.setFont(QFont("Source Code Pro", 9, QFont.Bold))
+        self.descriptionLabel.setWordWrap(True)
 
         self.__initLayout()
 
     def __initLayout(self):
         self.vBoxLayout.setSizeConstraint(QVBoxLayout.SetMinimumSize)
-        self.vBoxLayout.setContentsMargins(10, 8, 10, 8)
-        self.vBoxLayout.setSpacing(2)
-        self.gridBox.setHorizontalSpacing(10)
+        self.vBoxLayout.setContentsMargins(16, 12, 16, 12)
+        self.vBoxLayout.setSpacing(16)
+        self.gridBox.setHorizontalSpacing(20)
         self.gridBox.setVerticalSpacing(4)
 
         self.vBoxLayout.addWidget(self.titleLabel)
@@ -259,13 +277,17 @@ class AramFlyout(FlyoutViewBase):
         self.gridBox.addWidget(self.damageDealtLabel, 0, 0, Qt.AlignLeft)
         self.gridBox.addWidget(self.damageDealtValueLabel, 0, 1, Qt.AlignRight)
         self.gridBox.addWidget(self.damageReceivedLabel, 0, 2, Qt.AlignLeft)
-        self.gridBox.addWidget(self.damageReceivedValueLabel, 0, 3, Qt.AlignRight)
+        self.gridBox.addWidget(
+            self.damageReceivedValueLabel, 0, 3, Qt.AlignRight)
         self.gridBox.addWidget(self.healingIncreaseLabel, 1, 0, Qt.AlignLeft)
-        self.gridBox.addWidget(self.healingIncreaseValueLabel, 1, 1, Qt.AlignRight)
+        self.gridBox.addWidget(
+            self.healingIncreaseValueLabel, 1, 1, Qt.AlignRight)
         self.gridBox.addWidget(self.shieldIncreaseLabel, 1, 2, Qt.AlignLeft)
-        self.gridBox.addWidget(self.shieldIncreaseValueLabel, 1, 3, Qt.AlignRight)
+        self.gridBox.addWidget(
+            self.shieldIncreaseValueLabel, 1, 3, Qt.AlignRight)
         self.gridBox.addWidget(self.abilityHasteLabel, 2, 0, Qt.AlignLeft)
-        self.gridBox.addWidget(self.abilityHasteValueLabel, 2, 1, Qt.AlignRight)
+        self.gridBox.addWidget(
+            self.abilityHasteValueLabel, 2, 1, Qt.AlignRight)
         self.gridBox.addWidget(self.tenacityLabel, 2, 2, Qt.AlignLeft)
         self.gridBox.addWidget(self.tenacityValueLabel, 2, 3, Qt.AlignRight)
 
@@ -276,12 +298,19 @@ class AramFlyout(FlyoutViewBase):
         数据更新时调用一下, 把样式更新
         """
         self.descriptionLabel.setVisible(bool(self.description))
-        self.damageDealtValueLabel.setStyleSheet(self.__getColor(self.damageDealt, 100))
-        self.damageReceivedValueLabel.setStyleSheet(self.__getColor(self.damageReceived, 100, False))
-        self.healingIncreaseValueLabel.setStyleSheet(self.__getColor(self.healingIncrease, 100))
-        self.shieldIncreaseValueLabel.setStyleSheet(self.__getColor(self.shieldIncrease, 100))
-        self.abilityHasteValueLabel.setStyleSheet(self.__getColor(self.abilityHaste, 0))
-        self.tenacityValueLabel.setStyleSheet(self.__getColor(self.tenacity, 0))
+
+        self.damageDealtValueLabel.setType(
+            self.__getColor(self.damageDealt, 100))
+        self.damageReceivedValueLabel.setType(
+            self.__getColor(self.damageReceived, 100, False))
+        self.healingIncreaseValueLabel.setType(
+            self.__getColor(self.healingIncrease, 100))
+        self.shieldIncreaseValueLabel.setType(
+            self.__getColor(self.shieldIncrease, 100))
+        self.abilityHasteValueLabel.setType(
+            self.__getColor(self.abilityHaste, 0))
+        self.tenacityValueLabel.setType(
+            self.__getColor(self.tenacity, 0))
 
     def __getColor(self, val, criterion, isPositive=True) -> str:
         """
@@ -292,14 +321,14 @@ class AramFlyout(FlyoutViewBase):
             val, criterion = criterion, val
 
         if val > criterion:
-            return "color: #2aae0f;"  # 绿色
+            return 'win'  # 绿色
         elif val < criterion:
-            return "color: #d0021b;"  # 红色
+            return 'lose'  # 红色
 
-        return ""
+        return "text"
 
     def updateInfo(self, info):
-        self.catName = info.get("catname", "")
+        self.catName = info.get("catname", "").replace("-", " - ")
         self.damageDealt = int(info.get("zcsh", "100"))
         self.damageReceived = int(info.get("sdsh", "100"))
         self.healingIncrease = int(info.get("zlxl", "100"))
@@ -307,6 +336,10 @@ class AramFlyout(FlyoutViewBase):
         self.abilityHaste = int(info.get("jnjs", "0"))
         self.tenacity = int(info.get("renxing", "0"))
         self.description = info.get("description", "")
+
+        if self.description:
+            self.description = self.description.replace(
+                "(", "（").replace(")", "）")
 
         self.titleLabel.setText(self.catName)
         self.damageDealtValueLabel.setText(f"{self.damageDealt}%")
@@ -321,9 +354,10 @@ class AramFlyout(FlyoutViewBase):
     def showEvent(self, e):
         super().showEvent(e)
         self.adjustSize()
+
         if self.description:
-            w = self.vBoxLayout.sizeHint().width() * .16
-            self.descriptionLabel.setText(TextWrap.wrap(self.description, int(w), False)[0])
+            self.descriptionLabel.setText(self.description)
+
         self.move(self.calcPoints())
 
 
