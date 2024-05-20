@@ -29,3 +29,8 @@
     font: 12px 'Microsoft YaHei', 'Segoe UI';
     color: gray;
 }
+
+#descriptionLabel {
+    border-top: 1px solid rgba(0, 0, 0, 80);
+    margin-top: 10px;
+}

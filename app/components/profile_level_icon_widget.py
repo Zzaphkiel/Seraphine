@@ -225,6 +225,9 @@ class AramFlyout(FlyoutViewBase):
         if x < 5:
             x = 5
 
+        if y < 5:
+            y = pos.y() + self.target.height() + 5
+
         return QPoint(x, y)
 
     def __initWidgets(self):
