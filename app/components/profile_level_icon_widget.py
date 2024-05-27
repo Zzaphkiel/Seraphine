@@ -147,7 +147,6 @@ class RoundLevelAvatar(QWidget):
                 self.mFlyout = AramFlyout(
                     info=self.aramInfo,
                     target=self,
-                    parent=None
                 )
                 self.mFlyout.show()
                 # TODO Animation -- By Hpero4
@@ -167,10 +166,9 @@ class AramFlyout(FlyoutViewBase):
     def __init__(self, info, target, parent=None):
         super().__init__(parent=parent)
 
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
+        self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint |
+                            Qt.NoDropShadowWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-
-        self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.info = info
         self.target = target
@@ -225,7 +223,7 @@ class AramFlyout(FlyoutViewBase):
         if x < 5:
             x = 5
 
-        if y < 5:
+        if y < 2:
             y = pos.y() + self.target.height() + 5
 
         return QPoint(x, y)
