@@ -861,6 +861,9 @@ class MainWindow(FluentWindow):
 
         # 如果是进游戏后开的软件，需要先把友方信息更新上去
         async def paintAllySummonersInfo():
+            # TODO 自定义时, 若队伍成员<5, 会触发重新加载导致性能浪费
+            if self.gameInfoInterface.allyChampions and len(self.gameInfoInterface.allyChampions) >= 5:
+                return
             self.gameInfoInterface.allyChampions = {}
             self.gameInfoInterface.allyOrder = []
 
