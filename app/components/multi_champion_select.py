@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (QVBoxLayout, QFrame, QHBoxLayout,
 
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, ToolButton,
                                        SearchLineEdit, FlowLayout, SmoothScrollArea)
+from app.common.style_sheet import StyleSheet
 from app.components.animation_frame import CardWidget
 from app.components.champion_icon_widget import RoundIcon, RoundIconButton
 
@@ -44,11 +45,6 @@ class ChampionTabItem(CardWidget):
         self.closeButton.clicked.connect(self.closed)
 
         self.setMinimumWidth(200)
-        self.setStyleSheet(
-            "ChampionTabItem {border: 1px solid rgba(0, 0, 0, 0.095); border-radius: 6px}")
-
-        self.name.setStyleSheet(
-            "font: 14px 'Segoe UI', 'Microsoft YaHei'")
         self.name.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
     def __initLayout(self):
@@ -85,8 +81,6 @@ class ItemsDraggableLayout(QFrame):
         self.__initLayout()
 
     def __initWidget(self):
-        self.setStyleSheet(
-            "ItemsDraggableLayout {border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 6px;}")
         self.setFixedHeight(318)
         self.setFixedWidth(224)
 
@@ -237,7 +231,7 @@ class ItemsDraggableLayout(QFrame):
 
 
 class MultiChampionSelectWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, champions: dict, selected: list, parent=None):
         super().__init__(parent=parent)
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -250,18 +244,33 @@ class MultiChampionSelectWidget(QWidget):
         self.scrollWidget = QWidget()
         self.championsShowLayout = FlowLayout(needAni=False)
 
-        self.champions: dict = None
+        self.champions: dict = champions
+        self.selected = selected
 
         self.__initWidget()
         self.__initLayout()
 
+        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)
+
     def __initWidget(self):
-        self.scrollArea.setStyleSheet(
-            "SmoothScrollArea {border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 6px;}")
-        self.scrollWidget.setStyleSheet(
-            "QWidget {border: none; border-radius: 6px;}")
-        # self.scrollArea.setStyleSheet(
-        #     "SmoothScrollArea {border: none;}")
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollWidget.setObjectName("scrollWidget")
+
+        for i, [name, icon] in self.champions.items():
+            button = RoundIconButton(icon, 38, 4, 2, name, i)
+            button.clicked.connect(self.__onChampionIconClicked)
+
+            self.championsShowLayout.addWidget(button)
+
+        for name in self.selected:
+            if name == '':
+                break
+
+            id = connector.manager.getChampionIdByName(name)
+            icon = self.champions[id][1]
+
+            self.itemsDraggableWidget.addItem(icon, name, id)
+
         self.searchLineEdit.textChanged.connect(self.__onSearchLineTextChanged)
 
     def __initLayout(self):
@@ -282,20 +291,6 @@ class MultiChampionSelectWidget(QWidget):
 
         self.hBoxLayout.addWidget(self.itemsDraggableWidget)
         self.hBoxLayout.addLayout(self.championSelectLayout)
-
-    async def initChampions(self):
-        self.champions = {i: [name, ""]
-                          for i, name in connector.manager.getChampions().items()
-                          if i != -1}
-
-        for i, data in self.champions.items():
-            icon = await connector.getChampionIcon(i)
-            data[1] = icon
-
-            button = RoundIconButton(icon, 38, 2, 2, data[0], i)
-            button.clicked.connect(self.__onChampionIconClicked)
-
-            self.championsShowLayout.addWidget(button)
 
     def __onSearchLineTextChanged(self, text: str):
         for i in reversed(range(self.championsShowLayout.count())):
@@ -324,3 +319,7 @@ class MultiChampionSelectWidget(QWidget):
 
         champion = self.champions[championId]
         self.itemsDraggableWidget.addItem(champion[1], champion[0], championId)
+
+    def getSelectedChampionsName(self) -> list:
+        return [self.champions[id][0]
+                for id in self.itemsDraggableWidget.getCurrentChampionIds()]

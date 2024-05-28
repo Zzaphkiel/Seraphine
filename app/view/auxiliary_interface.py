@@ -11,14 +11,14 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit
 from qasync import asyncSlot
 
-from ..components.champion_picker import ChampionPicker
-from ..components.seraphine_interface import SeraphineInterface
-from ..lol.tools import fixLCUWindowViaExe
-from ..common.icons import Icon
-from ..common.config import cfg
-from ..common.style_sheet import StyleSheet
-from ..lol.connector import connector
-from ..lol.exceptions import *
+from app.components.seraphine_interface import SeraphineInterface
+from app.components.message_box import MultiChampionSelectMsgBox
+from app.lol.tools import fixLCUWindowViaExe
+from app.common.icons import Icon
+from app.common.config import cfg
+from app.common.style_sheet import StyleSheet
+from app.lol.connector import connector
+from app.lol.exceptions import *
 
 
 class AuxiliaryInterface(SeraphineInterface):
@@ -965,7 +965,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
         self.championLabel = QLabel(
             self.tr("Champion will be seleted automatically:"))
-        self.championPicker = ChampionPicker()
+        self.championSelectButton = PushButton(self.tr("Choose champions"))
 
         self.switchButtonWidget = QWidget(self.view)
         self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
@@ -978,8 +978,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.timeoutCompletedBtn = SwitchButton(
             indicatorPos=IndicatorPosition.RIGHT)
 
-        self.completer = None
-        self.champions = []
+        self.champions = {}
 
         self.enableConfigItem = enableConfigItem
         self.championConfigItem = championConfigItem
@@ -996,7 +995,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.inputLayout.setContentsMargins(48, 18, 44, 18)
 
         self.inputLayout.addWidget(self.championLabel, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(self.championPicker, alignment=Qt.AlignRight)
+        self.inputLayout.addWidget(
+            self.championSelectButton, alignment=Qt.AlignRight)
         self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.switchButtonLayout.setVerticalSpacing(19)
@@ -1017,17 +1017,22 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.switchButtonWidget)
 
     def __initWidget(self):
-        self.championPicker.setText(qconfig.get(self.championConfigItem))
         checked = qconfig.get(self.enableConfigItem)
-        self.enableButton.setChecked(checked)
-        self.__setStatusLabelText(self.championPicker.text(), checked)
-        self.timeoutCompletedBtn.setChecked(qconfig.get(self.timeoutCompletedCfgItem))
+        selected = qconfig.get(self.championConfigItem).split(',')
 
-        self.championPicker.selected.connect(self._on_selected_pick)
+        self.__onSelectedChampionsChanged(selected)
+
+        self.enableButton.setChecked(checked)
+        self.timeoutCompletedBtn.setChecked(
+            qconfig.get(self.timeoutCompletedCfgItem))
+        self.timeoutCompletedBtn.setEnabled(self.enableButton.isChecked())
+
         self.enableButton.checkedChanged.connect(
             self.__onEnableBtnCheckedChanged)
         self.timeoutCompletedBtn.checkedChanged.connect(
             self.__onTimeoutCompletedBtnCheckedChanged)
+        self.championSelectButton.clicked.connect(
+            self.__onChampionSelectButtonClicked)
 
     def __setStatusLabelText(self, champion, isChecked):
         if isChecked:
@@ -1035,33 +1040,53 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         else:
             self.statusLabel.setText(self.tr("Disabled"))
 
-
-    def _on_selected_pick(self, champion_ids: list):
-        champion_names = []
-        for champion_id in champion_ids:
-            champion_names.append(connector.manager.getChampionNameById(champion_id))
-        if len(champion_names) == 0:
-            return
-        champion_names = '>'.join(champion_names)
-        self.championPicker.setText(champion_names)
-        qconfig.set(self.championConfigItem, champion_names)
-
-
     def __onEnableBtnCheckedChanged(self, isChecked: bool):
-        self.championPicker.setEnabled(not isChecked)
+        self.championSelectButton.setEnabled(not isChecked)
         self.timeoutCompletedBtn.setEnabled(isChecked)
 
         if not isChecked:
             self.timeoutCompletedBtn.setChecked(False)
             self.__onTimeoutCompletedBtnCheckedChanged(False)
-        else:
-            self.__setStatusLabelText(self.championPicker.text(), isChecked)
 
         qconfig.set(self.enableConfigItem, isChecked)
 
+        selected = qconfig.get(self.championConfigItem).split(",")
+        self.__setStatusLabelText(self.tr(", ").join(selected), isChecked)
 
     def __onTimeoutCompletedBtnCheckedChanged(self, isChecked: bool):
         qconfig.set(self.timeoutCompletedCfgItem, isChecked)
+
+    def __onChampionSelectButtonClicked(self):
+        selected = qconfig.get(self.championConfigItem).split(",")
+
+        msgBox = MultiChampionSelectMsgBox(
+            self.champions, selected, self.window())
+        msgBox.completed.connect(self.__onSelectedChampionsChanged)
+        msgBox.exec()
+
+    def __onSelectedChampionsChanged(self, champions: list):
+        qconfig.set(self.championConfigItem, ','.join(champions))
+
+        if len(champions) == 0:
+            self.enableButton.setEnabled(False)
+            self.timeoutCompletedBtn.setEnabled(False)
+        else:
+            self.enableButton.setEnabled(True)
+
+        text = self.tr(", ").join(champions)
+        self.championLabel.setText(
+            self.tr("Champion will be seleted automatically: ") + text)
+
+        self.__setStatusLabelText(text, self.enableButton.isChecked())
+
+    async def initChampionList(self, champions: dict = None):
+        if champions:
+            self.champions = champions
+            return
+
+        self.champions = {i: [name, await connector.getChampionIcon(i)]
+                          for i, name in connector.manager.getChampions().items()
+                          if i != -1}
 
 
 # 自动 ban 英雄卡片
