@@ -869,7 +869,7 @@ class LolClientConnector(QObject):
         res = await res.json()
 
         return res['accessToken']
-    
+
     async def restartClient(self):
         res = await self.__post("/riotclient/kill-and-restart-ux")
 
@@ -1052,6 +1052,12 @@ class JsonManager:
     def getChampionList(self):
         return [item for item in self.champions.keys()]
 
+    def getChampionIdList(self):
+        return list(self.champs.keys())
+
+    def getChampions(self):
+        return self.champs
+
     def getSkinListByChampionName(self, championName):
         try:
             return [item for item in self.champions[championName]["skins"]]
@@ -1063,6 +1069,11 @@ class JsonManager:
 
     def getChampionIdByName(self, championName):
         return self.champions[championName]["id"]
+
+    def getChampionNameById(self, championId):
+        for cid in self.champs.keys():
+            if cid == championId:
+                return self.champs[cid]
 
 
 connector = LolClientConnector()

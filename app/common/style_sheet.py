@@ -19,6 +19,7 @@ class StyleSheet(StyleSheetBase, Enum):
     GAME_INFO_INTERFACE = 'game_info_interface'
     AUXILIARY_INTERFACE = 'auxiliary_interface'
     ARAM_FLYOUT = 'aram_flyout'
+    CHAMPION_SELECT_WIDGET = 'champion_select_widget'
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme

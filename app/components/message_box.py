@@ -5,7 +5,7 @@ import zipfile
 import shutil
 import sys
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton, QVBoxLayout, QWidget
 from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
                                      SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
@@ -18,6 +18,7 @@ from app.common.util import (github, getLolClientPidSlowly, getPortTokenServerBy
 from app.common.signals import signalBus
 from app.common.update import runUpdater
 from app.lol.connector import connector
+from app.components.multi_champion_select import MultiChampionSelectWidget
 
 
 class UpdateMessageBox(MessageBoxBase):
@@ -318,3 +319,49 @@ class ExceptionMessageBox(MessageBoxBase):
     def __initLayout(self):
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.textEdit)
+
+
+class MultiChampionSelectMsgBox(MessageBoxBase):
+    completed = pyqtSignal(list)
+
+    def __init__(self, champions: dict, selected: list, parent=None):
+        super().__init__(parent)
+
+        self.myYesButton = PrimaryPushButton(self.tr('OK'), self.buttonGroup)
+        self.myCancelButton = QPushButton(self.tr('Cancel'), self.buttonGroup)
+
+        self.titleLabel = TitleLabel(self.tr("Choose Champions"))
+        self.championSelectWidget = MultiChampionSelectWidget(
+            champions, selected)
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.championSelectWidget)
+
+        self.buttonLayout.addWidget(self.myYesButton)
+        self.buttonLayout.addWidget(self.myCancelButton)
+
+    def __initWidget(self):
+        self.yesButton.setVisible(False)
+        self.cancelButton.setVisible(False)
+        self.myCancelButton.setObjectName("cancelButton")
+
+        self.myYesButton.clicked.connect(self.__myOnYesButtonClicked)
+        self.myCancelButton.clicked.connect(self.__myOnCancelButtonClicked)
+
+        # 强迫症 TV 之这玩意左边多出来了
+        self.titleLabel.setStyleSheet("padding-left: 3px")
+
+    def __myOnYesButtonClicked(self):
+        self.completed.emit(
+            self.championSelectWidget.getSelectedChampionsName())
+
+        self.accept()
+        self.accepted.emit()
+
+    def __myOnCancelButtonClicked(self):
+        self.reject()
+        self.rejected.emit()

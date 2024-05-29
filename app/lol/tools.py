@@ -1,3 +1,4 @@
+import itertools
 import random
 import time
 import win32gui
@@ -1306,7 +1307,7 @@ class ChampionSelection:
         self.isSkinPicked = False
 
 
-async def autoSwap(data, selection):
+async def autoSwap(data, selection: ChampionSelection):
     """
     选用顺序交换请求发生时，自动接受
     """
@@ -1354,7 +1355,7 @@ async def autoTrade(data, selection):
             return True
 
 
-async def autoPick(data, selection):
+async def autoPick(data, selection: ChampionSelection):
     """
     自动选用英雄
     """
@@ -1370,19 +1371,27 @@ async def autoPick(data, selection):
                     or bool(player["championPickIntent"])):
                 return
 
+    bans = itertools.chain(data["bans"]['myTeamBans'],
+                           data["bans"]['theirTeamBans'])
+    champion_names = cfg.get(cfg.autoSelectChampion).split(',')
+    champion_id = 0
+    for champion_name in champion_names:
+        cid = connector.manager.getChampionIdByName(champion_name)
+        if cid not in bans:
+            champion_id = cid
+            break
+
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action["actorCellId"] == localPlayerCellId
                     and action['type'] == "pick"):
-                championId = connector.manager.getChampionIdByName(
-                    cfg.get(cfg.autoSelectChampion))
-                await connector.selectChampion(action['id'], championId)
+                await connector.selectChampion(action['id'], champion_id)
 
                 selection.isChampionPicked = True
                 return True
 
 
-async def autoComplete(data, selection):
+async def autoComplete(data, selection: ChampionSelection):
     """
     超时自动选定（当前选中英雄）
     """
@@ -1406,7 +1415,7 @@ async def autoComplete(data, selection):
                 return True
 
 
-async def autoBan(data, selection):
+async def autoBan(data, selection: ChampionSelection):
     """
     自动禁用英雄
     """
@@ -1488,6 +1497,8 @@ async def autoSelectSkinRandom(data, selection):
 
 async def fixLeagueClientWindow():
     """
+    ### 该函数已弃用
+
     #### 需要管理员权限
 
     调用 Win API 手动调整窗口大小 / 位置

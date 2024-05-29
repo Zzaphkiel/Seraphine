@@ -8,6 +8,7 @@ from app.common.style_sheet import ColorChangeable
 
 class CardWidget(BackgroundAnimationWidget, QFrame):
     clicked = pyqtSignal()
+    pressed = pyqtSignal()
 
     def __init__(self, parent=None, type=None):
         QFrame.__init__(self, parent=parent)
@@ -17,6 +18,10 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
             BackgroundAnimationWidget.__init__(self)
         self._isClickEnabled = False
         self._borderRadius = 4
+
+    def mousePressEvent(self, e):
+        super().mousePressEvent(e)
+        self.pressed.emit()
 
     def mouseReleaseEvent(self, e):
         super().mouseReleaseEvent(e)

@@ -464,8 +464,9 @@ class MainWindow(FluentWindow):
         self.__setLolInstallFolder(folder)
 
         self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
-        self.auxiliaryFuncInterface.autoSelectChampionCard.updateCompleter()
         self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
+        asyncio.create_task(
+            self.auxiliaryFuncInterface.autoSelectChampionCard.initChampionList())
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
         # 加载大乱斗buff -- By Hpero4
