@@ -1040,10 +1040,10 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.timeoutCompletedLabel, 1, 0, Qt.AlignLeft)
         self.switchButtonLayout.addWidget(
             self.timeoutCompletedBtn, 1, 1, Qt.AlignRight)
-        self.switchButtonLayout.addWidget(
-            self.randomSkinLabel, 2, 0, Qt.AlignLeft)
-        self.switchButtonLayout.addWidget(
-            self.randomSkinBtn, 2, 1, Qt.AlignRight)
+        # self.switchButtonLayout.addWidget(
+        #     self.randomSkinLabel, 2, 0, Qt.AlignLeft)
+        # self.switchButtonLayout.addWidget(
+        #     self.randomSkinBtn, 2, 1, Qt.AlignRight)
 
         self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
         self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
