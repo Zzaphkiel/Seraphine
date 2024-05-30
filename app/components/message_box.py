@@ -162,7 +162,8 @@ class NoticeMessageBox(MessageBoxBase):
         self.titleLabel.setContentsMargins(5, 0, 5, 0)
 
         textEdit = TextEdit(self)
-        textEdit.setFixedWidth(int(self.width() * .6))
+        textEdit.setFixedWidth(int(self.width() * 0.6))
+        textEdit.setFixedHeight(int(self.height() * 0.4))
         textEdit.setMarkdown(msg)
         textEdit.setReadOnly(True)
 
