@@ -131,7 +131,8 @@ class GameInfoInterface(SeraphineInterface):
                 self.allyChampions[summonerId] = newChampionId
                 view.updateIcon(icon)
                 if self.isAram:
-                    view.updateAramInfo(AramHome.getInfoByHeroId(str(newChampionId)))
+                    view.updateAramInfo(
+                        AramHome.getInfoByHeroId(str(newChampionId)))
 
     async def clear(self):
         self.allyChampions = {}
@@ -255,6 +256,9 @@ class TeamSummoners(QFrame):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     def updateSummonersOrder(self, order: list):
+        if not all(map(lambda i: i in self.items, order)):
+            return
+
         for i in reversed(range(self.vBoxLayout.count())):
             item = self.vBoxLayout.itemAt(i)
             self.vBoxLayout.removeItem(item)
@@ -275,7 +279,8 @@ class TeamSummoners(QFrame):
                 continue
 
             if isAram and summoner["championId"]:
-                aramInfo = AramHome.getInfoByHeroId(str(summoner["championId"]))
+                aramInfo = AramHome.getInfoByHeroId(
+                    str(summoner["championId"]))
             else:
                 aramInfo = None
 
@@ -494,6 +499,9 @@ class SummonersGamesView(QFrame):
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     def updateOrder(self, order):
+        if not all(map(lambda i: i in self.items, order)):
+            return
+
         for i in reversed(range(self.hBoxLayout.count())):
             item = self.hBoxLayout.itemAt(i)
             self.hBoxLayout.removeItem(item)
@@ -612,7 +620,8 @@ class Games(QFrame):
                 else:
                     self.summonerName.setEnabled(True)
                     return
-            self.qtimerSummonerNameClick.singleShot(1000, lambda: self.summonerName.setEnabled(True))
+            self.qtimerSummonerNameClick.singleShot(
+                1000, lambda: self.summonerName.setEnabled(True))
             signalBus.toSearchInterface.emit(self.summonerName.text())
 
 

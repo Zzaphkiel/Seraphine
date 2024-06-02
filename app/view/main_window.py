@@ -876,14 +876,15 @@ class MainWindow(FluentWindow):
             if self.gameInfoInterface.allyChampions and len(self.gameInfoInterface.allyChampions) >= 5:
                 return
 
+            info = await parseGameInfoByGameflowSession(
+                session, currentSummonerId, "ally", useSGP=True)
+
             self.gameInfoInterface.allyChampions = {}
             self.gameInfoInterface.allyOrder = []
 
             self.gameInfoInterface.summonersView.ally.clear()
             self.gameInfoInterface.allyGamesView.clear()
 
-            info = await parseGameInfoByGameflowSession(
-                session, currentSummonerId, "ally", useSGP=True)
             self.gameInfoInterface.updateAllySummoners(info)
 
         # 将敌方的召唤师基本信息绘制上去
@@ -901,6 +902,7 @@ class MainWindow(FluentWindow):
                 return
 
             interface = self.gameInfoInterface
+
             if order == interface.allyOrder or len(order) != len(interface.allyOrder):
                 return
 
