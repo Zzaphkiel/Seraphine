@@ -1365,7 +1365,10 @@ class LockConfigCard(SettingCard):
                 duration=5000,
                 parent=self.window().auxiliaryFuncInterface,
             )
-            self.setValue(not isChecked)
+
+            self.switchButton.checkedChanged.disconnect()
+            self.switchButton.setChecked(not isChecked)
+            self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
 
     def setConfigFileReadOnlyEnabled(self, enable):
         path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"

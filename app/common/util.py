@@ -1,7 +1,9 @@
 import json
 import os
 import re
+import winreg
 from functools import lru_cache, wraps
+from pathlib import Path
 
 import requests
 import base64
@@ -12,6 +14,8 @@ import win32api
 from app.common.config import cfg, VERSION, LOCAL_PATH
 from app.common.logger import logger
 
+
+TAG = "Util"
 
 class Github:
     def __init__(self, user="Zzaphkiel", repositories="Seraphine"):
@@ -232,6 +236,32 @@ class AramHome:
 
 
 github = Github()
+
+
+def getLoLPathByRegistry() -> str:
+    """
+    从注册表获取LOL的安装路径
+
+    ** 只能获取到国服的路径, 外服不支持 **
+
+    无法获取时返回空串
+    """
+    mainKey = winreg.HKEY_CURRENT_USER
+    subKey = "SOFTWARE\Tencent\LOL"
+    valueName = "InstallPath"
+
+    try:
+        with winreg.OpenKey(mainKey, subKey) as k:
+            installPath, _ = winreg.QueryValueEx(k, valueName)
+            return str(Path(f"{installPath}\TCLS").absolute()).replace("\\", "/")
+    except FileNotFoundError:
+        logger.warning("reg path or val does not exist.", TAG)
+    except WindowsError as e:
+        logger.warning(f"occurred while reading the registry: {e}", TAG)
+    except Exception as e:
+        logger.exception("unknown error reading registry", e, TAG)
+
+    return ""
 
 
 def getTasklistPath():
