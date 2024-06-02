@@ -29,7 +29,7 @@ from ..common.util import github, getLolClientPid, getTasklistPath, getLolClient
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
-from ..common.config import cfg, VERSION
+from ..common.config import cfg, VERSION, BETA
 from ..common.logger import logger
 from ..common.signals import signalBus
 from ..components.message_box import (UpdateMessageBox, NoticeMessageBox,
@@ -967,7 +967,7 @@ class MainWindow(FluentWindow):
         logger.error(str(self.auxiliaryFuncInterface), "Crash")
         logger.error(str(self.settingInterface), "Crash")
 
-        content = f"Seraphine ver.{VERSION}\n{'-'*5}\n{content}"
+        content = f"Seraphine ver.{BETA or VERSION}\n{'-'*5}\n{content}"
 
         w = ExceptionMessageBox(title, content, self.window())
 

@@ -84,7 +84,8 @@ class Config(QConfig):
                                                   "EnableAutoSelectTimeoutCompleted", False,
                                                   BoolValidator())
 
-    enableRandomSkin = ConfigItem("Functions", "enableRandomSkin", False, BoolValidator())
+    enableRandomSkin = ConfigItem(
+        "Functions", "enableRandomSkin", False, BoolValidator())
 
     autoSelectChampion = ConfigItem("Functions",
                                     "AutoSelectChampion", "")
@@ -133,6 +134,7 @@ class Config(QConfig):
 YEAR = 2023
 AUTHOR = "Zaphkiel"
 VERSION = "0.12.2"
+BETA = "0.13.0-beta2"
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"
