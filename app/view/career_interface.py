@@ -368,10 +368,10 @@ class CareerInterface(SeraphineInterface):
     @asyncSlot()
     async def refresh(self):
         if self.puuid:
-            tmp_filter_idx = self.filterComboBox.currentIndex()
+            index = self.filterComboBox.currentIndex()
             await self.updateInterface(puuid=self.puuid)
-            self.filterComboBox.setCurrentIndex(tmp_filter_idx)
-            self.__onfilterComboBoxChanged(tmp_filter_idx)
+            self.filterComboBox.setCurrentIndex(index)
+            self.__onfilterComboBoxChanged(index)
 
     async def updateInterface(self, puuid=None, summoner=None):
         '''
@@ -531,7 +531,7 @@ class CareerInterface(SeraphineInterface):
             targetId = 0
 
         hitGames, kills, deaths, assists, wins, losses = parseGames(
-            self.games["games"], targetId)
+            self.games.get("games", []), targetId)
 
         for game in hitGames:
             bar = GameInfoBar(game)
