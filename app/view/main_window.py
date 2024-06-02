@@ -875,6 +875,7 @@ class MainWindow(FluentWindow):
             # TODO 自定义时, 若队伍成员<5, 会触发重新加载导致性能浪费
             if self.gameInfoInterface.allyChampions and len(self.gameInfoInterface.allyChampions) >= 5:
                 return
+
             self.gameInfoInterface.allyChampions = {}
             self.gameInfoInterface.allyOrder = []
 

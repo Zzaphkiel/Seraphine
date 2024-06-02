@@ -931,102 +931,100 @@ async def parseGamesDataConcurrently(games):
 
 
 async def parseSummonerGameInfo(item, isRank, currentSummonerId):
-    summoner_game_info = {
-        "name": "You Know Who",
-        'tagLine': "",
-        "icon": await connector.getChampionIcon(item.get('championId', 0)),
-        'championId': item.get('championId', 0),
-        "level": 0,
-        "rankInfo": {
-            'solo': {'tier': '', 'icon': "", 'division': '', 'lp': ""},
-            'flex': {'tier': '', 'icon': '', 'division': '', 'lp': ""}
-        },
-        "gamesInfo": [],
-        "xpSinceLastLevel": 0,
-        "xpUntilNextLevel": 0,
-        # 当puuid为空时用obfuscatedPuuid替代，用于界面绘制
-        "puuid": item.get("obfuscatedPuuid", ""),
-        # 当summonerId为空时用obfuscatedSummonerId替代，用于界面绘制
-        "summonerId": item.get("obfuscatedSummonerId", 0),
-        "kda": [-1, -1, -1],
-        "cellId": item.get("cellId", -1),
+    summonerId = item.get('summonerId', None)
+
+    if item.get('nameVisibilityType') == 'HIDDEN':
+        return None
+
+    if summonerId == 0 or summonerId == None:
+        return None
+
+    summoner = await connector.getSummonerById(summonerId)
+
+    championId = item.get('championId') or 0
+    icon = await connector.getChampionIcon(championId)
+
+    puuid = summoner.get("puuid", None)
+
+    if puuid == "00000000-0000-0000-0000-000000000000" or not puuid:
+        return None
+
+    try:
+        origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+    except SummonerRankInfoNotFound:
+        origRankInfo = None
+
+    rankInfo = parseRankInfo(origRankInfo)
+
+    try:
+        origGamesInfo = await connector.getSummonerGamesByPuuid(
+            puuid, 0, 14)
+
+        if cfg.get(cfg.gameInfoFilter) and isRank:
+            origGamesInfo["games"] = [
+                game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+
+            begIdx = 15
+            while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
+                endIdx = begIdx + 5
+                new = (await connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx))["games"]
+
+                for game in new:
+                    if game["queueId"] in (420, 440):
+                        origGamesInfo['games'].append(game)
+
+                begIdx = endIdx + 1
+    except:
+        gamesInfo = []
+    else:
+        tasks = [parseGameData(game)
+                 for game in origGamesInfo["games"][:11]]
+        gamesInfo = await asyncio.gather(*tasks)
+
+    _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
+
+    teammatesInfo = [
+        getTeammates(
+            await connector.getGameDetailByGameId(game["gameId"]),
+            puuid
+        ) for game in gamesInfo[:1]  # 避免空报错, 查上一局的队友(对手)
+    ]
+
+    recentlyChampionName = ""
+    fateFlag = None
+
+    if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
+        if currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
+            # 上把队友
+            fateFlag = "ally"
+        elif currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
+            # 上把对面
+            fateFlag = "enemy"
+        recentlyChampionId = max(
+            teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
+        recentlyChampionName = connector.manager.champs.get(
+            recentlyChampionId)
+
+    return {
+        "name": summoner["gameName"] or summoner["displayName"] or item['summonerName'],
+        'tagLine': summoner.get("tagLine"),
+        "icon": icon,
+        'championId': championId,
+        "level": summoner["summonerLevel"],
+        "rankInfo": rankInfo,
+        "gamesInfo": gamesInfo,
+        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
+        "puuid": puuid,
+        "summonerId": summonerId,
+        "kda": [kill, deaths, assists],
+        "cellId": item.get("cellId"),
         "selectedPosition": item.get("selectedPosition"),
-        "fateFlag": "",
-        "isPublic": True,
+        "fateFlag": fateFlag,
+        "isPublic": summoner["privacy"] == "PUBLIC",
         # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
-        "recentlyChampionName": "未查到该召唤师信息"
+        "recentlyChampionName": recentlyChampionName
     }
-
-    summonerId = item.get('summonerId')
-    if summonerId and summonerId != 0:
-        summoner_game_info["summonerId"] = summonerId
-
-        summoner = await connector.getSummonerById(summonerId)
-        puuid = summoner.get("puuid")
-        if puuid and puuid != "00000000-0000-0000-0000-000000000000":
-            summoner_game_info["puuid"] = puuid
-
-            try:
-                origRankInfo = await connector.getRankedStatsByPuuid(puuid)
-                summoner_game_info["rankInfo"] = parseRankInfo(origRankInfo)
-            except SummonerRankInfoNotFound:
-                pass
-
-            try:
-                origGamesInfo = await connector.getSummonerGamesByPuuid(puuid, 0, 14)
-
-                if cfg.get(cfg.gameInfoFilter) and isRank:
-                    origGamesInfo["games"] = [game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
-
-                    page_index = 1
-                    page_size = 10
-                    while len(origGamesInfo["games"]) < 11:
-                        begin_index = 14 + ((page_index - 1) * page_size)
-                        end_index = begin_index + page_size
-                        sg = await connector.getSummonerGamesByPuuid(puuid, begin_index + 1, end_index)
-                        if sg:
-                            for game in sg.get("games"):
-                                if game["queueId"] in (420, 440):
-                                    origGamesInfo['games'].append(game)
-
-                        # 最多只查5页，防止遇到很久不打排位的人非常耗时
-                        if page_index >= 5:
-                            break
-                        else:
-                            page_index += 1
-            except SummonerGamesNotFound:
-                pass
-            finally:
-                tasks = [parseGameData(game) for game in origGamesInfo["games"][:11]]
-                gamesInfo = await asyncio.gather(*tasks)
-                _, kill, deaths, assists, _, _ = parseGames(gamesInfo)
-                summoner_game_info["gamesInfo"] = gamesInfo
-                summoner_game_info["kda"] = [kill, deaths, assists]
-
-            teammatesInfo = [
-                getTeammates(
-                    await connector.getGameDetailByGameId(game["gameId"]),
-                    puuid
-                ) for game in gamesInfo[:1]  # 避免空报错, 查上一局的队友(对手)
-            ]
-            if teammatesInfo:  # 判个空, 避免太久没有打游戏的玩家或新号引发异常
-                if currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['summoners']]:
-                    # 上把队友
-                    summoner_game_info["fateFlag"] = "ally"
-                elif currentSummonerId in [t['summonerId'] for t in teammatesInfo[0]['enemies']]:
-                    # 上把对面
-                    summoner_game_info["fateFlag"] = "enemy"
-                recentlyChampionId = max(teammatesInfo and teammatesInfo[0]['championId'], 0)  # 取不到时是-1, 如果-1置为0
-                recentlyChampionName = connector.manager.champs.get(recentlyChampionId)
-                summoner_game_info["recentlyChampionName"] = recentlyChampionName
-
-        summoner_game_info["name"] = summoner["gameName"] or summoner["displayName"] or item['summonerName']
-        summoner_game_info["level"] = summoner["summonerLevel"]
-        summoner_game_info["xpSinceLastLevel"] = summoner["xpSinceLastLevel"]
-        summoner_game_info["xpUntilNextLevel"] = summoner["xpUntilNextLevel"]
-        summoner_game_info["isPublic"] = summoner["privacy"] == "PUBLIC"
-
-    return summoner_game_info
 
 
 async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):

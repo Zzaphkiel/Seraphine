@@ -1363,7 +1363,7 @@ class LockConfigCard(SettingCard):
                 isClosable=True,
                 position=InfoBarPosition.BOTTOM_RIGHT,
                 duration=5000,
-                parent=self.window().auxiliaryFuncInterface,
+                parent=self.window(),
             )
 
             self.switchButton.checkedChanged.disconnect()
