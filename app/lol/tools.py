@@ -1006,7 +1006,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
             recentlyChampionId)
 
     return {
-        "name": summoner.get("gameName") or summoner.get("displayName") or item.get('summonerName'),
+        "name": summoner.get("name") or summoner.get("internalName"),
         'tagLine': summoner.get("tagLine"),
         "icon": icon,
         'championId': championId,
@@ -1105,7 +1105,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
             recentlyChampionId)
 
     return {
-        "name": summoner.get("gameName") or summoner.get("displayName") or item.get('summonerName'),
+        "name": summoner.get("name") or summoner.get("internalName"),
         'tagLine': tagLine,
         "icon": icon,
         'championId': championId,
