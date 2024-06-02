@@ -3,6 +3,8 @@ import sys
 import traceback
 import time
 import webbrowser
+from pathlib import Path
+
 import pyperclip
 
 import asyncio
@@ -22,7 +24,8 @@ from .career_interface import CareerInterface
 from .search_interface import SearchInterface
 from .game_info_interface import GameInfoInterface
 from .auxiliary_interface import AuxiliaryInterface
-from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly, AramHome
+from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly, AramHome, \
+    getLoLPathByRegistry
 from ..components.avatar_widget import NavigationAvatarWidget
 from ..components.temp_system_tray_menu import TmpSystemTrayMenu
 from ..common.icons import Icon
@@ -57,6 +60,7 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         logger.critical(f"Seraphine started, version: {VERSION}", TAG)
+        self.__initConfig()
 
         self.__initWindow()
         self.__initSystemTray()
@@ -103,6 +107,12 @@ class MainWindow(FluentWindow):
         self.splashScreen.finish()
 
         logger.critical("Seraphine initialized", TAG)
+
+    def __initConfig(self):
+        if cfg.get(cfg.lolFolder) == str(Path("").absolute()).replace("\\", "/"):
+            tmpPath = getLoLPathByRegistry()
+            if tmpPath:
+                cfg.set(cfg.lolFolder, tmpPath)
 
     def __initInterface(self):
         self.__lockInterface()
