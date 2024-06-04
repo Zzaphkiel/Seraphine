@@ -113,29 +113,29 @@ class AuxiliaryInterface(SeraphineInterface):
                 "Accept ceil or champion swaping requests during B/P"),
             cfg.autoAcceptCeilSwap, cfg.autoAcceptChampTrade,
             self.bpGroup)
-        self.autoSelectChampionCard = AutoSelectChampionCard(
+        # self.autoSelectChampionCard = AutoSelectChampionCard(
+        #     self.tr("Auto select champion"),
+        #     self.tr("Auto select champion when your selection begin"),
+        #     cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
+        #     cfg.enableAutoSelectTimeoutCompleted, cfg.enableRandomSkin,
+        #     self.bpGroup)
+        self.autoSelectChampionCard = NewAutoSelectChampionCard(
             self.tr("Auto select champion"),
             self.tr("Auto select champion when your selection begin"),
-            cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
-            cfg.enableAutoSelectTimeoutCompleted, cfg.enableRandomSkin,
+            cfg.enableAutoSelectChampion,
+            cfg.autoSelectChampion,
+            cfg.autoSelectChampionTop,
+            cfg.autoSelectChampionJug,
+            cfg.autoSelectChampionMid,
+            cfg.autoSelectChampionBot,
+            cfg.autoSelectChampionSup,
+            cfg.enableAutoSelectTimeoutCompleted,
             self.bpGroup)
         self.autoBanChampionCard = AutoBanChampionCard(
             self.tr("Auto ban champion"),
             self.tr("Auto ban champion when your ban section begin"),
             cfg.enableAutoBanChampion, cfg.autoBanChampion,
             cfg.pretentBan, cfg.autoBanDelay, self.bpGroup)
-        # self.new = NewAutoSelectChampionCard(
-        #     self.tr("Auto select champion"),
-        #     self.tr("Auto select champion when your selection begin"),
-        #     cfg.enableAutoSelectChampion,
-        #     cfg.autoSelectChampion,
-        #     cfg.autoSelectChampionTop,
-        #     cfg.autoSelectChampionJug,
-        #     cfg.autoSelectChampionMid,
-        #     cfg.autoSelectChampionBot,
-        #     cfg.autoSelectChampionSup,
-        #     cfg.enableAutoSelectTimeoutCompleted,
-        #     self.bpGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -167,7 +167,6 @@ class AuxiliaryInterface(SeraphineInterface):
         self.bpGroup.addSettingCard(self.autoAcceptSwapingCard)
         self.bpGroup.addSettingCard(self.autoSelectChampionCard)
         self.bpGroup.addSettingCard(self.autoBanChampionCard)
-        # self.bpGroup.addSettingCard(self.new)
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoReconnectCard)
@@ -1505,10 +1504,11 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
 
         self.defaultCfgWidget = QWidget(self.view)
         self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
-        self.defaultLabel = QLabel(self.tr("Default Configurations"))
+        self.defaultHintLabel = QLabel(self.tr("Default Configurations"))
 
-        self.defaultChampionsLabel = QLabel(self.tr("Default champions: "))
-        self.defaultChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.defaultLabel = QLabel(self.tr("Default champions: "))
+        self.defaultChampions = ChampionsCard()
+        self.defaultSelectButton = PushButton(self.tr("Choose"))
 
         self.rankCfgWidget = QWidget(self.view)
         self.rankCfgLayout = QGridLayout(self.rankCfgWidget)
@@ -1519,11 +1519,16 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         self.midLabel = QLabel(self.tr("Mid: "))
         self.botLabel = QLabel(self.tr("Bottom: "))
         self.supLabel = QLabel(self.tr("Support: "))
-        self.topChampionsSelectButton = PushButton(self.tr("Choose"))
-        self.jugChampionsSelectButton = PushButton(self.tr("Choose"))
-        self.midChampionsSelectButton = PushButton(self.tr("Choose"))
-        self.botChampionsSelectButton = PushButton(self.tr("Choose"))
-        self.supChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.topChampions = ChampionsCard()
+        self.jugChampions = ChampionsCard()
+        self.midChampions = ChampionsCard()
+        self.botChampions = ChampionsCard()
+        self.supChampions = ChampionsCard()
+        self.topSelectButton = PushButton(self.tr("Choose"))
+        self.jugSelectButton = PushButton(self.tr("Choose"))
+        self.midSelectButton = PushButton(self.tr("Choose"))
+        self.botSelectButton = PushButton(self.tr("Choose"))
+        self.supSelectButton = PushButton(self.tr("Choose"))
 
         self.buttonsWidget = QWidget(self.view)
         self.buttonsLayout = QGridLayout(self.buttonsWidget)
@@ -1539,7 +1544,7 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         self.__initLayout()
 
     def __initWidget(self):
-        self.defaultLabel.setStyleSheet("font: bold")
+        self.defaultHintLabel.setStyleSheet("font: bold")
         self.rankLabel.setStyleSheet("font: bold")
 
         # 逻辑是，必须要设置默认，才能设置具体分路和启动功能
@@ -1548,7 +1553,7 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         timeoutChecked = qconfig.get(self.enableTimeoutCompleteCfgItem)
 
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
-            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button: PushButton = getattr(self, f"{ty}SelectButton")
             button.setMinimumWidth(100)
             button.clicked.connect(lambda _, t=ty: self.__onButtonClicked(t))
 
@@ -1575,12 +1580,14 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.defaultCfgLayout.addWidget(
-            self.defaultLabel, 0, 0, alignment=Qt.AlignLeft)
+            self.defaultHintLabel, 0, 0, alignment=Qt.AlignLeft)
 
         self.defaultCfgLayout.addWidget(
-            self.defaultChampionsLabel, 1, 0, alignment=Qt.AlignLeft)
+            self.defaultLabel, 1, 0, alignment=Qt.AlignLeft)
         self.defaultCfgLayout.addWidget(
-            self.defaultChampionsSelectButton, 1, 1, alignment=Qt.AlignRight)
+            self.defaultChampions, 1, 1, alignment=Qt.AlignHCenter)
+        self.defaultCfgLayout.addWidget(
+            self.defaultSelectButton, 1, 2, alignment=Qt.AlignRight)
 
         self.rankCfgLayout.setVerticalSpacing(19)
         self.rankCfgLayout.setContentsMargins(48, 18, 44, 18)
@@ -1589,26 +1596,14 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         self.rankCfgLayout.addWidget(
             self.rankLabel, 0, 0, alignment=Qt.AlignLeft)
 
-        self.rankCfgLayout.addWidget(
-            self.topLabel, 1, 0, alignment=Qt.AlignLeft)
-        self.rankCfgLayout.addWidget(
-            self.topChampionsSelectButton, 1, 1, alignment=Qt.AlignRight)
-        self.rankCfgLayout.addWidget(
-            self.jugLabel, 2, 0, alignment=Qt.AlignLeft)
-        self.rankCfgLayout.addWidget(
-            self.jugChampionsSelectButton, 2, 1, alignment=Qt.AlignRight)
-        self.rankCfgLayout.addWidget(
-            self.midLabel, 3, 0, alignment=Qt.AlignLeft)
-        self.rankCfgLayout.addWidget(
-            self.midChampionsSelectButton, 3, 1, alignment=Qt.AlignRight)
-        self.rankCfgLayout.addWidget(
-            self.botLabel, 4, 0, alignment=Qt.AlignLeft)
-        self.rankCfgLayout.addWidget(
-            self.botChampionsSelectButton, 4, 1, alignment=Qt.AlignRight)
-        self.rankCfgLayout.addWidget(
-            self.supLabel, 5, 0, alignment=Qt.AlignLeft)
-        self.rankCfgLayout.addWidget(
-            self.supChampionsSelectButton, 5, 1, alignment=Qt.AlignRight)
+        for i, ty in enumerate(['top', 'jug', 'mid', 'bot', 'sup']):
+            label = getattr(self, f"{ty}Label")
+            champions = getattr(self, f"{ty}Champions")
+            button = getattr(self, f"{ty}SelectButton")
+
+            self.rankCfgLayout.addWidget(label, i+1, 0, Qt.AlignLeft)
+            self.rankCfgLayout.addWidget(champions, i+1, 1, Qt.AlignHCenter)
+            self.rankCfgLayout.addWidget(button, i+1, 2, Qt.AlignRight)
 
         self.buttonsLayout.setVerticalSpacing(19)
         self.buttonsLayout.setContentsMargins(48, 18, 44, 18)
@@ -1641,6 +1636,18 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
             if i != -1
         }
 
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            configItem = getattr(self, f"{ty}ChampionsConfigItem")
+            champions: ChampionsCard = getattr(self, f"{ty}Champions")
+            selected = qconfig.get(configItem).split(",")
+
+            if selected[0] == '':
+                continue
+
+            champions.updateChampions(
+                [self.champions[connector.manager.getChampionIdByName(name)][1]
+                 for name in selected])
+
     def __onButtonClicked(self, type: str):
         configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
         selected = qconfig.get(configItem).split(",")
@@ -1652,8 +1659,13 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
         box.exec()
 
     def __onChampionsChanged(self, champions: list, type: str):
-        configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
+        configItem = getattr(self, f"{type}ChampionsConfigItem")
         qconfig.set(configItem, ','.join(champions))
+
+        card: ChampionsCard = getattr(self, f"{type}Champions")
+        card.updateChampions(
+            [self.champions[connector.manager.getChampionIdByName(name)][1]
+             for name in champions])
 
         if type != 'default':
             return
@@ -1669,14 +1681,14 @@ class NewAutoSelectChampionCard(ExpandGroupSettingCard):
             buttonEnable = True
 
         for ty in ['top', 'jug', 'mid', 'bot', 'sup']:
-            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button: PushButton = getattr(self, f"{ty}SelectButton")
             button.setEnabled(buttonEnable)
 
     def __onEnableSelectChanged(self, checked):
         qconfig.set(self.enableConfigItem, checked)
 
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
-            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button: PushButton = getattr(self, f"{ty}SelectButton")
             button.setEnabled(not checked)
 
         self.enableTimeoutSwtichButton.setEnabled(checked)
@@ -1701,16 +1713,18 @@ class ChampionsCard(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.setContentsMargins(5, 5, 5, 5)
+        self.hBoxLayout.setAlignment(Qt.AlignCenter)
 
-        self.setFixedHeight(33)
+        self.setFixedWidth(230)
+        self.setFixedHeight(40)
 
     def updateChampions(self, champions):
         self.clear()
 
-        for champion in champions:
-            icon = RoundIcon(champion['icon'], 28, 2, 2)
-            self.hBoxLayout.addWidget(icon, alignment=Qt.AlignCenter)
+        for icon in champions:
+            icon = RoundIcon(icon, 28, 2, 2)
+            self.hBoxLayout.addWidget(icon, alignment=Qt.AlignVCenter)
 
     def clear(self):
         for i in reversed(range(self.hBoxLayout.count())):

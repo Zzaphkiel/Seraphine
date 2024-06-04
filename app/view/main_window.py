@@ -478,8 +478,6 @@ class MainWindow(FluentWindow):
 
         asyncio.create_task(
             self.auxiliaryFuncInterface.autoSelectChampionCard.initChampionList())
-        asyncio.create_task(
-            self.auxiliaryFuncInterface.new.initChampionList())
 
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
