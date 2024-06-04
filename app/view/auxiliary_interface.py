@@ -2,18 +2,23 @@ import threading
 import os
 import stat
 
+from PyQt5.QtGui import QIcon
+from qfluentwidgets.common.icon import FluentIcon as FIF
+
 from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                                      SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                                      PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                                      IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
-                                     ExpandGroupSettingCard)
+                                     ExpandGroupSettingCard, StrongBodyLabel, SubtitleLabel)
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit
+from PyQt5.QtWidgets import (
+    QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QFrame)
 from qasync import asyncSlot
 
 from app.components.seraphine_interface import SeraphineInterface
 from app.components.message_box import MultiChampionSelectMsgBox
+from app.components.champion_icon_widget import RoundIcon
 from app.lol.tools import fixLCUWindowViaExe
 from app.common.icons import Icon
 from app.common.config import cfg
@@ -119,6 +124,18 @@ class AuxiliaryInterface(SeraphineInterface):
             self.tr("Auto ban champion when your ban section begin"),
             cfg.enableAutoBanChampion, cfg.autoBanChampion,
             cfg.pretentBan, cfg.autoBanDelay, self.bpGroup)
+        # self.new = NewAutoSelectChampionCard(
+        #     self.tr("Auto select champion"),
+        #     self.tr("Auto select champion when your selection begin"),
+        #     cfg.enableAutoSelectChampion,
+        #     cfg.autoSelectChampion,
+        #     cfg.autoSelectChampionTop,
+        #     cfg.autoSelectChampionJug,
+        #     cfg.autoSelectChampionMid,
+        #     cfg.autoSelectChampionBot,
+        #     cfg.autoSelectChampionSup,
+        #     cfg.enableAutoSelectTimeoutCompleted,
+        #     self.bpGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -150,6 +167,7 @@ class AuxiliaryInterface(SeraphineInterface):
         self.bpGroup.addSettingCard(self.autoAcceptSwapingCard)
         self.bpGroup.addSettingCard(self.autoSelectChampionCard)
         self.bpGroup.addSettingCard(self.autoBanChampionCard)
+        # self.bpGroup.addSettingCard(self.new)
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoReconnectCard)
@@ -157,6 +175,7 @@ class AuxiliaryInterface(SeraphineInterface):
         self.gameGroup.addSettingCard(self.spectateCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
 
+        # 客户端修复
         self.clientGroup.addSettingCard(self.fixDpiCard)
         self.clientGroup.addSettingCard(self.restartClientCard)
 
@@ -1056,6 +1075,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
     def __initWidget(self):
         checked = qconfig.get(self.enableConfigItem)
         selected = qconfig.get(self.championConfigItem).split(',')
+        self.championSelectButton.setMinimumWidth(100)
 
         self.__onSelectedChampionsChanged(selected)
 
@@ -1455,3 +1475,247 @@ class FriendRequestCard(ExpandGroupSettingCard):
                  self.tr("Please check the summoner's name and retry"))
         else:
             info('success', self.tr("Send friend request successfully"))
+
+
+class NewAutoSelectChampionCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None,
+                 enableConfigItem: ConfigItem = None,
+                 championsConfigItem: ConfigItem = None,
+                 topChampionsConfigItem: ConfigItem = None,
+                 jugChampionsConfigItem: ConfigItem = None,
+                 midChampionsConfigItem: ConfigItem = None,
+                 botChampionsConfigItem: ConfigItem = None,
+                 supChampionsConfigItem: ConfigItem = None,
+                 enableTimeoutCompleteCfgItem: ConfigItem = None,
+                 parent=None):
+        super().__init__(Icon.CHECK, title, content, parent)
+
+        self.champions = {}
+
+        self.enableConfigItem = enableConfigItem
+        self.defaultChampionsConfigItem = championsConfigItem
+        self.topChampionsConfigItem = topChampionsConfigItem
+        self.jugChampionsConfigItem = jugChampionsConfigItem
+        self.midChampionsConfigItem = midChampionsConfigItem
+        self.botChampionsConfigItem = botChampionsConfigItem
+        self.supChampionsConfigItem = supChampionsConfigItem
+        self.enableTimeoutCompleteCfgItem = enableTimeoutCompleteCfgItem
+
+        self.statusLabel = QLabel()
+
+        self.defaultCfgWidget = QWidget(self.view)
+        self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
+        self.defaultLabel = QLabel(self.tr("Default Configurations"))
+
+        self.defaultChampionsLabel = QLabel(self.tr("Default champions: "))
+        self.defaultChampionsSelectButton = PushButton(self.tr("Choose"))
+
+        self.rankCfgWidget = QWidget(self.view)
+        self.rankCfgLayout = QGridLayout(self.rankCfgWidget)
+        self.rankLabel = QLabel(self.tr("Rank Configurations"))
+
+        self.topLabel = QLabel(self.tr("Top: "))
+        self.jugLabel = QLabel(self.tr("Juggle: "))
+        self.midLabel = QLabel(self.tr("Mid: "))
+        self.botLabel = QLabel(self.tr("Bottom: "))
+        self.supLabel = QLabel(self.tr("Support: "))
+        self.topChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.jugChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.midChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.botChampionsSelectButton = PushButton(self.tr("Choose"))
+        self.supChampionsSelectButton = PushButton(self.tr("Choose"))
+
+        self.buttonsWidget = QWidget(self.view)
+        self.buttonsLayout = QGridLayout(self.buttonsWidget)
+        self.enableLabel = QLabel(self.tr("Enable:"))
+        self.enableSwitchButton = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
+        self.enableTimeoutCompleteLabel = QLabel(
+            self.tr("Completed before timeout:"))
+        self.enableTimeoutSwtichButton = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.defaultLabel.setStyleSheet("font: bold")
+        self.rankLabel.setStyleSheet("font: bold")
+
+        # 逻辑是，必须要设置默认，才能设置具体分路和启动功能
+        selected = qconfig.get(self.defaultChampionsConfigItem) != ''
+        checked = qconfig.get(self.enableConfigItem)
+        timeoutChecked = qconfig.get(self.enableTimeoutCompleteCfgItem)
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button.setMinimumWidth(100)
+            button.clicked.connect(lambda _, t=ty: self.__onButtonClicked(t))
+
+            if ty != 'default':
+                button.setEnabled(selected)
+
+        self.enableSwitchButton.checkedChanged.connect(
+            self.__onEnableSelectChanged)
+        self.enableSwitchButton.setEnabled(selected)
+        self.enableSwitchButton.setChecked(checked)
+
+        self.enableTimeoutSwtichButton.checkedChanged.connect(
+            self.__onEnableTimeoutCompleteChanged)
+        self.enableTimeoutSwtichButton.setEnabled(checked)
+        self.enableTimeoutSwtichButton.setChecked(timeoutChecked)
+
+        self.__updateStatusLabel()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.defaultCfgLayout.setVerticalSpacing(19)
+        self.defaultCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.defaultCfgLayout.addWidget(
+            self.defaultLabel, 0, 0, alignment=Qt.AlignLeft)
+
+        self.defaultCfgLayout.addWidget(
+            self.defaultChampionsLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.defaultCfgLayout.addWidget(
+            self.defaultChampionsSelectButton, 1, 1, alignment=Qt.AlignRight)
+
+        self.rankCfgLayout.setVerticalSpacing(19)
+        self.rankCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.rankCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.rankCfgLayout.addWidget(
+            self.rankLabel, 0, 0, alignment=Qt.AlignLeft)
+
+        self.rankCfgLayout.addWidget(
+            self.topLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(
+            self.topChampionsSelectButton, 1, 1, alignment=Qt.AlignRight)
+        self.rankCfgLayout.addWidget(
+            self.jugLabel, 2, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(
+            self.jugChampionsSelectButton, 2, 1, alignment=Qt.AlignRight)
+        self.rankCfgLayout.addWidget(
+            self.midLabel, 3, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(
+            self.midChampionsSelectButton, 3, 1, alignment=Qt.AlignRight)
+        self.rankCfgLayout.addWidget(
+            self.botLabel, 4, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(
+            self.botChampionsSelectButton, 4, 1, alignment=Qt.AlignRight)
+        self.rankCfgLayout.addWidget(
+            self.supLabel, 5, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(
+            self.supChampionsSelectButton, 5, 1, alignment=Qt.AlignRight)
+
+        self.buttonsLayout.setVerticalSpacing(19)
+        self.buttonsLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonsLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonsLayout.addWidget(
+            self.enableLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.buttonsLayout.addWidget(
+            self.enableSwitchButton, 0, 1, alignment=Qt.AlignRight)
+        self.buttonsLayout.addWidget(
+            self.enableTimeoutCompleteLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.buttonsLayout.addWidget(
+            self.enableTimeoutSwtichButton, 1, 1, alignment=Qt.AlignRight)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.addGroupWidget(self.defaultCfgWidget)
+        self.addGroupWidget(self.rankCfgWidget)
+        self.addGroupWidget(self.buttonsWidget)
+
+    async def initChampionList(self, champions: dict = None):
+        if champions:
+            self.champions = champions
+            return
+
+        self.champions = {
+            i: [name, await connector.getChampionIcon(i)]
+            for i, name in connector.manager.getChampions().items()
+            if i != -1
+        }
+
+    def __onButtonClicked(self, type: str):
+        configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
+        selected = qconfig.get(configItem).split(",")
+
+        box = MultiChampionSelectMsgBox(
+            self.champions, selected, self.window())
+        box.completed.connect(
+            lambda champions, t=type: self.__onChampionsChanged(champions, t))
+        box.exec()
+
+    def __onChampionsChanged(self, champions: list, type: str):
+        configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
+        qconfig.set(configItem, ','.join(champions))
+
+        if type != 'default':
+            return
+
+        if len(champions) == 0:
+            self.enableSwitchButton.setChecked(False)
+            self.enableSwitchButton.setEnabled(False)
+            self.enableTimeoutSwtichButton.setChecked(False)
+            self.enableTimeoutSwtichButton.setEnabled(False)
+            buttonEnable = False
+        else:
+            self.enableSwitchButton.setEnabled(True)
+            buttonEnable = True
+
+        for ty in ['top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button.setEnabled(buttonEnable)
+
+    def __onEnableSelectChanged(self, checked):
+        qconfig.set(self.enableConfigItem, checked)
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}ChampionsSelectButton")
+            button.setEnabled(not checked)
+
+        self.enableTimeoutSwtichButton.setEnabled(checked)
+
+        if not checked:
+            self.enableTimeoutSwtichButton.setChecked(False)
+
+        self.__updateStatusLabel()
+
+    def __onEnableTimeoutCompleteChanged(self, checked):
+        qconfig.set(self.enableTimeoutCompleteCfgItem, checked)
+
+    def __updateStatusLabel(self):
+        checked = self.enableSwitchButton.isChecked()
+
+        text = self.tr("Enabled") if checked else self.tr("Disabled")
+        self.statusLabel.setText(text)
+
+
+class ChampionsCard(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.setFixedHeight(33)
+
+    def updateChampions(self, champions):
+        self.clear()
+
+        for champion in champions:
+            icon = RoundIcon(champion['icon'], 28, 2, 2)
+            self.hBoxLayout.addWidget(icon, alignment=Qt.AlignCenter)
+
+    def clear(self):
+        for i in reversed(range(self.hBoxLayout.count())):
+            item = self.hBoxLayout.itemAt(i)
+            self.hBoxLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()

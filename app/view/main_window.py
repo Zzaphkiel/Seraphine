@@ -475,8 +475,12 @@ class MainWindow(FluentWindow):
 
         self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
         self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
+
         asyncio.create_task(
             self.auxiliaryFuncInterface.autoSelectChampionCard.initChampionList())
+        asyncio.create_task(
+            self.auxiliaryFuncInterface.new.initChampionList())
+
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 
         # 加载大乱斗buff -- By Hpero4

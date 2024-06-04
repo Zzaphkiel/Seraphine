@@ -87,8 +87,19 @@ class Config(QConfig):
     enableRandomSkin = ConfigItem(
         "Functions", "enableRandomSkin", False, BoolValidator())
 
-    autoSelectChampion = ConfigItem("Functions",
-                                    "AutoSelectChampion", "")
+    autoSelectChampion = ConfigItem(
+        "Functions", "AutoSelectChampion", "")
+
+    autoSelectChampionTop = ConfigItem(
+        "Functions", "AutoSelectChampionTop", "")
+    autoSelectChampionJug = ConfigItem(
+        "Functions", "AutoSelectChampionJug", "")
+    autoSelectChampionMid = ConfigItem(
+        "Functions", "AutoSelectChampionMid", "")
+    autoSelectChampionBot = ConfigItem(
+        "Functions", "AutoSelectChampionBot", "")
+    autoSelectChampionSup = ConfigItem(
+        "Functions", "AutoSelectChampionSup", "")
 
     enableAutoBanChampion = ConfigItem(
         "Functions", "EnableAutoBanChampion", False, BoolValidator())
@@ -126,9 +137,6 @@ class Config(QConfig):
 
     enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
     proxyAddr = ConfigItem("General", "HttpProxy", "")
-
-    # enableCopyPlayersInfo = ConfigItem("Functions", "EnableCopyPlayersInfo",
-    #                                    False, BoolValidator())
 
 
 YEAR = 2023

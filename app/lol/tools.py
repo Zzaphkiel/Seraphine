@@ -1309,8 +1309,8 @@ async def autoSwap(data, selection: ChampionSelection):
     """
     选用顺序交换请求发生时，自动接受
     """
-    isAutoSwap = cfg.get(cfg.autoAcceptCeilSwap)
-    if not isAutoSwap:
+
+    if not cfg.get(cfg.autoAcceptCeilSwap):
         return
 
     for pickOrderSwap in data['pickOrderSwaps']:
@@ -1325,9 +1325,8 @@ async def autoBenchSwap(data, selection):
     """
     自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
     """
-    isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
-    if not isAutoPick or not data['benchEnabled']:
-        return
+    if not cfg.get(cfg.enableAutoSelectChampion) or not data['benchEnabled']:
+        return False
 
     championId = connector.manager.getChampionIdByName(
         cfg.get(cfg.autoSelectChampion))
@@ -1337,14 +1336,15 @@ async def autoBenchSwap(data, selection):
             await connector.benchSwap(championId)
             return True
 
+    return False
+
 
 async def autoTrade(data, selection):
     """
     英雄交换请求发生时，自动接受
     """
-    isAutoTrade = cfg.get(cfg.autoAcceptChampTrade)
-    if not isAutoTrade:
-        return
+    if not cfg.get(cfg.autoAcceptChampTrade):
+        return False
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
@@ -1352,38 +1352,49 @@ async def autoTrade(data, selection):
             await connector.acceptTrade(trade['id'])
             return True
 
+    return False
+
 
 async def autoPick(data, selection: ChampionSelection):
     """
     自动选用英雄
     """
-    isAutoPick = cfg.get(cfg.enableAutoSelectChampion)
-    if not isAutoPick or selection.isChampionPicked:
+    if not cfg.get(cfg.enableAutoSelectChampion) or selection.isChampionPicked:
         return
 
     localPlayerCellId = data['localPlayerCellId']
 
     for player in data['myTeam']:
-        if player["cellId"] == localPlayerCellId:
-            if (bool(player["championId"])
-                    or bool(player["championPickIntent"])):
-                return
+        if player["cellId"] != localPlayerCellId:
+            continue
+
+        if bool(player['championId']):
+            return
+
+        if bool(player['championPickIntent']):
+            return
+
+        break
 
     bans = itertools.chain(data["bans"]['myTeamBans'],
                            data["bans"]['theirTeamBans'])
-    champion_names = cfg.get(cfg.autoSelectChampion).split(',')
-    champion_id = 0
-    for champion_name in champion_names:
-        cid = connector.manager.getChampionIdByName(champion_name)
+
+    championNames = cfg.get(cfg.autoSelectChampion).split(',')
+    championId = 0
+
+    for name in championNames:
+        cid = connector.manager.getChampionIdByName(name)
+
         if cid not in bans:
-            champion_id = cid
+            championId = cid
             break
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if (action["actorCellId"] == localPlayerCellId
                     and action['type'] == "pick"):
-                await connector.selectChampion(action['id'], champion_id)
+
+                await connector.selectChampion(action['id'], championId)
 
                 selection.isChampionPicked = True
                 return True
@@ -1458,11 +1469,10 @@ async def rollAndSwapBack():
     championId = await connector.getCurrentChampion()
 
     await connector.reroll()
-
     await connector.benchSwap(championId)
 
 
-async def autoSelectSkinRandom(data, selection):
+async def autoSelectSkinRandom(data, selection: ChampionSelection):
     """
     随机选皮肤
     """
