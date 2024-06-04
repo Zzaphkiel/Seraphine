@@ -17,6 +17,7 @@ from app.common.logger import logger
 
 TAG = "Util"
 
+
 class Github:
     def __init__(self, user="Zzaphkiel", repositories="Seraphine"):
         self.githubApi = "http://api.github.com"
@@ -61,7 +62,8 @@ class Github:
 
         res = self.sess.get(url, proxies=proxy).json()
 
-        json_data = json.loads(str(base64.b64decode(res['content']), encoding='utf-8'))
+        json_data = json.loads(
+            str(base64.b64decode(res['content']), encoding='utf-8'))
 
         return json_data.get(VERSION, {})
 
@@ -85,7 +87,7 @@ class Github:
 
 class AramHome:
     """
-    Power by: 大乱斗之家
+    Powered by: 大乱斗之家
     Site: http://www.jddld.com
     """
     ARAM_CFG_PATH = f"{LOCAL_PATH}/AramBuff.json"
@@ -116,11 +118,11 @@ class AramHome:
             await m.__update()
 
     @classmethod
-    def getInfoByHeroId(cls, heroid: str):
-        return cls.getInfoByField("heroid", heroid)
+    def getInfoByChampionId(cls, championId: str):
+        return cls.getInfoByField("heroid", championId)
 
     @classmethod
-    def getInfoByHeroName(cls, name: str):
+    def getInfoByChampionName(cls, name: str):
         return cls.getInfoByField("name", name)
 
     @classmethod
@@ -182,7 +184,8 @@ class AramHome:
             'api_call_function': 'module_list',
             'pagesize': '200'  # FIXME 超过200个英雄会拿不完 -- By Hpero4
         }
-        data = requests.get(url, params=params, proxies=None, verify=False).json()  # 它不需要代理
+        data = requests.get(url, params=params, proxies=None,
+                            verify=False).json()  # 它不需要代理
         if data.get("code") == 1:
             with open(self.ARAM_CFG_PATH, "w") as f:
                 data = data.get("data")
@@ -228,7 +231,8 @@ class AramHome:
             with open(self.ARAM_CFG_PATH, "r") as f:
                 data = json.loads(f.read())
                 AramHome.data = data
-                dataVer = re.search(r"\d+\.\d+", data.get("banben", "")).group(0)
+                dataVer = re.search(
+                    r"\d+\.\d+", data.get("banben", "")).group(0)
                 if dataVer and dataVer == lolVer:
                     return False
 
@@ -383,7 +387,8 @@ def getFileProperties(fname):
                  'FileDescription', 'LegalTrademarks', 'PrivateBuild',
                  'FileVersion', 'OriginalFilename', 'SpecialBuild')
 
-    props = {'FixedFileInfo': None, 'StringFileInfo': None, 'FileVersion': None}
+    props = {'FixedFileInfo': None,
+             'StringFileInfo': None, 'FileVersion': None}
 
     try:
         fixedInfo = win32api.GetFileVersionInfo(fname, '\\')
@@ -394,14 +399,16 @@ def getFileProperties(fname):
 
         # \VarFileInfo\Translation returns list of available (language, codepage)
         # pairs that can be used to retreive string info. We are using only the first pair.
-        lang, codepage = win32api.GetFileVersionInfo(fname, '\\VarFileInfo\\Translation')[0]
+        lang, codepage = win32api.GetFileVersionInfo(
+            fname, '\\VarFileInfo\\Translation')[0]
 
         # any other must be of the form \StringfileInfo\%04X%04X\parm_name, middle
         # two are language/codepage pair returned from above
 
         strInfo = {}
         for propName in propNames:
-            strInfoPath = u'\\StringFileInfo\\%04X%04X\\%s' % (lang, codepage, propName)
+            strInfoPath = u'\\StringFileInfo\\%04X%04X\\%s' % (
+                lang, codepage, propName)
             strInfo[propName] = win32api.GetFileVersionInfo(fname, strInfoPath)
 
         props['StringFileInfo'] = strInfo

@@ -21,8 +21,8 @@ from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
-from ..common.util import AramHome
-from ..components.seraphine_interface import SeraphineInterface
+from app.common.util import AramHome
+from app.components.seraphine_interface import SeraphineInterface
 
 
 class GameInfoInterface(SeraphineInterface):
@@ -132,7 +132,7 @@ class GameInfoInterface(SeraphineInterface):
                 view.updateIcon(icon)
                 if self.isAram:
                     view.updateAramInfo(
-                        AramHome.getInfoByHeroId(str(newChampionId)))
+                        AramHome.getInfoByChampionId(str(newChampionId)))
 
     async def clear(self):
         self.allyChampions = {}
@@ -279,7 +279,7 @@ class TeamSummoners(QFrame):
                 continue
 
             if isAram and summoner["championId"]:
-                aramInfo = AramHome.getInfoByHeroId(
+                aramInfo = AramHome.getInfoByChampionId(
                     str(summoner["championId"]))
             else:
                 aramInfo = None
