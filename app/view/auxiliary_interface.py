@@ -113,13 +113,7 @@ class AuxiliaryInterface(SeraphineInterface):
                 "Accept ceil or champion swaping requests during B/P"),
             cfg.autoAcceptCeilSwap, cfg.autoAcceptChampTrade,
             self.bpGroup)
-        # self.autoSelectChampionCard = AutoSelectChampionCard(
-        #     self.tr("Auto select champion"),
-        #     self.tr("Auto select champion when your selection begin"),
-        #     cfg.enableAutoSelectChampion, cfg.autoSelectChampion,
-        #     cfg.enableAutoSelectTimeoutCompleted, cfg.enableRandomSkin,
-        #     self.bpGroup)
-        self.autoSelectChampionCard = NewAutoSelectChampionCard(
+        self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
             self.tr("Auto select champion when your selection begin"),
             cfg.enableAutoSelectChampion,
@@ -998,153 +992,6 @@ class AutoAcceptSwapingCard(ExpandGroupSettingCard):
             self.statusLabel.setText(self.tr("Disabled"))
 
 
-# 自动选择英雄卡片
-class AutoSelectChampionCard(ExpandGroupSettingCard):
-    def __init__(self, title, content=None,
-                 enableConfigItem: ConfigItem = None,
-                 championConfigItem: ConfigItem = None,
-                 timeoutCompletedCfgItem: ConfigItem = None,
-                 randomSkinCfgItem: ConfigItem = None,
-                 parent=None):
-        super().__init__(Icon.CHECK, title, content, parent)
-
-        self.statusLabel = QLabel(self)
-
-        self.inputWidget = QWidget(self.view)
-        self.inputLayout = QHBoxLayout(self.inputWidget)
-
-        self.championLabel = QLabel(
-            self.tr("Champion will be seleted automatically:"))
-        self.championSelectButton = PushButton(self.tr("Choose champions"))
-
-        self.switchButtonWidget = QWidget(self.view)
-        self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
-
-        self.enableLabel = QLabel(self.tr("Enable:"))
-        self.enableButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
-
-        self.timeoutCompletedLabel = QLabel(
-            self.tr("Completed before timeout:"))
-        self.timeoutCompletedBtn = SwitchButton(
-            indicatorPos=IndicatorPosition.RIGHT)
-
-        self.champions = {}
-
-        self.enableConfigItem = enableConfigItem
-        self.championConfigItem = championConfigItem
-        self.timeoutCompletedCfgItem = timeoutCompletedCfgItem
-        self.randomSkinCfgItem = randomSkinCfgItem
-
-        self.__initLayout()
-        self.__initWidget()
-
-    def __initLayout(self):
-        self.addWidget(self.statusLabel)
-
-        self.inputLayout.setSpacing(19)
-        self.inputLayout.setAlignment(Qt.AlignTop)
-        self.inputLayout.setContentsMargins(48, 18, 44, 18)
-
-        self.inputLayout.addWidget(self.championLabel, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(
-            self.championSelectButton, alignment=Qt.AlignRight)
-        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.switchButtonLayout.setVerticalSpacing(19)
-        self.switchButtonLayout.addWidget(self.enableLabel, 0, 0, Qt.AlignLeft)
-        self.switchButtonLayout.addWidget(
-            self.enableButton, 0, 1, Qt.AlignRight)
-        self.switchButtonLayout.addWidget(
-            self.timeoutCompletedLabel, 1, 0, Qt.AlignLeft)
-        self.switchButtonLayout.addWidget(
-            self.timeoutCompletedBtn, 1, 1, Qt.AlignRight)
-        # self.switchButtonLayout.addWidget(
-        #     self.randomSkinLabel, 2, 0, Qt.AlignLeft)
-        # self.switchButtonLayout.addWidget(
-        #     self.randomSkinBtn, 2, 1, Qt.AlignRight)
-
-        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
-
-        self.viewLayout.setSpacing(0)
-        self.viewLayout.setContentsMargins(0, 0, 0, 0)
-        self.addGroupWidget(self.inputWidget)
-        self.addGroupWidget(self.switchButtonWidget)
-
-    def __initWidget(self):
-        checked = qconfig.get(self.enableConfigItem)
-        selected = qconfig.get(self.championConfigItem).split(',')
-        self.championSelectButton.setMinimumWidth(100)
-
-        self.__onSelectedChampionsChanged(selected)
-
-        self.enableButton.setChecked(checked)
-        self.timeoutCompletedBtn.setChecked(
-            qconfig.get(self.timeoutCompletedCfgItem))
-        self.timeoutCompletedBtn.setEnabled(self.enableButton.isChecked())
-
-        self.enableButton.checkedChanged.connect(
-            self.__onEnableBtnCheckedChanged)
-        self.timeoutCompletedBtn.checkedChanged.connect(
-            self.__onTimeoutCompletedBtnCheckedChanged)
-        self.championSelectButton.clicked.connect(
-            self.__onChampionSelectButtonClicked)
-
-    def __setStatusLabelText(self, champion, isChecked):
-        if isChecked:
-            self.statusLabel.setText(self.tr("Enabled, champion: ") + champion)
-        else:
-            self.statusLabel.setText(self.tr("Disabled"))
-
-    def __onEnableBtnCheckedChanged(self, isChecked: bool):
-        self.championSelectButton.setEnabled(not isChecked)
-        self.timeoutCompletedBtn.setEnabled(isChecked)
-
-        if not isChecked:
-            self.timeoutCompletedBtn.setChecked(False)
-            self.__onTimeoutCompletedBtnCheckedChanged(False)
-
-        qconfig.set(self.enableConfigItem, isChecked)
-
-        selected = qconfig.get(self.championConfigItem).split(",")
-        self.__setStatusLabelText(self.tr(", ").join(selected), isChecked)
-
-    def __onTimeoutCompletedBtnCheckedChanged(self, isChecked: bool):
-        qconfig.set(self.timeoutCompletedCfgItem, isChecked)
-
-    def __onChampionSelectButtonClicked(self):
-        selected = qconfig.get(self.championConfigItem).split(",")
-
-        msgBox = MultiChampionSelectMsgBox(
-            self.champions, selected, self.window())
-        msgBox.completed.connect(self.__onSelectedChampionsChanged)
-        msgBox.exec()
-
-    def __onSelectedChampionsChanged(self, champions: list):
-        qconfig.set(self.championConfigItem, ','.join(champions))
-
-        if len(champions) == 0:
-            self.enableButton.setEnabled(False)
-            self.timeoutCompletedBtn.setEnabled(False)
-        else:
-            self.enableButton.setEnabled(True)
-
-        text = self.tr(", ").join(champions)
-        self.championLabel.setText(
-            self.tr("Champion will be seleted automatically: ") + text)
-
-        self.__setStatusLabelText(text, self.enableButton.isChecked())
-
-    async def initChampionList(self, champions: dict = None):
-        if champions:
-            self.champions = champions
-            return
-
-        self.champions = {i: [name, await connector.getChampionIcon(i)]
-                          for i, name in connector.manager.getChampions().items()
-                          if i != -1}
-
-
 # 自动 ban 英雄卡片
 class AutoBanChampionCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
@@ -1476,7 +1323,7 @@ class FriendRequestCard(ExpandGroupSettingCard):
             info('success', self.tr("Send friend request successfully"))
 
 
-class NewAutoSelectChampionCard(ExpandGroupSettingCard):
+class AutoSelectChampionCard(ExpandGroupSettingCard):
     def __init__(self, title, content=None,
                  enableConfigItem: ConfigItem = None,
                  championsConfigItem: ConfigItem = None,
