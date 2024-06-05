@@ -1386,6 +1386,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.tr("Completed before timeout:"))
         self.enableTimeoutSwtichButton = SwitchButton(
             indicatorPos=IndicatorPosition.RIGHT)
+        self.resetButton = PushButton(self.tr("Reset"))
 
         self.__initWidget()
         self.__initLayout()
@@ -1417,6 +1418,9 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.enableTimeoutSwtichButton.setEnabled(checked)
         self.enableTimeoutSwtichButton.setChecked(timeoutChecked)
 
+        self.resetButton.clicked.connect(self.__onResetButtonClicked)
+        self.resetButton.setMinimumWidth(100)
+
         self.__updateStatusLabel()
 
     def __initLayout(self):
@@ -1427,21 +1431,20 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.defaultCfgLayout.addWidget(
-            self.defaultHintLabel, 0, 0, alignment=Qt.AlignLeft)
+            self.defaultHintLabel, 0, 0, Qt.AlignLeft)
 
         self.defaultCfgLayout.addWidget(
-            self.defaultLabel, 1, 0, alignment=Qt.AlignLeft)
+            self.defaultLabel, 1, 0, Qt.AlignLeft)
         self.defaultCfgLayout.addWidget(
-            self.defaultChampions, 1, 1, alignment=Qt.AlignHCenter)
+            self.defaultChampions, 1, 1, Qt.AlignHCenter)
         self.defaultCfgLayout.addWidget(
-            self.defaultSelectButton, 1, 2, alignment=Qt.AlignRight)
+            self.defaultSelectButton, 1, 2, Qt.AlignRight)
 
         self.rankCfgLayout.setVerticalSpacing(19)
         self.rankCfgLayout.setContentsMargins(48, 18, 44, 18)
         self.rankCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
-        self.rankCfgLayout.addWidget(
-            self.rankLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.rankCfgLayout.addWidget(self.rankLabel, 0, 0, Qt.AlignLeft)
 
         for i, ty in enumerate(['top', 'jug', 'mid', 'bot', 'sup']):
             label = getattr(self, f"{ty}Label")
@@ -1457,13 +1460,15 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.buttonsLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.buttonsLayout.addWidget(
-            self.enableLabel, 0, 0, alignment=Qt.AlignLeft)
+            self.enableLabel, 0, 0, Qt.AlignLeft)
         self.buttonsLayout.addWidget(
-            self.enableSwitchButton, 0, 1, alignment=Qt.AlignRight)
+            self.enableSwitchButton, 0, 1, Qt.AlignRight)
         self.buttonsLayout.addWidget(
-            self.enableTimeoutCompleteLabel, 1, 0, alignment=Qt.AlignLeft)
+            self.enableTimeoutCompleteLabel, 1, 0, Qt.AlignLeft)
         self.buttonsLayout.addWidget(
-            self.enableTimeoutSwtichButton, 1, 1, alignment=Qt.AlignRight)
+            self.enableTimeoutSwtichButton, 1, 1, Qt.AlignRight)
+        self.buttonsLayout.addWidget(
+            self.resetButton, 2, 1, Qt.AlignRight)
 
         self.viewLayout.setSpacing(0)
         self.viewLayout.setContentsMargins(0, 0, 0, 0)
@@ -1553,6 +1558,10 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
         text = self.tr("Enabled") if checked else self.tr("Disabled")
         self.statusLabel.setText(text)
+
+    def __onResetButtonClicked(self):
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            self.__onChampionsChanged([], ty)
 
 
 class ChampionsCard(QFrame):

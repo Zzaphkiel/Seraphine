@@ -136,7 +136,7 @@
         <translation type="obsolete">已启用，自动选择：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1554"/>
+        <location filename="../../view/auxiliary_interface.py" line="1559"/>
         <source>Disabled</source>
         <translation>未启用</translation>
     </message>
@@ -221,9 +221,14 @@
         <translation>辅助：</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="1554"/>
+        <location filename="../../view/auxiliary_interface.py" line="1559"/>
         <source>Enabled</source>
         <translation>已启用</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="1389"/>
+        <source>Reset</source>
+        <translation>恢复默认</translation>
     </message>
 </context>
 <context>
