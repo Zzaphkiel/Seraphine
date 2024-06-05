@@ -256,7 +256,7 @@ class MultiChampionSelectWidget(QWidget):
         self.scrollArea.setObjectName("scrollArea")
         self.scrollWidget.setObjectName("scrollWidget")
 
-        for i, [name, icon] in self.champions.items():
+        for i, [name, icon, _] in self.champions.items():
             button = RoundIconButton(icon, 38, 4, 2, name, i)
             button.clicked.connect(self.__onChampionIconClicked)
 
@@ -299,8 +299,9 @@ class MultiChampionSelectWidget(QWidget):
             self.championsShowLayout.removeWidget(widget)
             widget.deleteLater()
 
-        for i, [name, icon] in self.champions.items():
-            if text not in name:
+        for i, [name, icon, keywords] in self.champions.items():
+            if text not in keywords:
+                # optional todo: match for each keyword again, but is has higher complexity
                 continue
 
             button = RoundIconButton(icon, 38, 4, 2, name, i)
