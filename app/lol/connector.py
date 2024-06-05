@@ -377,7 +377,7 @@ class LolClientConnector(QObject):
         res = await res.json()
 
         if not "summonerId" in res:
-            raise Exception()
+            raise ReferenceError()
 
         return res
 

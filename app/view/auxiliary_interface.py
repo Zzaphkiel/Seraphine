@@ -125,11 +125,19 @@ class AuxiliaryInterface(SeraphineInterface):
             cfg.autoSelectChampionSup,
             cfg.enableAutoSelectTimeoutCompleted,
             self.bpGroup)
-        self.autoBanChampionCard = AutoBanChampionCard(
+        self.autoBanChampionsCard = AutoBanChampionCard(
             self.tr("Auto ban champion"),
             self.tr("Auto ban champion when your ban section begin"),
-            cfg.enableAutoBanChampion, cfg.autoBanChampion,
-            cfg.pretentBan, cfg.autoBanDelay, self.bpGroup)
+            cfg.enableAutoBanChampion,
+            cfg.autoBanChampion,
+            cfg.autoBanChampionTop,
+            cfg.autoBanChampionJug,
+            cfg.autoBanChampionMid,
+            cfg.autoBanChampionBot,
+            cfg.autoBanChampionSup,
+            cfg.pretentBan,
+            cfg.autoBanDelay,
+            self.bpGroup)
 
         self.__initWidget()
         self.__initLayout()
@@ -160,7 +168,7 @@ class AuxiliaryInterface(SeraphineInterface):
         self.bpGroup.addSettingCard(self.autoAcceptMatchingCard)
         self.bpGroup.addSettingCard(self.autoAcceptSwapingCard)
         self.bpGroup.addSettingCard(self.autoSelectChampionCard)
-        self.bpGroup.addSettingCard(self.autoBanChampionCard)
+        self.bpGroup.addSettingCard(self.autoBanChampionsCard)
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoReconnectCard)
@@ -178,6 +186,10 @@ class AuxiliaryInterface(SeraphineInterface):
         self.expandLayout.addWidget(self.gameGroup)
         self.expandLayout.addWidget(self.clientGroup)
         self.expandLayout.addWidget(self.profileGroup)
+
+    async def initChampionList(self):
+        champions = await self.autoSelectChampionCard.initChampionList()
+        await self.autoBanChampionsCard.initChampionList(champions)
 
 
 class OnlineStatusCard(ExpandGroupSettingCard):
@@ -992,190 +1004,6 @@ class AutoAcceptSwapingCard(ExpandGroupSettingCard):
             self.statusLabel.setText(self.tr("Disabled"))
 
 
-# 自动 ban 英雄卡片
-class AutoBanChampionCard(ExpandGroupSettingCard):
-    def __init__(self, title, content=None, enableConfigItem: ConfigItem = None,
-                 championConfigItem: ConfigItem = None,
-                 pretentConfigItem: ConfigItem = None, delayConfigItem: ConfigItem = None, parent=None):
-        super().__init__(Icon.SQUARECROSS, title, content, parent)
-
-        self.statusLabel = QLabel(self)
-
-        self.inputWidget = QWidget(self.view)
-        self.inputLayout = QGridLayout(self.inputWidget)
-
-        self.championLabel = QLabel(
-            self.tr("Champion will be banned automatically:"))
-        self.lineEdit = LineEdit()
-        self.secondsLabel = QLabel(self.tr("Ban after a delay of seconds:"))
-        self.delayLineEdit = SpinBox()
-
-        self.switchButtonWidget = QWidget(self.view)
-        self.switchButtonLayout = QGridLayout(self.switchButtonWidget)
-
-        self.label1 = QLabel(self.tr("Enable:"))
-        self.switchButton1 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
-
-        self.label2 = QLabel(
-            self.tr("Prevent banning champions selected by teammates"))
-        self.switchButton2 = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
-
-        self.completer = None
-        self.champions = []
-
-        self.enableConfigItem = enableConfigItem
-        self.championConfigItem = championConfigItem
-        self.pretentConfigItem = pretentConfigItem
-        self.delayConfigItem = delayConfigItem
-
-        self.__initLayout()
-        self.__initWidget()
-
-    def __initLayout(self):
-        self.addWidget(self.statusLabel)
-
-        self.inputLayout.setVerticalSpacing(19)
-        self.inputLayout.setAlignment(Qt.AlignTop)
-        self.inputLayout.setContentsMargins(48, 18, 44, 18)
-
-        self.inputLayout.addWidget(
-            self.championLabel, 0, 0, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(
-            self.lineEdit, 0, 1, alignment=Qt.AlignRight)
-
-        self.inputLayout.addWidget(
-            self.secondsLabel, 1, 0, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(
-            self.delayLineEdit, 1, 1, alignment=Qt.AlignRight)
-
-        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.switchButtonLayout.setContentsMargins(48, 18, 44, 18)
-        self.switchButtonLayout.setVerticalSpacing(19)
-        self.switchButtonLayout.addWidget(self.label1, 0, 0, Qt.AlignLeft)
-        self.switchButtonLayout.addWidget(
-            self.switchButton1, 0, 1, Qt.AlignRight)
-        self.switchButtonLayout.addWidget(self.label2, 1, 0, Qt.AlignLeft)
-        self.switchButtonLayout.addWidget(
-            self.switchButton2, 1, 1, Qt.AlignRight)
-        self.switchButtonLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
-
-        self.viewLayout.setSpacing(0)
-        self.viewLayout.setContentsMargins(0, 0, 0, 0)
-        self.addGroupWidget(self.inputWidget)
-        self.addGroupWidget(self.switchButtonWidget)
-
-    def __initWidget(self):
-        self.lineEdit.setPlaceholderText(self.tr("Champion name"))
-        self.lineEdit.setMinimumWidth(250)
-        self.lineEdit.setClearButtonEnabled(True)
-        self.lineEdit.setEnabled(False)
-
-        self.delayLineEdit.setRange(0, 25)
-        self.delayLineEdit.setValue(cfg.get(self.delayConfigItem))
-        self.delayLineEdit.setSingleStep(1)
-        self.delayLineEdit.setMinimumWidth(250)
-
-        self.switchButton1.setEnabled(False)
-        self.switchButton2.setEnabled(False)
-
-        self.setValue(qconfig.get(self.championConfigItem),
-                      qconfig.get(self.enableConfigItem),
-                      qconfig.get(self.pretentConfigItem),
-                      qconfig.get(self.delayConfigItem))
-
-        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
-        self.switchButton1.checkedChanged.connect(self.__onCheckedChanged)
-        self.switchButton2.checkedChanged.connect(self.__onPrententChanged)
-        self.delayLineEdit.valueChanged.connect(self.__onDelayTimeChanged)
-
-        self.__fixStyleSheetError()
-
-    def __fixStyleSheetError(self):
-
-        light = """
-            SpinBox:disabled {
-                color: rgba(0, 0, 0, 150);
-                background-color: rgba(249, 249, 249, 0.3);
-                border: 1px solid rgba(0, 0, 0, 13);
-                border-bottom: 1px solid rgba(0, 0, 0, 13);
-            }
-        """
-
-        dark = """
-            SpinBox:disabled {    
-                color: rgba(255, 255, 255, 150);
-                background-color: rgba(255, 255, 255, 0.0419);
-                border: 1px solid rgba(255, 255, 255, 0.0698);
-            }
-        """
-
-        setCustomStyleSheet(self.delayLineEdit, light, dark)
-
-    def __setStatusLabelText(self, champion, isChecked):
-        if isChecked:
-            self.statusLabel.setText(self.tr("Enabled, champion: ") + champion)
-        else:
-            self.statusLabel.setText(self.tr("Disabled"))
-
-    def updateCompleter(self):
-        self.champions = connector.manager.getChampionList()
-        self.completer = QCompleter(self.champions)
-        self.completer.setFilterMode(Qt.MatchContains)
-        self.lineEdit.setCompleter(self.completer)
-
-        self.validate()
-
-    def setValue(self, championName: str, isChecked: bool, pretent: bool, delay: int):
-        qconfig.set(self.championConfigItem, championName)
-        qconfig.set(self.enableConfigItem, isChecked)
-        qconfig.set(self.pretentConfigItem, pretent)
-        qconfig.set(self.delayConfigItem, delay)
-
-        self.lineEdit.setText(championName)
-        self.switchButton1.setChecked(isChecked)
-        self.switchButton2.setChecked(pretent)
-        self.delayLineEdit.setValue(delay)
-
-        self.__setStatusLabelText(championName, isChecked)
-
-    def validate(self):
-        text = self.lineEdit.text()
-
-        if text not in self.champions and self.switchButton1.checked:
-            self.setValue("", False, False, "")
-
-        self.__onLineEditTextChanged(text)
-        self.__onCheckedChanged(self.switchButton1.isChecked())
-
-    def __onLineEditTextChanged(self, text):
-        enable = text in self.champions
-
-        self.switchButton1.setEnabled(enable)
-
-        self.setValue(text, self.switchButton1.isChecked(),
-                      self.switchButton2.isChecked(), self.delayLineEdit.value())
-
-    def __onCheckedChanged(self, isChecked: bool):
-        self.lineEdit.setEnabled(not isChecked)
-        self.switchButton2.setEnabled(isChecked)
-        self.delayLineEdit.setEnabled(isChecked)
-
-        if not isChecked:
-            self.switchButton2.setChecked(False)
-
-        self.setValue(self.lineEdit.text(), isChecked,
-                      self.switchButton2.isChecked(), self.delayLineEdit.value())
-
-    def __onPrententChanged(self, isChecked: bool):
-        self.setValue(self.lineEdit.text(), self.switchButton1.isChecked(),
-                      isChecked, self.delayLineEdit.value())
-
-    def __onDelayTimeChanged(self, value):
-        self.setValue(self.lineEdit.text(), self.switchButton1.isChecked(),
-                      self.switchButton2.isChecked(), value)
-
-
 class DodgeCard(SettingCard):
     def __init__(self, title, content, parent):
         super().__init__(Icon.EXIT, title, content, parent)
@@ -1480,13 +1308,12 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
     async def initChampionList(self, champions: dict = None):
         if champions:
             self.champions = champions
-            return
-
-        self.champions = {
-            i: [name, await connector.getChampionIcon(i)]
-            for i, name in connector.manager.getChampions().items()
-            if i != -1
-        }
+        else:
+            self.champions = {
+                i: [name, await connector.getChampionIcon(i)]
+                for i, name in connector.manager.getChampions().items()
+                if i != -1
+            }
 
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
             configItem = getattr(self, f"{ty}ChampionsConfigItem")
@@ -1499,6 +1326,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             champions.updateChampions(
                 [self.champions[connector.manager.getChampionIdByName(name)][1]
                  for name in selected])
+
+        return self.champions
 
     def __onButtonClicked(self, type: str):
         configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
@@ -1562,6 +1391,293 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
     def __onResetButtonClicked(self):
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
             self.__onChampionsChanged([], ty)
+
+
+class AutoBanChampionCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None,
+                 enableConfigItem: ConfigItem = None,
+                 championsConfigItem: ConfigItem = None,
+                 topChampionsConfigItem: ConfigItem = None,
+                 jugChampionsConfigItem: ConfigItem = None,
+                 midChampionsConfigItem: ConfigItem = None,
+                 botChampionsConfigItem: ConfigItem = None,
+                 supChampionsConfigItem: ConfigItem = None,
+                 friendlyConfigItem: ConfigItem = None,
+                 delayTimeConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.SQUARECROSS, title, content, parent)
+
+        self.champions = {}
+
+        self.enableConfigItem = enableConfigItem
+        self.defaultChampionsConfigItem = championsConfigItem
+        self.topChampionsConfigItem = topChampionsConfigItem
+        self.jugChampionsConfigItem = jugChampionsConfigItem
+        self.midChampionsConfigItem = midChampionsConfigItem
+        self.botChampionsConfigItem = botChampionsConfigItem
+        self.supChampionsConfigItem = supChampionsConfigItem
+
+        self.friendlyConfigItem = friendlyConfigItem
+        self.delayTimeConfigItem = delayTimeConfigItem
+
+        self.statusLabel = QLabel()
+
+        self.defaultCfgWidget = QWidget(self.view)
+        self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
+        self.defaultHintLabel = QLabel(self.tr("Default Configurations"))
+
+        self.defaultLabel = QLabel(self.tr("Default champions: "))
+        self.defaultChampions = ChampionsCard()
+        self.defaultSelectButton = PushButton(self.tr("Choose"))
+
+        self.rankCfgWidget = QWidget(self.view)
+        self.rankCfgLayout = QGridLayout(self.rankCfgWidget)
+        self.rankLabel = QLabel(self.tr("Rank Configurations"))
+
+        self.topLabel = QLabel(self.tr("Top: "))
+        self.jugLabel = QLabel(self.tr("Juggle: "))
+        self.midLabel = QLabel(self.tr("Mid: "))
+        self.botLabel = QLabel(self.tr("Bottom: "))
+        self.supLabel = QLabel(self.tr("Support: "))
+        self.topChampions = ChampionsCard()
+        self.jugChampions = ChampionsCard()
+        self.midChampions = ChampionsCard()
+        self.botChampions = ChampionsCard()
+        self.supChampions = ChampionsCard()
+        self.topSelectButton = PushButton(self.tr("Choose"))
+        self.jugSelectButton = PushButton(self.tr("Choose"))
+        self.midSelectButton = PushButton(self.tr("Choose"))
+        self.botSelectButton = PushButton(self.tr("Choose"))
+        self.supSelectButton = PushButton(self.tr("Choose"))
+
+        self.buttonsCfgWidget = QWidget(self.view)
+        self.buttonsCfgLayout = QGridLayout(self.buttonsCfgWidget)
+        self.delayLabel = QLabel(self.tr("Ban after a delay of seconds:"))
+        self.delaySpinBox = SpinBox()
+        self.enableLabel = QLabel(self.tr("Enable:"))
+        self.enableSwitchButton = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
+        self.friendlyLabel = QLabel(
+            self.tr("Prevent banning champions picked by teammates:"))
+        self.friendlySwitchButton = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
+
+        self.resetButton = PushButton(self.tr("Reset"))
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.defaultHintLabel.setStyleSheet("font: bold")
+        self.rankLabel.setStyleSheet("font: bold")
+
+        haveDefault = qconfig.get(self.defaultChampionsConfigItem) != ''
+        enabled = qconfig.get(self.enableConfigItem)
+        delayTime = qconfig.get(self.delayTimeConfigItem)
+        friendlyEnabled = qconfig.get(self.friendlyConfigItem)
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}SelectButton")
+            button.setMinimumWidth(100)
+            button.clicked.connect(lambda _, t=ty: self.__onButtonClicked(t))
+
+            if ty != 'default':
+                button.setEnabled(haveDefault)
+
+        self.enableSwitchButton.checkedChanged.connect(
+            self.__onEnableSwitchButtonClicked)
+        self.delaySpinBox.valueChanged.connect(
+            self.__onDelaySpinBoxValueChanged)
+        self.friendlySwitchButton.checkedChanged.connect(
+            self.__onFriendlySwitchButtonClicked)
+        self.resetButton.clicked.connect(self.__onResetButtonClicked)
+
+        self.delaySpinBox.setMinimumWidth(250)
+        self.delaySpinBox.setSingleStep(1)
+        self.delaySpinBox.setRange(0, 25)
+        self.delaySpinBox.setEnabled(haveDefault and not enabled)
+        self.delaySpinBox.setValue(delayTime)
+        self.enableSwitchButton.setEnabled(haveDefault)
+        self.enableSwitchButton.setChecked(enabled)
+        self.friendlySwitchButton.setEnabled(enabled)
+        self.friendlySwitchButton.setChecked(friendlyEnabled)
+        self.resetButton.setMinimumWidth(100)
+
+        self.__updateStatusLabel()
+        self.__fixStyleSheetOfSpinBox()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.defaultCfgLayout.setVerticalSpacing(19)
+        self.defaultCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.defaultCfgLayout.addWidget(
+            self.defaultHintLabel, 0, 0, Qt.AlignLeft)
+
+        self.defaultCfgLayout.addWidget(
+            self.defaultLabel, 1, 0, Qt.AlignLeft)
+        self.defaultCfgLayout.addWidget(
+            self.defaultChampions, 1, 1, Qt.AlignHCenter)
+        self.defaultCfgLayout.addWidget(
+            self.defaultSelectButton, 1, 2, Qt.AlignRight)
+
+        self.rankCfgLayout.setVerticalSpacing(19)
+        self.rankCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.rankCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.rankCfgLayout.addWidget(self.rankLabel, 0, 0, Qt.AlignLeft)
+
+        for i, ty in enumerate(['top', 'jug', 'mid', 'bot', 'sup']):
+            label = getattr(self, f"{ty}Label")
+            champions = getattr(self, f"{ty}Champions")
+            button = getattr(self, f"{ty}SelectButton")
+
+            self.rankCfgLayout.addWidget(label, i+1, 0, Qt.AlignLeft)
+            self.rankCfgLayout.addWidget(champions, i+1, 1, Qt.AlignHCenter)
+            self.rankCfgLayout.addWidget(button, i+1, 2, Qt.AlignRight)
+
+        self.buttonsCfgLayout.setVerticalSpacing(19)
+        self.buttonsCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonsCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonsCfgLayout.addWidget(
+            self.delayLabel, 0, 0, Qt.AlignLeft)
+        self.buttonsCfgLayout.addWidget(
+            self.delaySpinBox, 0, 1, Qt.AlignRight)
+        self.buttonsCfgLayout.addWidget(
+            self.enableLabel, 1, 0, Qt.AlignLeft)
+        self.buttonsCfgLayout.addWidget(
+            self.enableSwitchButton, 1, 1, Qt.AlignRight)
+        self.buttonsCfgLayout.addWidget(
+            self.friendlyLabel, 2, 0, Qt.AlignLeft)
+        self.buttonsCfgLayout.addWidget(
+            self.friendlySwitchButton, 2, 1, Qt.AlignRight)
+        self.buttonsCfgLayout.addWidget(
+            self.resetButton, 3, 1, Qt.AlignRight)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.addGroupWidget(self.defaultCfgWidget)
+        self.addGroupWidget(self.rankCfgWidget)
+        self.addGroupWidget(self.buttonsCfgWidget)
+
+    async def initChampionList(self, champions: dict = None):
+        if champions:
+            self.champions = champions
+        else:
+            self.champions = {
+                i: [name, await connector.getChampionIcon(i)]
+                for i, name in connector.manager.getChampions().items()
+                if i != -1
+            }
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            configItem = getattr(self, f"{ty}ChampionsConfigItem")
+            champions: ChampionsCard = getattr(self, f"{ty}Champions")
+            selected = qconfig.get(configItem).split(",")
+
+            if selected[0] == '':
+                continue
+
+            champions.updateChampions(
+                [self.champions[connector.manager.getChampionIdByName(name)][1]
+                 for name in selected])
+
+        return self.champions
+
+    def __onButtonClicked(self, type: str):
+        configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
+        selected = qconfig.get(configItem).split(",")
+
+        box = MultiChampionSelectMsgBox(
+            self.champions, selected, self.window())
+        box.completed.connect(
+            lambda champions, t=type: self.__onChampionsChanged(champions, t))
+        box.exec()
+
+    def __onChampionsChanged(self, champions: list, type: str):
+        configItem = getattr(self, f"{type}ChampionsConfigItem")
+        qconfig.set(configItem, ','.join(champions))
+
+        card: ChampionsCard = getattr(self, f"{type}Champions")
+        card.updateChampions(
+            [self.champions[connector.manager.getChampionIdByName(name)][1]
+             for name in champions])
+
+        if type != 'default':
+            return
+
+        if len(champions) == 0:
+            self.enableSwitchButton.setChecked(False)
+            self.enableSwitchButton.setEnabled(False)
+            self.friendlySwitchButton.setChecked(False)
+            self.friendlySwitchButton.setEnabled(False)
+            self.delaySpinBox.setEnabled(False)
+            buttonEnable = False
+        else:
+            self.enableSwitchButton.setEnabled(True)
+            self.delaySpinBox.setEnabled(True)
+            buttonEnable = True
+
+        for ty in ['top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}SelectButton")
+            button.setEnabled(buttonEnable)
+
+    def __onEnableSwitchButtonClicked(self, checked):
+        qconfig.set(self.enableConfigItem, checked)
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            button: PushButton = getattr(self, f"{ty}SelectButton")
+            button.setEnabled(not checked)
+
+        self.friendlySwitchButton.setEnabled(checked)
+        self.delaySpinBox.setEnabled(not checked)
+
+        if not checked:
+            self.friendlySwitchButton.setChecked(False)
+
+        self.__updateStatusLabel()
+
+    def __onDelaySpinBoxValueChanged(self, value):
+        qconfig.set(self.delayTimeConfigItem, value)
+
+    def __onFriendlySwitchButtonClicked(self, checked):
+        qconfig.set(self.friendlyConfigItem, checked)
+
+    def __onResetButtonClicked(self):
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            self.__onChampionsChanged([], ty)
+
+        self.delaySpinBox.setValue(0)
+
+    def __updateStatusLabel(self):
+        checked = self.enableSwitchButton.isChecked()
+
+        text = self.tr("Enabled") if checked else self.tr("Disabled")
+        self.statusLabel.setText(text)
+
+    def __fixStyleSheetOfSpinBox(self):
+        # 这玩意在深色 + Enabled 为 False 的时候看起来怪怪的，手动改一下
+        light = """
+            SpinBox:disabled {
+                color: rgba(0, 0, 0, 150);
+                background-color: rgba(249, 249, 249, 0.3);
+                border: 1px solid rgba(0, 0, 0, 13);
+                border-bottom: 1px solid rgba(0, 0, 0, 13);
+            }
+        """
+
+        dark = """
+            SpinBox:disabled {    
+                color: rgba(255, 255, 255, 150);
+                background-color: rgba(255, 255, 255, 0.0419);
+                border: 1px solid rgba(255, 255, 255, 0.0698);
+            }
+        """
+
+        setCustomStyleSheet(self.delaySpinBox, light, dark)
 
 
 class ChampionsCard(QFrame):

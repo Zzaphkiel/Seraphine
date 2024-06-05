@@ -474,10 +474,8 @@ class MainWindow(FluentWindow):
         self.__setLolInstallFolder(folder)
 
         self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
-        self.auxiliaryFuncInterface.autoBanChampionCard.updateCompleter()
 
-        asyncio.create_task(
-            self.auxiliaryFuncInterface.autoSelectChampionCard.initChampionList())
+        asyncio.create_task(self.auxiliaryFuncInterface.initChampionList())
 
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
 

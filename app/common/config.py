@@ -103,7 +103,14 @@ class Config(QConfig):
 
     enableAutoBanChampion = ConfigItem(
         "Functions", "EnableAutoBanChampion", False, BoolValidator())
+
     autoBanChampion = ConfigItem("Functions", "AutoBanChampion", "")
+    autoBanChampionTop = ConfigItem("Functions", "AutoBanChampionTop", "")
+    autoBanChampionJug = ConfigItem("Functions", "AutoBanChampionJug", "")
+    autoBanChampionMid = ConfigItem("Functions", "AutoBanChampionMid", "")
+    autoBanChampionBot = ConfigItem("Functions", "AutoBanChampionBot", "")
+    autoBanChampionSup = ConfigItem("Functions", "AutoBanChampionSup", "")
+
     autoBanDelay = RangeConfigItem(
         "Functions", "AutoBanDelay", 0, RangeValidator(0, 25))
     pretentBan = ConfigItem("Functions", "PrententBan", False, BoolValidator())
