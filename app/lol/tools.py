@@ -1440,7 +1440,21 @@ async def autoBan(data, selection: ChampionSelection):
                     and action['type'] == 'ban'
                     and action["isInProgress"]):
 
-                candidates = cfg.get(cfg.autoBanChampion).split(',')
+                pos = next(filter(lambda x: x['cellId'] == localPlayerCellId, data['myTeam']), None)
+                pos = pos.get('assignedPosition')
+                # print(pos)
+                if pos == 'top':
+                    candidates = cfg.get(cfg.autoBanChampionTop).split(',')
+                elif pos == 'judge':
+                    candidates = cfg.get(cfg.autoBanChampionJug).split(',')
+                elif pos == 'middle':
+                    candidates = cfg.get(cfg.autoBanChampionMid).split(',')
+                elif pos == 'bottom':
+                    candidates = cfg.get(cfg.autoBanChampionBot).split(',')
+                elif pos == 'support':
+                    candidates = cfg.get(cfg.autoBanChampionSup).split(',')
+                else:
+                    candidates = cfg.get(cfg.autoBanChampion).split(',')
                 candidates = [connector.manager.getChampionIdByName(c) for c in candidates]
 
                 # 给队友一点预选的时间
