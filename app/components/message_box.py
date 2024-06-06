@@ -358,7 +358,7 @@ class MultiChampionSelectMsgBox(MessageBoxBase):
 
     def __myOnYesButtonClicked(self):
         self.completed.emit(
-            self.championSelectWidget.getSelectedChampionsName())
+            self.championSelectWidget.getSelectedChampionIds())
 
         self.accept()
         self.accepted.emit()

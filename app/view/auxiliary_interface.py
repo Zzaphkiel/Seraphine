@@ -1319,20 +1319,23 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
             configItem = getattr(self, f"{ty}ChampionsConfigItem")
             champions: ChampionsCard = getattr(self, f"{ty}Champions")
-            selected = qconfig.get(configItem).split(",")
+            selected = qconfig.get(configItem)
 
-            if selected[0] == '':
+            if not (type(selected) is list and all(type(s) is int for s in selected)):
+                selected = []
+                qconfig.set(configItem, selected)
+
+            if len(selected) == 0:
                 continue
 
             champions.updateChampions(
-                [self.champions[connector.manager.getChampionIdByName(name)][1]
-                 for name in selected])
+                [self.champions[id][1] for id in selected])
 
         return self.champions
 
     def __onButtonClicked(self, type: str):
         configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
-        selected = qconfig.get(configItem).split(",")
+        selected = qconfig.get(configItem)
 
         box = MultiChampionSelectMsgBox(
             self.champions, selected, self.window())
@@ -1342,12 +1345,11 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
 
     def __onChampionsChanged(self, champions: list, type: str):
         configItem = getattr(self, f"{type}ChampionsConfigItem")
-        qconfig.set(configItem, ','.join(champions))
+        qconfig.set(configItem, champions)
 
         card: ChampionsCard = getattr(self, f"{type}Champions")
         card.updateChampions(
-            [self.champions[connector.manager.getChampionIdByName(name)][1]
-             for name in champions])
+            [self.champions[id][1] for id in champions])
 
         if type != 'default':
             return
@@ -1569,7 +1571,7 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
             self.champions = champions
         else:
             self.champions = {
-                i: [name, await connector.getChampionIcon(i)]
+                i: [name, await connector.getChampionIcon(i), get_champion_keywords_by_id(i)]
                 for i, name in connector.manager.getChampions().items()
                 if i != -1
             }
@@ -1577,20 +1579,26 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
             configItem = getattr(self, f"{ty}ChampionsConfigItem")
             champions: ChampionsCard = getattr(self, f"{ty}Champions")
-            selected = qconfig.get(configItem).split(",")
+            selected = qconfig.get(configItem)
 
-            if selected[0] == '':
+            # 原来的配置项里储存字符串，使用 ',' 分隔
+            # 现在储存的是 list 类型，其中是 championId
+            # 为了兼容老版本的配置文件，这里手动对配置文件进行一下验证 / 重置
+            if not (type(selected) is list and all(type(s) is int for s in selected)):
+                selected = []
+                qconfig.set(configItem, selected)
+
+            if len(selected) == 0:
                 continue
 
             champions.updateChampions(
-                [self.champions[connector.manager.getChampionIdByName(name)][1]
-                 for name in selected])
+                [self.champions[id][1]for id in selected])
 
         return self.champions
 
     def __onButtonClicked(self, type: str):
         configItem: ConfigItem = getattr(self, f"{type}ChampionsConfigItem")
-        selected = qconfig.get(configItem).split(",")
+        selected = qconfig.get(configItem)
 
         box = MultiChampionSelectMsgBox(
             self.champions, selected, self.window())
@@ -1600,12 +1608,11 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
 
     def __onChampionsChanged(self, champions: list, type: str):
         configItem = getattr(self, f"{type}ChampionsConfigItem")
-        qconfig.set(configItem, ','.join(champions))
+        qconfig.set(configItem, champions)
 
         card: ChampionsCard = getattr(self, f"{type}Champions")
         card.updateChampions(
-            [self.champions[connector.manager.getChampionIdByName(name)][1]
-             for name in champions])
+            [self.champions[id][1] for id in champions])
 
         if type != 'default':
             return

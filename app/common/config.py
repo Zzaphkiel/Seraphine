@@ -76,10 +76,6 @@ class Config(QConfig):
     autoAcceptMatchingDelay = RangeConfigItem(
         "Functions", "AutoAcceptMatchingDelay", 0, RangeValidator(0, 11))
 
-    enableAutoSelectChampion = ConfigItem("Functions",
-                                          "EnableAutoSelectChampion", False,
-                                          BoolValidator())
-
     enableAutoSelectTimeoutCompleted = ConfigItem("Functions",
                                                   "EnableAutoSelectTimeoutCompleted", False,
                                                   BoolValidator())
@@ -87,29 +83,35 @@ class Config(QConfig):
     enableRandomSkin = ConfigItem(
         "Functions", "enableRandomSkin", False, BoolValidator())
 
+    enableAutoSelectChampion = ConfigItem(
+        "Functions", "EnableAutoSelectChampion", False, BoolValidator())
     autoSelectChampion = ConfigItem(
-        "Functions", "AutoSelectChampion", "")
-
+        "Functions", "AutoSelectChampion", [])
     autoSelectChampionTop = ConfigItem(
-        "Functions", "AutoSelectChampionTop", "")
+        "Functions", "AutoSelectChampionTop", [])
     autoSelectChampionJug = ConfigItem(
-        "Functions", "AutoSelectChampionJug", "")
+        "Functions", "AutoSelectChampionJug", [])
     autoSelectChampionMid = ConfigItem(
-        "Functions", "AutoSelectChampionMid", "")
+        "Functions", "AutoSelectChampionMid", [])
     autoSelectChampionBot = ConfigItem(
-        "Functions", "AutoSelectChampionBot", "")
+        "Functions", "AutoSelectChampionBot", [])
     autoSelectChampionSup = ConfigItem(
-        "Functions", "AutoSelectChampionSup", "")
+        "Functions", "AutoSelectChampionSup", [])
 
     enableAutoBanChampion = ConfigItem(
         "Functions", "EnableAutoBanChampion", False, BoolValidator())
-
-    autoBanChampion = ConfigItem("Functions", "AutoBanChampion", "")
-    autoBanChampionTop = ConfigItem("Functions", "AutoBanChampionTop", "")
-    autoBanChampionJug = ConfigItem("Functions", "AutoBanChampionJug", "")
-    autoBanChampionMid = ConfigItem("Functions", "AutoBanChampionMid", "")
-    autoBanChampionBot = ConfigItem("Functions", "AutoBanChampionBot", "")
-    autoBanChampionSup = ConfigItem("Functions", "AutoBanChampionSup", "")
+    autoBanChampion = ConfigItem(
+        "Functions", "AutoBanChampion", [])
+    autoBanChampionTop = ConfigItem(
+        "Functions", "AutoBanChampionTop", [])
+    autoBanChampionJug = ConfigItem(
+        "Functions", "AutoBanChampionJug", [])
+    autoBanChampionMid = ConfigItem(
+        "Functions", "AutoBanChampionMid", [])
+    autoBanChampionBot = ConfigItem(
+        "Functions", "AutoBanChampionBot", [])
+    autoBanChampionSup = ConfigItem(
+        "Functions", "AutoBanChampionSup", [])
 
     autoBanDelay = RangeConfigItem(
         "Functions", "AutoBanDelay", 0, RangeValidator(0, 25))

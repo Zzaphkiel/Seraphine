@@ -262,11 +262,8 @@ class MultiChampionSelectWidget(QWidget):
 
             self.championsShowLayout.addWidget(button)
 
-        for name in self.selected:
-            if name == '':
-                break
-
-            id = connector.manager.getChampionIdByName(name)
+        for id in self.selected:
+            name = connector.manager.getChampionNameById(id)
             icon = self.champions[id][1]
 
             self.itemsDraggableWidget.addItem(icon, name, id)
@@ -321,6 +318,5 @@ class MultiChampionSelectWidget(QWidget):
         champion = self.champions[championId]
         self.itemsDraggableWidget.addItem(champion[1], champion[0], championId)
 
-    def getSelectedChampionsName(self) -> list:
-        return [self.champions[id][0]
-                for id in self.itemsDraggableWidget.getCurrentChampionIds()]
+    def getSelectedChampionIds(self) -> list:
+        return self.itemsDraggableWidget.getCurrentChampionIds()
