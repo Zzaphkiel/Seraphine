@@ -1379,15 +1379,24 @@ async def autoPick(data, selection: ChampionSelection):
     bans = itertools.chain(data["bans"]['myTeamBans'],
                            data["bans"]['theirTeamBans'])
 
-    championNames = cfg.get(cfg.autoSelectChampion).split(',')
-    championId = 0
-
-    for name in championNames:
-        cid = connector.manager.getChampionIdByName(name)
-
-        if cid not in bans:
-            championId = cid
-            break
+    pos = next(filter(lambda x: x['cellId'] == localPlayerCellId, data['myTeam']), None)
+    pos = pos.get('assignedPosition')
+    # print(pos)
+    if pos == 'top':
+        candidates = cfg.get(cfg.autoSelectChampionTop).split(',')
+    elif pos == 'juggle':
+        candidates = cfg.get(cfg.autoSelectChampionJug).split(',')
+    elif pos == 'middle':
+        candidates = cfg.get(cfg.autoSelectChampionMid).split(',')
+    elif pos == 'bottom':
+        candidates = cfg.get(cfg.autoSelectChampionBot).split(',')
+    elif pos == 'utility':
+        candidates = cfg.get(cfg.autoSelectChampionSup).split(',')
+    else:
+        candidates = cfg.get(cfg.autoSelectChampion).split(',')
+    candidates = [connector.manager.getChampionIdByName(c) for c in candidates]
+    candidates = [x for x in candidates if x not in bans]
+    championId = candidates[0] if candidates else 0
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
@@ -1440,8 +1449,22 @@ async def autoBan(data, selection: ChampionSelection):
                     and action['type'] == 'ban'
                     and action["isInProgress"]):
 
-                championId = connector.manager.getChampionIdByName(
-                    cfg.get(cfg.autoBanChampion))
+                pos = next(filter(lambda x: x['cellId'] == localPlayerCellId, data['myTeam']), None)
+                pos = pos.get('assignedPosition')
+                # print(pos)
+                if pos == 'top':
+                    candidates = cfg.get(cfg.autoBanChampionTop).split(',')
+                elif pos == 'juggle':
+                    candidates = cfg.get(cfg.autoBanChampionJug).split(',')
+                elif pos == 'middle':
+                    candidates = cfg.get(cfg.autoBanChampionMid).split(',')
+                elif pos == 'bottom':
+                    candidates = cfg.get(cfg.autoBanChampionBot).split(',')
+                elif pos == 'utility':
+                    candidates = cfg.get(cfg.autoBanChampionSup).split(',')
+                else:
+                    candidates = cfg.get(cfg.autoBanChampion).split(',')
+                candidates = [connector.manager.getChampionIdByName(c) for c in candidates]
 
                 # 给队友一点预选的时间
                 await asyncio.sleep(cfg.get(cfg.autoBanDelay))
@@ -1451,11 +1474,10 @@ async def autoBan(data, selection: ChampionSelection):
                     myTeam = (await connector.getChampSelectSession()).get("myTeam")
                     if not myTeam:
                         return
-                    for player in myTeam:
-                        if player["championPickIntent"] == championId:
-                            championId = 0
-                            break
+                    intents = [player["championPickIntent"] for player in myTeam]
+                    candidates = [x for x in candidates if x not in intents]
 
+                championId = candidates[0] if candidates else 0
                 await connector.banChampion(action['id'], championId, True)
 
                 return True

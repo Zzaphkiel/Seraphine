@@ -5,6 +5,7 @@ import stat
 from PyQt5.QtGui import QIcon
 from qfluentwidgets.common.icon import FluentIcon as FIF
 
+from ..common.game_element import get_champion_keywords_by_id
 from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
                                      SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                                      PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
@@ -1310,7 +1311,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.champions = champions
         else:
             self.champions = {
-                i: [name, await connector.getChampionIcon(i)]
+                i: [name, await connector.getChampionIcon(i), get_champion_keywords_by_id(i)]
                 for i, name in connector.manager.getChampions().items()
                 if i != -1
             }
