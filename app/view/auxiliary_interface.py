@@ -1311,7 +1311,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             self.champions = champions
         else:
             self.champions = {
-                i: [name, await connector.getChampionIcon(i), get_champion_keywords_by_id(i)]
+                i: [name, await connector.getChampionIcon(i)]
                 for i, name in connector.manager.getChampions().items()
                 if i != -1
             }
@@ -1571,7 +1571,7 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
             self.champions = champions
         else:
             self.champions = {
-                i: [name, await connector.getChampionIcon(i), get_champion_keywords_by_id(i)]
+                i: [name, await connector.getChampionIcon(i)]
                 for i, name in connector.manager.getChampions().items()
                 if i != -1
             }

@@ -15,6 +15,7 @@ from app.components.animation_frame import CardWidget
 from app.components.champion_icon_widget import RoundIcon, RoundIconButton
 
 from app.lol.connector import connector
+from app.lol.champions import ChampionAlias
 
 
 class ChampionTabItem(CardWidget):
@@ -256,7 +257,7 @@ class MultiChampionSelectWidget(QWidget):
         self.scrollArea.setObjectName("scrollArea")
         self.scrollWidget.setObjectName("scrollWidget")
 
-        for i, [name, icon, _] in self.champions.items():
+        for i, [name, icon] in self.champions.items():
             button = RoundIconButton(icon, 38, 4, 2, name, i)
             button.clicked.connect(self.__onChampionIconClicked)
 
@@ -296,10 +297,12 @@ class MultiChampionSelectWidget(QWidget):
             self.championsShowLayout.removeWidget(widget)
             widget.deleteLater()
 
-        for i, [name, icon, keywords] in self.champions.items():
-            if text not in keywords:
-                # optional todo: match for each keyword again, but is has higher complexity
-                continue
+        champions = self.__getChampionIdsByAlias(text)
+
+        for i in champions:
+            champion = self.champions[i]
+            name = champion[0]
+            icon = champion[1]
 
             button = RoundIconButton(icon, 38, 4, 2, name, i)
             button.clicked.connect(self.__onChampionIconClicked)
@@ -307,6 +310,13 @@ class MultiChampionSelectWidget(QWidget):
             self.championsShowLayout.addWidget(button)
 
         self.championsShowLayout.update()
+
+    def __getChampionIdsByAlias(self, alias):
+        if ChampionAlias.isAvailable():
+            return ChampionAlias.getChampionIdsByAliasFuzzily(alias)
+        else:
+            return [id for id, [name, _] in self.champions.items()
+                    if alias in name]
 
     def __onChampionIconClicked(self, championId):
         if self.itemsDraggableWidget.count() == 6:

@@ -44,6 +44,7 @@ from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
                            SERVERS_SUBSET)
 from app.lol.aram import AramHome
+from app.lol.champions import ChampionAlias
 
 import threading
 
@@ -482,6 +483,7 @@ class MainWindow(FluentWindow):
 
         # 加载大乱斗buff -- By Hpero4
         aramInitT = asyncio.create_task(AramHome.checkAndUpdate())
+        championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
 
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
@@ -511,7 +513,7 @@ class MainWindow(FluentWindow):
 
         t = self.__onGameStatusChanged(status)
         self.__unlockInterface()
-        await aramInitT
+        await asyncio.gather(aramInitT, championsInit)
         await t
 
     async def __startConnector(self, pid):
