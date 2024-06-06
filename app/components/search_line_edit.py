@@ -89,7 +89,8 @@ class MyCompleterMenu(CompleterMenu):
 
         # add items
         for i in items:
-            self.addAction(QAction(i, triggered=lambda c, x=i: self.__onItemSelected(x)))
+            self.addAction(QAction(i, triggered=lambda c,
+                           x=i: self.__onItemSelected(x)))
 
         return True
 
@@ -114,6 +115,14 @@ class SearchLineEdit(QSearchLineEdit):
     def refreshCompleter(self):
         self._showCompleterMenu()
 
+    def text(self):
+        text = super().text()
+        text = text.replace('\u2066', '')
+        text = text.replace('\u2069', '')
+        self.setText(text)
+
+        return text
+
     def _showCompleterMenu(self):
         if not self.completer():
             return
@@ -131,8 +140,10 @@ class SearchLineEdit(QSearchLineEdit):
             self._completerMenu.activated.connect(self._completer.activated)
 
         # add menu items
-        changed = self._completerMenu.setCompletion(self.completer().completionModel())
-        self._completerMenu.setMaxVisibleItems(self.completer().maxVisibleItems())
+        changed = self._completerMenu.setCompletion(
+            self.completer().completionModel())
+        self._completerMenu.setMaxVisibleItems(
+            self.completer().maxVisibleItems())
 
         # show menu
         if changed:
