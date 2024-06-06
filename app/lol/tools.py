@@ -1379,15 +1379,24 @@ async def autoPick(data, selection: ChampionSelection):
     bans = itertools.chain(data["bans"]['myTeamBans'],
                            data["bans"]['theirTeamBans'])
 
-    championNames = cfg.get(cfg.autoSelectChampion).split(',')
-    championId = 0
-
-    for name in championNames:
-        cid = connector.manager.getChampionIdByName(name)
-
-        if cid not in bans:
-            championId = cid
-            break
+    pos = next(filter(lambda x: x['cellId'] == localPlayerCellId, data['myTeam']), None)
+    pos = pos.get('assignedPosition')
+    # print(pos)
+    if pos == 'top':
+        candidates = cfg.get(cfg.autoSelectChampionTop).split(',')
+    elif pos == 'juggle':
+        candidates = cfg.get(cfg.autoSelectChampionJug).split(',')
+    elif pos == 'middle':
+        candidates = cfg.get(cfg.autoSelectChampionMid).split(',')
+    elif pos == 'bottom':
+        candidates = cfg.get(cfg.autoSelectChampionBot).split(',')
+    elif pos == 'utility':
+        candidates = cfg.get(cfg.autoSelectChampionSup).split(',')
+    else:
+        candidates = cfg.get(cfg.autoSelectChampion).split(',')
+    candidates = [connector.manager.getChampionIdByName(c) for c in candidates]
+    candidates = [x for x in candidates if x not in bans]
+    championId = candidates[0] if candidates else 0
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
@@ -1445,13 +1454,13 @@ async def autoBan(data, selection: ChampionSelection):
                 # print(pos)
                 if pos == 'top':
                     candidates = cfg.get(cfg.autoBanChampionTop).split(',')
-                elif pos == 'judge':
+                elif pos == 'juggle':
                     candidates = cfg.get(cfg.autoBanChampionJug).split(',')
                 elif pos == 'middle':
                     candidates = cfg.get(cfg.autoBanChampionMid).split(',')
                 elif pos == 'bottom':
                     candidates = cfg.get(cfg.autoBanChampionBot).split(',')
-                elif pos == 'support':
+                elif pos == 'utility':
                     candidates = cfg.get(cfg.autoBanChampionSup).split(',')
                 else:
                     candidates = cfg.get(cfg.autoBanChampion).split(',')
