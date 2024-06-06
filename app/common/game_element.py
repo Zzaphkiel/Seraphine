@@ -13,7 +13,8 @@ class Champion:
 def fetch_champion_list():
     import requests
 
-    r = requests.get(url='https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js')
+    r = requests.get(
+        url='https://game.gtimg.cn/images/lol/act/img/js/heroList/hero_list.js')
     hero_list = r.json()
     hero_list = hero_list['hero']
     champion_list = []

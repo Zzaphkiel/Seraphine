@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, QRectF, QPoint
 from PyQt5.QtGui import QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QLabel, QVBoxLayout, QGridLayout
 
-from app.common.util import AramHome
+from app.lol.aram import AramHome
 from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor,
                                        FlyoutViewBase, TextWrap)
 from app.components.color_label import ColorLabel

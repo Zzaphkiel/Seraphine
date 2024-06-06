@@ -21,7 +21,7 @@ from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
-from app.common.util import AramHome
+from app.lol.aram import AramHome
 from app.components.seraphine_interface import SeraphineInterface
 
 

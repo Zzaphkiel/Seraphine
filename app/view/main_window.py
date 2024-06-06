@@ -14,35 +14,36 @@ import pygetwindow as gw
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
-from ..common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
-                                     FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                                     ToolTipFilter, FluentIcon, ToolTipPosition)
 
-from .start_interface import StartInterface
-from .setting_interface import SettingInterface
-from .career_interface import CareerInterface
-from .search_interface import SearchInterface
-from .game_info_interface import GameInfoInterface
-from .auxiliary_interface import AuxiliaryInterface
-from ..common.util import github, getLolClientPid, getTasklistPath, getLolClientPidSlowly, AramHome, \
-    getLoLPathByRegistry
-from ..components.avatar_widget import NavigationAvatarWidget
-from ..components.temp_system_tray_menu import TmpSystemTrayMenu
-from ..common.icons import Icon
-from ..common.config import cfg, VERSION, BETA
-from ..common.logger import logger
-from ..common.signals import signalBus
-from ..components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                      WaitingForLolMessageBox, ExceptionMessageBox)
-from ..lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
-                              SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
-from ..lol.listener import (LolProcessExistenceListener, StoppableThread)
+from app.common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
+                                       FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
+                                       ToolTipFilter, FluentIcon, ToolTipPosition)
 
-from ..lol.connector import connector
-from ..lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                         getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                         autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
-                         SERVERS_SUBSET)
+from app.view.start_interface import StartInterface
+from app.view.setting_interface import SettingInterface
+from app.view.career_interface import CareerInterface
+from app.view.search_interface import SearchInterface
+from app.view.game_info_interface import GameInfoInterface
+from app.view.auxiliary_interface import AuxiliaryInterface
+from app.common.util import (github, getLolClientPid, getTasklistPath,
+                             getLolClientPidSlowly, getLoLPathByRegistry)
+from app.components.avatar_widget import NavigationAvatarWidget
+from app.components.temp_system_tray_menu import TmpSystemTrayMenu
+from app.common.icons import Icon
+from app.common.config import cfg, VERSION, BETA
+from app.common.logger import logger
+from app.common.signals import signalBus
+from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
+                                        WaitingForLolMessageBox, ExceptionMessageBox)
+from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
+                                SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
+from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
+from app.lol.connector import connector
+from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
+                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
+                           autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
+                           SERVERS_SUBSET)
+from app.lol.aram import AramHome
 
 import threading
 
