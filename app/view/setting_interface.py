@@ -1,24 +1,21 @@
 # coding:utf-8
 import os
 
-from ..common.qfluentwidgets import (
-    SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard, PushSettingCard,
-    ExpandLayout, CustomColorSettingCard, InfoBar, setTheme, setThemeColor,
-    SmoothScrollArea, PrimaryPushSettingCard,
-    HyperlinkCard, TeachingTip, TeachingTipTailPosition, TeachingTipView,
-    ExpandGroupSettingCard, ConfigItem, setCustomStyleSheet, SwitchButton,
-    qconfig, LineEdit, PushButton, IndicatorPosition, FluentIcon)
+from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard,
+                                       PushSettingCard, ExpandLayout, CustomColorSettingCard, InfoBar,
+                                       setTheme, setThemeColor, PrimaryPushSettingCard, HyperlinkCard,
+                                       TeachingTip, TeachingTipTailPosition, TeachingTipView, PushButton)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QDesktopServices
-from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog
 
-from ..common.icons import Icon
-from ..common.config import (
-    cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11)
-from ..common.style_sheet import StyleSheet
-from ..components.seraphine_interface import SeraphineInterface
-from ..components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
-                                        LooseSwitchSettingCard, ProxySettingCard)
+from app.common.icons import Icon
+from app.common.config import (cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_URL, isWin11,
+                               BETA)
+from app.common.style_sheet import StyleSheet
+from app.components.seraphine_interface import SeraphineInterface
+from app.components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
+                                          LooseSwitchSettingCard, ProxySettingCard)
 
 
 class SettingInterface(SeraphineInterface):
@@ -200,7 +197,7 @@ class SettingInterface(SeraphineInterface):
         self.aboutCard = HyperlinkCard(
             GITHUB_URL, self.tr("View GitHub"), Icon.INFO, self.tr('About'),
             self.tr('Copyright') + ' © ' + f"{YEAR}, {AUTHOR}. " +
-            self.tr('Version') + f" {VERSION}", self.aboutGroup)
+            self.tr('Version') + f" {BETA or VERSION}", self.aboutGroup)
         self.aboutCard.linkButton.setIcon(Icon.GITHUB)
 
         self.__initWidget()

@@ -1076,8 +1076,8 @@ class LockConfigCard(SettingCard):
         mode = 0o444 if enable else 0o666
         os.chmod(path, mode)
 
-        current_mode = stat.S_IMODE(os.lstat(path).st_mode)
-        if current_mode != mode:
+        currentMode = stat.S_IMODE(os.lstat(path).st_mode)
+        if currentMode != mode:
             return False
 
         return True

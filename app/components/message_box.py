@@ -12,7 +12,7 @@ from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollAre
                                      CheckBox, setCustomStyleSheet, ProgressBar,
                                      PrimaryPushButton, ComboBox)
 
-from app.common.config import VERSION, cfg, LOCAL_PATH
+from app.common.config import VERSION, cfg, LOCAL_PATH, BETA
 from app.common.util import (github, getLolClientPidSlowly, getPortTokenServerByPid,
                              getTasklistPath, getLolClientPids, getLolClientPidsSlowly)
 from app.common.signals import signalBus
@@ -50,7 +50,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.titleLabel.setText(self.tr('Update detected'))
         self.titleLabel.setContentsMargins(5, 0, 5, 0)
 
-        self.content.setText(self.tr("current: v") + VERSION + self.tr(", ")
+        self.content.setText(self.tr("current: v") + BETA or VERSION + self.tr(", ")
                              + self.tr("new: v") + self.info.get("tag_name")[1:])
         self.content.setContentsMargins(8, 0, 5, 0)
 

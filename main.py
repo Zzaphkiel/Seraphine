@@ -1,6 +1,6 @@
 # coding:utf-8
 from app.view.main_window import MainWindow
-from app.common.config import cfg, VERSION
+from app.common.config import cfg, VERSION, BETA
 import sys
 import os
 
@@ -16,7 +16,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 def main():
     args = sys.argv
     if len(args) == 2 and args[1] in ['--version', '-v']:
-        print(VERSION)
+        print(BETA or VERSION)
         return
 
     if cfg.get(cfg.dpiScale) == "Auto":

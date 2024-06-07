@@ -61,7 +61,7 @@ class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
 
-        logger.critical(f"Seraphine started, version: {VERSION}", TAG)
+        logger.critical(f"Seraphine started, version: {BETA or VERSION}", TAG)
         self.__initConfig()
 
         self.__initWindow()
