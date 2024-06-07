@@ -838,7 +838,11 @@ class SpectateCard(ExpandGroupSettingCard):
               parent=self.window().auxiliaryFuncInterface)
 
         try:
-            await connector.spectate(self.lineEdit.text())
+            text = self.lineEdit.text()
+            text = text.replace('\u2066', '').replace('\u2069', '')
+
+            await connector.spectate(text)
+
         except SummonerNotFound:
             info('error', self.tr("Summoner not found"),
                  self.tr("Please check the summoner's name and retry"))
