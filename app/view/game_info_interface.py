@@ -268,8 +268,9 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addWidget(view)
 
         if len(order) < 5:
-            self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
             self.vBoxLayout.addStretch(5 - len(order))
+            spacing = self.vBoxLayout.spacing()
+            self.vBoxLayout.addSpacing(spacing * (5 - len(order)))
 
     def updateSummoners(self, summoners, isAram=False):
         self.clear()
@@ -291,8 +292,9 @@ class TeamSummoners(QFrame):
             self.vBoxLayout.addWidget(summonerView, stretch=1)
 
         if len(summoners) < 5:
-            self.vBoxLayout.addSpacing(self.vBoxLayout.spacing())
             self.vBoxLayout.addStretch(5 - len(summoners))
+            spacing = self.vBoxLayout.spacing()
+            self.vBoxLayout.addSpacing(spacing * (5 - len(summoners)))
 
     def updateColor(self, colors):
         for summonerId, color in colors.items():
@@ -521,8 +523,9 @@ class SummonersGamesView(QFrame):
             view.style().polish(view)
 
         if len(order) < 5:
-            self.hBoxLayout.addSpacing(self.hBoxLayout.spacing())
             self.hBoxLayout.addStretch(5 - len(order))
+            spacing = self.hBoxLayout.spacing()
+            self.hBoxLayout.addSpacing(spacing * (5 - len(order)))
 
     def updateSummoners(self, summoners):
         self.clear()
@@ -542,6 +545,8 @@ class SummonersGamesView(QFrame):
 
         if len(summoners) < 5:
             self.hBoxLayout.addStretch(5 - len(summoners))
+            spacing = self.hBoxLayout.spacing()
+            self.hBoxLayout.addSpacing(spacing * (5 - len(summoners)))
 
     def clear(self):
         for i in reversed(range(self.hBoxLayout.count())):
@@ -601,7 +606,8 @@ class Games(QFrame):
 
         if len(games) < 11:
             self.gamesLayout.addStretch(11-len(games))
-            self.gamesLayout.addSpacing(5)
+            spacing = self.gamesLayout.spacing()
+            self.gamesLayout.addSpacing(spacing * (11 - len(games)))
 
     @asyncSlot()
     async def __onSummonerNameClicked(self):

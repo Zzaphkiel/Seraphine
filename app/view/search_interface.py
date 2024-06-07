@@ -193,6 +193,8 @@ class GamesTab(QFrame):
         # 如果不够十个就给它填充一下
         if end - begin < 10:
             layout.addStretch(10 - (end - begin))
+            spacing = layout.spacing()
+            layout.addSpacing((10 - (end - begin)) * spacing)
 
         self.stackWidget.addWidget(widget)
         self.maxPageNum += 1
