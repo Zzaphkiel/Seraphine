@@ -10,7 +10,7 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        ExpandGroupSettingCard, TransparentToolButton,
                                        FluentIcon)
 
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
 from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QFrame, QSpacerItem, QSizePolicy)
 from qasync import asyncSlot
@@ -1703,23 +1703,24 @@ class ChampionsCard(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.hBoxLayout.setContentsMargins(6, 6, 6, 6)
+        self.hBoxLayout.setContentsMargins(2, 0, 4, 0)
         self.hBoxLayout.setAlignment(Qt.AlignCenter)
 
         self.iconLayout = QHBoxLayout()
-        self.iconLayout.setContentsMargins(0, 0, 0, 0)
+        self.iconLayout.setContentsMargins(6, 6, 0, 6)
         self.clearButton = TransparentToolButton(FluentIcon.CLOSE)
-        self.clearButton.setFixedSize(30, 30)
+        self.clearButton.setFixedSize(28, 28)
+        self.clearButton.setIconSize(QSize(15, 15))
         self.clearButton.setVisible(False)
         self.clearButton.clicked.connect(self.clearRequested)
 
         self.hBoxLayout.addLayout(self.iconLayout)
         self.hBoxLayout.addItem(QSpacerItem(
             0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
-        self.hBoxLayout.addWidget(self.clearButton)
+        self.hBoxLayout.addWidget(self.clearButton, alignment=Qt.AlignVCenter)
 
-        self.setFixedWidth(260)
-        self.setFixedHeight(40)
+        self.setFixedWidth(250)
+        self.setFixedHeight(42)
 
     def updateChampions(self, champions):
         self.clear()
