@@ -2,15 +2,12 @@ import threading
 import os
 import stat
 
-from PyQt5.QtGui import QIcon
-from qfluentwidgets.common.icon import FluentIcon as FIF
 
-from ..common.game_element import get_champion_keywords_by_id
-from ..common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
-                                     SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
-                                     PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                                     IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
-                                     ExpandGroupSettingCard, StrongBodyLabel, SubtitleLabel)
+from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
+                                       SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
+                                       PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
+                                       IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
+                                       ExpandGroupSettingCard)
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (

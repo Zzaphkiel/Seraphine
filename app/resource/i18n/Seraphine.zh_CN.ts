@@ -1211,7 +1211,7 @@
     <message>
         <location filename="../../view/main_window.py" line="700"/>
         <source>Do you wish to exit?</source>
-        <translation>您第一次点击了关闭按钮</translation>
+        <translation>你第一次点击了关闭按钮</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="684"/>
@@ -1317,7 +1317,7 @@
     <message>
         <location filename="../../view/main_window.py" line="700"/>
         <source>Choose action for close button (you can modify it at any time in the settings page)</source>
-        <translation>请选择点击关闭按钮的默认行为（您可以今后任意时间在设置界面修改它）</translation>
+        <translation>请选择点击关闭按钮的默认行为</translation>
     </message>
 </context>
 <context>
@@ -1775,7 +1775,7 @@
     <message>
         <location filename="../../view/search_interface.py" line="1020"/>
         <source>Please input summoner name</source>
-        <translation>请输入召唤师名</translation>
+        <translation>请输入同大区召唤师名</translation>
     </message>
     <message>
         <location filename="../../view/search_interface.py" line="1027"/>
@@ -2186,7 +2186,7 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="788"/>
         <source>Summoners&apos;s name you want to spectate:</source>
-        <translation>你想观战的召唤师名：</translation>
+        <translation>你想观战的同大区召唤师名：</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="819"/>
@@ -2239,7 +2239,7 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../view/start_interface.py" line="88"/>
         <source>(You can launch LOL by other means)</source>
-        <translation>（您也可以通过其他方式打开客户端）</translation>
+        <translation>（你也可以通过其他方式打开客户端）</translation>
     </message>
     <message>
         <location filename="../../view/start_interface.py" line="78"/>
@@ -2495,7 +2495,7 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../components/message_box.py" line="204"/>
         <source>Please clicked &quot;Connect To Client&quot; button manually when LOL launched completely</source>
-        <translation>请您在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
+        <translation>请在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>
 </context>
 <context>
