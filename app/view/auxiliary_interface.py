@@ -7,11 +7,12 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
                                        PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                                        IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
-                                       ExpandGroupSettingCard)
+                                       ExpandGroupSettingCard, TransparentToolButton,
+                                       FluentIcon)
 
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import (
-    QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout, QFrame)
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
+                             QFrame, QSpacerItem, QSizePolicy)
 from qasync import asyncSlot
 
 from app.components.seraphine_interface import SeraphineInterface
@@ -1322,6 +1323,9 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             champions: ChampionsCard = getattr(self, f"{ty}Champions")
             selected = qconfig.get(configItem)
 
+            champions.clearRequested.connect(
+                lambda t=ty: self.__onChampionsChanged([], t))
+
             if not (type(selected) is list and all(type(s) is int for s in selected)):
                 selected = []
                 qconfig.set(configItem, selected)
@@ -1582,6 +1586,9 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
             champions: ChampionsCard = getattr(self, f"{ty}Champions")
             selected = qconfig.get(configItem)
 
+            champions.clearRequested.connect(
+                lambda t=ty: self.__onChampionsChanged([], t))
+
             # 原来的配置项里储存字符串，使用 ',' 分隔
             # 现在储存的是 list 类型，其中是 championId
             # 为了兼容老版本的配置文件，这里手动对配置文件进行一下验证 / 重置
@@ -1690,14 +1697,28 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
 
 
 class ChampionsCard(QFrame):
+    clearRequested = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.hBoxLayout.setContentsMargins(5, 5, 5, 5)
+        self.hBoxLayout.setContentsMargins(6, 6, 6, 6)
         self.hBoxLayout.setAlignment(Qt.AlignCenter)
 
-        self.setFixedWidth(230)
+        self.iconLayout = QHBoxLayout()
+        self.iconLayout.setContentsMargins(0, 0, 0, 0)
+        self.clearButton = TransparentToolButton(FluentIcon.CLOSE)
+        self.clearButton.setFixedSize(30, 30)
+        self.clearButton.setVisible(False)
+        self.clearButton.clicked.connect(self.clearRequested)
+
+        self.hBoxLayout.addLayout(self.iconLayout)
+        self.hBoxLayout.addItem(QSpacerItem(
+            0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed))
+        self.hBoxLayout.addWidget(self.clearButton)
+
+        self.setFixedWidth(260)
         self.setFixedHeight(40)
 
     def updateChampions(self, champions):
@@ -1705,12 +1726,20 @@ class ChampionsCard(QFrame):
 
         for icon in champions:
             icon = RoundIcon(icon, 28, 2, 2)
-            self.hBoxLayout.addWidget(icon, alignment=Qt.AlignVCenter)
+            self.iconLayout.addWidget(icon, alignment=Qt.AlignVCenter)
 
     def clear(self):
-        for i in reversed(range(self.hBoxLayout.count())):
-            item = self.hBoxLayout.itemAt(i)
-            self.hBoxLayout.removeItem(item)
+        for i in reversed(range(self.iconLayout.count())):
+            item = self.iconLayout.itemAt(i)
+            self.iconLayout.removeItem(item)
 
             if item.widget():
                 item.widget().deleteLater()
+
+    def enterEvent(self, a0: QEvent) -> None:
+        self.clearButton.setVisible(True)
+        return super().enterEvent(a0)
+
+    def leaveEvent(self, a0: QEvent) -> None:
+        self.clearButton.setVisible(False)
+        return super().leaveEvent(a0)
