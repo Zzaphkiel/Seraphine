@@ -1,7 +1,7 @@
 pyperclip==1.8.2
 PyQt5==5.15.9
 PyQt5-sip==12.12.1
-PyQt-Fluent-Widgets==1.4.6
+PyQt-Fluent-Widgets==1.5.7
 Requests==2.32.3
 aiohttp==3.9.5
 pygetwindow==0.0.9
