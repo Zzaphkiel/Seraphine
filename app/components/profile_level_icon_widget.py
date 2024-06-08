@@ -84,7 +84,7 @@ class RoundLevelAvatar(QWidget):
         self.aramInfo = aramInfo
 
         # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
-        # self.aramInfo = AramHome.getInfoByHeroId("75")
+        # self.aramInfo = AramHome.getInfoByChampionId("75")
 
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:

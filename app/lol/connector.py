@@ -595,6 +595,26 @@ class LolClientConnector(QObject):
         return await res.read()
 
     @retry()
+    async def setProfileIcon(self, iconId):
+        data = {"profileIconId": iconId}
+        url = "/lol-summoner/v1/current-summoner/icon"
+
+        res = await self.__put(url, data)
+        return await res.json()
+
+    @retry()
+    async def getChatMe(self):
+        res = await self.__get("/lol-chat/v1/me")
+        return await res.json()
+
+    @retry()
+    async def getCurrentSummonerProfile(self):
+        url = "/lol-summoner/v1/current-summoner/summoner-profile"
+
+        res = await self.__get(url)
+        return await res.json()
+
+    @retry()
     async def removePrestigeCrest(self):
         ref = await self.__get('/lol-regalia/v2/current-summoner/regalia')
         ref = await ref.json()
