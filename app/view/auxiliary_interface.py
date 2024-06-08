@@ -1227,7 +1227,7 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.rankLabel.setStyleSheet("font: bold")
 
         # 逻辑是，必须要设置默认，才能设置具体分路和启动功能
-        selected = qconfig.get(self.defaultChampionsConfigItem) != ''
+        selected = qconfig.get(self.defaultChampionsConfigItem) != []
         checked = qconfig.get(self.enableConfigItem)
         timeoutChecked = qconfig.get(self.enableTimeoutCompleteCfgItem)
 
@@ -1478,7 +1478,7 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.defaultHintLabel.setStyleSheet("font: bold")
         self.rankLabel.setStyleSheet("font: bold")
 
-        haveDefault = qconfig.get(self.defaultChampionsConfigItem) != ''
+        haveDefault = qconfig.get(self.defaultChampionsConfigItem) != []
         enabled = qconfig.get(self.enableConfigItem)
         delayTime = qconfig.get(self.delayTimeConfigItem)
         friendlyEnabled = qconfig.get(self.friendlyConfigItem)
