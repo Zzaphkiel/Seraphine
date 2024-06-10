@@ -753,7 +753,6 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
             tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
-
         except:
             tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
@@ -1006,7 +1005,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
             recentlyChampionId)
 
     return {
-        "name": summoner.get("name") or summoner.get("internalName"),
+        "name": summoner.get("gameName") or summoner.get("internalName"),
         'tagLine': summoner.get("tagLine"),
         "icon": icon,
         'championId': championId,
@@ -1044,7 +1043,10 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
 
     championId = item.get('championId') or 0
     icon = await connector.getChampionIcon(championId)
-    summoner = await connector.getSummonerByPuuidViaSGP(token, puuid)
+    # SGP 接口返回的 summoner name 不是最新的，导致右侧点击召唤师名后搜不到
+    # 重新使用 LCU API
+    # summoner = await connector.getSummonerByPuuidViaSGP(token, puuid)
+    summoner = await connector.getSummonerByPuuid(puuid)
 
     try:
         origRankInfo = await connector.getRankedStatsByPuuid(puuid)
@@ -1074,7 +1076,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
     except:
         gamesInfo = []
     else:
-        tagLine = getTagLineFromGame(origGamesInfo['games'][0], puuid)
+        # tagLine = getTagLineFromGame(origGamesInfo['games'][0], puuid)
 
         tasks = [parseGamesDataFromSGP(game, puuid)
                  for game in origGamesInfo["games"][:11]]
@@ -1105,17 +1107,17 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
             recentlyChampionId)
 
     return {
-        "name": summoner.get("name") or summoner.get("internalName"),
-        'tagLine': tagLine,
+        "name": summoner.get("gameName"),
+        'tagLine': summoner.get('tagLine'),
         "icon": icon,
         'championId': championId,
-        "level": summoner["level"],
+        "level": summoner["summonerLevel"],
         "rankInfo": rankInfo,
         "gamesInfo": gamesInfo,
-        "xpSinceLastLevel": summoner["expPoints"],
-        "xpUntilNextLevel": summoner["expToNextLevel"],
+        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
         "puuid": puuid,
-        "summonerId": summoner['id'],
+        "summonerId": summoner['summonerId'],
         "kda": [kill, deaths, assists],
         "cellId": item.get("cellId"),
         "selectedPosition": item.get("selectedPosition"),
@@ -1124,6 +1126,28 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
         # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
         "recentlyChampionName": recentlyChampionName
     }
+
+    # 适用于 SGP API 返回值
+    # return {
+    #     "name": summoner.get("gameName"),
+    #     'tagLine': tagLine,
+    #     "icon": icon,
+    #     'championId': championId,
+    #     "level": summoner["level"],
+    #     "rankInfo": rankInfo,
+    #     "gamesInfo": gamesInfo,
+    #     "xpSinceLastLevel": summoner["expPoints"],
+    #     "xpUntilNextLevel": summoner["expToNextLevel"],
+    #     "puuid": puuid,
+    #     "summonerId": summoner['id'],
+    #     "kda": [kill, deaths, assists],
+    #     "cellId": item.get("cellId"),
+    #     "selectedPosition": item.get("selectedPosition"),
+    #     "fateFlag": fateFlag,
+    #     "isPublic": summoner["privacy"] == "PUBLIC",
+    #     # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
+    #     "recentlyChampionName": recentlyChampionName
+    # }
 
 
 def getTeammatesFromSGPGame(game, puuid):
