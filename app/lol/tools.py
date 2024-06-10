@@ -1423,7 +1423,12 @@ async def autoPick(data, selection: ChampionSelection):
     candidates.extend(cfg.get(cfg.autoSelectChampion))
 
     candidates = [x for x in candidates if x not in bans]
-    championId = candidates[0] if candidates else 0
+
+    if not candidates:
+        selection.isChampionPicked = True
+        return
+
+    championId = candidates[0]
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
@@ -1507,7 +1512,10 @@ async def autoBan(data, selection: ChampionSelection):
                                for player in myTeam]
                     candidates = [x for x in candidates if x not in intents]
 
-                championId = candidates[0] if candidates else 0
+                if not candidates:
+                    return
+
+                championId = candidates[0]
                 await connector.banChampion(action['id'], championId, True)
 
                 return True
