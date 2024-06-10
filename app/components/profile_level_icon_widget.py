@@ -1,12 +1,14 @@
 import sys
 
-from PyQt5.QtCore import Qt, QRectF, QPoint
-from PyQt5.QtGui import QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QHBoxLayout, QLabel, QVBoxLayout, QGridLayout
+from PyQt5.QtCore import (
+    Qt, QRectF, QPoint, QPropertyAnimation, QParallelAnimationGroup, QEasingCurve)
+from PyQt5.QtGui import QHideEvent, QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
+from PyQt5.QtWidgets import (QWidget, QApplication, QMainWindow, QHBoxLayout,
+                             QLabel, QVBoxLayout, QGridLayout, QFrame, QGraphicsDropShadowEffect)
 
 from app.lol.aram import AramHome
-from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme, themeColor,
-                                       FlyoutViewBase, TextWrap)
+from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme,
+                                       themeColor, FlyoutViewBase, TextWrap)
 from app.components.color_label import ColorLabel
 from app.common.style_sheet import StyleSheet
 
@@ -149,26 +151,115 @@ class RoundLevelAvatar(QWidget):
                     target=self,
                 )
                 self.mFlyout.show()
-                # TODO Animation -- By Hpero4
-                # aM = FlyoutAnimationManager.make(FlyoutAnimationType.SLIDE_LEFT, self.mFlyout)
-                # target = aM.position(self)
-                # aM.exec(target)
+
         super().enterEvent(a0)
 
     def leaveEvent(self, a0):
         if self.aramInfo:
             if self.mFlyout:
-                self.mFlyout.close()
+                self.mFlyout.fadeOut()
                 self.mFlyout = None
 
 
-class AramFlyout(FlyoutViewBase):
-    def __init__(self, info, target, parent=None):
-        super().__init__(parent=parent)
+class AramFlyout(QWidget):
+    def __init__(self, info, target: QWidget, parent=None):
+        super().__init__(parent)
 
+        self.target = target
+
+        self.hBoxLayout = QHBoxLayout(self)
+        self.view = AramFlyoutView(info, target, parent)
         self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint |
                             Qt.NoDropShadowWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
+
+        self.hBoxLayout.addWidget(self.view)
+        self.hBoxLayout.setContentsMargins(15, 8, 15, 20)
+
+        self.__initShadowEffect()
+        self.__initAnimation()
+
+    def __initShadowEffect(self, blurRadius=35, offset=(0, 8)):
+        color = QColor(0, 0, 0, 80 if isDarkTheme() else 30)
+
+        self.shadowEffect = QGraphicsDropShadowEffect(self.view)
+        self.shadowEffect.setBlurRadius(blurRadius)
+        self.shadowEffect.setOffset(*offset)
+        self.shadowEffect.setColor(color)
+
+        self.view.setGraphicsEffect(None)
+        self.view.setGraphicsEffect(self.shadowEffect)
+
+    def __initAnimation(self):
+        self.opacityAni = QPropertyAnimation(
+            self, b'windowOpacity', self.parent())
+        self.slideAni = QPropertyAnimation(self, b'pos', self.parent())
+
+        self.opacityAni.setDuration(187)
+        self.slideAni.setDuration(187)
+
+        self.opacityAni.setEasingCurve(QEasingCurve.InOutQuad)
+        self.slideAni.setEasingCurve(QEasingCurve.InOutQuad)
+
+        self.opacityAni.setStartValue(0)
+        self.opacityAni.setEndValue(1)
+
+        self.aniGroup = QParallelAnimationGroup(self)
+        self.aniGroup.addAnimation(self.opacityAni)
+        self.aniGroup.addAnimation(self.slideAni)
+
+    def showEvent(self, e):
+        pos = self.calcPoints()
+
+        self.slideAni.setStartValue(pos + QPoint(10, 0))
+        self.slideAni.setEndValue(pos)
+
+        self.aniGroup.start()
+
+        return super().showEvent(e)
+
+    def fadeOut(self):
+        fadeOutAniGroup = QParallelAnimationGroup(self)
+
+        opacityAni = QPropertyAnimation(self, b'windowOpacity', self.parent())
+        opacityAni.setStartValue(1)
+        opacityAni.setEndValue(0)
+        opacityAni.setDuration(120)
+
+        slideAni = QPropertyAnimation(self, b'pos', self.parent())
+        slideAni.setStartValue(self.pos())
+        slideAni.setEndValue(self.pos() + QPoint(10, 0))
+        slideAni.setDuration(120)
+
+        fadeOutAniGroup.addAnimation(opacityAni)
+        fadeOutAniGroup.addAnimation(slideAni)
+
+        fadeOutAniGroup.finished.connect(self.close)
+        fadeOutAniGroup.start()
+
+    def calcPoints(self):
+        pos = self.target.mapToGlobal(QPoint())
+        x, y = pos.x(), pos.y()
+
+        hintWidth = self.sizeHint().width()
+        hintHeight = self.sizeHint().height()
+
+        x += self.target.width() // 2 - hintWidth // 2
+        y += self.target.height() // 2 - hintHeight // 2
+
+        dx = -hintWidth // 2 - 45
+        if x + dx < -15:
+            dx = -dx
+
+        return QPoint(x + dx, y)
+
+    def updateInfo(self, info):
+        self.view.updateInfo()
+
+
+class AramFlyoutView(FlyoutViewBase):
+    def __init__(self, info, target: QWidget, parent=None):
+        super().__init__(parent=parent)
 
         self.info = info
         self.target = target
@@ -213,20 +304,8 @@ class AramFlyout(FlyoutViewBase):
         self.updateInfo(info)
 
         self.__initWidgets()
+
         StyleSheet.ARAM_FLYOUT.apply(self)
-
-    def calcPoints(self):
-        pos = self.target.mapToGlobal(QPoint())
-        x = pos.x() + self.target.width() // 2 - self.sizeHint().width() // 2
-        y = pos.y() - self.sizeHint().height() - 12
-
-        if x < 5:
-            x = 5
-
-        if y < 2:
-            y = pos.y() + self.target.height() + 5
-
-        return QPoint(x, y)
 
     def __initWidgets(self):
         self.titleLabel.setObjectName("titleLabel")
@@ -264,6 +343,7 @@ class AramFlyout(FlyoutViewBase):
         self.__initLayout()
 
     def __initLayout(self):
+
         self.vBoxLayout.setSizeConstraint(QVBoxLayout.SetMinimumSize)
         self.vBoxLayout.setContentsMargins(16, 12, 16, 12)
         self.vBoxLayout.setSpacing(16)
@@ -291,8 +371,6 @@ class AramFlyout(FlyoutViewBase):
             self.abilityHasteValueLabel, 2, 1, Qt.AlignRight)
         self.gridBox.addWidget(self.tenacityLabel, 2, 2, Qt.AlignLeft)
         self.gridBox.addWidget(self.tenacityValueLabel, 2, 3, Qt.AlignRight)
-
-        self.setLayout(self.vBoxLayout)
 
     def __updateStyle(self):
         """
@@ -358,8 +436,6 @@ class AramFlyout(FlyoutViewBase):
 
         if self.description:
             self.descriptionLabel.setText(self.description)
-
-        self.move(self.calcPoints())
 
 
 if __name__ == "__main__":
