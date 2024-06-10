@@ -70,7 +70,7 @@ class AuxiliaryInterface(SeraphineInterface):
         self.lockConfigCard = LockConfigCard(
             self.tr("Lock config"),
             self.tr("Make your game config unchangeable"),
-            cfg.lockConfig, self.gameGroup)
+            self.gameGroup)
 
         self.fixDpiCard = FixClientDpiCard(
             self.tr("Fix client window"),
@@ -1022,12 +1022,9 @@ class DodgeCard(SettingCard):
 
 
 class LockConfigCard(SettingCard):
-    loadNowMode = pyqtSignal()
 
-    def __init__(self, title, content, configItem: ConfigItem, parent):
+    def __init__(self, title, content,  parent):
         super().__init__(Icon.LOCK, title, content, parent)
-
-        self.configItem = configItem
 
         self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
 
@@ -1035,23 +1032,24 @@ class LockConfigCard(SettingCard):
         self.hBoxLayout.addSpacing(16)
 
         self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
-        self.loadNowMode.connect(self.__onLoadNowMode)
 
-    def __onLoadNowMode(self):
+    def loadNowMode(self):
         path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
 
-        if os.path.exists(path):
-            current_mode = stat.S_IMODE(os.lstat(path).st_mode)
-            if current_mode == 0o444:
-                self.switchButton.setChecked(True)
+        if not os.path.exists(path):
+            self.switchButton.setChecked(False)
+            self.switchButton.setEnabled(False)
+            return
 
-    def setValue(self, isChecked: bool):
-        qconfig.set(self.configItem, isChecked)
-        self.switchButton.setChecked(isChecked)
+        try:
+            currentMode = stat.S_IMODE(os.lstat(path).st_mode)
+            if currentMode == 0o444:
+                self.switchButton.setChecked(True)
+        except:
+            self.switchButton.setEnabled(False)
+            pass
 
     def __onCheckedChanged(self, isChecked: bool):
-        self.setValue(isChecked)
-
         if not self.setConfigFileReadOnlyEnabled(isChecked):
             InfoBar.error(
                 title=self.tr("Error"),
@@ -1074,10 +1072,13 @@ class LockConfigCard(SettingCard):
             return False
 
         mode = 0o444 if enable else 0o666
-        os.chmod(path, mode)
-
-        currentMode = stat.S_IMODE(os.lstat(path).st_mode)
-        if currentMode != mode:
+        try:
+            os.chmod(path, mode)
+            currentMode = stat.S_IMODE(os.lstat(path).st_mode)
+            if currentMode != mode:
+                return False
+        except:
+            self.switchButton.setEnabled(False)
             return False
 
         return True

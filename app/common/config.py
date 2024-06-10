@@ -124,8 +124,6 @@ class Config(QConfig):
 
     lastNoticeSha = ConfigItem("Other", "LastNoticeSha", "")
 
-    lockConfig = ConfigItem("Functions", "LockConfig", False, BoolValidator())
-
     enableCloseToTray = ConfigItem(
         "General", "EnableCloseToTray", None, OptionsValidator([None, True, False]))
 

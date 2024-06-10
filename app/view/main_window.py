@@ -479,7 +479,7 @@ class MainWindow(FluentWindow):
 
         asyncio.create_task(self.auxiliaryFuncInterface.initChampionList())
 
-        self.auxiliaryFuncInterface.lockConfigCard.loadNowMode.emit()
+        self.auxiliaryFuncInterface.lockConfigCard.loadNowMode()
 
         # 加载大乱斗buff -- By Hpero4
         aramInitT = asyncio.create_task(AramHome.checkAndUpdate())
