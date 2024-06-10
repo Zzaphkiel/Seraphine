@@ -171,7 +171,7 @@ class CareerInterface(SeraphineInterface):
         self.kdaLabel.setToolTip(
             self.tr("Remakes or Customs do not count in statistics"))
         self.kdaLabel.installEventFilter(
-            ToolTipFilter(self.kdaLabel, 500, ToolTipPosition.RIGHT))
+            ToolTipFilter(self.kdaLabel, 500, ToolTipPosition.TOP))
 
         self.__updateTable()
 
