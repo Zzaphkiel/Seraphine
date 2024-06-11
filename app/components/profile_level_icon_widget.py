@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QWidget, QApplication, QMainWindow, QHBoxLayout,
 
 from app.lol.aram import AramHome
 from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme,
-                                       themeColor, FlyoutViewBase, TextWrap)
+                                       themeColor, FlyoutViewBase, TextWrap, FlyoutAnimationType)
 from app.components.color_label import ColorLabel
 from app.common.style_sheet import StyleSheet
 
@@ -138,37 +138,37 @@ class RoundLevelAvatar(QWidget):
 
     def updateAramInfo(self, info):
         self.aramInfo = info
-        if self.mFlyout:
-            self.mFlyout.updateInfo(info)
-            self.mFlyout.hide()
-            self.mFlyout.show()
+        if not self.mFlyout:
+            return
+
+        self.mFlyout.updateInfo(info)
+        self.mFlyout.hide()
+        self.mFlyout.show()
 
     def enterEvent(self, a0):
-        if self.aramInfo:
-            if not self.mFlyout:
-                self.mFlyout = AramFlyout(
-                    info=self.aramInfo,
-                    target=self,
-                )
-                self.mFlyout.show()
+        if not self.aramInfo or self.mFlyout:
+            return
+
+        self.mFlyout = AramFlyout(self.aramInfo, self)
+        self.mFlyout.show()
 
         super().enterEvent(a0)
 
     def leaveEvent(self, a0):
-        if self.aramInfo:
-            if self.mFlyout:
-                self.mFlyout.fadeOut()
-                self.mFlyout = None
+        if not self.aramInfo or not self.mFlyout:
+            return
+
+        self.mFlyout.fadeOut()
+        self.mFlyout = None
 
 
 class AramFlyout(QWidget):
     def __init__(self, info, target: QWidget, parent=None):
         super().__init__(parent)
-
         self.target = target
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.view = AramFlyoutView(info, target, parent)
+        self.view = AramFlyoutView(info, parent)
         self.setWindowFlags(Qt.ToolTip | Qt.FramelessWindowHint |
                             Qt.NoDropShadowWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -191,53 +191,66 @@ class AramFlyout(QWidget):
         self.view.setGraphicsEffect(self.shadowEffect)
 
     def __initAnimation(self):
-        self.opacityAni = QPropertyAnimation(
+        self.inOpacityAni = QPropertyAnimation(
             self, b'windowOpacity', self.parent())
-        self.slideAni = QPropertyAnimation(self, b'pos', self.parent())
+        self.inSlideAni = QPropertyAnimation(self, b'pos', self.parent())
 
-        self.opacityAni.setDuration(187)
-        self.slideAni.setDuration(187)
+        self.inOpacityAni.setDuration(187)
+        self.inSlideAni.setDuration(187)
 
-        self.opacityAni.setEasingCurve(QEasingCurve.InOutQuad)
-        self.slideAni.setEasingCurve(QEasingCurve.InOutQuad)
+        self.inOpacityAni.setEasingCurve(QEasingCurve.InOutQuad)
+        self.inSlideAni.setEasingCurve(QEasingCurve.InOutQuad)
 
-        self.opacityAni.setStartValue(0)
-        self.opacityAni.setEndValue(1)
+        self.inOpacityAni.setStartValue(0)
+        self.inOpacityAni.setEndValue(1)
 
-        self.aniGroup = QParallelAnimationGroup(self)
-        self.aniGroup.addAnimation(self.opacityAni)
-        self.aniGroup.addAnimation(self.slideAni)
+        self.inAniGroup = QParallelAnimationGroup(self)
+        self.inAniGroup.addAnimation(self.inOpacityAni)
+        self.inAniGroup.addAnimation(self.inSlideAni)
+
+        self.outAniGroup = QParallelAnimationGroup(self)
+
+        self.outOpacityAni = QPropertyAnimation(
+            self, b'windowOpacity', self.parent())
+        self.outOpacityAni.setEasingCurve(QEasingCurve.InOutQuad)
+        self.outOpacityAni.setStartValue(1)
+        self.outOpacityAni.setEndValue(0)
+        self.outOpacityAni.setDuration(120)
+
+        self.outSlideAni = QPropertyAnimation(self, b'pos', self.parent())
+        self.outSlideAni.setEasingCurve(QEasingCurve.InOutQuad)
+        self.outSlideAni.setDuration(120)
+
+        self.outAniGroup.addAnimation(self.outOpacityAni)
+        self.outAniGroup.addAnimation(self.outSlideAni)
+
+        self.outAniGroup.finished.connect(self.close)
 
     def showEvent(self, e):
-        pos = self.calcPoints()
+        pos = self.getPosition()
 
-        self.slideAni.setStartValue(pos + QPoint(10, 0))
-        self.slideAni.setEndValue(pos)
+        if self.animationType == FlyoutAnimationType.SLIDE_LEFT:
+            self.inSlideAni.setStartValue(pos + QPoint(10, 0))
+        else:
+            self.inSlideAni.setStartValue(pos - QPoint(10, 0))
 
-        self.aniGroup.start()
+        self.inSlideAni.setEndValue(pos)
+        self.inAniGroup.start()
 
         return super().showEvent(e)
 
     def fadeOut(self):
-        fadeOutAniGroup = QParallelAnimationGroup(self)
+        self.outSlideAni.setStartValue(self.pos())
 
-        opacityAni = QPropertyAnimation(self, b'windowOpacity', self.parent())
-        opacityAni.setStartValue(1)
-        opacityAni.setEndValue(0)
-        opacityAni.setDuration(120)
+        if self.animationType == FlyoutAnimationType.SLIDE_LEFT:
+            self.outSlideAni.setEndValue(self.pos() + QPoint(10, 0))
+        else:
+            self.outSlideAni.setEndValue(self.pos() - QPoint(10, 0))
 
-        slideAni = QPropertyAnimation(self, b'pos', self.parent())
-        slideAni.setStartValue(self.pos())
-        slideAni.setEndValue(self.pos() + QPoint(10, 0))
-        slideAni.setDuration(120)
+        self.outAniGroup.finished.connect(self.close)
+        self.outAniGroup.start()
 
-        fadeOutAniGroup.addAnimation(opacityAni)
-        fadeOutAniGroup.addAnimation(slideAni)
-
-        fadeOutAniGroup.finished.connect(self.close)
-        fadeOutAniGroup.start()
-
-    def calcPoints(self):
+    def getPosition(self):
         pos = self.target.mapToGlobal(QPoint())
         x, y = pos.x(), pos.y()
 
@@ -248,7 +261,11 @@ class AramFlyout(QWidget):
         y += self.target.height() // 2 - hintHeight // 2
 
         dx = -hintWidth // 2 - 45
+
+        self.animationType = FlyoutAnimationType.SLIDE_LEFT
+
         if x + dx < -15:
+            self.animationType = FlyoutAnimationType.SLIDE_RIGHT
             dx = -dx
 
         return QPoint(x + dx, y)
@@ -258,11 +275,8 @@ class AramFlyout(QWidget):
 
 
 class AramFlyoutView(FlyoutViewBase):
-    def __init__(self, info, target: QWidget, parent=None):
+    def __init__(self, info, parent=None):
         super().__init__(parent=parent)
-
-        self.info = info
-        self.target = target
 
         self.damageDealt = 0
         self.damageReceived = 0
@@ -304,6 +318,7 @@ class AramFlyoutView(FlyoutViewBase):
         self.updateInfo(info)
 
         self.__initWidgets()
+        self.__initLayout()
 
         StyleSheet.ARAM_FLYOUT.apply(self)
 
@@ -340,10 +355,7 @@ class AramFlyoutView(FlyoutViewBase):
         self.powerByLabel.setAlignment(Qt.AlignCenter)
         self.descriptionLabel.setWordWrap(True)
 
-        self.__initLayout()
-
     def __initLayout(self):
-
         self.vBoxLayout.setSizeConstraint(QVBoxLayout.SetMinimumSize)
         self.vBoxLayout.setContentsMargins(16, 12, 16, 12)
         self.vBoxLayout.setSpacing(16)
@@ -419,6 +431,7 @@ class AramFlyoutView(FlyoutViewBase):
         if self.description:
             self.description = self.description.replace(
                 "(", "（").replace(")", "）")
+            self.descriptionLabel.setText(self.description)
 
         self.titleLabel.setText(self.catName)
         self.damageDealtValueLabel.setText(f"{self.damageDealt}%")
@@ -429,13 +442,6 @@ class AramFlyoutView(FlyoutViewBase):
         self.tenacityValueLabel.setText(f"{self.tenacity}")
 
         self.__updateStyle()
-
-    def showEvent(self, e):
-        super().showEvent(e)
-        self.adjustSize()
-
-        if self.description:
-            self.descriptionLabel.setText(self.description)
 
 
 if __name__ == "__main__":
