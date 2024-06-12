@@ -10,7 +10,6 @@ import pyperclip
 import asyncio
 from aiohttp.client_exceptions import ClientConnectorError
 from qasync import asyncClose, asyncSlot
-import pygetwindow as gw
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
@@ -359,34 +358,6 @@ class MainWindow(FluentWindow):
         if not msgBox.exec():
             signalBus.terminateListeners.emit()
             sys.exit()
-
-    def gameStartMinimize(self):
-        srcWindow = None
-
-        while True:
-            time.sleep(1)
-
-            if not cfg.get(cfg.enableGameStartMinimize):
-                continue
-            activaWindow = gw.getActiveWindow()
-
-            if not activaWindow:
-                continue
-            activeWindowTitle = activaWindow.title
-
-            # 有窗口切换发生, 并且与 LOL 有关
-            if (srcWindow != activeWindowTitle
-                    and "League of Legends (TM) Client" in (activeWindowTitle, srcWindow)):
-
-                # 进入游戏窗口, 隐藏 Seraphine
-                if srcWindow == "League of Legends (TM) Client":
-                    self.mainWindowHide.emit(False)
-                else:
-                    # 切出游戏窗口, 显示 Seraphine
-                    self.mainWindowHide.emit(True)
-                    # self.activateWindow()
-
-            srcWindow = activeWindowTitle
 
     def __initSystemTray(self):
         self.trayIcon = QSystemTrayIcon(self)

@@ -4,6 +4,5 @@ PyQt5-sip==12.12.1
 PyQt-Fluent-Widgets==1.5.7
 Requests==2.32.3
 aiohttp==3.9.5
-pygetwindow==0.0.9
 psutil==5.9.8
 qasync==0.27.1
