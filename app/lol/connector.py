@@ -990,9 +990,15 @@ class JsonManager:
 
         for item in skins.values():
             championId = item["id"] // 1000
-            self.champions[self.champs[championId]
-                           ]["skins"][item["name"]] = item["id"]
-            self.champions[self.champs[championId]]["id"] = championId
+            champion = self.champions[self.champs[championId]]
+
+            if 'questSkinInfo' in item:
+                for tier in item['questSkinInfo']['tiers']:
+                    champion["skins"][tier["name"]] = tier["id"]
+                    champion["id"] = championId
+            else:
+                champion["skins"][item["name"]] = item["id"]
+                champion["id"] = championId
 
         for oldId, nowId in JsonManager.masterpieceItemsMap.items():
             self.items[oldId] = self.items[nowId]
