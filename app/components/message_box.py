@@ -50,7 +50,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.titleLabel.setText(self.tr('Update detected'))
         self.titleLabel.setContentsMargins(5, 0, 5, 0)
 
-        self.content.setText(self.tr("current: v") + BETA or VERSION + self.tr(", ")
+        self.content.setText(self.tr("current: v") + (BETA or VERSION) + self.tr(", ")
                              + self.tr("new: v") + self.info.get("tag_name")[1:])
         self.content.setContentsMargins(8, 0, 5, 0)
 
