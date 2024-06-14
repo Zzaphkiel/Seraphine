@@ -180,6 +180,12 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 - 感谢 [JetBrains](https://www.jetbrains.com.cn/) 为我们提供的免费 [PyCharm](https://www.jetbrains.com.cn/pycharm/) 许可证。
   
   Thanks to [JetBrains](https://www.jetbrains.com.cn/) for the free [PyCharm](https://www.jetbrains.com.cn/pycharm/) license.
+  
+  <p align='center'>
+    <a href="https://www.jetbrains.com.cn/pycharm/">
+      <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/cb3abddc-de4d-4198-8eb7-daaf03a6287a">
+    </a>
+  </p>
 
 ## 交流群
 - Seraphine 交流群（QQ）：[926719775](https://qm.qq.com/cgi-bin/qm/qr?k=ulYfeMNL-GrYzemJyjOq7K1y4YSasBPL&jump_from=webapi&authKey=6Nw8v3gCSswJ6HtoMlqTs2+/nS5llSOgVIs/Hh2Xm0yzNZ0yEIDjvYQqbdjF4wbb)，入群口令：enihpareS
