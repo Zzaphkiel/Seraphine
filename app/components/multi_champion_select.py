@@ -6,10 +6,11 @@ from PyQt5.QtCore import (QPoint, Qt, pyqtSignal, QSize,
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.QtWidgets import (QVBoxLayout, QFrame, QHBoxLayout,
                              QLabel, QApplication, QWidget, QCompleter)
-
-
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, ToolButton,
-                                       SearchLineEdit, FlowLayout, SmoothScrollArea)
+                                       SearchLineEdit, FlowLayout, SmoothScrollArea,
+                                       FlyoutViewBase, TeachingTipView)
+
+
 from app.common.style_sheet import StyleSheet
 from app.components.animation_frame import CardWidget
 from app.components.champion_icon_widget import RoundIcon, RoundIconButton
@@ -67,7 +68,7 @@ class ChampionTabItem(CardWidget):
         return QSize(141, 44)
 
 
-class ItemsDraggableLayout(QFrame):
+class ItemsDraggableWidget(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.items: List[ChampionTabItem] = []
@@ -231,27 +232,23 @@ class ItemsDraggableLayout(QFrame):
         return rect
 
 
-class MultiChampionSelectWidget(QWidget):
-    def __init__(self, champions: dict, selected: list, parent=None):
+class ChampionsSelectWidget(QWidget):
+    championClicked = pyqtSignal(int)
+
+    def __init__(self, champions: dict, parent: QWidget = None):
         super().__init__(parent=parent)
 
-        self.hBoxLayout = QHBoxLayout(self)
-
-        self.itemsDraggableWidget = ItemsDraggableLayout()
-        self.championSelectLayout = QVBoxLayout()
+        self.champions = champions
 
         self.searchLineEdit = SearchLineEdit()
+
+        self.vBoxLayout = QVBoxLayout(self)
         self.scrollArea = SmoothScrollArea()
         self.scrollWidget = QWidget()
         self.championsShowLayout = FlowLayout(needAni=False)
 
-        self.champions: dict = champions
-        self.selected = selected
-
         self.__initWidget()
         self.__initLayout()
-
-        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)
 
     def __initWidget(self):
         self.scrollArea.setObjectName("scrollArea")
@@ -259,15 +256,9 @@ class MultiChampionSelectWidget(QWidget):
 
         for i, [name, icon] in self.champions.items():
             button = RoundIconButton(icon, 38, 4, 2, name, i)
-            button.clicked.connect(self.__onChampionIconClicked)
+            button.clicked.connect(self.championClicked)
 
             self.championsShowLayout.addWidget(button)
-
-        for id in self.selected:
-            name = connector.manager.getChampionNameById(id)
-            icon = self.champions[id][1]
-
-            self.itemsDraggableWidget.addItem(icon, name, id)
 
         self.searchLineEdit.textChanged.connect(self.__onSearchLineTextChanged)
 
@@ -283,12 +274,9 @@ class MultiChampionSelectWidget(QWidget):
 
         self.scrollArea.setFixedSize(330, 279)
 
-        self.championSelectLayout.setContentsMargins(0, 0, 0, 0)
-        self.championSelectLayout.addWidget(self.searchLineEdit)
-        self.championSelectLayout.addWidget(self.scrollArea)
-
-        self.hBoxLayout.addWidget(self.itemsDraggableWidget)
-        self.hBoxLayout.addLayout(self.championSelectLayout)
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.vBoxLayout.addWidget(self.searchLineEdit)
+        self.vBoxLayout.addWidget(self.scrollArea)
 
     def __onSearchLineTextChanged(self, text: str):
         for i in reversed(range(self.championsShowLayout.count())):
@@ -305,7 +293,7 @@ class MultiChampionSelectWidget(QWidget):
             icon = champion[1]
 
             button = RoundIconButton(icon, 38, 4, 2, name, i)
-            button.clicked.connect(self.__onChampionIconClicked)
+            button.clicked.connect(self.championClicked)
 
             self.championsShowLayout.addWidget(button)
 
@@ -317,6 +305,37 @@ class MultiChampionSelectWidget(QWidget):
         else:
             return [id for id, [name, _] in self.champions.items()
                     if alias in name]
+
+
+class MultiChampionSelectWidget(QWidget):
+    def __init__(self, champions: dict, selected: list, parent=None):
+        super().__init__(parent=parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.itemsDraggableWidget = ItemsDraggableWidget()
+        self.championsSelectWidget = ChampionsSelectWidget(champions)
+        self.champions: dict = champions
+        self.selected = selected
+
+        self.__initWidget()
+        self.__initLayout()
+
+        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)
+
+    def __initWidget(self):
+        for id in self.selected:
+            name = connector.manager.getChampionNameById(id)
+            icon = self.champions[id][1]
+
+            self.itemsDraggableWidget.addItem(icon, name, id)
+
+        self.championsSelectWidget.championClicked.connect(
+            self.__onChampionIconClicked)
+
+    def __initLayout(self):
+        self.hBoxLayout.addWidget(self.itemsDraggableWidget)
+        self.hBoxLayout.addWidget(self.championsSelectWidget)
 
     def __onChampionIconClicked(self, championId):
         if self.itemsDraggableWidget.count() == 6:
@@ -330,3 +349,18 @@ class MultiChampionSelectWidget(QWidget):
 
     def getSelectedChampionIds(self) -> list:
         return self.itemsDraggableWidget.getCurrentChampionIds()
+
+
+class ChampionSelectFlyout(FlyoutViewBase):
+    championSelected = pyqtSignal(int)
+
+    def __init__(self, champions: dict, parent=None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.selectWidget = ChampionsSelectWidget(champions)
+        self.selectWidget.championClicked.connect(self.championSelected)
+
+        self.vBoxLayout.addWidget(self.selectWidget)
+
+        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)

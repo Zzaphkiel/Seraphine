@@ -1101,6 +1101,7 @@ class SearchInterface(SeraphineInterface):
         self.filterComboBox.setEnabled(True)
 
         self.gamesView.gameDetailView.clear()
+
         # NOTE 如果是生涯和搜索反复横跳, 就不重新启loadgames任务了
         if puuid != self.puuid:
             self.puuid = summoner['puuid']
@@ -1124,8 +1125,10 @@ class SearchInterface(SeraphineInterface):
             self.gamesView.gamesTab.updateQueueIdMap(games)
 
             # 启动任务，往 gamesTab 里丢数据
+            # NOTE 既然创建新任务, 并且刷新了self.puuid 就应该用self的, 否则就违背了loadGames判断的初衷
+
             self.gameLoadingTask = asyncio.create_task(
-                self.__loadGames(self.puuid))  # NOTE 既然创建新任务, 并且刷新了self.puuid 就应该用self的, 否则就违背了loadGames判断的初衷
+                self.__loadGames(self.puuid))
 
         self.gamesView.gamesTab.showTheFirstPage()
         self.gamesView.setLoadingPageEnable(False)

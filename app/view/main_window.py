@@ -446,8 +446,6 @@ class MainWindow(FluentWindow):
 
         self.__setLolInstallFolder(folder)
 
-        self.auxiliaryFuncInterface.profileBackgroundCard.updateCompleter()
-
         asyncio.create_task(self.auxiliaryFuncInterface.initChampionList())
 
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode()
@@ -903,13 +901,15 @@ class MainWindow(FluentWindow):
     async def __onCareerGameClicked(self, gameId):
         name = self.careerInterface.getSummonerName()
         self.searchInterface.searchLineEdit.setText(name)
-        self.searchInterface.filterComboBox.setCurrentIndex(
-            0)  # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
 
-        await self.searchInterface.searchAndShowFirstPage(self.careerInterface.puuid)
+        # 从生涯页跳过来默认将筛选条件设置为全部 -- By Hpero4
+        self.searchInterface.filterComboBox.setCurrentIndex(0)
+
         # 先加载完再切换, 避免加载过程中换搜索目标导致puuid出错 -- By Hpero4
+        await self.searchInterface.searchAndShowFirstPage(self.careerInterface.puuid)
         self.checkAndSwitchTo(self.searchInterface)
         self.searchInterface.loadingGameId = gameId
+
         # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
         self.searchInterface.waitingForDrawSelect(gameId)
         await self.searchInterface.updateGameDetailView(gameId, self.careerInterface.puuid)

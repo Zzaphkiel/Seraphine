@@ -8,7 +8,7 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
                                        IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
                                        ExpandGroupSettingCard, TransparentToolButton,
-                                       FluentIcon)
+                                       FluentIcon, Flyout, FlyoutAnimationType, TeachingTip)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
 from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
@@ -18,6 +18,7 @@ from qasync import asyncSlot
 from app.components.seraphine_interface import SeraphineInterface
 from app.components.message_box import MultiChampionSelectMsgBox
 from app.components.champion_icon_widget import RoundIcon
+from app.components.multi_champion_select import ChampionSelectFlyout
 from app.lol.tools import fixLCUWindowViaExe
 from app.common.icons import Icon
 from app.common.config import cfg
@@ -189,6 +190,7 @@ class AuxiliaryInterface(SeraphineInterface):
     async def initChampionList(self):
         champions = await self.autoSelectChampionCard.initChampionList()
         await self.autoBanChampionsCard.initChampionList(champions)
+        await self.profileBackgroundCard.initChampionList(champions)
 
 
 class OnlineStatusCard(ExpandGroupSettingCard):
@@ -251,10 +253,10 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.inputWidget = QWidget(self.view)
         self.inputLayout = QGridLayout(self.inputWidget)
 
-        self.championLabel = QLabel(self.tr("Champion's name:"))
-        self.championEdit = LineEdit(self)
+        self.championLabel = QLabel(self.tr("Champion's name: "))
+        self.championButton = PushButton(self.tr("Select champion"), self)
 
-        self.skinLabel = QLabel(self.tr("Skin's name:"))
+        self.skinLabel = QLabel(self.tr("Skin's name: "))
         self.skinComboBox = ComboBox()
 
         self.buttonWidget = QWidget(self.view)
@@ -274,7 +276,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.inputLayout.addWidget(
             self.championLabel, 0, 0, alignment=Qt.AlignLeft)
         self.inputLayout.addWidget(
-            self.championEdit, 0, 1, alignment=Qt.AlignRight)
+            self.championButton, 0, 1, alignment=Qt.AlignRight)
 
         self.inputLayout.addWidget(
             self.skinLabel, 1, 0, alignment=Qt.AlignLeft)
@@ -293,61 +295,51 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.buttonWidget)
 
     def __initWidget(self):
-        self.championEdit.setPlaceholderText(
-            self.tr("Please input champion name"))
-        self.championEdit.setMinimumWidth(250)
-        self.championEdit.setClearButtonEnabled(True)
+        self.championButton.setMinimumWidth(100)
+        self.championButton.clicked.connect(self.__onSelectButtonClicked)
 
         self.pushButton.setMinimumWidth(100)
         self.pushButton.setEnabled(False)
+        self.pushButton.clicked.connect(self.__onApplyButtonClicked)
 
         self.skinComboBox.setEnabled(False)
         self.skinComboBox.setMinimumWidth(250)
         self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
 
-        self.championEdit.textChanged.connect(self.__onLineEditTextChanged)
-        self.skinComboBox.currentTextChanged.connect(
-            self.__onComboBoxTextChanged)
-        self.pushButton.clicked.connect(
-            self.__onButtonClicked)
+    def __onSelectButtonClicked(self):
+        view = ChampionSelectFlyout(self.champions)
+        self.w = Flyout.make(view, self.championButton,
+                             self, FlyoutAnimationType.SLIDE_RIGHT, True)
 
-    def clear(self):
-        self.championEdit.clear()
-        self.skinComboBox.clear()
-        self.completer = None
+        view.championSelected.connect(self.__onChampionSelected)
 
-    def updateCompleter(self):
-        champions = connector.manager.getChampionList()
-        self.completer = QCompleter(champions)
-        self.completer.setFilterMode(Qt.MatchContains)
-        self.championEdit.setCompleter(self.completer)
-
-    def __onLineEditTextChanged(self):
-        text = self.championEdit.text()
-        skins = connector.manager.getSkinListByChampionName(text)
-
-        if len(skins) != 0:
-            self.skinComboBox.addItems(skins)
-            self.skinComboBox.setEnabled(True)
+    async def initChampionList(self, champions: dict = None):
+        if champions:
+            self.champions = champions
         else:
-            self.skinComboBox.clear()
-            self.skinComboBox.setEnabled(False)
-            self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
+            self.champions = {
+                i: [name, await connector.getChampionIcon(i)]
+                for i, name in connector.manager.getChampions().items()
+                if i != -1
+            }
 
-        self.__onComboBoxTextChanged()
+        return self.champions
 
-    def __onComboBoxTextChanged(self):
-        enable = self.championEdit.text(
-        ) != "" and self.skinComboBox.currentText() != ""
-        self.pushButton.setEnabled(enable)
+    def __onChampionSelected(self, championId):
+        self.w.fadeOut()
+        self.skinComboBox.clear()
+
+        name = self.champions[championId][0]
+        skins = connector.manager.getSkinListByChampionName(name)
+        for skin in skins:
+            self.skinComboBox.addItem(skin[0], userData=skin[1])
+
+        self.skinComboBox.setEnabled(True)
+        self.pushButton.setEnabled(True)
 
     @asyncSlot()
-    async def __onButtonClicked(self):
-        champion = self.championEdit.text()
-        skin = self.skinComboBox.currentText()
-
-        skinId = connector.manager.getSkinIdByChampionAndSkinName(
-            champion, skin)
+    async def __onApplyButtonClicked(self):
+        skinId = self.skinComboBox.currentData()
         await connector.setProfileBackground(skinId)
 
 

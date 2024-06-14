@@ -1074,7 +1074,7 @@ class JsonManager:
 
     def getSkinListByChampionName(self, championName):
         try:
-            return [item for item in self.champions[championName]["skins"]]
+            return [item for item in self.champions[championName]["skins"].items()]
         except:
             return []
 
