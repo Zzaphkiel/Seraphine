@@ -4,11 +4,12 @@ import stat
 
 
 from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
-                                       SmoothScrollArea, SettingCard, LineEdit, setCustomStyleSheet,
-                                       PushButton, ComboBox, SwitchButton, ConfigItem, qconfig,
-                                       IndicatorPosition, InfoBar, InfoBarPosition, SpinBox,
-                                       ExpandGroupSettingCard, TransparentToolButton,
-                                       FluentIcon, Flyout, FlyoutAnimationType, TeachingTip)
+                                       SmoothScrollArea, SettingCard, LineEdit, PushButton,
+                                       setCustomStyleSheet, ComboBox, SwitchButton, ConfigItem,
+                                       qconfig, IndicatorPosition, InfoBar, InfoBarPosition,
+                                       SpinBox, ExpandGroupSettingCard, TransparentToolButton,
+                                       FluentIcon, Flyout, FlyoutAnimationType, TeachingTip,
+                                       MessageBox, CheckBox)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
 from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
@@ -331,6 +332,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
         name = self.champions[championId][0]
         skins = connector.manager.getSkinListByChampionName(name)
+
         for skin in skins:
             self.skinComboBox.addItem(skin[0], userData=skin[1])
 
@@ -340,7 +342,37 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
     @asyncSlot()
     async def __onApplyButtonClicked(self):
         skinId = self.skinComboBox.currentData()
-        await connector.setProfileBackground(skinId)
+        contentId = connector.manager.getSkinAugments(skinId)
+
+        if contentId == None:
+            await connector.setProfileBackground(skinId)
+            return
+
+        self.skinId = skinId
+        self.contentId = contentId
+
+        msg = MessageBox(
+            self.tr("This skin has a Signed Version"),
+            self.tr("Setting to the signed version will restart the client."),
+            self.window())
+
+        msg.accepted.connect(self.__onMsgBoxYesButtonClicked)
+        msg.rejected.connect(self.__onMsgBoxNoButtonClicked)
+
+        msg.yesButton.setText(self.tr("Signed Version"))
+        msg.cancelButton.setText(self.tr("Unsigned Version"))
+
+        msg.exec_()
+
+    @asyncSlot()
+    async def __onMsgBoxYesButtonClicked(self):
+        await connector.setProfileBackground(self.skinId)
+        await connector.setProfileBackgroundAugments(self.contentId)
+        await connector.restartClient()
+
+    @asyncSlot()
+    async def __onMsgBoxNoButtonClicked(self):
+        await connector.setProfileBackground(self.skinId)
 
 
 class ProfileTierCard(ExpandGroupSettingCard):

@@ -545,6 +545,20 @@ class LolClientConnector(QObject):
             "key": "backgroundSkinId",
             "value": skinId,
         }
+
+        res = await self.__post(
+            "/lol-summoner/v1/current-summoner/summoner-profile", data=data
+        )
+
+        return await res.json()
+
+    @retry()
+    async def setProfileBackgroundAugments(self, contentId):
+        data = {
+            'key': 'backgroundSkinAugments',
+            'value': contentId
+        }
+
         res = await self.__post(
             "/lol-summoner/v1/current-summoner/summoner-profile", data=data
         )
@@ -979,6 +993,11 @@ class JsonManager:
             for item in queueData
         }
 
+        # 给高贵的名人堂皮肤一个专属于它们的成员变量（划掉）
+        # 名人堂皮肤里有 augments 参数，使用它们可以让召唤师生涯背景带上签名^^_
+        # ref: https://github.com/Hanxven/LeagueAkari
+        self.skinAugments = {}
+
         for item in skins.values():
             championId = item["id"] // 1000
             champion = self.champions[self.champs[championId]]
@@ -987,9 +1006,17 @@ class JsonManager:
                 for tier in item['questSkinInfo']['tiers']:
                     champion["skins"][tier["name"]] = tier["id"]
                     champion["id"] = championId
+
+                    if 'skinAugments' in tier and 'augments' in tier['skinAugments']:
+                        contentId = tier['skinAugments']['augments'][0]['contentId']
+                        self.skinAugments[tier['id']] = contentId
             else:
                 champion["skins"][item["name"]] = item["id"]
                 champion["id"] = championId
+
+                if 'skinAugments' in item and 'augments' in item['skinAugments']:
+                    contentId = item['skinAugments']['augments'][0]['contentId']
+                    self.skinAugments[item['id']] = contentId
 
     def getItemIconPath(self, iconId):
         if iconId != 0:
@@ -1088,6 +1115,9 @@ class JsonManager:
         for cid in self.champs.keys():
             if cid == championId:
                 return self.champs[cid]
+
+    def getSkinAugments(self, skinId):
+        return self.skinAugments.get(skinId)
 
 
 connector = LolClientConnector()
