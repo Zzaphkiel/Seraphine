@@ -720,22 +720,22 @@
 <context>
     <name>ChangeClientMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="234"/>
+        <location filename="../../components/message_box.py" line="248"/>
         <source>Reconnect</source>
         <translation>重新连接</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="236"/>
+        <location filename="../../components/message_box.py" line="250"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="259"/>
+        <location filename="../../components/message_box.py" line="273"/>
         <source>Change client</source>
         <translation>更改连接的客户端</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="262"/>
+        <location filename="../../components/message_box.py" line="276"/>
         <source>Please select the target LOL client:</source>
         <translation>请选择目标客户端：</translation>
     </message>
@@ -745,12 +745,12 @@
         <translation type="obsolete">[当前]</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="269"/>
+        <location filename="../../components/message_box.py" line="283"/>
         <source>PID: </source>
         <translation>进程 ID：</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="269"/>
+        <location filename="../../components/message_box.py" line="283"/>
         <source>, </source>
         <translation>，</translation>
     </message>
@@ -760,7 +760,7 @@
         <translation type="obsolete">服务器：</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="272"/>
+        <location filename="../../components/message_box.py" line="286"/>
         <source>(current)</source>
         <translation>（当前连接）</translation>
     </message>
@@ -809,12 +809,12 @@
 <context>
     <name>ExceptionMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="314"/>
+        <location filename="../../components/message_box.py" line="328"/>
         <source>Copy to clipboard and exit</source>
         <translation>复制错误信息并退出</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="315"/>
+        <location filename="../../components/message_box.py" line="329"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>
@@ -1384,17 +1384,17 @@
 <context>
     <name>MultiChampionSelectMsgBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="331"/>
+        <location filename="../../components/message_box.py" line="345"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="332"/>
+        <location filename="../../components/message_box.py" line="346"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="334"/>
+        <location filename="../../components/message_box.py" line="348"/>
         <source>Choose Champions</source>
         <translation>选择英雄</translation>
     </message>
@@ -1470,12 +1470,12 @@
 <context>
     <name>NoticeMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="175"/>
+        <location filename="../../components/message_box.py" line="189"/>
         <source>Ok</source>
         <translation>知道了</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="161"/>
+        <location filename="../../components/message_box.py" line="175"/>
         <source>Notice</source>
         <translation>公告</translation>
     </message>
@@ -2476,7 +2476,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>UpdateMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="50"/>
+        <location filename="../../components/message_box.py" line="56"/>
         <source>Update detected</source>
         <translation>发现新版本</translation>
     </message>
@@ -2486,12 +2486,12 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">不再提醒</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="53"/>
+        <location filename="../../components/message_box.py" line="59"/>
         <source>current: v</source>
         <translation>当前版本：v</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="53"/>
+        <location filename="../../components/message_box.py" line="59"/>
         <source>new: v</source>
         <translation>新版本：v</translation>
     </message>
@@ -2501,55 +2501,60 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">立即下载 🤩</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="66"/>
+        <location filename="../../components/message_box.py" line="32"/>
         <source>Ok</source>
         <translation>知道了</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="53"/>
+        <location filename="../../components/message_box.py" line="59"/>
         <source>, </source>
         <translation>，</translation>
     </message>
     <message>
         <location filename="../../components/message_box.py" line="29"/>
         <source>OK</source>
-        <translation>知道了</translation>
+        <translation type="obsolete">知道了</translation>
     </message>
     <message>
         <location filename="../../components/message_box.py" line="30"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation type="obsolete">取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="65"/>
+        <location filename="../../components/message_box.py" line="30"/>
         <source>Update and Restart</source>
-        <translation>立即下载并安装 🤩</translation>
+        <translation>自动下载安装（可能被拦截）</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="74"/>
+        <location filename="../../components/message_box.py" line="78"/>
         <source>Updating is only available on releases version</source>
-        <translation>自动更新功能仅在发布版本可用</translation>
+        <translation>一键更新功能仅在发布版本可用</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="137"/>
+        <location filename="../../components/message_box.py" line="141"/>
         <source>Downloading finished, decompressing...</source>
         <translation>下载成功，正在解压缩...</translation>
+    </message>
+    <message>
+        <location filename="../../components/message_box.py" line="33"/>
+        <source>Manually Download</source>
+        <translation>转到浏览器手动下载 🤩</translation>
     </message>
 </context>
 <context>
     <name>WaitingForLolMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="182"/>
+        <location filename="../../components/message_box.py" line="196"/>
         <source>Connect To Client</source>
         <translation>连接客户端</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="184"/>
+        <location filename="../../components/message_box.py" line="198"/>
         <source>Exit Seraphine</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="201"/>
+        <location filename="../../components/message_box.py" line="215"/>
         <source>Tasklist is not available</source>
         <translation>我们无法自动连接至 LOL 客户端 😱</translation>
     </message>
@@ -2566,7 +2571,7 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">请您在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="204"/>
+        <location filename="../../components/message_box.py" line="218"/>
         <source>Please clicked &quot;Connect To Client&quot; button manually when LOL launched completely</source>
         <translation>请在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>

@@ -4,6 +4,7 @@ import os
 import zipfile
 import shutil
 import sys
+import webbrowser
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton, QVBoxLayout, QWidget
@@ -26,8 +27,10 @@ class UpdateMessageBox(MessageBoxBase):
         super().__init__(parent=parent)
         self.info = info
 
-        self.myYesButton = PrimaryPushButton(self.tr('OK'), self.buttonGroup)
-        self.myCancelButton = QPushButton(self.tr('Cancel'), self.buttonGroup)
+        self.myYesButton = QPushButton(
+            self.tr("Update and Restart"), self.buttonGroup)
+        self.myCancelButton = QPushButton(self.tr("Ok"), self.buttonGroup)
+        self.manuallyButton = PrimaryPushButton(self.tr("Manually Download"))
 
         self.titleLabel = TitleLabel()
         self.content = BodyLabel()
@@ -44,6 +47,9 @@ class UpdateMessageBox(MessageBoxBase):
         self.cancelButton.setVisible(False)
 
         self.myCancelButton.setObjectName("cancelButton")
+        self.myYesButton.setObjectName('cancelButton')
+
+        self.buttonLayout.addWidget(self.manuallyButton)
         self.buttonLayout.addWidget(self.myYesButton)
         self.buttonLayout.addWidget(self.myCancelButton)
 
@@ -62,9 +68,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setVisible(False)
         self.bar.setVisible(False)
 
-        self.myYesButton.setText(self.tr("Update and Restart"))
-        self.myCancelButton.setText(self.tr("Ok"))
-
+        self.manuallyButton.clicked.connect(self.__onManuallyButtonClicked)
         self.myYesButton.clicked.connect(self.__onYesButtonClicked)
         self.myCancelButton.clicked.connect(self.__onCancelButtonClicked)
 
@@ -151,6 +155,16 @@ class UpdateMessageBox(MessageBoxBase):
         sys.exit()
 
     def __onCancelButtonClicked(self):
+        self.reject()
+        self.rejected.emit()
+
+    def __onManuallyButtonClicked(self):
+        url: str = self.info['assets'][0]['browser_download_url']
+        url = url.replace("github", "gitee")
+        url = url.replace("Zzaphkiel/Seraphine", "Zzaphkiel/seraphine")
+
+        webbrowser.open(url)
+
         self.reject()
         self.rejected.emit()
 
