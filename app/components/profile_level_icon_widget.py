@@ -138,12 +138,11 @@ class RoundLevelAvatar(QWidget):
 
     def updateAramInfo(self, info):
         self.aramInfo = info
+
         if not self.mFlyout:
             return
 
         self.mFlyout.updateInfo(info)
-        self.mFlyout.hide()
-        self.mFlyout.show()
 
     def enterEvent(self, a0):
         if not self.aramInfo or self.mFlyout:
@@ -271,7 +270,7 @@ class AramFlyout(QWidget):
         return QPoint(x + dx, y)
 
     def updateInfo(self, info):
-        self.view.updateInfo()
+        self.view.updateInfo(info)
 
 
 class AramFlyoutView(FlyoutViewBase):
