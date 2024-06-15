@@ -46,6 +46,7 @@ class CareerInterface(SeraphineInterface):
         self.currentSummonerName = None
         self.puuid = None
         self.showTagLine = False
+        self.recentTeammatesInfo = None
 
         self.vBoxLayout = QVBoxLayout(self)
         self.IconNameHBoxLayout = QHBoxLayout()
@@ -80,8 +81,8 @@ class CareerInterface(SeraphineInterface):
         self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
         self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
-        self.teammatesFlyout = TeammatesFlyOut()
         self.filterComboBox = ComboBox()
+        self.recentTeammatesFlyout: Flyout = None
 
         self.gameInfoAreaLayout = QHBoxLayout()
         self.gameInfoArea = SmoothScrollArea()
@@ -382,6 +383,10 @@ class CareerInterface(SeraphineInterface):
         assert summoner or puuid
 
         self.setLoadingPageEnabled(True)
+        self.recentTeammatesInfo = None
+        if self.recentTeammatesFlyout:
+            self.recentTeammatesFlyout.close()
+            self.recentTeammatesFlyout = None
 
         if summoner is None:
             summoner = await connector.getSummonerByPuuid(puuid)
@@ -477,7 +482,6 @@ class CareerInterface(SeraphineInterface):
         self.__updateGameInfo()
 
         self.backToMeButton.setEnabled(not self.isCurrentSummoner())
-        self.teammatesFlyout.updatePuuid(puuid)
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
@@ -560,18 +564,20 @@ class CareerInterface(SeraphineInterface):
         return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
 
     def __onRecentTeammatesButtonClicked(self):
-        self.w = Flyout.make(
-            self.teammatesFlyout, self.recentTeamButton, self,
-            aniType=FlyoutAnimationType.DROP_DOWN, isDeleteOnClose=False)
+        view = TeammatesFlyOut()
+        if self.info:
+            view.setLoadingPageEnabled(False)
+            view.updateSummoners(self.info)
+
+        self.recentTeammatesFlyout = Flyout.make(
+            view, self.recentTeamButton, self, FlyoutAnimationType.DROP_DOWN)
 
     async def __updateRecentTeammates(self):
-        self.teammatesFlyout.setLoadingPageEnabled(True)
+        self.info = await getRecentTeammates(self.games['games'], self.puuid)
 
-        info = await getRecentTeammates(
-            self.games['games'], self.puuid)
-
-        self.teammatesFlyout.updateSummoners(info)
-        self.teammatesFlyout.setLoadingPageEnabled(False)
+        if self.recentTeammatesFlyout:
+            self.recentTeammatesFlyout.close()
+            self.__onRecentTeammatesButtonClicked()
 
 
 class TeammatesFlyOut(FlyoutViewBase):
@@ -604,9 +610,6 @@ class TeammatesFlyOut(FlyoutViewBase):
         self.stackedWidget.setFixedHeight(352)
         self.stackedWidget.setFixedWidth(490)
 
-    def updatePuuid(self, puuid):
-        self.puuid = puuid
-
     def clear(self):
         for i in reversed(range(self.infopageVBoxLayout.count())):
             item = self.infopageVBoxLayout.itemAt(i)
@@ -616,11 +619,6 @@ class TeammatesFlyOut(FlyoutViewBase):
                 item.widget().deleteLater()
 
     def updateSummoners(self, info):
-        if self.puuid != info['puuid']:
-            return
-
-        self.clear()
-
         for summoner in info['summoners']:
             infoBar = TeammateInfoBar(summoner)
             self.infopageVBoxLayout.addWidget(infoBar)
