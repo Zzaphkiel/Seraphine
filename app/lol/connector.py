@@ -204,6 +204,7 @@ class LolClientConnector(QObject):
         self.sgpSess = None
         self.port = None
         self.token = None
+        self.sgpToken = None
         self.server = None
         self.inMainLand = False
 
@@ -218,7 +219,7 @@ class LolClientConnector(QObject):
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
-        self.__initSessions()
+        await self.__initSessions()
         self.__initPlatformInfo()
         await self.__initManager()
         self.__initFolder()
@@ -247,6 +248,12 @@ class LolClientConnector(QObject):
         async def onChampSelectChanged(event):
             signalBus.champSelectChanged.emit(event)
 
+        @self.listener.subscribe(event="OnJsonApiEvent_entitlements_v1_token",
+                                 uri='/entitlements/v1/token',
+                                 type=("Update",))
+        async def onSGPTokenChanged(event):
+            self.sgpToken = event['data']['accessToken']
+
         # @self.listener.subscribe(event='OnJsonApiEvent', type=())
         # async def onDebugListen(event):
         #     print(event)
@@ -266,7 +273,7 @@ class LolClientConnector(QObject):
 
         self.__init__()
 
-    def __initSessions(self):
+    async def __initSessions(self):
         self.lcuSess = aiohttp.ClientSession(
             base_url=f'https://127.0.0.1:{self.port}',
             auth=aiohttp.BasicAuth('riot', self.token)
@@ -283,6 +290,8 @@ class LolClientConnector(QObject):
         self.sgpSess = aiohttp.ClientSession(
             base_url=url
         )
+
+        self.sgpToken = await self.getSGPtoken()
 
     def __initFolder(self):
         if not os.path.exists("app/resource/game"):
@@ -909,9 +918,9 @@ class LolClientConnector(QObject):
 
         return res
 
-    async def getSummonerGamesByPuuidViaSGP(self, token, puuid, begIdx, endIdx):
+    async def getSummonerGamesByPuuidViaSGP(self, puuid, begIdx, endIdx):
         logger.debug(
-            f"getSummonerGamesByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+            f"getSummonerGamesByPuuidViaSGP called, {puuid = }", TAG)
 
         url = f"/match-history-query/v1/products/lol/player/{puuid}/SUMMARY"
         params = {
@@ -919,29 +928,29 @@ class LolClientConnector(QObject):
             'count': endIdx - begIdx + 1,
         }
 
-        res = await self.__sgp__get(url, token, params)
+        res = await self.__sgp__get(url, params)
         return await res.json()
 
-    async def getRankedStatsByPuuidViaSGP(self, token, puuid):
+    async def getRankedStatsByPuuidViaSGP(self, puuid):
         logger.debug(
-            f"getRankedStatsByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+            f"getRankedStatsByPuuidViaSGP called, {puuid = }", TAG)
 
         url = f'/leagues-ledge/v2/leagueLadders/puuid/{puuid}'
-        res = await self.__sgp__get(url, token)
+        res = await self.__sgp__get(url)
 
         return await res.json()
 
-    async def getSummonerByPuuidViaSGP(self, token, puuid):
+    async def getSummonerByPuuidViaSGP(self, puuid):
         """
         该接口的返回值与 `self.getSummonerByPuuid()` 相比，拿不到召唤师的 `tagLine`
         即数字编号信息
         """
         logger.debug(
-            f"getSummonerByPuuidViaSGP called, {token = }, {puuid = }", TAG)
+            f"getSummonerByPuuidViaSGP called, {puuid = }", TAG)
 
         url = f"/summoner-ledge/v1/regions/{self.server.lower()}/summoners/puuid/{puuid}"
 
-        res = await self.__sgp__get(url, token)
+        res = await self.__sgp__get(url)
         return await res.json()
 
     def isInMainland(self):
@@ -964,11 +973,11 @@ class LolClientConnector(QObject):
     async def __patch(self, path, data=None):
         return await self.lcuSess.patch(path, json=data, ssl=False)
 
-    async def __sgp__get(self, path, token, params=None):
+    async def __sgp__get(self, path, params=None):
         assert self.inMainLand
 
         headers = {
-            "Authorization": f"Bearer {token}"
+            "Authorization": f"Bearer {self.sgpToken}"
         }
 
         return await self.sgpSess.get(path, params=params, ssl=False, headers=headers)

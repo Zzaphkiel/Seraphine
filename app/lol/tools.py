@@ -749,10 +749,10 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
     if useSGP and connector.isInMainland():
         # 如果是国服就优先尝试 SGP
         try:
-            token = await connector.getSGPtoken()
-            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
+            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
+            print('hi')
         except:
             tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
@@ -803,8 +803,7 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSG
     if useSGP and connector.isInMainland():
         # 如果是国服就优先尝试 SGP
         try:
-            token = await connector.getSGPtoken()
-            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token)
+            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId)
                      for item in team]
             summoners = await asyncio.gather(*tasks)
 
@@ -1026,7 +1025,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     }
 
 
-async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
+async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
     '''
     使用 SGP 接口取战绩信息
 
@@ -1045,7 +1044,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
     icon = await connector.getChampionIcon(championId)
     # SGP 接口返回的 summoner name 不是最新的，导致右侧点击召唤师名后搜不到
     # 重新使用 LCU API
-    # summoner = await connector.getSummonerByPuuidViaSGP(token, puuid)
+    # summoner = await connector.getSummonerByPuuidViaSGP(puuid)
     summoner = await connector.getSummonerByPuuid(puuid)
 
     try:
@@ -1056,8 +1055,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
     rankInfo = parseRankInfo(origRankInfo)
 
     try:
-        origGamesInfo = await connector.getSummonerGamesByPuuidViaSGP(
-            token, puuid, 0, 14)
+        origGamesInfo = await connector.getSummonerGamesByPuuidViaSGP(puuid, 0, 14)
 
         if cfg.get(cfg.gameInfoFilter) and isRank:
             origGamesInfo["games"] = [
@@ -1066,7 +1064,7 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId, token):
             begIdx = 15
             while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
                 endIdx = begIdx + 10
-                new = (await connector.getSummonerGamesByPuuidViaSGP(token, puuid, begIdx, endIdx))["games"]
+                new = (await connector.getSummonerGamesByPuuidViaSGP(puuid, begIdx, endIdx))["games"]
 
                 for game in new:
                     if game['json']["queueId"] in (420, 440):
