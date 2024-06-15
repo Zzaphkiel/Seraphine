@@ -99,7 +99,7 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 
 
 ## 您也可以自己打包可执行文件 📂
-在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确环境支持 `7z` 命令
+在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确认环境支持 `7z` 命令
 ```shell
 pip install pyinstaller==5.13
 ```
