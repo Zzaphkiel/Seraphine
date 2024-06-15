@@ -99,7 +99,7 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 
 
 ## 您也可以自己打包可执行文件 📂
-在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确环境支持 `zip` 命令
+在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确环境支持 `7z` 命令
 ```shell
 pip install pyinstaller==5.13
 ```
@@ -175,9 +175,9 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
     </a>
   </p>
 - 感谢 [大乱斗之家](jddld.com) 为我们提供大乱斗 Buff 信息服务支持。
-- 感谢 [JetBrains](https://www.jetbrains.com.cn/) 为我们提供的免费 [PyCharm](https://www.jetbrains.com.cn/pycharm/) 许可证。
+- 感谢 [JetBrains](https://www.jetbrains.com.cn/) 为我们提供的免费许可证。
   
-  Thanks to [JetBrains](https://www.jetbrains.com.cn/) for the free [PyCharm](https://www.jetbrains.com.cn/pycharm/) license.
+  Particularly, thanks to [JetBrains](https://www.jetbrains.com.cn/) for the free [PyCharm](https://www.jetbrains.com.cn/pycharm/) license.
   
   <p align='center'>
     <a href="https://www.jetbrains.com.cn/pycharm/">
