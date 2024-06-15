@@ -423,13 +423,12 @@ class TeamView(QFrame):
         self.isToolTipInit = False
 
         self.bansFlyOut = None
+        self.bansInfo = None
 
         self.__initWidget()
         self.__initLayout()
 
         cfg.themeChanged.connect(self.__updateIconColor)
-        self.bansButton.clicked.connect(lambda: Flyout.make(
-            self.bansFlyOut, self.bansButton, self, isDeleteOnClose=False))
 
     def __initWidget(self):
         self.teamResultLabel.setObjectName("teamResult")
@@ -455,6 +454,7 @@ class TeamView(QFrame):
         self.goldIconLabel.setVisible(False)
 
         self.dmgIconLabel.setObjectName("dmgIconLabel")
+        self.bansButton.clicked.connect(self.__onBansButtonClicked)
 
     def __initToolTip(self):
         self.towerIconLabel.setToolTip(self.tr("Tower destroyed"))
@@ -606,9 +606,13 @@ class TeamView(QFrame):
 
         if len(bans) != 0:
             self.bansButton.setVisible(True)
-            self.bansFlyOut = BansFlyoutView(bans)
+            self.bansInfo = bans
+
+            if self.bansFlyOut:
+                self.bansFlyOut.close()
         else:
             self.bansButton.setVisible(False)
+            self.bansInfo = None
 
         self.csIconLabel.setVisible(True)
         self.goldIconLabel.setVisible(True)
@@ -637,6 +641,10 @@ class TeamView(QFrame):
             16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.csIconLabel.setPixmap(QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
             16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def __onBansButtonClicked(self):
+        flyout = BansFlyoutView(self.bansInfo)
+        self.bansFlyOut = Flyout.make(flyout, self.bansButton, self)
 
 
 class BansFlyoutView(FlyoutViewBase):
