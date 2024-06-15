@@ -79,30 +79,27 @@ python main.py
 由于本程序的功能**完全**基于英雄联盟客户端 API 实现，**不含任何**对客户端以及游戏文件本体、代码以及内存的读取或破坏其完整性的行为（详情见下方[套盾环节](https://github.com/Zzaphkiel/Seraphine?tab=readme-ov-file#%E5%A5%97%E7%9B%BE%E7%8E%AF%E8%8A%82-%EF%B8%8F)）。因此仅使用 Seraphine 时极大概率不会被封号，但**并不保证**一定不会封号。
 
 ### Q：真的被封号了怎么办？
-根据反馈，目前有被封 1 小时的情况发生，申诉或等待解封吧 😭
+申诉或等待解封吧 😭
 
 ### Q：为什么客户端无法连接 / 功能无法使用 / 生涯界面无限转圈 / 最新战绩更新有延迟？
 Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户端接口所提供的，程序只是负责将它们显示出来。所以如果遇到功能无法使用或数据更新由延迟的情况，原因基本出在英雄联盟服务器本身，与 Seraphine 大概率没啥关系~
-
-### Q：从本地直接运行代码报错怎么办？
-换 Python `3.8` 试试。
 
 ### Q：为什么不提供具体某模式 / 某英雄总场次以及总胜率？
 英雄联盟客户端没有提供相关数据接口，我们做不到哇~
 
 ### Q：客户端为什么有时候会闪退？
-我们怀疑是由于并发 LCU API 访问导致的，您可以自行在设置中设置这一数量。
+我们怀疑客户端无法承载某些 HTTP 访问（它一碰就碎）。
 
 
 ## 帮助我们改进 Seraphine 😘
-在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请按照模板填写哦~
+在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请按照模板填写。**发布新 issue 前请先善用搜索功能，看看之前是否讨论过相关或类似的问题！**
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
 
-**发布新 issue 前请先善用搜索功能，看看之前是否讨论过相关或类似的问题！** _因开学太忙，后续的功能更新、BUG 修复以及 issue 回复的速度将显著变慢，还请谅解。_
+
 
 ## 您也可以自己打包可执行文件 📂
-在 `seraphine` 虚拟环境下安装 `Pyinstaller`
+在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确环境支持 `zip` 命令
 ```shell
 pip install pyinstaller==5.13
 ```
@@ -122,7 +119,7 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 **参考译文**：Seraphine 未经 Riot Games 认可，也不代表 Riot Games 或任何官方参与制作或管理 Riot Games 产品的人的观点或意见。Riot Games 及其所有相关产物均为 Riot Games，Inc 的商标或注册商标。
 
 ## 套盾环节 🛡️
-本程序为在 GitHub 仓库 [Zzaphkiel/Seraphine](https://github.com/Zzaphkiel/Seraphine) 开源的代码，以及在 [Release](https://github.com/Zzaphkiel/Seraphine/releases) 中上传的二进制文件。本环节旨在让用户更加全面详尽地了解本程序以及可能风险，以便用户在使用本程序前及过程中做出充分的风险评估和明智的决策。
+本程序为在 GitHub 仓库 [Zzaphkiel/Seraphine](https://github.com/Zzaphkiel/Seraphine) 开源的代码，以及在 [Release](https://github.com/Zzaphkiel/Seraphine/releases) 或官方 QQ 群组中上传的二进制文件。本环节旨在让用户更加全面详尽地了解本程序以及可能风险，以便用户在使用本程序前及过程中做出充分的风险评估和明智的决策。
 
 1. 本程序的目的是通过为游戏玩家提供**游戏外**辅助功能，从而给玩家提供更好的游戏体验。我们不鼓励不支持任何违反 Riot 以及腾讯规定或任何可能导致游戏环境不公平的行为。
 2. 本程序的代码实现遵守 [Riot Policies](https://developer.riotgames.com/policies/general) 的规定，提供的功能符合 [《英雄联盟》游戏插件公约](https://lol.qq.com/webplat/info/news_version3/152/4579/4581/m3106/201509/381618.shtml) 的要求。
@@ -135,13 +132,14 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 
 ## 参考资料 👀
 - GUI 基于 [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) 以及 [zhiyiYo/PyQt-Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 实现
+
 - LCU API 使用方法以及汇总详见官方文档
   - https://riot-api-libraries.readthedocs.io/en/latest/lcu.html#lcu-explorer
   - https://hextechdocs.dev/tag/lcu/
   - https://developer.riotgames.com/docs/lol
   - https://www.mingweisamuel.com/lcu-schema/tool/#/
 
-  以及其他使用 LCU API 的项目
+  以及其他使用 LCU API 的优秀项目
   - https://github.com/KebsCS/KBotExt
   - https://github.com/XHXIAIEIN/LeagueCustomLobby
   - https://github.com/7rebux/league-tools
@@ -185,7 +183,9 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
     <a href="https://www.jetbrains.com.cn/pycharm/">
       <img src="https://github.com/Zzaphkiel/Seraphine/assets/60383222/cb3abddc-de4d-4198-8eb7-daaf03a6287a">
     </a>
+    PyCharm：适用于数据科学和 Web 开发的 Python IDE
   </p>
+
 
 ## 交流群
 - Seraphine 交流群（QQ）：[926719775](https://qm.qq.com/cgi-bin/qm/qr?k=ulYfeMNL-GrYzemJyjOq7K1y4YSasBPL&jump_from=webapi&authKey=6Nw8v3gCSswJ6HtoMlqTs2+/nS5llSOgVIs/Hh2Xm0yzNZ0yEIDjvYQqbdjF4wbb)（已满，随缘进群），入群口令：enihpareS
