@@ -12,6 +12,7 @@ from app.common.util import getLolClientVersion
 
 class AramHome:
     """
+    #### 数据使用已获得授权
     Powered by: 大乱斗之家
     Site: http://www.jddld.com
     """
