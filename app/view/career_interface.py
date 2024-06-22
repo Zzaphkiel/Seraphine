@@ -628,7 +628,14 @@ class TeammatesFlyOut(FlyoutViewBase):
     def updateSummoners(self, info):
         for summoner in info['summoners']:
             infoBar = TeammateInfoBar(summoner)
-            self.infopageVBoxLayout.addWidget(infoBar)
+            self.infopageVBoxLayout.addWidget(infoBar, stretch=1)
+
+        length = len(info['summoners'])
+        spacing = self.infopageVBoxLayout.spacing()
+
+        if length < 5:
+            self.infopageVBoxLayout.addStretch(5-length)
+            self.infopageVBoxLayout.addSpacing(spacing * (5-length))
 
     def setLoadingPageEnabled(self, enable):
         index = 0 if enable else 1
