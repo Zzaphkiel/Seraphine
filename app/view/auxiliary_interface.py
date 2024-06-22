@@ -1058,7 +1058,7 @@ class LockConfigCard(SettingCard):
         self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
 
     def loadNowMode(self):
-        path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
+        path = f"{cfg.get(cfg.lolFolder)[0]}/../Game/Config/PersistedSettings.json"
 
         if not os.path.exists(path):
             self.switchButton.setChecked(False)
@@ -1090,7 +1090,7 @@ class LockConfigCard(SettingCard):
             self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
 
     def setConfigFileReadOnlyEnabled(self, enable):
-        path = f"{cfg.get(cfg.lolFolder)}/../Game/Config/PersistedSettings.json"
+        path = f"{cfg.get(cfg.lolFolder)[0]}/../Game/Config/PersistedSettings.json"
 
         if not os.path.exists(path):
             return False

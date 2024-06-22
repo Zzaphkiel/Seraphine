@@ -8,10 +8,10 @@ import webbrowser
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton, QVBoxLayout, QWidget
-from ..common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
-                                     SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
-                                     CheckBox, setCustomStyleSheet, ProgressBar,
-                                     PrimaryPushButton, ComboBox)
+from app.common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
+                                       SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
+                                       CheckBox, setCustomStyleSheet, ProgressBar,
+                                       PrimaryPushButton, ComboBox)
 
 from app.common.config import VERSION, cfg, LOCAL_PATH, BETA
 from app.common.util import (github, getLolClientPidSlowly, getPortTokenServerByPid,
@@ -20,6 +20,7 @@ from app.common.signals import signalBus
 from app.common.update import runUpdater
 from app.lol.connector import connector
 from app.components.multi_champion_select import MultiChampionSelectWidget
+from app.components.multi_lol_path_setting import PathDraggableWidget
 
 
 class UpdateMessageBox(MessageBoxBase):
@@ -373,6 +374,48 @@ class MultiChampionSelectMsgBox(MessageBoxBase):
     def __myOnYesButtonClicked(self):
         self.completed.emit(
             self.championSelectWidget.getSelectedChampionIds())
+
+        self.accept()
+        self.accepted.emit()
+
+    def __myOnCancelButtonClicked(self):
+        self.reject()
+        self.rejected.emit()
+
+
+class MultiPathSettingMsgBox(MessageBoxBase):
+
+    def __init__(self, paths: list, parent=None):
+        super().__init__(parent)
+        self.myYesButton = PrimaryPushButton(self.tr('OK'), self.buttonGroup)
+        self.myCancelButton = QPushButton(self.tr('Cancel'), self.buttonGroup)
+
+        self.titleLabel = TitleLabel(self.tr("Set LOL cLient path"))
+        self.pathsWidget = PathDraggableWidget(paths)
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.pathsWidget)
+
+        self.buttonLayout.addWidget(self.myYesButton)
+        self.buttonLayout.addWidget(self.myCancelButton)
+
+    def __initWidget(self):
+        self.yesButton.setVisible(False)
+        self.cancelButton.setVisible(False)
+        self.myCancelButton.setObjectName("cancelButton")
+
+        self.myYesButton.clicked.connect(self.__myOnYesButtonClicked)
+        self.myCancelButton.clicked.connect(self.__myOnCancelButtonClicked)
+
+        # 强迫症 TV 之这玩意左边多出来了
+        self.titleLabel.setStyleSheet("padding-left: 1px")
+
+    def __myOnYesButtonClicked(self):
+        cfg.set(cfg.lolFolder, self.pathsWidget.getCurrentPaths())
 
         self.accept()
         self.accepted.emit()

@@ -1,13 +1,14 @@
 # coding:utf-8
 from typing import Union
 
-from ..common.qfluentwidgets import (
+from app.common.qfluentwidgets import (
     FluentIconBase, ExpandGroupSettingCard, ConfigItem, qconfig, PushButton, SpinBox,
     ColorDialog, LineEdit, SwitchButton,  IndicatorPosition, setCustomStyleSheet,
-    SwitchSettingCard)
+    SwitchSettingCard, TransparentToolButton, FluentIcon)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QColor
-from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton
+from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton,
+                             QVBoxLayout)
 
 from app.common.icons import Icon
 from app.common.config import cfg

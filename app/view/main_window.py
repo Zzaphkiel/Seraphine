@@ -61,8 +61,8 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         logger.critical(f"Seraphine started, version: {BETA or VERSION}", TAG)
-        self.__initConfig()
 
+        self.__initConfig()
         self.__initWindow()
         self.__initSystemTray()
 
@@ -110,10 +110,23 @@ class MainWindow(FluentWindow):
         logger.critical("Seraphine initialized", TAG)
 
     def __initConfig(self):
-        if cfg.get(cfg.lolFolder) == str(Path("").absolute()).replace("\\", "/"):
-            tmpPath = getLoLPathByRegistry()
-            if tmpPath:
-                cfg.set(cfg.lolFolder, tmpPath)
+        folder = cfg.get(cfg.lolFolder)
+
+        isEmptyList = folder == []
+        isEmptyStr = folder == str(Path("").absolute()).replace(
+            "\\", "/") or folder == ""
+
+        if isEmptyList or isEmptyStr:
+            path = getLoLPathByRegistry()
+
+            if not path:
+                return
+
+            cfg.set(cfg.lolFolder, [path])
+            return
+
+        if type(folder) is str:
+            cfg.set(cfg.lolFolder, [folder])
 
     def __initInterface(self):
         self.__lockInterface()
@@ -573,10 +586,11 @@ class MainWindow(FluentWindow):
         folder = folder.replace("LeagueClient", "TCLS")
         folder = f"{folder[:1].upper()}{folder[1:]}"
 
-        cfg.set(cfg.lolFolder, folder)
+        current = cfg.get(cfg.lolFolder)
 
-        self.settingInterface.lolFolderCard.setContent(folder)
-        self.settingInterface.lolFolderCard.repaint()
+        if folder not in current:
+            current.append(current)
+            cfg.set(cfg.lolFolder, current)
 
     @asyncSlot(dict)
     async def __onCurrentSummonerProfileChanged(self, data: dict):
@@ -605,7 +619,7 @@ class MainWindow(FluentWindow):
 
     def __startLolClient(self):
         for clientName in ("client.exe", "LeagueClient.exe"):
-            path = f'{cfg.get(cfg.lolFolder)}/{clientName}'
+            path = f'{cfg.get(cfg.lolFolder)[0]}/{clientName}'
             if os.path.exists(path):
                 os.popen(f'"{path}"')
                 self.__showStartLolSuccessInfo()

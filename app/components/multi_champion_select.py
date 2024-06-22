@@ -1,26 +1,21 @@
-from typing import List
-import sys
 
-from PyQt5.QtCore import (QPoint, Qt, pyqtSignal, QSize,
-                          QRect, QPropertyAnimation, QEasingCurve)
-from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import (QVBoxLayout, QFrame, QHBoxLayout,
-                             QLabel, QApplication, QWidget, QCompleter)
-from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, ToolButton,
-                                       SearchLineEdit, FlowLayout, SmoothScrollArea,
-                                       FlyoutViewBase, TeachingTipView)
+from PyQt5.QtCore import (Qt, pyqtSignal, QSize)
+from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout,
+                             QLabel, QWidget)
+from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, SearchLineEdit,
+                                       FlowLayout, SmoothScrollArea, FlyoutViewBase)
 
 
 from app.common.style_sheet import StyleSheet
-from app.components.animation_frame import CardWidget
 from app.components.champion_icon_widget import RoundIcon, RoundIconButton
+from app.components.draggable_widget import DraggableItem, ItemsDraggableWidget
 
 from app.lol.connector import connector
 from app.lol.champions import ChampionAlias
 
 
-class ChampionTabItem(CardWidget):
-    closed = pyqtSignal()
+class ChampionTabItem(DraggableItem):
+    closeRequested = pyqtSignal()
 
     def __init__(self, icon, name, championId, parent=None):
         super().__init__(parent)
@@ -33,8 +28,6 @@ class ChampionTabItem(CardWidget):
 
         self.closeButton = TransparentToolButton(FluentIcon.CLOSE)
 
-        self.slideAni = QPropertyAnimation(self, b'pos', self)
-
         self.__initWidgets()
         self.__initLayout()
 
@@ -44,7 +37,7 @@ class ChampionTabItem(CardWidget):
 
         self.closeButton.setIconSize(QSize(12, 12))
         self.closeButton.setFixedSize(QSize(26, 26))
-        self.closeButton.clicked.connect(self.closed)
+        self.closeButton.clicked.connect(self.closeRequested)
 
         self.setMinimumWidth(200)
         self.name.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
@@ -56,180 +49,27 @@ class ChampionTabItem(CardWidget):
         self.hBoxLayout.addWidget(self.name)
         self.hBoxLayout.addWidget(self.closeButton, alignment=Qt.AlignRight)
 
-    def slideTo(self, y: int, duration=250):
-        self.slideAni.setStartValue(self.pos())
-        self.slideAni.setEndValue(QPoint(self.x(), y))
-        self.slideAni.setDuration(duration)
-        self.slideAni.setEasingCurve(QEasingCurve.Type.InOutQuad)
-
-        self.slideAni.start()
-
     def sizeHint(self):
         return QSize(141, 44)
 
 
-class ItemsDraggableWidget(QFrame):
+class ChampionDraggableWidget(ItemsDraggableWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.items: List[ChampionTabItem] = []
-
-        self.dragPos = QPoint()
-        self.isDragging = False
-        self.currentIndex = -1
-
-        self.vBoxLayout = QVBoxLayout(self)
-
         self.__initWidget()
-        self.__initLayout()
 
     def __initWidget(self):
         self.setFixedHeight(318)
         self.setFixedWidth(224)
 
-    def __initLayout(self):
-        self.vBoxLayout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
-        self.vBoxLayout.setContentsMargins(11, 11, 11, 11)
-        self.vBoxLayout.setSpacing(6)
-
     def addItem(self, icon, name, championId):
         item = ChampionTabItem(icon, name, championId)
+        item.closeRequested.connect(lambda i=item: self._removeItem(i))
 
-        item.pressed.connect(self.__onItemPressed)
-        item.closed.connect(lambda i=item: self.removeItem(i))
-
-        self.items.append(item)
-        self.vBoxLayout.addWidget(item)
+        self._addItem(item)
 
     def getCurrentChampionIds(self):
         return [item.championId for item in self.items]
-
-    def mousePressEvent(self, e: QMouseEvent):
-        super().mousePressEvent(e)
-
-        if e.button() != Qt.MouseButton.LeftButton or \
-                not self.vBoxLayout.geometry().contains(e.pos()):
-            return
-
-        self.dragPos = e.pos()
-
-    def mouseMoveEvent(self, e: QMouseEvent):
-        super().mouseMoveEvent(e)
-
-        if not self.vBoxLayout.geometry().contains(e.pos()) or \
-                self.count() <= 1:
-            return
-
-        index = self.getCurrentIndex()
-        if index == -1:
-            return
-
-        item = self.tabItem(index)
-
-        dy = e.pos().y() - self.dragPos.y()
-        self.dragPos = e.pos()
-
-        if index == 0 and dy < 0 and item.y() <= 0:
-            return
-
-        if index == self.count() - 1 and dy > 0 and \
-                item.geometry().bottom() >= self.height() - 1:
-            return
-
-        item.move(item.x(), item.y() + dy)
-        self.isDragging = True
-
-        if dy < 0 and index > 0:
-            siblingIndex = index - 1
-            siblingItem = self.tabItem(siblingIndex)
-
-            if item.y() < siblingItem.geometry().center().y():
-                self.__swapItem(siblingIndex)
-
-        if dy > 0 and index < self.count() - 1:
-            siblingIndex = index + 1
-            siblingItem = self.tabItem(siblingIndex)
-
-            if item.geometry().bottom() > siblingItem.geometry().center().y():
-                self.__swapItem(siblingIndex)
-
-    def mouseReleaseEvent(self, e: QMouseEvent):
-        super().mouseReleaseEvent(e)
-
-        if not self.isDragging:
-            return
-
-        self.isDragging = False
-
-        item = self.tabItem(self.getCurrentIndex())
-        y = self.tabRect(self.getCurrentIndex()).y()
-
-        # duration = int(abs(item.y() - y) * 250 / item.height())
-        duration = 250
-
-        item.slideTo(y, duration)
-        item.slideAni.finished.connect(self.__adjustLayout)
-
-        self.setCurrentIndex(-1)
-
-    def removeItem(self, item: ChampionTabItem):
-        index = self.items.index(item)
-
-        self.items.pop(index)
-        self.vBoxLayout.removeWidget(item)
-
-        item.deleteLater()
-        self.update()
-
-    def __swapItem(self, index):
-        items = self.items
-        swappedItem = self.tabItem(index)
-
-        y = self.tabRect(self.getCurrentIndex()).y()
-
-        items[self.getCurrentIndex()], items[index] = \
-            items[index], items[self.getCurrentIndex()]
-        self.setCurrentIndex(index)
-        swappedItem.slideTo(y)
-
-    def __adjustLayout(self):
-        self.sender().disconnect()
-
-        for item in self.items:
-            self.vBoxLayout.removeWidget(item)
-
-        for item in self.items:
-            self.vBoxLayout.addWidget(item)
-
-    def __onItemPressed(self):
-        item: ChampionTabItem = self.sender()
-        item.raise_()
-
-        index = self.items.index(item)
-        self.setCurrentIndex(index)
-
-    def setCurrentIndex(self, index: int):
-        self.currentIndex = index
-
-    def getCurrentIndex(self):
-        return self.currentIndex
-
-    def count(self):
-        return len(self.items)
-
-    def tabItem(self, index: int) -> ChampionTabItem:
-        return self.items[index]
-
-    def tabRect(self, index: int) -> QRect:
-        y = 0
-
-        for i in range(index):
-            y += self.tabItem(i).height()
-            y += self.vBoxLayout.spacing()
-
-        rect = self.tabItem(index).geometry()
-        rect.moveTop(y + self.vBoxLayout.contentsMargins().top() + 1)
-
-        return rect
 
 
 class ChampionsSelectWidget(QWidget):
@@ -249,6 +89,8 @@ class ChampionsSelectWidget(QWidget):
 
         self.__initWidget()
         self.__initLayout()
+
+        StyleSheet.CHAMPIONS_SELECT_WIDGET.apply(self)
 
     def __initWidget(self):
         self.scrollArea.setObjectName("scrollArea")
@@ -313,15 +155,13 @@ class MultiChampionSelectWidget(QWidget):
 
         self.hBoxLayout = QHBoxLayout(self)
 
-        self.itemsDraggableWidget = ItemsDraggableWidget()
+        self.itemsDraggableWidget = ChampionDraggableWidget()
         self.championsSelectWidget = ChampionsSelectWidget(champions)
         self.champions: dict = champions
         self.selected = selected
 
         self.__initWidget()
         self.__initLayout()
-
-        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)
 
     def __initWidget(self):
         for id in self.selected:
@@ -362,5 +202,3 @@ class ChampionSelectFlyout(FlyoutViewBase):
         self.selectWidget.championClicked.connect(self.championSelected)
 
         self.vBoxLayout.addWidget(self.selectWidget)
-
-        StyleSheet.CHAMPION_SELECT_WIDGET.apply(self)

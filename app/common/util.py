@@ -103,7 +103,9 @@ def getLoLPathByRegistry() -> str:
     try:
         with winreg.OpenKey(mainKey, subKey) as k:
             installPath, _ = winreg.QueryValueEx(k, valueName)
-            return str(Path(f"{installPath}\TCLS").absolute()).replace("\\", "/")
+            path = str(Path(f"{installPath}\TCLS").absolute()
+                       ).replace("\\", "/")
+            return f"{path[:1].upper()}{path[1:]}"
     except FileNotFoundError:
         logger.warning("reg path or val does not exist.", TAG)
     except WindowsError as e:
@@ -265,7 +267,7 @@ def getFileProperties(fname):
 
 
 def getLolClientVersion():
-    gamePath = cfg.get(cfg.lolFolder)
+    gamePath = cfg.get(cfg.lolFolder)[0]
 
     assert gamePath  # 必须有, 否则就是调用逻辑有问题 -- By Hpero4
 

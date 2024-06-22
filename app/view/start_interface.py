@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QLabel, QWidget, QVBoxLayout,
                              QSpacerItem, QSizePolicy)
 
 from app.common.qfluentwidgets import (InfoBar, InfoBarPosition, PushButton, SmoothScrollArea,
-                                       IndeterminateProgressBar)
+                                       IndeterminateProgressBar, ComboBox)
 from app.components.seraphine_interface import SeraphineInterface
 
 from app.lol.connector import connector
@@ -34,14 +34,21 @@ class StartInterface(SeraphineInterface):
 
         self.vBoxLayout = QVBoxLayout(self)
 
+        self.pathComboBox = ComboBox()
+        self.pathLayout = QHBoxLayout()
+
         self.__initWidget()
         self.__initLayout()
         self.showLoadingPage()
 
     def __initLayout(self):
-
         self.label1.setAlignment(Qt.AlignCenter)
         self.label2.setAlignment(Qt.AlignCenter)
+
+        self.pathLayout.setContentsMargins(0, 0, 0, 0)
+        self.pathLayout.setAlignment(Qt.AlignCenter)
+        self.pathLayout.addWidget(self.label2)
+        self.pathLayout.addWidget(self.pathComboBox)
 
         self.vBoxLayout.addWidget(self.processBar)
         self.vBoxLayout.addItem(
@@ -51,7 +58,7 @@ class StartInterface(SeraphineInterface):
         self.vBoxLayout.addWidget(self.pushButton, alignment=Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.label3, alignment=Qt.AlignCenter)
         self.vBoxLayout.addSpacing(20)
-        self.vBoxLayout.addWidget(self.label2)
+        self.vBoxLayout.addLayout(self.pathLayout)
         self.vBoxLayout.addItem(
             QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
@@ -63,8 +70,11 @@ class StartInterface(SeraphineInterface):
         self.label2.setObjectName('label2')
         self.label3.setObjectName("label3")
 
-        StyleSheet.START_INTERFACE.apply(self)
+        paths = cfg.get(cfg.lolFolder)
+        self.pathComboBox.addItems(paths)
+
         self.__connectSignalToSlot()
+        StyleSheet.START_INTERFACE.apply(self)
 
     def hideLoadingPage(self):
         self.processBar.stop()
@@ -74,6 +84,7 @@ class StartInterface(SeraphineInterface):
         self.label2.setText(
             f"PID = {connector.pid}\n--app-port = {connector.port}\n--remoting-auth-token = {connector.token}")
         self.label3.setVisible(False)
+        self.pathComboBox.setVisible(False)
 
         self.pushButton.setText(self.tr("Change client connected"))
         self.pushButton.setIcon(Icon.DUALSCREEN)
@@ -83,8 +94,7 @@ class StartInterface(SeraphineInterface):
         self.loading = True
 
         self.label1.setText(self.tr("Connecting to LOL Client..."))
-        self.label2.setText(self.tr("LOL client folder:") +
-                            f" {cfg.get(cfg.lolFolder)}")
+        self.label2.setText(self.tr("LOL client folder: "))
         self.label3.setText(self.tr("(You can launch LOL by other means)"))
 
         self.label3.setVisible(True)
@@ -98,7 +108,7 @@ class StartInterface(SeraphineInterface):
     def __onPushButtonClicked(self):
         if self.loading:
             for clientName in ("client.exe", "LeagueClient.exe"):
-                path = f'{cfg.get(cfg.lolFolder)}/{clientName}'
+                path = f'{self.pathComboBox.currentText()}/{clientName}'
                 if os.path.exists(path):
                     os.popen(f'"{path}"')
                     self.__showStartLolSuccessInfo()

@@ -1,0 +1,11 @@
+#scrollArea {
+    border: 1px solid rgb(70, 70, 70);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+#scrollWidget {
+    border: none;
+    border-radius: 6px;
+    background-color: transparent
+}

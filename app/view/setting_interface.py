@@ -15,7 +15,9 @@ from app.common.config import (cfg, YEAR, AUTHOR, VERSION, FEEDBACK_URL, GITHUB_
 from app.common.style_sheet import StyleSheet
 from app.components.seraphine_interface import SeraphineInterface
 from app.components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
-                                          LooseSwitchSettingCard, ProxySettingCard)
+                                          LooseSwitchSettingCard, ProxySettingCard,
+                                          )
+from app.components.message_box import MultiPathSettingMsgBox
 
 
 class SettingInterface(SeraphineInterface):
@@ -68,8 +70,12 @@ class SettingInterface(SeraphineInterface):
         self.lolFolderCard = PushSettingCard(self.tr("Choose folder"),
                                              Icon.FOLDER,
                                              self.tr("Client Path"),
-                                             cfg.get(cfg.lolFolder),
+                                             self.tr(
+                                                 "Set client path and order"),
                                              self.generalGroup)
+        self.lolFolderCard.button.setFixedWidth(100)
+        self.lolFolderCard.button.setStyleSheet(
+            "QPushButton {padding-left: 0; padding-right: 0;}")
 
         self.gameStartMinimizeCard = SwitchSettingCard(
             Icon.PAGE, self.tr("Minimize windows during game activities"),
@@ -279,16 +285,10 @@ class SettingInterface(SeraphineInterface):
         )
 
     def __onLolFolderCardClicked(self):
-        folder = QFileDialog.getExistingDirectory(
-            self, self.tr("Choose folder"),
-            self.lolFolderCard.contentLabel.text())
+        current = cfg.get(cfg.lolFolder)
 
-        if not folder or cfg.get(cfg.lolFolder) == folder:
-            return
-
-        cfg.set(cfg.lolFolder, folder)
-        self.lolFolderCard.setContent(folder)
-        self.window().startInterface.label2.setText(folder)
+        msgBox = MultiPathSettingMsgBox(current, self.window())
+        msgBox.exec_()
 
     def __showRestartToolTip(self):
         InfoBar.success(self.tr("Updated successfully"),

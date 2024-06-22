@@ -1,0 +1,14 @@
+DraggableItem {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px
+}
+
+DraggableItem>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei'
+}
+
+ItemsDraggableWidget {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
+    background-color: rgba(245, 245, 245, 0.667);
+}

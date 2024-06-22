@@ -29,7 +29,7 @@ def isWin11():
 
 
 class Config(QConfig):
-    lolFolder = ConfigItem("General", "LolPath", "", FolderValidator())
+    lolFolder = ConfigItem("General", "LolPath", [])
     enableStartLolWithApp = ConfigItem("General", "EnableStartLolWithApp",
                                        False, BoolValidator())
 

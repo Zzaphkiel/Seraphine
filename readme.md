@@ -168,7 +168,7 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
 </p>
 
 ## 致谢 🥳
-- 感谢所有开发者对 Seraphine 的开发与维护提供的巨大帮助。
+- 感谢所有贡献者对 Seraphine 的开发与维护提供的巨大帮助。
   <p align='center'>
     <a href="https://github.com/Zzaphkiel/Seraphine/graphs/contributors">
       <img src="https://contrib.rocks/image?repo=Zzaphkiel/Seraphine">
