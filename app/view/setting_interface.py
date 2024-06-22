@@ -38,7 +38,7 @@ class SettingInterface(SeraphineInterface):
             cfg.apiConcurrencyNumber,
             self.tr("LCU API concurrency number"),
             self.tr("Number of concurrency:"),
-            1, 1, 5,
+            1, 1, 20,
             Icon.APPLIST,
             self.tr("Setting the maximum number of API concurrency."),
             self.functionGroup)

@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 import time
-import webbrowser
+import copy
 from pathlib import Path
 
 import pyperclip
@@ -586,11 +586,12 @@ class MainWindow(FluentWindow):
         folder = folder.replace("LeagueClient", "TCLS")
         folder = f"{folder[:1].upper()}{folder[1:]}"
 
-        current = cfg.get(cfg.lolFolder)
+        current: list = cfg.get(cfg.lolFolder)
 
-        if folder not in current:
-            current.append(current)
-            cfg.set(cfg.lolFolder, current)
+        if folder.lower() not in [item.lower() for item in current]:
+            new = copy.deepcopy(current)
+            new.append(folder)
+            cfg.set(cfg.lolFolder, new)
 
     @asyncSlot(dict)
     async def __onCurrentSummonerProfileChanged(self, data: dict):

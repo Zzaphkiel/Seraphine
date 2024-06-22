@@ -752,7 +752,6 @@ async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
             tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
-            print('hi')
         except:
             tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
                      for item in session['myTeam']]
@@ -1641,8 +1640,6 @@ async def fixLeagueClientWindow():
             targetWindowWidth, targetWindowHeight,
             SWP_SHOWWINDOW
         )
-
-        print('hi')
 
         win32gui.SetWindowPos(
             windowCefHWnd,
