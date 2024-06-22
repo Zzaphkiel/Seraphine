@@ -384,6 +384,7 @@ class CareerInterface(SeraphineInterface):
 
         self.setLoadingPageEnabled(True)
         self.recentTeammatesInfo = None
+
         if self.recentTeammatesFlyout:
             self.recentTeammatesFlyout.close()
             self.recentTeammatesFlyout = None
@@ -565,15 +566,21 @@ class CareerInterface(SeraphineInterface):
 
     def __onRecentTeammatesButtonClicked(self):
         view = TeammatesFlyOut()
-        if self.info:
+
+        if self.recentTeammatesInfo:
             view.setLoadingPageEnabled(False)
-            view.updateSummoners(self.info)
+            view.updateSummoners(self.recentTeammatesInfo)
 
         self.recentTeammatesFlyout = Flyout.make(
             view, self.recentTeamButton, self, FlyoutAnimationType.DROP_DOWN)
+        self.recentTeammatesFlyout.closed.connect(
+            self.__resetRecentTeammatesFlyout)
+
+    def __resetRecentTeammatesFlyout(self):
+        self.recentTeammatesFlyout = None
 
     async def __updateRecentTeammates(self):
-        self.info = await getRecentTeammates(self.games['games'], self.puuid)
+        self.recentTeammatesInfo = await getRecentTeammates(self.games['games'], self.puuid)
 
         if self.recentTeammatesFlyout:
             self.recentTeammatesFlyout.close()

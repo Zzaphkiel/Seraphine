@@ -12,11 +12,11 @@ import asyncio
 import aiohttp
 from PyQt5.QtCore import pyqtSignal, QObject
 
-from ..common.config import cfg, Language
-from ..common.logger import logger
-from ..common.signals import signalBus
-from ..common.util import getPortTokenServerByPid
-from .exceptions import *
+from app.common.config import cfg, Language
+from app.common.logger import logger
+from app.common.signals import signalBus
+from app.common.util import getPortTokenServerByPid
+from app.lol.exceptions import *
 
 requests.packages.urllib3.disable_warnings()
 
@@ -829,14 +829,26 @@ class LolClientConnector(QObject):
 
         return res
 
-    def getConversations(self):
-        res = self.__get("/lol-chat/v1/conversations").json()
+    async def dodge(self):
+        data = {
+            "destination": 'lcdsServiceProxy',
+            "method": 'call',
+            "args": '["", "teambuilder-draft", "quitV2", ""]'
+        }
 
-        return res
+        res = await self.__post("/lol-login/v1/session/invoke", data=data)
 
-    def getHelp(self):
-        res = self.__get("/help").json()
-        return res
+        return await res.json()
+
+    async def getConversations(self):
+        res = await self.__get("/lol-chat/v1/conversations")
+
+        return await res.json()
+
+    async def getHelp(self):
+        res = await self.__get("/help")
+
+        return await res.json()
 
     @retry()
     async def sendFriendRequest(self, name):
@@ -850,12 +862,6 @@ class LolClientConnector(QObject):
         res = await self.__post('/lol-chat/v1/friend-requests', data=data)
 
         print(await res.read())
-
-    def dodge(self):
-        res = self.__post(
-            '/lol-login/v1/session/invoke?destination=lcdsServiceProxy&method=call&args=["","teambuilder-draft","quitV2",""])').content
-
-        return res
 
     @retry()
     def sendNotificationMsg(self, title, content):
