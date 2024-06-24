@@ -1162,12 +1162,12 @@
         <translation type="obsolete">客户端已连接</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="649"/>
+        <location filename="../../view/main_window.py" line="650"/>
         <source>Invalid path</source>
         <translation>路径非法</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="649"/>
+        <location filename="../../view/main_window.py" line="650"/>
         <source>Please set the correct directory of the LOL client in the setting page</source>
         <translation>请在设置页面中设置正确的 LOL 客户端路径</translation>
     </message>
@@ -1177,52 +1177,52 @@
         <translation>启动页</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="638"/>
+        <location filename="../../view/main_window.py" line="639"/>
         <source>Start LOL successfully</source>
         <translation>启动客户端成功</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="733"/>
+        <location filename="../../view/main_window.py" line="734"/>
         <source>Home</source>
         <translation>游戏大厅</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="736"/>
+        <location filename="../../view/main_window.py" line="737"/>
         <source>Selecting Champions</source>
         <translation>英雄选择</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="754"/>
+        <location filename="../../view/main_window.py" line="755"/>
         <source>Gaming</source>
         <translation>游戏中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="761"/>
+        <location filename="../../view/main_window.py" line="762"/>
         <source>Waiting for status</source>
         <translation>等待游戏结果</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="763"/>
+        <location filename="../../view/main_window.py" line="764"/>
         <source>End of game</source>
         <translation>游戏结束</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="765"/>
+        <location filename="../../view/main_window.py" line="766"/>
         <source>Lobby</source>
         <translation>房间组队中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="773"/>
+        <location filename="../../view/main_window.py" line="774"/>
         <source>Ready check</source>
         <translation>匹配确认</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="776"/>
+        <location filename="../../view/main_window.py" line="777"/>
         <source>Match making</source>
         <translation>匹配中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="943"/>
+        <location filename="../../view/main_window.py" line="944"/>
         <source>Exception occurred 😥</source>
         <translation>程序出现异常 😥</translation>
     </message>
@@ -1232,12 +1232,12 @@
         <translation>战绩查询 👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="694"/>
+        <location filename="../../view/main_window.py" line="695"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="693"/>
+        <location filename="../../view/main_window.py" line="694"/>
         <source>Minimize</source>
         <translation>最小化到任务栏</translation>
     </message>
@@ -1247,7 +1247,7 @@
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="686"/>
+        <location filename="../../view/main_window.py" line="687"/>
         <source>Do you wish to exit?</source>
         <translation>你第一次点击了关闭按钮</translation>
     </message>
@@ -1288,17 +1288,17 @@
         <translation>客户端信息请求失败</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="742"/>
+        <location filename="../../view/main_window.py" line="743"/>
         <source>Blue Team</source>
         <translation>蓝色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="744"/>
+        <location filename="../../view/main_window.py" line="745"/>
         <source>Red Team</source>
         <translation>红色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="779"/>
+        <location filename="../../view/main_window.py" line="780"/>
         <source>Waiting reconnect</source>
         <translation>等待重新连接</translation>
     </message>
@@ -1353,7 +1353,7 @@
         <translation>，</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="686"/>
+        <location filename="../../view/main_window.py" line="687"/>
         <source>Choose action for close button (you can modify it at any time in the settings page)</source>
         <translation>请选择点击关闭按钮的默认行为</translation>
     </message>
@@ -1550,11 +1550,44 @@
     </message>
 </context>
 <context>
+    <name>PathDraggableWidget</name>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="99"/>
+        <source>Choose folder</source>
+        <translation>选择文件夹</translation>
+    </message>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="114"/>
+        <source>Editing failed</source>
+        <translation>修改失败</translation>
+    </message>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="114"/>
+        <source>Path &quot;</source>
+        <translation>路径 “</translation>
+    </message>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="114"/>
+        <source>&quot; already exists</source>
+        <translation>” 已经存在</translation>
+    </message>
+</context>
+<context>
     <name>PathTabItem</name>
     <message>
         <location filename="../../components/multi_lol_path_setting.py" line="59"/>
         <source>Choose folder</source>
-        <translation>设置</translation>
+        <translation type="obsolete">设置</translation>
+    </message>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="44"/>
+        <source>Delete</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <location filename="../../components/multi_lol_path_setting.py" line="47"/>
+        <source>Edit</source>
+        <translation>修改</translation>
     </message>
 </context>
 <context>

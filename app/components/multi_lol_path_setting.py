@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QSpacerItem,
                              QLabel, QWidget, QSizePolicy, QFileDialog)
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, SearchLineEdit,
                                        FlowLayout, SmoothScrollArea, FlyoutViewBase,
-                                       BodyLabel)
+                                       BodyLabel, InfoBarPosition, InfoBar, ToolTipFilter,
+                                       ToolTipPosition)
 
 
 from app.common.style_sheet import StyleSheet
@@ -14,6 +15,7 @@ from app.components.draggable_widget import DraggableItem, ItemsDraggableWidget
 
 class PathTabItem(DraggableItem):
     closedRequested = pyqtSignal()
+    editRequestd = pyqtSignal()
 
     def __init__(self, path: str, parent=None):
         super().__init__(parent=parent)
@@ -38,7 +40,14 @@ class PathTabItem(DraggableItem):
         self.closeButton.setFixedSize(QSize(26, 26))
 
         self.closeButton.clicked.connect(self.closedRequested)
-        self.editButton.clicked.connect(self.__onEditButtonClicked)
+        self.editButton.clicked.connect(self.editRequestd)
+
+        self.closeButton.setToolTip(self.tr("Delete"))
+        self.closeButton.installEventFilter(
+            ToolTipFilter(self.closeButton, 300))
+        self.editButton.setToolTip(self.tr("Edit"))
+        self.editButton.installEventFilter(
+            ToolTipFilter(self.editButton, 300))
 
         self.label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
 
@@ -56,16 +65,6 @@ class PathTabItem(DraggableItem):
         self.hBoxLayout.addWidget(
             self.closeButton, alignment=Qt.AlignRight | Qt.AlignVCenter)
 
-    def __onEditButtonClicked(self):
-        path = QFileDialog.getExistingDirectory(
-            self, self.tr("Choose folder"),
-            self.label.text())
-
-        if not path:
-            return
-
-        self.label.setText(path)
-
     def sizeHint(self):
         return QSize(250, 44)
 
@@ -79,16 +78,12 @@ class PathDraggableWidget(ItemsDraggableWidget):
         self.setFixedHeight(318)
 
         for path in paths:
-
-            # 别问为什么要判断一下，我也不知道为什么
-            if type(path) is not str:
-                continue
-
             self.addItem(path)
 
     def addItem(self, path):
         item = PathTabItem(path)
         item.closedRequested.connect(lambda i=item: self.removeItem(item))
+        item.editRequestd.connect(lambda i=item: self.editItem(item))
 
         self._addItem(item)
 
@@ -100,3 +95,24 @@ class PathDraggableWidget(ItemsDraggableWidget):
 
     def getCurrentPaths(self):
         return [item.label.text() for item in self.items]
+
+    def editItem(self, item: PathTabItem):
+        path = QFileDialog.getExistingDirectory(
+            self, self.tr("Choose folder"),
+            item.label.text())
+
+        if not path:
+            return
+
+        current = self.getCurrentPaths()
+        if path.lower() in [x.lower() for x in current]:
+            self.__showEditErrorInfo(path)
+            return
+
+        item.label.setText(path)
+
+    def __showEditErrorInfo(self, path):
+        InfoBar.error(self.tr("Editing failed"),
+                      self.tr("Path \"") + path + self.tr("\" already exists"),
+                      Qt.Vertical, True, 5000, InfoBarPosition.BOTTOM_RIGHT,
+                      self.window())
