@@ -90,8 +90,10 @@ def retry(count=5, retry_sep=0):
                     time.sleep(retry_sep)
                     exce = e
 
-                    if isinstance(e, SummonerNotFound):  # SummonerNotFound 再重试会报 429 (限流)
+                    # SummonerNotFound 再重试会报 429 (限流)
+                    if isinstance(e, SummonerNotFound):
                         raise e
+
                     continue
                 else:
                     break
@@ -199,7 +201,9 @@ class LolClientConnector(QObject):
 
     def __init__(self):
         super().__init__()
-        self.semaphore = None
+        maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
+
+        self.semaphore = asyncio.Semaphore(maxRefCnt)
         self.lcuSess = None
         self.sgpSess = None
         self.port = None
@@ -209,7 +213,6 @@ class LolClientConnector(QObject):
         self.inMainLand = False
 
         self.manager = None
-        self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
 
         self.dqLock = threading.Lock()
         self.callStack = deque(maxlen=10)
@@ -217,7 +220,6 @@ class LolClientConnector(QObject):
     async def start(self, pid):
         self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
-        self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
         await self.__initSessions()
         self.__initPlatformInfo()

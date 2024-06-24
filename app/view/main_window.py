@@ -33,7 +33,7 @@ from app.common.config import cfg, VERSION, BETA
 from app.common.logger import logger
 from app.common.signals import signalBus
 from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                        WaitingForLolMessageBox, ExceptionMessageBox)
+                                        WaitingForLolMessageBox, ExceptionMessageBox,)
 from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                                 SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
@@ -83,9 +83,6 @@ class MainWindow(FluentWindow):
             target=self.checkUpdate, parent=self)
         self.checkNoticeThread = StoppableThread(
             target=lambda: self.checkNotice(False), parent=self)
-        # 该功能不再支持 -- By Hpero4
-        # self.minimizeThread = StoppableThread(
-        #     target=self.gameStartMinimize, parent=self)
 
         logger.critical("Seraphine listerners started", TAG)
 
