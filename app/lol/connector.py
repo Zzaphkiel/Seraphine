@@ -201,9 +201,9 @@ class LolClientConnector(QObject):
 
     def __init__(self):
         super().__init__()
-        maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
+        self.maxRefCnt = cfg.get(cfg.apiConcurrencyNumber)
 
-        self.semaphore = asyncio.Semaphore(maxRefCnt)
+        self.semaphore = None
         self.lcuSess = None
         self.sgpSess = None
         self.port = None
@@ -220,6 +220,7 @@ class LolClientConnector(QObject):
     async def start(self, pid):
         self.pid = pid
         self.port, self.token, self.server = getPortTokenServerByPid(pid)
+        self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
         await self.__initSessions()
         self.__initPlatformInfo()
