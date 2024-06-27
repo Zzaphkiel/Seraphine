@@ -7,15 +7,14 @@ import sys
 import webbrowser
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QLabel, QTextBrowser, QPushButton, QVBoxLayout, QWidget
-from app.common.qfluentwidgets import (MessageBox, MessageBoxBase, SmoothScrollArea,
-                                       SubtitleLabel, BodyLabel, TextEdit, TitleLabel,
-                                       CheckBox, setCustomStyleSheet, ProgressBar,
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget
+from app.common.qfluentwidgets import (MessageBoxBase, SmoothScrollArea,
+                                       BodyLabel, TextEdit, TitleLabel,
+                                       ProgressBar,
                                        PrimaryPushButton, ComboBox)
 
 from app.common.config import VERSION, cfg, LOCAL_PATH, BETA
-from app.common.util import (github, getLolClientPidSlowly, getPortTokenServerByPid,
-                             getTasklistPath, getLolClientPids, getLolClientPidsSlowly)
+from app.common.util import getLolClientPidSlowly
 from app.common.signals import signalBus
 from app.common.update import runUpdater
 from app.lol.connector import connector
@@ -112,6 +111,7 @@ class UpdateMessageBox(MessageBoxBase):
 
         self.myYesButton.setEnabled(False)
         self.myCancelButton.setEnabled(False)
+        self.manuallyButton.setEnabled(False)
 
         self.infoLabel.setVisible(True)
         self.bar.setVisible(True)
