@@ -29,7 +29,7 @@ jobs:
         if: ${{ env.SUCCESS }} == 'true'
         with:
           name: Seraphine
-          path: .\Seraphine.zip
+          path: .\Seraphine.7z
 
   release:
     needs: build-seraphine
@@ -61,7 +61,7 @@ jobs:
         tag: ${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
         replacesArtifacts: false
-        artifacts: Seraphine.zip
+        artifacts: Seraphine.7z
     - name: Sync to Gitee
       if: env.UPDATED == 'true'
       env:

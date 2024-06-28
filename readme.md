@@ -23,15 +23,15 @@
 
 ## 快速上手 🤗
 ### 直接使用打包好的程序
-点击[这里](https://github.com/Zzaphkiel/Seraphine/releases/latest)进入发布页面，在下方找到资源中的 `Seraphine.zip`，点击下载并解压至文件夹中，双击运行其中的 `Seraphine.exe` 即可。
+点击[这里](https://github.com/Zzaphkiel/Seraphine/releases/latest)进入发布页面，在下方找到资源中的 `Seraphine.7z`，点击下载并解压至文件夹中，双击运行其中的 `Seraphine.exe` 即可。
 
 ### 或通过本地构建
-下载项目 `zip` 压缩包解压至文件夹或通过 `git`
+下载项目源码 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
 cd Seraphine
 git clone https://github.com/Zzaphkiel/Seraphine.git
 ```
-创建并激活新的 Anaconda 环境
+创建并激活新的 conda 环境
 ```shell
 conda create -n seraphine python=3.8
 conda activate seraphine
@@ -112,7 +112,7 @@ pip install pyinstaller==5.13
 ``` shell
 .\make
 ```
-命令结束后在目标文件夹获得 `Seraphine.zip`。
+命令结束后在目标文件夹获得 `Seraphine.7z`。
 
 ## Riot 声明 📢
 Seraphine is not endorsed by Riot Games and does not reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games and all associated properties are trademarks or registered trademarks of Riot Games, Inc

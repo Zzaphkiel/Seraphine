@@ -1,10 +1,10 @@
 from qasync import asyncSlot
 import aiohttp
 import os
-import zipfile
 import shutil
 import sys
 import webbrowser
+import py7zr
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget
@@ -116,7 +116,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setVisible(True)
         self.bar.setVisible(True)
 
-        zipPath = f'{LOCAL_PATH}/Seraphine.zip'
+        zipPath = f'{LOCAL_PATH}/Seraphine.7z'
         if os.path.exists(zipPath):
             os.remove(zipPath)
 
@@ -142,7 +142,7 @@ class UpdateMessageBox(MessageBoxBase):
         self.infoLabel.setText(
             self.tr("Downloading finished, decompressing..."))
 
-        with zipfile.ZipFile(zipPath, 'r') as z:
+        with py7zr.SevenZipFile(zipPath, mode='r') as z:
             z.extractall(dirPath)
 
         os.remove(zipPath)

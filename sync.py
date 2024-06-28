@@ -37,7 +37,7 @@ TAG_NAME = args.tag
 NAME = TAG_NAME
 BODY = f"Seraphine {TAG_NAME}"
 TARGET_COMMITISH = "master"
-FILE_PATH = "Seraphine.zip"
+FILE_PATH = "Seraphine.7z"
 
 HEADERS = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
 
