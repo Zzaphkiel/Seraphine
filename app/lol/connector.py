@@ -219,7 +219,13 @@ class LolClientConnector(QObject):
 
     async def start(self, pid):
         self.pid = pid
-        self.port, self.token, self.server = getPortTokenServerByPid(pid)
+
+        try:
+            self.port, self.token, self.server = getPortTokenServerByPid(pid)
+        except:
+            signalBus.getCmdlineError.emit()
+            return
+
         self.semaphore = asyncio.Semaphore(self.maxRefCnt)
 
         await self.__initSessions()
@@ -286,7 +292,7 @@ class LolClientConnector(QObject):
             return
 
         if self.server.lower() in ('hn1', 'hn10'):
-            url = f'https://{self.server.lower()}-cloud-sgp.lol.qq.com:21019'
+            url = f'https://{self.server.lower()}-k8s-sgp.lol.qq.com:21019'
         else:
             url = f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
 

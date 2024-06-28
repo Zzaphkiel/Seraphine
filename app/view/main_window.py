@@ -213,6 +213,8 @@ class MainWindow(FluentWindow):
             self.__onChampSelectChanged)
         signalBus.lcuApiExceptionRaised.connect(
             self.__onShowLcuConnectError)
+        signalBus.getCmdlineError.connect(
+            self.__showNeedAdminMessageBox)
 
         # From career_interface
         signalBus.careerGameBarClicked.connect(self.__onCareerGameClicked)
@@ -363,11 +365,21 @@ class MainWindow(FluentWindow):
 
     def __showWaitingMessageBox(self):
         self.tasklistEnabled = False
+
         msgBox = WaitingForLolMessageBox(self.window())
 
         if not msgBox.exec():
             signalBus.terminateListeners.emit()
             sys.exit()
+
+    def __showNeedAdminMessageBox(self):
+        msgBox = MessageBox(self.tr("Get cmdline error"), self.tr(
+            "Try running Seraphine as an administrator"), self.window())
+        msgBox.cancelButton.setVisible(False)
+        msgBox.exec()
+
+        signalBus.terminateListeners.emit()
+        sys.exit()
 
     def __initSystemTray(self):
         self.trayIcon = QSystemTrayIcon(self)

@@ -187,10 +187,7 @@ def isLolGameProcessExist(path):
     return b'League of Legends.exe' in processes
 
 
-def getPortTokenServerByPid(pid):
-    '''
-    通过进程 id 获得启动命令行参数中的 port、token 以及登录服务器
-    '''
+def getPortTokenServerByPidViaPsutil(pid):
     port, token, server = None, None, None
 
     process = psutil.Process(pid)
@@ -214,6 +211,31 @@ def getPortTokenServerByPid(pid):
             break
 
     return port, token, server
+
+
+def getPortTokenServerByPidViaWmic():
+    '''
+    ### 需要管理员权限
+    '''
+    command = "wmic process WHERE name='LeagueClientUx.exe' GET commandline"
+    output = subprocess.check_output(command, shell=True).decode("gbk")
+
+    port = re.findall(r'--app-port=(.+?)"', output)[0]
+    token = re.findall(r'--remoting-auth-token=(.+?)"', output)[0]
+    server = re.findall(r'--rso_platform_id=(.+?)"', output)[0]
+
+    return port, token, server
+
+
+def getPortTokenServerByPid(pid):
+    '''
+    通过进程 id 获得启动命令行参数中的 port、token 以及登录服务器
+    '''
+
+    try:
+        return getPortTokenServerByPidViaPsutil(pid)
+    except:
+        return getPortTokenServerByPidViaWmic()
 
 
 def getFileProperties(fname):
