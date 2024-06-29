@@ -1110,8 +1110,15 @@ class SearchInterface(SeraphineInterface):
 
         self.gamesView.gameDetailView.clear()
 
-        # NOTE 如果是生涯和搜索反复横跳, 就不重新启loadgames任务了
+        # NOTE 如果是生涯和搜索反复横跳, 就不重新启 loadgames 任务了
         if puuid != self.puuid:
+            if self.gameLoadingTask:
+                self.gameLoadingTask.cancel()
+
+                while not self.gameLoadingTask.cancelled() \
+                        and not self.gameLoadingTask.done():
+                    await asyncio.sleep(.2)
+
             self.puuid = summoner['puuid']
             self.gamesView.gamesTab.clear()
 
@@ -1156,7 +1163,7 @@ class SearchInterface(SeraphineInterface):
         #  如果在绘制前Tabs的StackWidget改变, 会导致画错框甚至找不到绘制对象 AttributeError
         #  必须保证绘制时界面没有被改变; (目前暂时是将耗时操作移到画框后面)
         # FIXME -- By Hpero4
-        #  如果选中的对局不在第一页中(＞11), 将不会画上选择框
+        #  如果选中的对局不在第一页中(> 11), 将不会画上选择框
         layout = tabs.stackWidget.widget(1).layout()
         for i in range(layout.count()):
             item = layout.itemAt(i)
@@ -1182,15 +1189,15 @@ class SearchInterface(SeraphineInterface):
     async def onSearchButtonClicked(self):
         if not await self.searchAndShowFirstPage():
             return
-        self.filterComboBox.setCurrentIndex(0)  # 将筛选条件回调至"全部" -- By Hpero4
 
+        self.filterComboBox.setCurrentIndex(0)  # 将筛选条件回调至"全部" -- By Hpero4
         self.gamesView.gamesTab.clickFirstTab()
 
     async def __loadGames(self, puuid):
         begIdx = 20
         endIdx = 29
 
-        # NOTE 换了查询目标, 若之前正在查, 先等task被release掉 -- By Hpero4
+        # NOTE 换了查询目标, 若之前正在查, 先等 task 被 release 掉 -- By Hpero4
         while self.gameLoadingTask and not self.gameLoadingTask.done() and puuid != self.puuid:
             await asyncio.sleep(.2)
 

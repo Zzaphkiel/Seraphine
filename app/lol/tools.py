@@ -1617,8 +1617,6 @@ async def fixLeagueClientWindow():
     targetWindowWidth = int(1280 * clientZoom)
     targetWindowHeight = int(720 * clientZoom)
 
-    print(targetWindowWidth, targetWindowHeight)
-
     def patchDpiChangedMessage(hWnd):
         dpi = ctypes.windll.user32.GetDpiForWindow(hWnd)
         wParam = win32api.MAKELONG(dpi, dpi)
