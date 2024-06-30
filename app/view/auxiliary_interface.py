@@ -9,7 +9,7 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        qconfig, IndicatorPosition, InfoBar, InfoBarPosition,
                                        SpinBox, ExpandGroupSettingCard, TransparentToolButton,
                                        FluentIcon, Flyout, FlyoutAnimationType, TeachingTip,
-                                       MessageBox, CheckBox)
+                                       MessageBox, CheckBox, ToolTipFilter, ToolTipPosition)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
 from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
@@ -1208,6 +1208,8 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.defaultCfgWidget = QWidget(self.view)
         self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
         self.defaultHintLabel = QLabel(self.tr("Default Configurations"))
+        self.helpLayout = QHBoxLayout()
+        self.helpButotn = TransparentToolButton(Icon.QUESTION_CIRCLE)
 
         self.defaultLabel = QLabel(self.tr("Default champions: "))
         self.defaultChampions = ChampionsCard()
@@ -1251,6 +1253,14 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.defaultHintLabel.setStyleSheet("font: bold")
         self.rankLabel.setStyleSheet("font: bold")
 
+        self.helpButotn.setFixedSize(QSize(26, 26))
+        self.helpButotn.setIconSize(QSize(16, 16))
+
+        self.helpButotn.setToolTip(self.tr(
+            "Default settings must be set.\n\nIf champions set by lane are not available, default settings will be used."))
+        self.helpButotn.installEventFilter(ToolTipFilter(
+            self.helpButotn, 0, ToolTipPosition.RIGHT))
+
         # 逻辑是，必须要设置默认，才能设置具体分路和启动功能
         selected = qconfig.get(self.defaultChampionsConfigItem) != []
         checked = qconfig.get(self.enableConfigItem)
@@ -1286,8 +1296,13 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
         self.defaultCfgLayout.setContentsMargins(48, 18, 44, 18)
         self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
-        self.defaultCfgLayout.addWidget(
-            self.defaultHintLabel, 0, 0, Qt.AlignLeft)
+        self.helpLayout.setContentsMargins(0, 0, 0, 0)
+        self.helpLayout.setSpacing(10)
+        self.helpLayout.addWidget(self.defaultHintLabel)
+        self.helpLayout.addWidget(self.helpButotn)
+
+        self.defaultCfgLayout.addLayout(
+            self.helpLayout, 0, 0, Qt.AlignLeft)
 
         self.defaultCfgLayout.addWidget(
             self.defaultLabel, 1, 0, Qt.AlignLeft)
@@ -1457,6 +1472,8 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.defaultCfgWidget = QWidget(self.view)
         self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
         self.defaultHintLabel = QLabel(self.tr("Default Configurations"))
+        self.helpLayout = QHBoxLayout()
+        self.helpButotn = TransparentToolButton(Icon.QUESTION_CIRCLE)
 
         self.defaultLabel = QLabel(self.tr("Default champions: "))
         self.defaultChampions = ChampionsCard()
@@ -1508,6 +1525,14 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         delayTime = qconfig.get(self.delayTimeConfigItem)
         friendlyEnabled = qconfig.get(self.friendlyConfigItem)
 
+        self.helpButotn.setFixedSize(QSize(26, 26))
+        self.helpButotn.setIconSize(QSize(16, 16))
+
+        self.helpButotn.setToolTip(self.tr(
+            "Default settings must be set.\n\nIf champions set by lane are not available, default settings will be used."))
+        self.helpButotn.installEventFilter(ToolTipFilter(
+            self.helpButotn, 0, ToolTipPosition.RIGHT))
+
         for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
             button: PushButton = getattr(self, f"{ty}SelectButton")
             button.setMinimumWidth(100)
@@ -1545,8 +1570,13 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
         self.defaultCfgLayout.setContentsMargins(48, 18, 44, 18)
         self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
-        self.defaultCfgLayout.addWidget(
-            self.defaultHintLabel, 0, 0, Qt.AlignLeft)
+        self.helpLayout.setContentsMargins(0, 0, 0, 0)
+        self.helpLayout.setSpacing(10)
+        self.helpLayout.addWidget(self.defaultHintLabel)
+        self.helpLayout.addWidget(self.helpButotn)
+
+        self.defaultCfgLayout.addLayout(
+            self.helpLayout, 0, 0, Qt.AlignLeft)
 
         self.defaultCfgLayout.addWidget(
             self.defaultLabel, 1, 0, Qt.AlignLeft)
