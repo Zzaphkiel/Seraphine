@@ -42,7 +42,7 @@ from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
                            autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
                            SERVERS_SUBSET)
-from app.lol.aram import AramHome
+from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
 
 import threading
@@ -473,7 +473,7 @@ class MainWindow(FluentWindow):
         self.auxiliaryFuncInterface.lockConfigCard.loadNowMode()
 
         # 加载大乱斗buff -- By Hpero4
-        aramInitT = asyncio.create_task(AramHome.checkAndUpdate())
+        aramInitT = asyncio.create_task(AramBuff.checkAndUpdate())
         championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
 
         # ---- 240413 ---- By Hpero4
@@ -502,10 +502,12 @@ class MainWindow(FluentWindow):
         # 这可能导致性能或是其他不可预期的问题, 这是只是一个例子;
         # ---- 240413 ---- By Hpero4
 
-        t = self.__onGameStatusChanged(status)
         self.__unlockInterface()
-        await asyncio.gather(aramInitT, championsInit)
-        await t
+        await asyncio.gather(championsInit, aramInitT)
+        await self.__onGameStatusChanged(status)
+
+        # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
+        # self.careerInterface.icon.aramInfo = AramBuff.getInfoByChampionId(75)
 
     async def __startConnector(self, pid):
         try:

@@ -6,7 +6,7 @@ from PyQt5.QtGui import QHideEvent, QPainter, QPainterPath, QPen, QFont, QPixmap
 from PyQt5.QtWidgets import (QWidget, QApplication, QMainWindow, QHBoxLayout,
                              QLabel, QVBoxLayout, QGridLayout, QFrame, QGraphicsDropShadowEffect)
 
-from app.lol.aram import AramHome
+from app.lol.aram import AramBuff
 from app.common.qfluentwidgets import (ProgressRing, ToolTipFilter, ToolTipPosition, isDarkTheme,
                                        themeColor, FlyoutViewBase, TextWrap, FlyoutAnimationType)
 from app.components.color_label import ColorLabel
@@ -85,9 +85,6 @@ class RoundLevelAvatar(QWidget):
         self.mFlyout = None
         self.aramInfo = aramInfo
 
-        # Note 如果你希望测试大乱斗的数据弹框, 参考这个 -- By Hpero4
-        # self.aramInfo = AramHome.getInfoByChampionId("75")
-
     def paintEvent(self, event):
         if self.paintXpSinceLastLevel != self.xpSinceLastLevel or self.paintXpUntilNextLevel != self.xpUntilNextLevel or self.callUpdate:
             self.progressRing.setVal(self.xpSinceLastLevel * 100 //
@@ -139,7 +136,7 @@ class RoundLevelAvatar(QWidget):
     def updateAramInfo(self, info):
         self.aramInfo = info
 
-        if not self.mFlyout:
+        if not self.mFlyout or not info:
             return
 
         self.mFlyout.updateInfo(info)

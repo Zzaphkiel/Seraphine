@@ -3,7 +3,7 @@ import os
 import re
 from functools import lru_cache, wraps
 
-import requests
+import aiohttp
 
 from app.common.config import cfg, LOCAL_PATH
 from app.common.logger import logger
@@ -29,7 +29,15 @@ class ChampionAlias:
         logger.info("Update champions alias", self.TAG)
 
         try:
-            res = requests.get(self.URL).json()
+            async with aiohttp.ClientSession() as session:
+                res = await session.get(self.URL, proxy=None, ssl=False)
+
+                # 不知道为什么这样子不行：
+                # res = await res.json()
+
+                s = str(await res.read(), encoding='utf-8')
+                res = json.loads(s)
+
             champions = {}
 
             for champion in res['hero']:
@@ -61,9 +69,12 @@ class ChampionAlias:
             return True
 
         with open(self.CHAMPION_CFG_PATH, 'r') as f:
-            ChampionAlias.data = json.loads(f.read())
+            try:
+                ChampionAlias.data = json.loads(f.read())
+            except:
+                return True
 
-            return ChampionAlias.data.get('version') != lolVersion
+        return ChampionAlias.getDataVersion() != lolVersion
 
     @classmethod
     def getChampionsAlias(cls) -> dict:
@@ -72,6 +83,10 @@ class ChampionAlias:
     @classmethod
     def isAvailable(cls) -> bool:
         return ChampionAlias.data != None
+
+    @classmethod
+    def getDataVersion(cls) -> str:
+        return ChampionAlias.data.get("version")
 
     @classmethod
     def getChampionIdsByAliasFuzzily(cls, alias):

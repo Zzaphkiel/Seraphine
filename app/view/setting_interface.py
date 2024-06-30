@@ -77,13 +77,6 @@ class SettingInterface(SeraphineInterface):
         self.lolFolderCard.button.setStyleSheet(
             "QPushButton {padding-left: 0; padding-right: 0;}")
 
-        self.gameStartMinimizeCard = SwitchSettingCard(
-            Icon.PAGE, self.tr("Minimize windows during game activities"),
-            self.tr(
-                "Reduce CPU usage for rendering UI during gaming"),
-            cfg.enableGameStartMinimize
-        )
-
         self.logLevelCard = ComboBoxSettingCard(
             cfg.logLevel,
             Icon.LOG,
@@ -303,7 +296,6 @@ class SettingInterface(SeraphineInterface):
                         parent=self)
 
     def __onDeleteButtonClicked(self):
-
         folders = [
             'champion icons', 'item icons', 'profile icons', 'rune icons',
             'summoner spell icons'
