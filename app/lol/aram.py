@@ -56,6 +56,11 @@ class AramBuff:
             except:
                 return True
 
+            # 兼容老版本的 json
+            if AramBuff.data.get('version') == None:
+                print('hi')
+                return True
+
             return AramBuff.getDataVersion() != lolVersion
 
     @classmethod
