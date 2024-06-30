@@ -226,17 +226,25 @@ class SummonersView(QFrame):
             self.enemyButton.setChecked(True)
 
     def __setStyleSheet(self):
-        light = '''
-            TransparentTogglePushButton,
-            TransparentTogglePushButton:hover {
-            border: 1px solid rgba(0, 0, 0, 0.073);
-        }'''
+        light = "rgba(0, 0, 0, 0.073)"
+        dark = "rgba(255, 255, 255, 0.053)"
 
-        dark = '''
+        qss = '''
             TransparentTogglePushButton,
-            TransparentTogglePushButton:hover {
-            border: 1px solid rgba(255, 255, 255, 0.053);
-        }'''
+            TransparentTogglePushButton:hover,
+            TransparentTogglePushButton:disabled {{
+                border: 1px solid {};
+            }}
+
+            TransparentTogglePushButton:checked,
+            TransparentTogglePushButton:checked:hover {{
+                border: none;
+            }}
+        
+        '''
+
+        light = qss.format(light)
+        dark = qss.format(dark)
 
         setCustomStyleSheet(self.allyButton, light, dark)
         setCustomStyleSheet(self.enemyButton, light, dark)
