@@ -77,18 +77,20 @@ class SettingInterface(SeraphineInterface):
         self.lolFolderCard.button.setStyleSheet(
             "QPushButton {padding-left: 0; padding-right: 0;}")
 
+        self.logGroup = SettingCardGroup(self.tr("Log"), self.scrollWidget)
+
         self.logLevelCard = ComboBoxSettingCard(
             cfg.logLevel,
             Icon.LOG,
             self.tr('Log Level'),
             self.tr('The level of logging for Seraphine (take effect after restart)'),
             texts=["Debug", "Info", "Warning", "Error"],
-            parent=self.generalGroup)
+            parent=self.logGroup)
         self.viewLogCard = PushSettingCard(
             self.tr("Open"), Icon.DOCUMENT, self.tr("Log file"),
             self.
             tr("Open log directory"),
-            self.generalGroup)
+            self.logGroup)
         self.viewLogCard.button.setFixedWidth(100)
 
         # 这玩意左右 padding 大的离谱，手动给它改了
@@ -235,8 +237,8 @@ class SettingInterface(SeraphineInterface):
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
         # self.generalGroup.addSettingCard(self.gameStartMinimizeCard)  # 该功能不再支持, 隐藏它 -- By Hpero4
-        self.generalGroup.addSettingCard(self.logLevelCard)
-        self.generalGroup.addSettingCard(self.viewLogCard)
+        self.logGroup.addSettingCard(self.logLevelCard)
+        self.logGroup.addSettingCard(self.viewLogCard)
 
         self.personalizationGroup.addSettingCard(self.micaCard)
         self.personalizationGroup.addSettingCard(self.themeCard)
@@ -256,6 +258,7 @@ class SettingInterface(SeraphineInterface):
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
         self.expandLayout.addWidget(self.functionGroup)
         self.expandLayout.addWidget(self.generalGroup)
+        self.expandLayout.addWidget(self.logGroup)
         self.expandLayout.addWidget(self.personalizationGroup)
         self.expandLayout.addWidget(self.updateGroup)
         self.expandLayout.addWidget(self.aboutGroup)

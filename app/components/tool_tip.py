@@ -125,7 +125,7 @@ class HelpButton(TransparentToolButton):
         super().__init__(Icon.QUESTION_CIRCLE, parent=parent)
 
         self.setFixedSize(QSize(26, 26))
-        self.setFixedSize(QSize(16, 16))
+        self.setIconSize(QSize(16, 16))
 
         self.view = view
         self.mToolTip = None
