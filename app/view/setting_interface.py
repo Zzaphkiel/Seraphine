@@ -306,8 +306,16 @@ class SettingInterface(SeraphineInterface):
 
         for folder in folders:
             path = f'app/resource/game/{folder}'
+
+            if not os.path.exists(path):
+                continue
+
             for file in os.listdir(path):
                 filePath = f"{path}/{file}"
+
+                if not os.path.exists(filePath):
+                    continue
+
                 os.remove(filePath)
 
     def __showFlyout(self):
