@@ -145,6 +145,12 @@ class Config(QConfig):
     enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
     proxyAddr = ConfigItem("General", "HttpProxy", "")
 
+    opggRegion = ConfigItem("Function", "OpggRegion", "kr",
+                            OptionsValidator(["kr", "global"]), restart=True)
+    opggTier = ConfigItem("Function", "OpggTier", "emerald_plus", OptionsValidator([
+        "ibsg", "gold_plus", "platinum_plus", "emerald_plus", "diamond_plus", "master", "master_plus", "grandmaster", "challenger"
+    ]))
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
