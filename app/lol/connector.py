@@ -333,7 +333,7 @@ class LolClientConnector(QObject):
     def __initPlatformInfo(self):
         if self.server:
             mainlandPlatforms = {'tj100', 'hn1', 'cq100',
-                                 'gz100', 'nj100', 'bgp2', 'hn10', 'tj101'}
+                                 'gz100', 'nj100', 'hn10', 'tj101'}
 
             self.inMainLand = self.server.lower() in mainlandPlatforms
 
