@@ -666,7 +666,7 @@ If champions set by lane are not available, default settings will be used.</sour
     <message>
         <location filename="../../view/career_interface.py" line="112"/>
         <source>Copy summoner name to ClipBoard</source>
-        <translation>复制召唤师名</translation>
+        <translation>复制召唤师名及编号</translation>
     </message>
     <message>
         <location filename="../../view/career_interface.py" line="81"/>
@@ -865,7 +865,7 @@ If champions set by lane are not available, default settings will be used.</sour
     <message>
         <location filename="../../view/auxiliary_interface.py" line="1149"/>
         <source>Please input summoner&apos;s name</source>
-        <translation>请输入召唤师名</translation>
+        <translation>请输入召唤师名及编号</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="1176"/>
@@ -1935,7 +1935,7 @@ If champions set by lane are not available, default settings will be used.</sour
     <message>
         <location filename="../../view/search_interface.py" line="1030"/>
         <source>Please input summoner name</source>
-        <translation>请输入同大区召唤师名</translation>
+        <translation>请输入同大区召唤师名及编号</translation>
     </message>
     <message>
         <location filename="../../view/search_interface.py" line="1037"/>
@@ -2361,7 +2361,7 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="810"/>
         <source>Summoners&apos;s name you want to spectate:</source>
-        <translation>你想观战的同大区召唤师名：</translation>
+        <translation>你想观战的同大区召唤师名及编号：</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="841"/>

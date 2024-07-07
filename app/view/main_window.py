@@ -44,7 +44,7 @@ from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            SERVERS_SUBSET)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
-from app.lol.opgg import opgg
+# from app.lol.opgg import opgg
 
 import threading
 
@@ -710,7 +710,7 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-            await opgg.close()
+            # await opgg.close()
 
             return super().closeEvent(a0)
         else:

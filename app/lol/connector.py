@@ -291,7 +291,7 @@ class LolClientConnector(QObject):
         if not self.server:
             return
 
-        if self.server.lower() in ('hn1', 'hn10'):
+        if self.server.lower() in ('hn1', 'hn10', 'bgp2'):
             url = f'https://{self.server.lower()}-k8s-sgp.lol.qq.com:21019'
         else:
             url = f'https://{self.server.lower()}-sgp.lol.qq.com:21019'
@@ -333,7 +333,7 @@ class LolClientConnector(QObject):
     def __initPlatformInfo(self):
         if self.server:
             mainlandPlatforms = {'tj100', 'hn1', 'cq100',
-                                 'gz100', 'nj100', 'hn10', 'tj101'}
+                                 'gz100', 'nj100', 'hn10', 'tj101', 'bgp2'}
 
             self.inMainLand = self.server.lower() in mainlandPlatforms
 
