@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 
 from app.common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                                        FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                                       ToolTipFilter, FluentIcon, ToolTipPosition)
+                                       ToolTipFilter, FluentIcon, ToolTipPosition, FluentWindowBase)
 
 from app.view.start_interface import StartInterface
 from app.view.setting_interface import SettingInterface
@@ -24,6 +24,7 @@ from app.view.career_interface import CareerInterface
 from app.view.search_interface import SearchInterface
 from app.view.game_info_interface import GameInfoInterface
 from app.view.auxiliary_interface import AuxiliaryInterface
+from app.view.opgg_interface import OpggInterface
 from app.common.util import (github, getLolClientPid, getTasklistPath,
                              getLolClientPidSlowly, getLoLPathByRegistry)
 from app.components.avatar_widget import NavigationAvatarWidget
@@ -44,7 +45,7 @@ from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            SERVERS_SUBSET)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
-# from app.lol.opgg import opgg
+from app.lol.opgg import opgg
 
 import threading
 
@@ -105,6 +106,8 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
 
+        self.opggInterface = OpggInterface()
+
         logger.critical("Seraphine initialized", TAG)
 
     def __initConfig(self):
@@ -156,6 +159,16 @@ class MainWindow(FluentWindow):
         pos = NavigationItemPosition.BOTTOM
 
         self.navigationInterface.addItem(
+            routeKey='Opgg',
+            icon=QIcon("app/resource/images/opgg.svg"),
+            text="OP.GG",
+            onClick=lambda: self.opggInterface.show(),
+            selectable=False,
+            position=pos,
+            tooltip="OP.GG"
+        )
+
+        self.navigationInterface.addItem(
             routeKey='Fix',
             icon=Icon.ARROWCIRCLE,
             text=self.tr("Back to Lobby"),
@@ -177,7 +190,7 @@ class MainWindow(FluentWindow):
         )
 
         self.navigationInterface.insertSeparator(
-            2, NavigationItemPosition.BOTTOM)
+            3, NavigationItemPosition.BOTTOM)
 
         self.avatarWidget = NavigationAvatarWidget(
             avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
@@ -710,7 +723,9 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-            # await opgg.close()
+            await opgg.close()
+
+            self.opggInterface.close()
 
             return super().closeEvent(a0)
         else:

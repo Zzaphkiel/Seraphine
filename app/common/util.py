@@ -2,7 +2,6 @@ import json
 import os
 import re
 import winreg
-from functools import lru_cache, wraps
 from pathlib import Path
 
 import requests
@@ -11,7 +10,7 @@ import subprocess
 import psutil
 import win32api
 
-from app.common.config import cfg, VERSION, LOCAL_PATH
+from app.common.config import cfg, VERSION
 from app.common.logger import logger
 
 

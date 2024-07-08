@@ -5,6 +5,7 @@ SOURCES += app/view/main_window.py \
            app/view/search_interface.py \
            app/view/auxiliary_interface.py \
            app/view/game_info_interface.py \
+           app/view/opgg_interface.py \
            app/components/game_infobar_widget.py \
            app/components/summoner_name_button.py \
            app/components/mode_filter_widget.py \
