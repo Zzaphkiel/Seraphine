@@ -82,7 +82,7 @@ class AramBuff:
                 res = await session.get(url, params=params, proxy=None, ssl=False)
                 data = await res.json()
         except:
-            logger.warning(f"Getting Aram buff failed, data: {data}", self.TAG)
+            logger.warning(f"Getting Aram buff failed", self.TAG)
             return
 
         if data.get('code') != 1:
