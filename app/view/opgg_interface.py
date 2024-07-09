@@ -13,7 +13,8 @@ from app.lol.opgg import opgg
 from app.common.config import qconfig
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
-                                       ToolTipPosition, IndeterminateProgressRing)
+                                       ToolTipPosition, IndeterminateProgressRing, setTheme,
+                                       Theme)
 from app.components.toggle_button import ToggleButton
 from app.components.tier_list_widget import TierListWidget
 from app.common.util import getTasklistPath, getLolClientPid
@@ -80,6 +81,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
+        # setTheme(Theme.DARK)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -88,7 +90,7 @@ class OpggInterface(OpggInterfaceBase):
         self.regionComboBox = ComboBox()
         self.tierComboBox = ComboBox()
         self.positionComboBox = ComboBox()
-        self.versionLable = BodyLabel()
+        self.versionLable = BodyLabel(self.tr("Version: ") + "14.13")
 
         self.stackedWidget = QStackedWidget()
         self.tierInterface = TierInterface()
@@ -101,7 +103,7 @@ class OpggInterface(OpggInterfaceBase):
         self.test()
 
     def __initWindow(self):
-        self.setMinimumSize(600, 800)
+        self.setMinimumSize(640, 816)
         self.setWindowIcon(QIcon("app/resource/images/opgg.svg"))
         self.setWindowTitle("OP.GG")
 
@@ -170,6 +172,7 @@ class OpggInterface(OpggInterfaceBase):
         self.filterLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding,  QSizePolicy.Fixed))
         self.filterLayout.addWidget(self.versionLable)
+        self.filterLayout.addSpacing(4)
 
         self.stackedWidget.addWidget(self.tierInterface)
         self.stackedWidget.addWidget(self.buildInterface)

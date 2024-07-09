@@ -1,7 +1,7 @@
 TierListWidget {
     border: 1px solid rgba(0, 0, 0, 0.095);
     border-radius: 6px;
-    background-color: rgba(245, 245, 245, 0.5);
+    background-color: rgba(245, 245, 245, 0.334);
 }
 
 TierListWidget {
@@ -15,12 +15,15 @@ ListTitleBar {
     border-top: none;
     border-left: none;
     border-right: none;
-    background-color: rgba(245, 245, 245, 0.8);
+    background-color: rgba(245, 245, 245, 0.6);
 }
 
 #scrollArea {
     border: none;
-    background-color: transparent;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    background-color: rgba(245, 245, 245, 0.55);
+    ;
 }
 
 #scrollWidget {
@@ -28,5 +31,6 @@ ListTitleBar {
 }
 
 ListItem {
-    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
 }

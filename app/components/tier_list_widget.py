@@ -13,22 +13,30 @@ from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundA
                                        FluentIconBase, FluentStyleSheet, NavigationItemPosition,
                                        qrouter, StackedWidget, FluentTitleBar,  ComboBox,
                                        TransparentToolButton, BodyLabel, ToolTipFilter,
-                                       ToolTipPosition, TransparentPushButton, SmoothScrollArea)
+                                       ToolTipPosition, TransparentPushButton, SmoothScrollArea,
+                                       setCustomStyleSheet)
 from app.components.toggle_button import ToggleButton
 from app.components.champion_icon_widget import RoundIcon
+from app.components.animation_frame import ColorAnimationFrame
 from app.common.style_sheet import StyleSheet
 
 
 class TierListWidget(QFrame):
     def __init__(self, parent=None):
+        '''
+        英雄梯队列表组件
+
+        观前警告：
+            为了实现该死的上下对齐，该类实现中含有大量魔法数字
+            请自备降压药
+        '''
+
         super().__init__(parent)
 
         self.vBoxLayout = QVBoxLayout(self)
 
-        # TODO: 和下方的内容对齐
         self.titleBar = ListTitleBar()
 
-        # TODO: 组件支持点击以及背景动画
         self.scrollArea = SmoothScrollArea()
         self.scrollWidget = QFrame()
         self.scrollLayout = QVBoxLayout()
@@ -45,10 +53,11 @@ class TierListWidget(QFrame):
     def __initLayout(self):
         self.scrollLayout.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.setAlignment(Qt.AlignTop)
+        self.scrollLayout.setSpacing(3)
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setViewportMargins(0, 0, 14, 0)
+        self.scrollArea.setViewportMargins(6, 6, 17, 6)
 
         self.vBoxLayout.setSpacing(0)
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -68,6 +77,8 @@ class ListTitleBar(QFrame):
 
         self.hBoxLayout = QHBoxLayout(self)
 
+        # self.setStyleSheet("border: 1px solid black")
+
         self.counterLabel = BodyLabel("#")
         self.championLabel = BodyLabel(self.tr("Champion"))
         self.tierLabel = TransparentPushButton(self.tr("Tier"))
@@ -80,25 +91,40 @@ class ListTitleBar(QFrame):
         self.__initLayout()
 
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(0, 6, 14, 6)
+        self.hBoxLayout.setContentsMargins(16, 6, 27, 6)
 
         self.hBoxLayout.addWidget(self.counterLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacing(6)
         self.hBoxLayout.addWidget(self.championLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacerItem(QSpacerItem(
+            0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.tierLabel, alignment=Qt.AlignCenter)
+        # self.hBoxLayout.addSpacing(1)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacing(8)
         self.hBoxLayout.addWidget(self.countersLabel, alignment=Qt.AlignCenter)
 
     def __initWidget(self):
-        pass
+        self.counterLabel.setFixedWidth(30)
+        self.counterLabel.setAlignment(Qt.AlignCenter)
+        self.countersLabel.setAlignment(Qt.AlignCenter)
+
+        width = 80
+
+        self.tierLabel.setFixedWidth(50)
+        self.winRateLabel.setFixedWidth(width)
+        self.pickRateLabel.setFixedWidth(width)
+        self.banRateLabel.setFixedWidth(width)
+        self.countersLabel.setFixedWidth(80)
 
 
-class ListItem(QFrame):
+class ListItem(ColorAnimationFrame):
     def __init__(self, info, parent: QWidget = None):
-        super().__init__(parent)
+        super().__init__(type='default', parent=parent)
 
-        # self.setStyleSheet("border: 1px solid black;")
+        # self.setStyleSheet("border: 1px solid black")
 
         self.championId = info['championId']
         tierIcon = f"app/resource/images/icon-tier-{info['tier']}.svg"
@@ -130,10 +156,14 @@ class ListItem(QFrame):
         self.winRateLabel.setAlignment(Qt.AlignCenter)
         self.pickRateLabel.setAlignment(Qt.AlignCenter)
         self.banRateLabel.setAlignment(Qt.AlignCenter)
+        self.tierLabel.setAlignment(Qt.AlignCenter)
 
-        self.winRateLabel.setFixedWidth(60)
-        self.pickRateLabel.setFixedWidth(60)
-        self.banRateLabel.setFixedWidth(60)
+        width = 80
+
+        self.tierLabel.setFixedWidth(50)
+        self.winRateLabel.setFixedWidth(width)
+        self.pickRateLabel.setFixedWidth(width)
+        self.banRateLabel.setFixedWidth(width)
         self.countersLabel.setFixedWidth(80)
 
     def __initLayout(self):
@@ -148,7 +178,6 @@ class ListItem(QFrame):
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.tierLabel, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addSpacing(12)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)
