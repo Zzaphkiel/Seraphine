@@ -1,0 +1,32 @@
+TierListWidget {
+    border: 1px solid rgb(70, 70, 70);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+TierListWidget {
+    background-color: transparent;
+}
+
+ListTitleBar {
+    border: 1px solid rgb(70, 70, 70);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background-color: rgba(255, 255, 255, 0.251);
+}
+
+#scrollArea {
+    border: none;
+    background-color: transparent;
+}
+
+#scrollWidget {
+    background-color: transparent;
+}
+
+ListItem {
+    background-color: transparent;
+}

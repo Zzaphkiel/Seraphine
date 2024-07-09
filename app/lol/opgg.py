@@ -2,14 +2,16 @@ import aiohttp
 import asyncio
 from async_lru import alru_cache
 
+from PyQt5.QtCore import QObject
 from app.common.config import cfg
+from app.lol.connector import connector
 
 TAG = "opgg"
 
 
-class Opgg:
+class Opgg(QObject):
     def __init__(self):
-        self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
+        self.session = None
 
         self.defaultModes = ['ranked', 'aram', 'arena']
         self.tierList = {mode: None for mode in self.defaultModes}
@@ -17,6 +19,9 @@ class Opgg:
 
         self.defaultTier = cfg.get(cfg.opggTier)
         self.defaultRegion = cfg.get(cfg.opggRegion)
+
+    async def start(self):
+        self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
 
     @alru_cache(maxsize=20)
     async def __fetchTierList(self, region, mode, tier, version):
@@ -42,9 +47,9 @@ class Opgg:
         raw = await self.__fetchTierList(region, mode, tier, version)
 
         if mode == 'ranked':
-            res = self.__parseRankedTierList(raw)
+            res = await self.__parseRankedTierList(raw)
         else:
-            res = self.__parseOtherTierList(raw)
+            res = await self.__parseOtherTierList(raw)
 
         return res
 
@@ -63,31 +68,44 @@ class Opgg:
             res = await self.getTierList(region, mode, tier, self.version)
             self.tierList[mode] = res
 
-    def __parseRankedTierList(self, data):
+    async def __parseRankedTierList(self, data):
         '''
         召唤师峡谷模式下的原始梯队数据，是所有英雄所有位置一起返回的
 
         在此函数内按照分路位置将它们分开
         '''
         data = data['data']
-        res = {p: [] for p in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']}
+        res = {p: []
+               for p in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']}
 
         for item in data:
+            championId = item['id']
+            name = connector.manager.getChampionNameById(championId)
+            icon = await connector.getChampionIcon(championId)
+
             for p in item['positions']:
                 position = p['name']
 
                 stats = p['stats']
                 tier = stats['tier_data']
 
+                counters = [{
+                    'championId': c['champion_id'],
+                    'icon': await connector.getChampionIcon(c['champion_id'])
+                } for c in p['counters']]
+
                 res[position].append({
-                    'championId': item['id'],
+                    'championId': championId,
+                    'name': name,
+                    'icon': icon,
                     'winRate': stats.get('win_rate'),
                     'pickRate': stats.get('pick_rate'),
                     'banRate': stats.get('ban_rate'),
                     'kda': stats.get('kda'),
                     'tier': tier.get('tier'),
                     'rank': tier.get('rank'),
-                    'counters': [c['champion_id'] for c in p['counters']]
+                    'position': position,
+                    'counters': counters,
                 })
 
         # 排名 / 梯队是乱的，所以排个序
@@ -96,7 +114,7 @@ class Opgg:
 
         return res
 
-    def __parseOtherTierList(self, data):
+    async def __parseOtherTierList(self, data):
         '''
         处理其他模式下的原始梯队数据
         '''
@@ -107,14 +125,22 @@ class Opgg:
         for item in data:
             stats = item['average_stats']
 
+            championId = item['id']
+            name = connector.manager.getChampionNameById(championId)
+            icon = await connector.getChampionIcon(championId)
+
             res.append({
-                'championId': item['id'],
+                'championId': championId,
+                'name': name,
+                'icon': icon,
                 'winRate': stats.get('win_rate'),
                 'pickRate': stats.get('pick_rate'),
                 'banRate': stats.get('ban_rate'),
                 'kda': stats.get('kda'),
                 'tier': stats.get('tier'),
                 'rank': stats.get('rank'),
+                "position": None,
+                'counter': [],
             })
 
         return sorted(res, key=lambda x: x['rank'])

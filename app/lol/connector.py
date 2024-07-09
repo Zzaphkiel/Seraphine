@@ -15,7 +15,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from app.common.config import cfg, Language
 from app.common.logger import logger
 from app.common.signals import signalBus
-from app.common.util import getPortTokenServerByPid
+from app.common.util import getPortTokenServerByPid, getTasklistPath, getLolClientPid
 from app.lol.exceptions import *
 
 requests.packages.urllib3.disable_warnings()
@@ -216,6 +216,15 @@ class LolClientConnector(QObject):
 
         self.dqLock = threading.Lock()
         self.callStack = deque(maxlen=10)
+
+    async def autoStart(self):
+        '''
+        只是为了 debug 的时候省事罢了
+        '''
+        path = getTasklistPath()
+        pid = getLolClientPid(path)
+
+        await self.start(pid)
 
     async def start(self, pid):
         self.pid = pid

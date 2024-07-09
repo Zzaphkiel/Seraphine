@@ -16,6 +16,7 @@ class StyleSheet(StyleSheetBase, Enum):
     CAREER_INTERFACE = 'career_interface'
     START_INTERFACE = 'start_interface'
     SEARCH_INTERFACE = 'search_interface'
+    TIER_LIST_WIDGET = 'tier_list_widget'
     GAME_INFO_INTERFACE = 'game_info_interface'
     AUXILIARY_INTERFACE = 'auxiliary_interface'
     ARAM_FLYOUT = 'aram_flyout'

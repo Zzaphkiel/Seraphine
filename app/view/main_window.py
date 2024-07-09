@@ -106,7 +106,7 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
 
-        self.opggInterface = OpggInterface()
+        # self.opggInterface = OpggInterface()
 
         logger.critical("Seraphine initialized", TAG)
 
@@ -158,15 +158,15 @@ class MainWindow(FluentWindow):
 
         pos = NavigationItemPosition.BOTTOM
 
-        self.navigationInterface.addItem(
-            routeKey='Opgg',
-            icon=QIcon("app/resource/images/opgg.svg"),
-            text="OP.GG",
-            onClick=lambda: self.opggInterface.show(),
-            selectable=False,
-            position=pos,
-            tooltip="OP.GG"
-        )
+        # self.navigationInterface.addItem(
+        #     routeKey='Opgg',
+        #     icon=QIcon("app/resource/images/opgg.svg"),
+        #     text="OP.GG",
+        #     onClick=lambda: self.opggInterface.show(),
+        #     selectable=False,
+        #     position=pos,
+        #     tooltip="OP.GG"
+        # )
 
         self.navigationInterface.addItem(
             routeKey='Fix',
@@ -469,6 +469,7 @@ class MainWindow(FluentWindow):
         if not res:
             return
 
+        await opgg.start()
         self.checkAndSwitchTo(self.careerInterface)
         self.isClientProcessRunning = True
 
@@ -555,6 +556,7 @@ class MainWindow(FluentWindow):
             self.searchInterface.gameLoadingTask = None
 
         await connector.close()
+        await opgg.close()
 
         self.isClientProcessRunning = False
         self.currentSummoner = None
@@ -723,9 +725,8 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-            await opgg.close()
 
-            self.opggInterface.close()
+            # self.opggInterface.close()
 
             return super().closeEvent(a0)
         else:
