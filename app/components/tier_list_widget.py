@@ -2,7 +2,7 @@ import sys
 from typing import Union
 
 from PyQt5.QtGui import QColor, QPainter, QIcon, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedLayout, QWidget, QApplication, QStackedWidget,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy, QLabel)
 
@@ -14,7 +14,7 @@ from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundA
                                        qrouter, StackedWidget, FluentTitleBar,  ComboBox,
                                        TransparentToolButton, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, TransparentPushButton, SmoothScrollArea,
-                                       setCustomStyleSheet)
+                                       setCustomStyleSheet, FlowLayout)
 from app.components.toggle_button import ToggleButton
 from app.components.champion_icon_widget import RoundIcon
 from app.components.animation_frame import ColorAnimationFrame
@@ -41,12 +41,16 @@ class TierListWidget(QFrame):
         self.scrollWidget = QFrame()
         self.scrollLayout = QVBoxLayout()
 
+        self.data: list = None
+
         self.__initWidget()
         self.__initLayout()
 
     def __initWidget(self):
         self.scrollArea.setObjectName("scrollArea")
         self.scrollWidget.setObjectName("scrollWidget")
+
+        self.titleBar.sortRequested.connect(self.__onSortRequested)
 
         StyleSheet.TIER_LIST_WIDGET.apply(self)
 
@@ -65,13 +69,38 @@ class TierListWidget(QFrame):
         self.vBoxLayout.addWidget(self.titleBar)
         self.vBoxLayout.addWidget(self.scrollArea)
 
-    def updateList(self, data):
-        for x in data:
-            item = ListItem(x)
+    def updateList(self, data: list):
+        self.data = data
+        self.__update(data)
+
+    def clear(self):
+        for i in reversed(range(self.scrollLayout.count())):
+            item = self.scrollLayout.itemAt(i)
+            self.scrollLayout.removeItem(item)
+
+            if item.widget():
+                item.widget().deleteLater()
+
+    def __update(self, data: list):
+        self.clear()
+
+        for i, x in enumerate(data, start=1):
+            item = ListItem(i, x)
             self.scrollLayout.addWidget(item)
+
+    def __onSortRequested(self, key: str):
+        if key == 'rank':
+            def fun(x): return x[key]
+        else:
+            def fun(x): return -x[key]
+
+        data = sorted(self.data, key=fun)
+        self.__update(data)
 
 
 class ListTitleBar(QFrame):
+    sortRequested = pyqtSignal(str)
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
@@ -119,9 +148,18 @@ class ListTitleBar(QFrame):
         self.banRateLabel.setFixedWidth(width)
         self.countersLabel.setFixedWidth(80)
 
+        self.tierLabel.clicked.connect(
+            lambda: self.sortRequested.emit("rank"))
+        self.winRateLabel.clicked.connect(
+            lambda: self.sortRequested.emit("winRate"))
+        self.pickRateLabel.clicked.connect(
+            lambda: self.sortRequested.emit("pickRate"))
+        self.banRateLabel.clicked.connect(
+            lambda: self.sortRequested.emit("banRate"))
+
 
 class ListItem(ColorAnimationFrame):
-    def __init__(self, info, parent: QWidget = None):
+    def __init__(self, number, info, parent: QWidget = None):
         super().__init__(type='default', parent=parent)
 
         # self.setStyleSheet("border: 1px solid black")
@@ -131,7 +169,7 @@ class ListItem(ColorAnimationFrame):
 
         self.hBoxLayout = QHBoxLayout(self)
 
-        self.numberLabel = BodyLabel(str(info.get("rank")))
+        self.numberLabel = BodyLabel(str(number))
         self.nameLabel = BodyLabel(info.get("name"))
         self.championIcon = RoundIcon(info.get("icon"), 28, 2, 2)
         self.tierLabel = QLabel()
