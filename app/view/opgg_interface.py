@@ -10,12 +10,13 @@ from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget,
 from app.common.icons import Icon
 from app.lol.connector import connector
 from app.lol.opgg import opgg
-from app.common.config import qconfig
+from app.common.config import qconfig, cfg
+from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
-                                       Theme)
-from app.components.toggle_button import ToggleButton
+                                       Theme, setCustomStyleSheet)
+from app.components.transparent_button import TransparentToggleButton
 from app.components.tier_list_widget import TierListWidget
 from app.common.util import getTasklistPath, getLolClientPid
 
@@ -81,29 +82,36 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        # setTheme(Theme.DARK)
+        # setTheme(Theme.LIGHT)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
-        self.toggleButton = ToggleButton(Icon.APPLIST, Icon.PERSON)
+        self.toggleButton = TransparentToggleButton(Icon.APPLIST, Icon.PERSON)
         self.modeComboBox = ComboBox()
         self.regionComboBox = ComboBox()
         self.tierComboBox = ComboBox()
         self.positionComboBox = ComboBox()
-        self.versionLable = BodyLabel(self.tr("Version: ") + "14.13")
+        self.versionLabel = BodyLabel()
 
         self.stackedWidget = QStackedWidget()
         self.tierInterface = TierInterface()
         self.buildInterface = BuildInterface()
         self.waitingInterface = WaitingInterface()
 
+        # 缓存一个召唤师峡谷的梯队数据，切换位置的时候不重新调 opgg 了
+        self.cachedTier = None
+        self.cachedRegion = None
+        self.cachedRankedTierList = None
+
+        self.filterLock = False
+
         self.__initWindow()
         self.__initLayout()
 
-        self.test()
+        # self.test()
 
     def __initWindow(self):
-        self.setMinimumSize(645, 816)
+        self.setMinimumSize(640, 816)
         self.setWindowIcon(QIcon("app/resource/images/opgg.svg"))
         self.setWindowTitle("OP.GG")
 
@@ -149,8 +157,6 @@ class OpggInterface(OpggInterfaceBase):
             "Challenger"), icon="app/resource/images/CHALLENGER.svg", userData="challenger")
 
         self.positionComboBox.addItem(
-            self.tr("All"), "app/resource/images/icon-position-all.svg", "ALL")
-        self.positionComboBox.addItem(
             self.tr("Top"), "app/resource/images/icon-position-top.svg", "TOP")
         self.positionComboBox.addItem(
             self.tr("Jungle"), "app/resource/images/icon-position-jng.svg", "JUNGLE")
@@ -160,6 +166,15 @@ class OpggInterface(OpggInterfaceBase):
             self.tr("Bottom"), "app/resource/images/icon-position-bot.svg", "ADC")
         self.positionComboBox.addItem(
             self.tr("Support"), "app/resource/images/icon-position-sup.svg", "SUPPORT")
+
+        self.modeComboBox.currentIndexChanged.connect(
+            self.__onFilterTextChanged)
+        self.regionComboBox.currentIndexChanged.connect(
+            self.__onFilterTextChanged)
+        self.tierComboBox.currentIndexChanged.connect(
+            self.__onFilterTextChanged)
+        self.positionComboBox.currentIndexChanged.connect(
+            self.__onFilterTextChanged)
 
         self.toggleButton.changed.connect(self.__onToggleButtonClicked)
 
@@ -171,34 +186,101 @@ class OpggInterface(OpggInterfaceBase):
         self.filterLayout.addWidget(self.positionComboBox)
         self.filterLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding,  QSizePolicy.Fixed))
-        self.filterLayout.addWidget(self.versionLable)
+        self.filterLayout.addWidget(self.versionLabel)
         self.filterLayout.addSpacing(4)
 
         self.stackedWidget.addWidget(self.tierInterface)
         self.stackedWidget.addWidget(self.buildInterface)
         self.stackedWidget.addWidget(self.waitingInterface)
-        self.stackedWidget.setCurrentIndex(0)
 
         self.vBoxLayout.setAlignment(Qt.AlignTop)
         self.vBoxLayout.addLayout(self.filterLayout)
         self.vBoxLayout.addWidget(self.stackedWidget)
 
-    def __onToggleButtonClicked(self, index):
-        self.stackedWidget.setCurrentIndex(index)
+    # def __onToggleButtonClicked(self, index):
+    #     self.stackedWidget.setCurrentIndex(index)
 
-    def test(self):
-        # await connector.autoStart()
-        # await opgg.start()
+    @asyncSlot(int)
+    async def __onToggleButtonClicked(self, index):
+        await opgg.start()
+        await connector.autoStart()
 
-        # res = await opgg.getTierList("kr", "ranked", "emerald_plus", "14.13")
-        res = [{'championId': 145, 'name': '虚空之女', 'icon': 'app/resource/game/champion icons/145.png', 'winRate': 0.513415, 'pickRate': 0.443289, 'banRate': 0.174565, 'kda': 2.772181, 'tier': 1, 'rank': 1, 'position': 'ADC', 'counters': [{'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}]}, {'championId': 22, 'name': '寒冰射手', 'icon': 'app/resource/game/champion icons/22.png', 'winRate': 0.513519, 'pickRate': 0.134393, 'banRate': 0.298265, 'kda': 2.644017, 'tier': 1, 'rank': 2, 'position': 'ADC', 'counters': [{'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}]}, {'championId': 81, 'name': '探险家', 'icon': 'app/resource/game/champion icons/81.png', 'winRate': 0.499005, 'pickRate': 0.335979, 'banRate': 0.27095, 'kda': 2.681386, 'tier': 2, 'rank': 3, 'position': 'ADC', 'counters': [{'championId': 15, 'icon': 'app/resource/game/champion icons/15.png'}, {'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}]}, {'championId': 21, 'name': '赏金猎人', 'icon': 'app/resource/game/champion icons/21.png', 'winRate': 0.507612, 'pickRate': 0.111888, 'banRate': 0.0603609, 'kda': 2.553821, 'tier': 2, 'rank': 4, 'position': 'ADC', 'counters': [{'championId': 115, 'icon': 'app/resource/game/champion icons/115.png'}, {'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}, {'championId': 22, 'icon': 'app/resource/game/champion icons/22.png'}]}, {'championId': 96, 'name': '深渊巨口', 'icon': 'app/resource/game/champion icons/96.png', 'winRate': 0.524784, 'pickRate': 0.0165673, 'banRate': 0.00308373, 'kda': 2.334625, 'tier': 2, 'rank': 5, 'position': 'ADC', 'counters': [{'championId': 115, 'icon': 'app/resource/game/champion icons/115.png'}, {'championId': 21, 'icon': 'app/resource/game/champion icons/21.png'}, {'championId': 81, 'icon': 'app/resource/game/champion icons/81.png'}]}, {'championId': 222, 'name': '暴走萝莉', 'icon': 'app/resource/game/champion icons/222.png', 'winRate': 0.507693, 'pickRate': 0.0830959, 'banRate': 0.0249029, 'kda': 2.675101, 'tier': 2, 'rank': 6, 'position': 'ADC', 'counters': [{'championId': 115, 'icon': 'app/resource/game/champion icons/115.png'}, {'championId': 42, 'icon': 'app/resource/game/champion icons/42.png'}, {'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}]}, {'championId': 221, 'name': '祖安花火', 'icon': 'app/resource/game/champion icons/221.png', 'winRate': 0.495851, 'pickRate': 0.189893, 'banRate': 0.0862426, 'kda': 2.573191, 'tier': 2, 'rank': 7, 'position': 'ADC', 'counters': [{'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}, {'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}]}, {'championId': 202, 'name': '戏命师', 'icon': 'app/resource/game/champion icons/202.png', 'winRate': 0.500374, 'pickRate': 0.127509, 'banRate': 0.010266, 'kda': 3.130994, 'tier': 2, 'rank': 8, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 15, 'icon': 'app/resource/game/champion icons/15.png'}, {'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}]}, {'championId': 18, 'name': '麦林炮手', 'icon': 'app/resource/game/champion icons/18.png', 'winRate': 0.515868, 'pickRate': 0.01603, 'banRate': 0.0313651, 'kda': 2.635611, 'tier': 2, 'rank': 9, 'position': 'ADC', 'counters': [{'championId': 15, 'icon': 'app/resource/game/champion icons/15.png'}, {'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}, {'championId': 115, 'icon': 'app/resource/game/champion icons/115.png'}]}, {'championId': 498, 'name': '逆羽', 'icon': 'app/resource/game/champion icons/498.png', 'winRate': 0.500938, 'pickRate': 0.0599187, 'banRate': 0.00664675, 'kda': 2.637435, 'tier': 3, 'rank': 10, 'position': 'ADC', 'counters': [{'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 222, 'icon': 'app/resource/game/champion icons/222.png'}, {'championId': 22, 'icon': 'app/resource/game/champion icons/22.png'}]}, {'championId': 236, 'name': '圣枪游侠', 'icon': 'app/resource/game/champion icons/236.png', 'winRate': 0.495484, 'pickRate': 0.0826938, 'banRate': 0.0323981, 'kda': 2.522069, 'tier': 3, 'rank': 11, 'position': 'ADC', 'counters': [{'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 22, 'icon': 'app/resource/game/champion icons/22.png'}, {'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}]}, {'championId': 119, 'name': '荣耀行刑官', 'icon': 'app/resource/game/champion icons/119.png', 'winRate': 0.503839, 'pickRate': 0.0352344, 'banRate': 0.112423, 'kda': 2.354947, 'tier': 3, 'rank': 12, 'position': 'ADC', 'counters': [{'championId': 360, 'icon': 'app/resource/game/champion icons/360.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 67, 'icon': 'app/resource/game/champion icons/67.png'}]}, {'championId': 895,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           'name': '不羁之悦', 'icon': 'app/resource/game/champion icons/895.png', 'winRate': 0.518439, 'pickRate': 0.0079569, 'banRate': 0.00700253, 'kda': 2.376208, 'tier': 3, 'rank': 13, 'position': 'ADC', 'counters': [{'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 222, 'icon': 'app/resource/game/champion icons/222.png'}, {'championId': 110, 'icon': 'app/resource/game/champion icons/110.png'}]}, {'championId': 15, 'name': '战争女神', 'icon': 'app/resource/game/champion icons/15.png', 'winRate': 0.50252, 'pickRate': 0.0272242, 'banRate': 0.00549556, 'kda': 2.642289, 'tier': 3, 'rank': 14, 'position': 'ADC', 'counters': [{'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}]}, {'championId': 29, 'name': '瘟疫之源', 'icon': 'app/resource/game/champion icons/29.png', 'winRate': 0.508942, 'pickRate': 0.0129986, 'banRate': 0.00380224, 'kda': 2.529564, 'tier': 3, 'rank': 15, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 429, 'icon': 'app/resource/game/champion icons/429.png'}, {'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}]}, {'championId': 901, 'name': '炽炎雏龙', 'icon': 'app/resource/game/champion icons/901.png', 'winRate': 0.493104, 'pickRate': 0.0303947, 'banRate': 0.00357548, 'kda': 2.553529, 'tier': 4, 'rank': 16, 'position': 'ADC', 'counters': [{'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 202, 'icon': 'app/resource/game/champion icons/202.png'}]}, {'championId': 115, 'name': '爆破鬼才', 'icon': 'app/resource/game/champion icons/115.png', 'winRate': 0.504783, 'pickRate': 0.00936117, 'banRate': 0.000940471, 'kda': 2.541237, 'tier': 4, 'rank': 17, 'position': 'ADC', 'counters': [{'championId': 221, 'icon': 'app/resource/game/champion icons/221.png'}, {'championId': 360, 'icon': 'app/resource/game/champion icons/360.png'}, {'championId': 901, 'icon': 'app/resource/game/champion icons/901.png'}]}, {'championId': 51, 'name': '皮城女警', 'icon': 'app/resource/game/champion icons/51.png', 'winRate': 0.482405, 'pickRate': 0.0702821, 'banRate': 0.0329083, 'kda': 2.345821, 'tier': 4, 'rank': 18, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}, {'championId': 29, 'icon': 'app/resource/game/champion icons/29.png'}]}, {'championId': 360, 'name': '沙漠玫瑰', 'icon': 'app/resource/game/champion icons/360.png', 'winRate': 0.486994, 'pickRate': 0.0425568, 'banRate': 0.0676244, 'kda': 2.323828, 'tier': 4, 'rank': 19, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}]}, {'championId': 67, 'name': '暗夜猎手', 'icon': 'app/resource/game/champion icons/67.png', 'winRate': 0.488737, 'pickRate': 0.0200466, 'banRate': 0.0296018, 'kda': 2.207755, 'tier': 4, 'rank': 20, 'position': 'ADC', 'counters': [{'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 498, 'icon': 'app/resource/game/champion icons/498.png'}, {'championId': 51, 'icon': 'app/resource/game/champion icons/51.png'}]}, {'championId': 429, 'name': '复仇之矛', 'icon': 'app/resource/game/champion icons/429.png', 'winRate': 0.484617, 'pickRate': 0.0162263, 'banRate': 0.00823172, 'kda': 2.279167, 'tier': 5, 'rank': 21, 'position': 'ADC', 'counters': [{'championId': 21, 'icon': 'app/resource/game/champion icons/21.png'}, {'championId': 67, 'icon': 'app/resource/game/champion icons/67.png'}, {'championId': 145, 'icon': 'app/resource/game/champion icons/145.png'}]}, {'championId': 110, 'name': '惩戒之箭', 'icon': 'app/resource/game/champion icons/110.png', 'winRate': 0.466964, 'pickRate': 0.0299336, 'banRate': 0.00595512, 'kda': 2.325087, 'tier': 5, 'rank': 22, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 67, 'icon': 'app/resource/game/champion icons/67.png'}, {'championId': 222, 'icon': 'app/resource/game/champion icons/222.png'}]}, {'championId': 42, 'name': '英勇投弹手', 'icon': 'app/resource/game/champion icons/42.png', 'winRate': 0.479015, 'pickRate': 0.00812648, 'banRate': 0.00235333, 'kda': 2.563865, 'tier': 5, 'rank': 23, 'position': 'ADC', 'counters': [{'championId': 15, 'icon': 'app/resource/game/champion icons/15.png'}, {'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 119, 'icon': 'app/resource/game/champion icons/119.png'}]}, {'championId': 523, 'name': '残月之肃', 'icon': 'app/resource/game/champion icons/523.png', 'winRate': 0.4554, 'pickRate': 0.0372961, 'banRate': 0.00288858, 'kda': 2.040353, 'tier': 5, 'rank': 24, 'position': 'ADC', 'counters': [{'championId': 18, 'icon': 'app/resource/game/champion icons/18.png'}, {'championId': 96, 'icon': 'app/resource/game/champion icons/96.png'}, {'championId': 895, 'icon': 'app/resource/game/champion icons/895.png'}]}]
+        print("init")
+
+    def setWaitingInterfaceEnabled(self, enabled, back):
+        self.toggleButton.setEnabled(not enabled)
+        self.modeComboBox.setEnabled(not enabled)
+        self.regionComboBox.setEnabled(not enabled)
+        self.tierComboBox.setEnabled(not enabled)
+        self.positionComboBox.setEnabled(not enabled)
+
+        self.stackedWidget.setCurrentIndex(2 if enabled else back)
+
+    @asyncSlot(int)
+    async def __onFilterTextChanged(self, _):
+        # TODO:
+        # 请求异常时显示空白画面并提示，而不是报错
+
+        if self.filterLock:
+            return
+
+        self.filterLock = True
+        currentIndex = self.stackedWidget.currentIndex()
+        self.setWaitingInterfaceEnabled(True, currentIndex)
+        if currentIndex == 0:
+            await self.__updateTierInterface()
+
+        self.setWaitingInterfaceEnabled(False, currentIndex)
+        self.filterLock = False
+
+    async def __updateTierInterface(self):
+        mode = self.modeComboBox.currentData()
+        region = self.regionComboBox.currentData()
+        tier = self.tierComboBox.currentData()
+        position = self.positionComboBox.currentData()
+
+        cfg.set(cfg.opggRegion, region)
+        cfg.set(cfg.opggTier, tier)
+
+        # 只有在排位模式下，可以选择对应的分路
+        if mode != 'ranked':
+            position = 'none'
+            self.positionComboBox.setVisible(False)
+        else:
+            self.positionComboBox.setVisible(True)
+
+        # 斗魂竞技场的段位选择只能是 "all"
+        if mode == 'arena':
+            tier = 'all'
+            self.tierComboBox.setVisible(False)
+        else:
+            self.tierComboBox.setVisible(True)
+
+        if mode == 'ranked':
+            if tier == self.cachedTier and \
+                    region == self.cachedRegion and \
+                    self.cachedRankedTierList != None:
+                res = self.cachedRankedTierList['data'][position]
+                data = self.cachedRankedTierList
+            else:
+                data = await opgg.getTierList(region, mode, tier)
+                self.cachedTier = tier
+                self.cachedRegion = region
+                self.cachedRankedTierList = data
+
+                res = data['data'][position]
+        else:
+            data = await opgg.getTierList(region, mode, tier)
+            res = data['data']
+
+        version = data['version']
+        self.versionLabel.setText(self.tr("Version: ") + version)
         self.tierInterface.tierList.updateList(res)
 
     @asyncClose
     async def closeEvent(self, e):
-        # await connector.close()
-        # await opgg.close()
+        await connector.close()
+        await opgg.close()
 
         return super().closeEvent(e)
 
@@ -248,7 +330,7 @@ class WaitingInterface(QFrame):
         self.__initLayout()
 
     def __initWidget(self):
-        pass
+        StyleSheet.WAITING_INTERFACE.apply(self)
 
     def __initLayout(self):
         self.vBoxLayout.setAlignment(Qt.AlignCenter)

@@ -1,0 +1,20 @@
+TransparentButton {
+    color: black;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+
+    padding: 6px 6px 6px 6px;
+    outline: none;
+}
+
+TransparentButton:hover {
+    background-color: rgba(0, 0, 0, 9);
+    border: none;
+}
+
+TransparentButton:pressed {
+    color: rgba(0, 0, 0, 0.63);
+    background-color: rgba(0, 0, 0, 6);
+    border: none;
+}

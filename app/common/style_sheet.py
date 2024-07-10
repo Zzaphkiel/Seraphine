@@ -22,6 +22,8 @@ class StyleSheet(StyleSheetBase, Enum):
     ARAM_FLYOUT = 'aram_flyout'
     DRAGGABLE_WIDGET = 'draggable_widget'
     CHAMPIONS_SELECT_WIDGET = 'champions_select_widget'
+    WAITING_INTERFACE = 'waiting_interface'
+    TRANSPARENT_BUTTON = 'transparent_button'
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme

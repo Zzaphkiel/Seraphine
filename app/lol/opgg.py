@@ -14,59 +14,60 @@ class Opgg(QObject):
         self.session = None
 
         self.defaultModes = ['ranked', 'aram', 'arena']
-        self.tierList = {mode: None for mode in self.defaultModes}
-        self.version = None
-
         self.defaultTier = cfg.get(cfg.opggTier)
         self.defaultRegion = cfg.get(cfg.opggRegion)
 
     async def start(self):
         self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
 
-    @alru_cache(maxsize=20)
-    async def __fetchTierList(self, region, mode, tier, version):
+    @alru_cache(maxsize=128)
+    async def __fetchTierList(self, region, mode, tier):
         url = f"/api/{region}/champions/{mode}"
-        params = {"tier": tier, "version": version}
+        params = {"tier": tier}
 
         return await self.__get(url, params)
 
-    @alru_cache(maxsize=20)
-    async def __fetchChampionBuild(self, region, mode, championId, position, tier, version):
+    @alru_cache(maxsize=128)
+    async def __fetchChampionBuild(self, region, mode, championId, position, tier):
         url = f"/api/{region}/champions/{mode}/{championId}/{position}"
-        params = {"tier": tier, "version": version}
+        params = {"tier": tier}
 
         return await self.__get(url, params)
 
-    @alru_cache(maxsize=20)
+    @alru_cache(maxsize=128)
     async def getDataVersion(self, region, mode):
         url = f"/api/{region}/champions/{mode}/versions"
         return await self.__get(url)
 
-    @alru_cache(maxsize=20)
-    async def getTierList(self, region, mode, tier, version):
-        raw = await self.__fetchTierList(region, mode, tier, version)
+    @alru_cache(maxsize=128)
+    async def getTierList(self, region, mode, tier):
+        raw = await self.__fetchTierList(region, mode, tier)
+
+        version = raw['meta']['version']
 
         if mode == 'ranked':
             res = await self.__parseRankedTierList(raw)
         else:
             res = await self.__parseOtherTierList(raw)
 
-        return res
+        return {
+            'data': res,
+            'version': version
+        }
 
     async def initDefalutTier(self):
         region = self.defaultRegion
-        version = await self.getDataVersion(region, 'ranked')
-        self.version = version['data'][0]
 
         for mode in self.defaultModes:
             # 只在召唤师峡谷模式下按照默认段位取梯队
+
             if mode == 'ranked':
                 tier = self.defaultTier
             else:
                 tier = 'all'
 
-            res = await self.getTierList(region, mode, tier, self.version)
-            self.tierList[mode] = res
+            # 因为这函数有 cache，直接无脑调用一下妥了
+            _ = await self.getTierList(region, mode, tier)
 
     async def __parseRankedTierList(self, data):
         '''
@@ -74,6 +75,7 @@ class Opgg(QObject):
 
         在此函数内按照分路位置将它们分开
         '''
+
         data = data['data']
         res = {p: []
                for p in ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT']}
@@ -125,6 +127,12 @@ class Opgg(QObject):
         for item in data:
             stats = item['average_stats']
 
+            if stats == None:
+                continue
+
+            if stats.get('rank') == None:
+                continue
+
             championId = item['id']
             name = connector.manager.getChampionNameById(championId)
             icon = await connector.getChampionIcon(championId)
@@ -140,7 +148,7 @@ class Opgg(QObject):
                 'tier': stats.get('tier'),
                 'rank': stats.get('rank'),
                 "position": None,
-                'counter': [],
+                'counters': [],
             })
 
         return sorted(res, key=lambda x: x['rank'])
