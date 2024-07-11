@@ -1,5 +1,6 @@
 import sys
 from typing import Union
+import time
 
 from qasync import asyncSlot
 from PyQt5.QtGui import QColor, QPainter, QIcon, QPixmap
@@ -42,7 +43,9 @@ class TierListWidget(QFrame):
         self.scrollWidget = QFrame()
         self.scrollLayout = QVBoxLayout()
 
-        self.data: list = None
+        self.allChampionShowing = True
+
+        self.items: list[ListItem] = []
 
         self.__initWidget()
         self.__initLayout()
@@ -71,36 +74,65 @@ class TierListWidget(QFrame):
         self.vBoxLayout.addWidget(self.scrollArea)
 
     def updateList(self, data: list):
-        self.data = data
-        self.__update(data)
+        if len(self.items) != 0:
+            self.clear()
+
+            for item in self.items:
+                item.deleteLater()
+
+        self.items = [ListItem(0, x) for x in data]
+        self.__update(self.items)
 
     def clear(self):
         for i in reversed(range(self.scrollLayout.count())):
             item = self.scrollLayout.itemAt(i)
             self.scrollLayout.removeItem(item)
 
-            if item.widget():
-                item.widget().deleteLater()
-
-    def __update(self, data: list):
+    def __update(self, items: list):
         self.clear()
 
-        for i, x in enumerate(data, start=1):
-            item = ListItem(i, x)
-            self.scrollLayout.addWidget(item)
+        for i, x in enumerate(items, start=1):
+            x.setCounter(i)
+            self.scrollLayout.addWidget(x)
 
     @asyncSlot(str)
     async def __onSortRequested(self, key: str):
-        if self.data[0][key] == None:
+        if self.items[0].info.get(key) == None:
             return
 
         if key == 'rank':
-            def fun(x): return x[key]
+            def fun(x): return x.info.get(key)
         else:
-            def fun(x): return -x[key]
+            def fun(x): return -x.info.get(key)
 
-        data = sorted(self.data, key=fun)
-        self.__update(data)
+        self.items.sort(key=fun)
+        self.__update(self.items)
+
+    def filterChampions(self, type: str, x):
+        self.allChampionShowing = False
+
+        '''
+        通过两种方式来筛选英雄：
+        - `type` 为 `championId` 时，通过判断英雄 id 在不在列表 `x` 中筛选
+        - `type` 为 `name` 时，通过判断字符串 `x` 在不在英雄名中筛选
+        '''
+
+        if type == 'championId':
+            for item in self.items:
+                item.setVisible(item.info['championId'] in x)
+
+        else:
+            for item in self.items:
+                self.setVisible(x in item.info['name'])
+
+    def showAllChampions(self):
+        if self.allChampionShowing:
+            return
+
+        self.allChampionShowing = True
+
+        for item in self.items:
+            item.setVisible(True)
 
 
 class ListTitleBar(QFrame):
@@ -170,8 +202,13 @@ class ListTitleBar(QFrame):
 class ListItem(ColorAnimationFrame):
     def __init__(self, number, info, parent: QWidget = None):
         super().__init__(type=f"tier{info['tier']}", parent=parent)
+        # super().__init__(type="default", parent=parent)
 
         self.championId = info['championId']
+        self.name = info['name']
+
+        self.info = info
+
         tierIcon = f"app/resource/images/icon-tier-{info['tier']}.svg"
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -247,3 +284,6 @@ class ListItem(ColorAnimationFrame):
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacing(8)
         self.hBoxLayout.addWidget(self.countersLabel, alignment=Qt.AlignCenter)
+
+    def setCounter(self, x):
+        self.numberLabel.setText(str(x))

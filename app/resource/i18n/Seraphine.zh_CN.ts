@@ -827,12 +827,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ErrorInterface</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="350"/>
+        <location filename="../../view/opgg_interface.py" line="418"/>
         <source>Fetch data failed 😭</source>
         <translation>数据拉取失败 😭</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="351"/>
+        <location filename="../../view/opgg_interface.py" line="419"/>
         <source>Please wait and try again</source>
         <translation>请等待后重试</translation>
     </message>
@@ -1137,32 +1137,32 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ListTitleBar</name>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="117"/>
+        <location filename="../../components/tier_list_widget.py" line="163"/>
         <source>Champion</source>
         <translation>英雄</translation>
     </message>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="118"/>
+        <location filename="../../components/tier_list_widget.py" line="164"/>
         <source>Tier</source>
         <translation>梯队</translation>
     </message>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="119"/>
+        <location filename="../../components/tier_list_widget.py" line="165"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="120"/>
+        <location filename="../../components/tier_list_widget.py" line="166"/>
         <source>Pick Rate</source>
         <translation>登场率</translation>
     </message>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="121"/>
+        <location filename="../../components/tier_list_widget.py" line="167"/>
         <source>Ban Rate</source>
         <translation>禁用率</translation>
     </message>
     <message>
-        <location filename="../../components/tier_list_widget.py" line="122"/>
+        <location filename="../../components/tier_list_widget.py" line="168"/>
         <source>Counters</source>
         <translation>劣势对抗</translation>
     </message>
@@ -1626,122 +1626,122 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>OpggInterface</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="122"/>
+        <location filename="../../view/opgg_interface.py" line="134"/>
         <source>Ranked</source>
         <translation>召唤师峡谷</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="124"/>
+        <location filename="../../view/opgg_interface.py" line="136"/>
         <source>Aram</source>
         <translation>极地大乱斗</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="126"/>
+        <location filename="../../view/opgg_interface.py" line="138"/>
         <source>Arena</source>
         <translation>斗魂竞技场</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="128"/>
+        <location filename="../../view/opgg_interface.py" line="140"/>
         <source>Urf</source>
         <translation>无限火力</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="130"/>
+        <location filename="../../view/opgg_interface.py" line="142"/>
         <source>Nexus Blitz</source>
         <translation>极限闪击</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="133"/>
+        <location filename="../../view/opgg_interface.py" line="145"/>
         <source>All regions</source>
         <translation>全球</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="135"/>
+        <location filename="../../view/opgg_interface.py" line="147"/>
         <source>Korea</source>
         <translation>韩服</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="138"/>
+        <location filename="../../view/opgg_interface.py" line="150"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="140"/>
+        <location filename="../../view/opgg_interface.py" line="152"/>
         <source>Gold -</source>
         <translation>黄金 -</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="142"/>
+        <location filename="../../view/opgg_interface.py" line="154"/>
         <source>Gold +</source>
         <translation>黄金 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="144"/>
+        <location filename="../../view/opgg_interface.py" line="156"/>
         <source>Platinum +</source>
         <translation>铂金 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="146"/>
+        <location filename="../../view/opgg_interface.py" line="158"/>
         <source>Emerald +</source>
         <translation>翡翠 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="148"/>
+        <location filename="../../view/opgg_interface.py" line="160"/>
         <source>Diamond +</source>
         <translation>钻石 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="150"/>
+        <location filename="../../view/opgg_interface.py" line="162"/>
         <source>Master</source>
         <translation>大师</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="152"/>
+        <location filename="../../view/opgg_interface.py" line="164"/>
         <source>Master +</source>
         <translation>大师 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="154"/>
+        <location filename="../../view/opgg_interface.py" line="166"/>
         <source>Grandmaster</source>
         <translation>宗师</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="156"/>
+        <location filename="../../view/opgg_interface.py" line="168"/>
         <source>Challenger</source>
         <translation>王者</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="118"/>
+        <location filename="../../view/opgg_interface.py" line="130"/>
         <source>Show Tier / Build</source>
         <translation>显示梯队 / 英雄详情</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="159"/>
+        <location filename="../../view/opgg_interface.py" line="171"/>
         <source>Top</source>
         <translation>上路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="161"/>
+        <location filename="../../view/opgg_interface.py" line="173"/>
         <source>Jungle</source>
         <translation>打野</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="163"/>
+        <location filename="../../view/opgg_interface.py" line="175"/>
         <source>Mid</source>
         <translation>中路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="165"/>
+        <location filename="../../view/opgg_interface.py" line="177"/>
         <source>Bottom</source>
         <translation>下路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="167"/>
+        <location filename="../../view/opgg_interface.py" line="179"/>
         <source>Support</source>
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="280"/>
+        <location filename="../../view/opgg_interface.py" line="349"/>
         <source>Version: </source>
         <translation>游戏版本：</translation>
     </message>
@@ -2145,6 +2145,14 @@ If champions set by lane are not available, default settings will be used.</sour
         <location filename="../../view/search_interface.py" line="1083"/>
         <source>Please check the summoner&apos;s name and retry</source>
         <translation>请检查召唤师名后重试</translation>
+    </message>
+</context>
+<context>
+    <name>SearchLineEditFlyout</name>
+    <message>
+        <location filename="../../view/opgg_interface.py" line="455"/>
+        <source>Search champions</source>
+        <translation>搜索英雄</translation>
     </message>
 </context>
 <context>

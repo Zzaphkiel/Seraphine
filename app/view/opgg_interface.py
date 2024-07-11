@@ -2,7 +2,7 @@ import sys
 
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy)
 
@@ -10,16 +10,22 @@ from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
 from app.common.icons import Icon
 from app.lol.connector import connector
 from app.lol.opgg import opgg
+from app.lol.champions import ChampionAlias
+from app.common.logger import logger
 from app.common.config import qconfig, cfg
 from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
                                        Theme, setCustomStyleSheet, SubtitleLabel, TitleLabel,
-                                       DisplayLabel)
+                                       DisplayLabel, PushButton, SearchLineEdit, ToolButton,
+                                       FlyoutViewBase, Flyout, TeachingTip, TeachingTipView,
+                                       TeachingTipTailPosition)
 from app.components.transparent_button import TransparentToggleButton
 from app.components.tier_list_widget import TierListWidget
 from app.common.util import getTasklistPath, getLolClientPid
+
+TAG = 'OpggInterface'
 
 
 class OpggInterfaceBase(BackgroundAnimationWidget, FramelessWindow):
@@ -83,15 +89,21 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        # setTheme(Theme.DARK)
+        setTheme(Theme.LIGHT)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
+        self.searchButton = ToolButton(Icon.SEARCH)
         self.toggleButton = TransparentToggleButton(Icon.APPLIST, Icon.PERSON)
         self.modeComboBox = ComboBox()
         self.regionComboBox = ComboBox()
         self.tierComboBox = ComboBox()
         self.positionComboBox = ComboBox()
+
+        self.debugButton = PushButton()
+        self.debugButton.setFixedSize(33, 33)
+        self.debugButton.clicked.connect(self.__onDebugButtonClicked)
+
         self.versionLabel = BodyLabel()
 
         self.stackedWidget = QStackedWidget()
@@ -177,13 +189,16 @@ class OpggInterface(OpggInterfaceBase):
             self.__onFilterTextChanged)
 
         self.toggleButton.changed.connect(self.__onToggleButtonClicked)
+        self.searchButton.clicked.connect(self.__onSearchButtonClicked)
 
     def __initLayout(self):
         self.filterLayout.addWidget(self.toggleButton)
+        self.filterLayout.addWidget(self.searchButton)
         self.filterLayout.addWidget(self.modeComboBox)
         self.filterLayout.addWidget(self.regionComboBox)
         self.filterLayout.addWidget(self.tierComboBox)
         self.filterLayout.addWidget(self.positionComboBox)
+        self.filterLayout.addWidget(self.debugButton)
         self.filterLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding,  QSizePolicy.Fixed))
         self.filterLayout.addWidget(self.versionLabel)
@@ -200,18 +215,42 @@ class OpggInterface(OpggInterfaceBase):
         self.vBoxLayout.addLayout(self.filterLayout)
         self.vBoxLayout.addWidget(self.stackedWidget)
 
-    # def __onToggleButtonClicked(self, index):
-    #     self.stackedWidget.setCurrentIndex(index)
+    def __onToggleButtonClicked(self, index):
+        self.stackedWidget.setCurrentIndex(index)
 
-    @asyncSlot(int)
-    async def __onToggleButtonClicked(self, index):
+    def __onSearchButtonClicked(self):
+        # 如果当前界面在梯队列表界面，则显示一个普通的搜索框用来筛选下方的英雄
+        if self.stackedWidget.currentWidget() is self.tierInterface:
+            # 点击之后弹出的搜索框是空白的，让下方的所有英雄重新显示出来比较符合直觉
+            self.tierInterface.tierList.showAllChampions()
+
+            view = SearchLineEditFlyout()
+            Flyout.make(view, self.searchButton, self, isDeleteOnClose=True)
+            view.textChanged.connect(self.__onSearchLineTextChanged)
+            view.searchLineEdit.setFocus()
+
+    def __onSearchLineTextChanged(self, text):
+        if text == '':
+            self.tierInterface.tierList.showAllChampions()
+            return
+
+        if ChampionAlias.isAvailable():
+            ids = ChampionAlias.getChampionIdsByAliasFuzzily(text)
+            self.tierInterface.tierList.filterChampions('championId', ids)
+        else:
+            self.tierInterface.tierList.filterChampions('name', text)
+
+    @asyncSlot(bool)
+    async def __onDebugButtonClicked(self, _):
         await opgg.start()
         await connector.autoStart()
+        await ChampionAlias.checkAndUpdate()
 
         print("init")
 
     def setComboBoxesEnabled(self, enabled):
         self.toggleButton.setEnabled(enabled)
+        self.searchButton.setEnabled(enabled)
         self.modeComboBox.setEnabled(enabled)
         self.regionComboBox.setEnabled(enabled)
         self.tierComboBox.setEnabled(enabled)
@@ -221,7 +260,7 @@ class OpggInterface(OpggInterfaceBase):
         self.setComboBoxesEnabled(widget is not self.waitingInterface)
         self.stackedWidget.setCurrentWidget(widget)
 
-    @asyncSlot(int)
+    @ asyncSlot(int)
     async def __onFilterTextChanged(self, _):
         # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
         if self.filterLock:
@@ -245,7 +284,9 @@ class OpggInterface(OpggInterfaceBase):
 
             # 让转圈消失，显示界面
             self.setCurrentInterface(current)
-        except:
+        except Exception as e:
+            logger.error(f"Get OPGG tier list failed, {e}", TAG)
+
             # 记录一下是由哪里进入到的出错的界面
             self.errorInterface.setFromInterface(current)
 
@@ -266,6 +307,9 @@ class OpggInterface(OpggInterfaceBase):
 
         cfg.set(cfg.opggRegion, region)
         cfg.set(cfg.opggTier, tier)
+
+        logger.info(
+            f"Get tier list: {mode}, {region}, {tier}, {position}", TAG)
 
         # 只有在排位模式下，可以选择对应的分路
         if mode != 'ranked':
@@ -395,3 +439,18 @@ class ErrorInterface(QFrame):
         self.vBoxLayout.setAlignment(Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.title, alignment=Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.content, alignment=Qt.AlignCenter)
+
+
+class SearchLineEditFlyout(FlyoutViewBase):
+    textChanged = pyqtSignal(str)
+
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.searchLineEdit = SearchLineEdit()
+        self.vBoxLayout.addWidget(self.searchLineEdit)
+
+        self.searchLineEdit.textChanged.connect(self.textChanged)
+        self.searchLineEdit.setPlaceholderText(self.tr("Search champions"))
+        self.searchLineEdit.setMinimumWidth(200)
