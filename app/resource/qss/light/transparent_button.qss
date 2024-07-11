@@ -4,7 +4,7 @@ TransparentButton {
     border: none;
     border-radius: 5px;
 
-    padding: 6px 6px 6px 6px;
+    padding: 6px 6px 8px 6px;
     outline: none;
 }
 

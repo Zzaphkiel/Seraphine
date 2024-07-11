@@ -34,3 +34,11 @@ ListItem {
     border: 1px solid rgba(0, 0, 0, 0.095);
     border-radius: 6px;
 }
+
+#countersLabel,
+#counterLabel,
+#championLabel {
+    color: black;
+    font: 14px 'Microsoft YaHei', 'Segoe UI';
+    padding: 6px 6px 8px 8px;
+}

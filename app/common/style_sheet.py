@@ -24,6 +24,7 @@ class StyleSheet(StyleSheetBase, Enum):
     CHAMPIONS_SELECT_WIDGET = 'champions_select_widget'
     WAITING_INTERFACE = 'waiting_interface'
     TRANSPARENT_BUTTON = 'transparent_button'
+    ERROR_INTERFACE = "error_interface"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
@@ -126,6 +127,8 @@ class __ColorManager():
 
 colorManager = __ColorManager()
 
+# 有关胜负等一切组件的颜色
+
 
 @colorManager.registerColor('win')
 def __getWinColor():
@@ -145,6 +148,7 @@ def __getRemakeColor():
     return __getStyleSheetColor(color)
 
 
+# 动画背景组件的默认颜色
 @colorManager.registerColor('default')
 def __getDefaultColor():
     color = QColor(233, 233, 233, 13 if isDarkTheme() else 170)
@@ -156,12 +160,14 @@ def __getDefaultColor():
     return color, c1, c2, c3
 
 
+# 文字组件的颜色
 @colorManager.registerColor("text")
 def __getTextColor():
     color = QColor('white') if isDarkTheme() else QColor('black')
     return color, color, color, color
 
 
+# 对局信息界面提示组队的颜色
 @colorManager.registerColor('team1')
 def __getTeam1Color():
     # TODO: 开放用户自定义设置
@@ -173,6 +179,43 @@ def __getTeam1Color():
 def __getTeam2Color():
     # TODO: 开放用户自定义设置
     color = QColor.fromRgb(255, 51, 153, 39)
+    return __getStyleSheetColor(color)
+
+
+# OPGG 英雄梯队中英雄卡片的颜色
+@colorManager.registerColor('tier0')
+def __getTier0Color():
+    color = QColor.fromRgb(232, 64, 87, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor('tier1')
+def __getTier1Color():
+    color = QColor.fromRgb(0, 147, 255, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor('tier2')
+def __getTier2Color():
+    color = QColor.fromRgb(0, 187, 163, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor('tier3')
+def __getTier3Color():
+    color = QColor.fromRgb(255, 185, 0, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor('tier4')
+def __getTier4Color():
+    color = QColor.fromRgb(154, 164, 175, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor('tier5')
+def __getTier5Color():
+    color = QColor.fromRgb(168, 138, 103, 39)
     return __getStyleSheetColor(color)
 
 

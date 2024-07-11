@@ -3,7 +3,7 @@ import sys
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget,
+from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy)
 
 
@@ -15,7 +15,8 @@ from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
-                                       Theme, setCustomStyleSheet)
+                                       Theme, setCustomStyleSheet, SubtitleLabel, TitleLabel,
+                                       DisplayLabel)
 from app.components.transparent_button import TransparentToggleButton
 from app.components.tier_list_widget import TierListWidget
 from app.common.util import getTasklistPath, getLolClientPid
@@ -82,7 +83,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        # setTheme(Theme.LIGHT)
+        # setTheme(Theme.DARK)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -97,6 +98,7 @@ class OpggInterface(OpggInterfaceBase):
         self.tierInterface = TierInterface()
         self.buildInterface = BuildInterface()
         self.waitingInterface = WaitingInterface()
+        self.errorInterface = ErrorInterface()
 
         # 缓存一个召唤师峡谷的梯队数据，切换位置的时候不重新调 opgg 了
         self.cachedTier = None
@@ -108,10 +110,8 @@ class OpggInterface(OpggInterfaceBase):
         self.__initWindow()
         self.__initLayout()
 
-        # self.test()
-
     def __initWindow(self):
-        self.setMinimumSize(640, 816)
+        self.setMinimumSize(640, 821)
         self.setWindowIcon(QIcon("app/resource/images/opgg.svg"))
         self.setWindowTitle("OP.GG")
 
@@ -192,6 +192,9 @@ class OpggInterface(OpggInterfaceBase):
         self.stackedWidget.addWidget(self.tierInterface)
         self.stackedWidget.addWidget(self.buildInterface)
         self.stackedWidget.addWidget(self.waitingInterface)
+        self.stackedWidget.addWidget(self.errorInterface)
+
+        # self.stackedWidget.setCurrentIndex(3)
 
         self.vBoxLayout.setAlignment(Qt.AlignTop)
         self.vBoxLayout.addLayout(self.filterLayout)
@@ -207,31 +210,53 @@ class OpggInterface(OpggInterfaceBase):
 
         print("init")
 
-    def setWaitingInterfaceEnabled(self, enabled, back):
-        self.toggleButton.setEnabled(not enabled)
-        self.modeComboBox.setEnabled(not enabled)
-        self.regionComboBox.setEnabled(not enabled)
-        self.tierComboBox.setEnabled(not enabled)
-        self.positionComboBox.setEnabled(not enabled)
+    def setComboBoxesEnabled(self, enabled):
+        self.toggleButton.setEnabled(enabled)
+        self.modeComboBox.setEnabled(enabled)
+        self.regionComboBox.setEnabled(enabled)
+        self.tierComboBox.setEnabled(enabled)
+        self.positionComboBox.setEnabled(enabled)
 
-        self.stackedWidget.setCurrentIndex(2 if enabled else back)
+    def setCurrentInterface(self, widget: QWidget):
+        self.setComboBoxesEnabled(widget is not self.waitingInterface)
+        self.stackedWidget.setCurrentWidget(widget)
 
     @asyncSlot(int)
     async def __onFilterTextChanged(self, _):
-        # TODO:
-        # 请求异常时显示空白画面并提示，而不是报错
-
+        # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
         if self.filterLock:
             return
 
         self.filterLock = True
-        currentIndex = self.stackedWidget.currentIndex()
-        self.setWaitingInterfaceEnabled(True, currentIndex)
-        if currentIndex == 0:
-            await self.__updateTierInterface()
 
-        self.setWaitingInterfaceEnabled(False, currentIndex)
+        # 判断一下是刷新梯队列表还是 build 界面
+        current = self.stackedWidget.currentWidget()
+
+        # 显示转圈圈界面，并且锁住上方的 combo box
+        self.setCurrentInterface(self.waitingInterface)
+
+        # 如果是在出错的界面请求的更新，则需要知道是因为刷新了啥才进入到的出错界面
+        if current is self.errorInterface:
+            current = self.errorInterface.getFromInterface()
+
+        try:
+            # 尝试刷新当前的界面
+            await self.__updateInterface(current)
+
+            # 让转圈消失，显示界面
+            self.setCurrentInterface(current)
+        except:
+            # 记录一下是由哪里进入到的出错的界面
+            self.errorInterface.setFromInterface(current)
+
+            # 显示出错的界面
+            self.setCurrentInterface(self.errorInterface)
+
         self.filterLock = False
+
+    async def __updateInterface(self, interface: QWidget):
+        if interface is self.tierInterface:
+            await self.__updateTierInterface()
 
     async def __updateTierInterface(self):
         mode = self.modeComboBox.currentData()
@@ -257,11 +282,13 @@ class OpggInterface(OpggInterfaceBase):
             self.tierComboBox.setVisible(True)
 
         if mode == 'ranked':
+            # rank 模式下，如果是切换了位置选项，会命中 cache，不用重新请求了
             if tier == self.cachedTier and \
                     region == self.cachedRegion and \
                     self.cachedRankedTierList != None:
                 res = self.cachedRankedTierList['data'][position]
                 data = self.cachedRankedTierList
+            # 否则是第一次请求 rank 模式数据，记录一下 cache
             else:
                 data = await opgg.getTierList(region, mode, tier)
                 self.cachedTier = tier
@@ -270,6 +297,7 @@ class OpggInterface(OpggInterfaceBase):
 
                 res = data['data'][position]
         else:
+            # 除了 rank 意外的其他模式，该咋整咋整吧
             data = await opgg.getTierList(region, mode, tier)
             res = data['data']
 
@@ -299,7 +327,6 @@ class TierInterface(QFrame):
 
     def __initLayout(self):
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-
         self.vBoxLayout.addWidget(self.tierList)
 
 
@@ -329,9 +356,42 @@ class WaitingInterface(QFrame):
         self.__initWidget()
         self.__initLayout()
 
-    def __initWidget(self):
         StyleSheet.WAITING_INTERFACE.apply(self)
+
+    def __initWidget(self):
+        pass
 
     def __initLayout(self):
         self.vBoxLayout.setAlignment(Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.processRing, alignment=Qt.AlignCenter)
+
+
+class ErrorInterface(QFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.title = QLabel(self.tr("Fetch data failed 😭"))
+        self.content = QLabel(self.tr("Please wait and try again"))
+
+        self.fromInterface: QWidget = None
+
+        self.__initWidget()
+        self.__initLayout()
+
+        StyleSheet.ERROR_INTERFACE.apply(self)
+
+    def setFromInterface(self, interface: QWidget):
+        self.fromInterface = interface
+
+    def getFromInterface(self):
+        return self.fromInterface
+
+    def __initWidget(self):
+        self.title.setObjectName("titleLabel")
+        self.content.setObjectName("contentLabel")
+
+    def __initLayout(self):
+        self.vBoxLayout.setAlignment(Qt.AlignCenter)
+        self.vBoxLayout.addWidget(self.title, alignment=Qt.AlignCenter)
+        self.vBoxLayout.addWidget(self.content, alignment=Qt.AlignCenter)

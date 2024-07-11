@@ -109,15 +109,17 @@ class ListTitleBar(QFrame):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
+        # self.setStyleSheet("border: 1px solid black;")
+
         self.hBoxLayout = QHBoxLayout(self)
 
-        self.counterLabel = BodyLabel("#")
-        self.championLabel = BodyLabel(self.tr("Champion"))
-        self.tierLabel = TransparentPushButton(self.tr("Tier"))
+        self.counterLabel = QLabel("#")
+        self.championLabel = QLabel(self.tr("Champion"))
+        self.tierLabel = TransparentButton(self.tr("Tier"))
         self.winRateLabel = TransparentButton(self.tr("Win Rate"))
         self.pickRateLabel = TransparentButton(self.tr("Pick Rate"))
         self.banRateLabel = TransparentButton(self.tr("Ban Rate"))
-        self.countersLabel = BodyLabel(self.tr("Counters"))
+        self.countersLabel = QLabel(self.tr("Counters"))
 
         self.__initWidget()
         self.__initLayout()
@@ -126,13 +128,13 @@ class ListTitleBar(QFrame):
         self.hBoxLayout.setContentsMargins(16, 6, 27, 6)
 
         self.hBoxLayout.addWidget(self.counterLabel, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addSpacing(6)
+        # self.hBoxLayout.addSpacing()
         self.hBoxLayout.addWidget(self.championLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.tierLabel, alignment=Qt.AlignCenter)
-        # self.hBoxLayout.addSpacing(1)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacing(2)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacing(8)
@@ -140,8 +142,12 @@ class ListTitleBar(QFrame):
 
     def __initWidget(self):
         self.counterLabel.setFixedWidth(30)
+        self.counterLabel.setObjectName("counterLabel")
         self.counterLabel.setAlignment(Qt.AlignCenter)
         self.countersLabel.setAlignment(Qt.AlignCenter)
+        self.countersLabel.setObjectName("countersLabel")
+        self.championLabel.setAlignment(Qt.AlignCenter)
+        self.championLabel.setObjectName("championLabel")
 
         width = 70
 
@@ -163,9 +169,7 @@ class ListTitleBar(QFrame):
 
 class ListItem(ColorAnimationFrame):
     def __init__(self, number, info, parent: QWidget = None):
-        super().__init__(type='default', parent=parent)
-
-        # self.setStyleSheet("border: 1px solid black")
+        super().__init__(type=f"tier{info['tier']}", parent=parent)
 
         self.championId = info['championId']
         tierIcon = f"app/resource/images/icon-tier-{info['tier']}.svg"
