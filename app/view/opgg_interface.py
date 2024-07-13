@@ -17,13 +17,11 @@ from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
-                                       Theme, setCustomStyleSheet, SubtitleLabel, TitleLabel,
-                                       DisplayLabel, PushButton, SearchLineEdit, ToolButton,
-                                       FlyoutViewBase, Flyout, TeachingTip, TeachingTipView,
-                                       TeachingTipTailPosition)
+                                       Theme, PushButton, SearchLineEdit, ToolButton,
+                                       FlyoutViewBase, Flyout)
 from app.components.transparent_button import TransparentToggleButton
-from app.components.tier_list_widget import TierListWidget
-from app.common.util import getTasklistPath, getLolClientPid
+from app.view.opgg_tier_interface import TierInterface
+from app.view.opgg_build_interface import BuildInterface
 
 TAG = 'OpggInterface'
 
@@ -89,7 +87,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        setTheme(Theme.LIGHT)
+        # setTheme(Theme.DARK)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -179,6 +177,11 @@ class OpggInterface(OpggInterfaceBase):
         self.positionComboBox.addItem(
             self.tr("Support"), "app/resource/images/icon-position-sup.svg", "SUPPORT")
 
+        self.__setComboBoxCurrentData(
+            self.tierComboBox, cfg.get(cfg.opggTier))
+        self.__setComboBoxCurrentData(
+            self.regionComboBox, cfg.get(cfg.opggRegion))
+
         self.modeComboBox.currentIndexChanged.connect(
             self.__onFilterTextChanged)
         self.regionComboBox.currentIndexChanged.connect(
@@ -190,6 +193,16 @@ class OpggInterface(OpggInterfaceBase):
 
         self.toggleButton.changed.connect(self.__onToggleButtonClicked)
         self.searchButton.clicked.connect(self.__onSearchButtonClicked)
+
+    def __setComboBoxCurrentData(self, comboBox: ComboBox, data) -> int:
+        """
+        这 `ComboBox` 居然没提供通过 `userData` 设置当前项的函数，我帮它实现一个
+
+        虽然这函数是 $O(n)$ 的，但 `ComboBox` 提供的 `setCurrentText()` 也是 $O(n)$ 的 ^^
+        """
+
+        index = comboBox.findData(data)
+        comboBox.setCurrentIndex(index)
 
     def __initLayout(self):
         self.filterLayout.addWidget(self.toggleButton)
@@ -209,7 +222,7 @@ class OpggInterface(OpggInterfaceBase):
         self.stackedWidget.addWidget(self.waitingInterface)
         self.stackedWidget.addWidget(self.errorInterface)
 
-        # self.stackedWidget.setCurrentIndex(3)
+        # self.stackedWidget.setCurrentWidget(self.buildInterface)
 
         self.vBoxLayout.setAlignment(Qt.AlignTop)
         self.vBoxLayout.addLayout(self.filterLayout)
@@ -227,6 +240,8 @@ class OpggInterface(OpggInterfaceBase):
             view = SearchLineEditFlyout()
             Flyout.make(view, self.searchButton, self, isDeleteOnClose=True)
             view.textChanged.connect(self.__onSearchLineTextChanged)
+
+            # 点一下搜索按钮之后，自动让弹出的搜索框获得焦点，可以少点一次鼠标
             view.searchLineEdit.setFocus()
 
     def __onSearchLineTextChanged(self, text):
@@ -260,7 +275,16 @@ class OpggInterface(OpggInterfaceBase):
         self.setComboBoxesEnabled(widget is not self.waitingInterface)
         self.stackedWidget.setCurrentWidget(widget)
 
-    @ asyncSlot(int)
+    def setAutoRefreshEnabled(self, enabled):
+        """
+        设置界面是否随着 Combo Box 的改变而自动刷新
+
+        用于想要一次性设置多个 Combo Box 的值之后再刷新的场景
+        """
+
+        self.filterLock = not enabled
+
+    @asyncSlot(int)
     async def __onFilterTextChanged(self, _):
         # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
         if self.filterLock:
@@ -285,7 +309,8 @@ class OpggInterface(OpggInterfaceBase):
             # 让转圈消失，显示界面
             self.setCurrentInterface(current)
         except Exception as e:
-            logger.error(f"Get OPGG tier list failed, {e}", TAG)
+            logger.error(
+                f"Get OPGG data failed, exception: {e}, interface: {current}", TAG)
 
             # 记录一下是由哪里进入到的出错的界面
             self.errorInterface.setFromInterface(current)
@@ -332,6 +357,7 @@ class OpggInterface(OpggInterfaceBase):
                     self.cachedRankedTierList != None:
                 res = self.cachedRankedTierList['data'][position]
                 data = self.cachedRankedTierList
+
             # 否则是第一次请求 rank 模式数据，记录一下 cache
             else:
                 data = await opgg.getTierList(region, mode, tier)
@@ -340,8 +366,9 @@ class OpggInterface(OpggInterfaceBase):
                 self.cachedRankedTierList = data
 
                 res = data['data'][position]
+
+        # 除了 rank 以外的其他模式，该咋整咋整吧
         else:
-            # 除了 rank 意外的其他模式，该咋整咋整吧
             data = await opgg.getTierList(region, mode, tier)
             res = data['data']
 
@@ -357,39 +384,6 @@ class OpggInterface(OpggInterfaceBase):
         return super().closeEvent(e)
 
 
-class TierInterface(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        self.vBoxLayout = QVBoxLayout(self)
-        self.tierList = TierListWidget()
-
-        self.__initWidget()
-        self.__initLayout()
-
-    def __initWidget(self):
-        pass
-
-    def __initLayout(self):
-        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.vBoxLayout.addWidget(self.tierList)
-
-
-class BuildInterface(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-
-        self.vBoxLayout = QVBoxLayout(self)
-
-        self.__initWidget()
-        self.__initLayout()
-
-    def __initWidget(self):
-        pass
-
-    def __initLayout(self):
-        pass
-
-
 class WaitingInterface(QFrame):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
@@ -400,7 +394,7 @@ class WaitingInterface(QFrame):
         self.__initWidget()
         self.__initLayout()
 
-        StyleSheet.WAITING_INTERFACE.apply(self)
+        StyleSheet.OPGG_WAITING_INTERFACE.apply(self)
 
     def __initWidget(self):
         pass
@@ -423,7 +417,7 @@ class ErrorInterface(QFrame):
         self.__initWidget()
         self.__initLayout()
 
-        StyleSheet.ERROR_INTERFACE.apply(self)
+        StyleSheet.OPGG_ERROR_INTERFACE.apply(self)
 
     def setFromInterface(self, interface: QWidget):
         self.fromInterface = interface

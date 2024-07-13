@@ -16,15 +16,18 @@ class StyleSheet(StyleSheetBase, Enum):
     CAREER_INTERFACE = 'career_interface'
     START_INTERFACE = 'start_interface'
     SEARCH_INTERFACE = 'search_interface'
-    TIER_LIST_WIDGET = 'tier_list_widget'
     GAME_INFO_INTERFACE = 'game_info_interface'
     AUXILIARY_INTERFACE = 'auxiliary_interface'
+
+    OPGG_TIER_INTERFACE = 'opgg_tier_interface'
+    OPGG_BUILD_INTERFACE = 'opgg_build_interface'
+    OPGG_WAITING_INTERFACE = 'opgg_waiting_interface'
+    OPGG_ERROR_INTERFACE = "opgg_error_interface"
+
     ARAM_FLYOUT = 'aram_flyout'
     DRAGGABLE_WIDGET = 'draggable_widget'
     CHAMPIONS_SELECT_WIDGET = 'champions_select_widget'
-    WAITING_INTERFACE = 'waiting_interface'
     TRANSPARENT_BUTTON = 'transparent_button'
-    ERROR_INTERFACE = "error_interface"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme

@@ -1,26 +1,35 @@
-import sys
-from typing import Union
-import time
 
-from qasync import asyncSlot
-from PyQt5.QtGui import QColor, QPainter, QIcon, QPixmap
+from PyQt5.QtWidgets import (QHBoxLayout, QWidget, QFrame, QVBoxLayout, QSpacerItem,
+                             QSizePolicy, QLabel, QHBoxLayout, QWidget, QLabel, QFrame,
+                             QVBoxLayout, QSpacerItem, QSizePolicy)
 from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
-from PyQt5.QtWidgets import (QHBoxLayout, QStackedLayout, QWidget, QApplication, QStackedWidget,
-                             QFrame, QVBoxLayout, QSpacerItem, QSizePolicy, QLabel)
+from PyQt5.QtGui import QPixmap
+from qasync import asyncSlot
 
-
-from app.common.icons import Icon
-from app.common.config import qconfig
-from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
-                                       FluentIconBase, FluentStyleSheet, NavigationItemPosition,
-                                       qrouter, StackedWidget, FluentTitleBar,  ComboBox,
-                                       TransparentToolButton, BodyLabel, ToolTipFilter,
-                                       ToolTipPosition, TransparentPushButton, SmoothScrollArea,
-                                       setCustomStyleSheet, FlowLayout)
-from app.components.champion_icon_widget import RoundIcon
-from app.components.transparent_button import TransparentButton
 from app.components.animation_frame import ColorAnimationFrame
+from app.components.transparent_button import TransparentButton
+from app.components.champion_icon_widget import RoundIcon
 from app.common.style_sheet import StyleSheet
+from app.common.qfluentwidgets import BodyLabel, SmoothScrollArea, FlowLayout
+
+
+class TierInterface(QFrame):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        self.vBoxLayout = QVBoxLayout(self)
+        self.tierList = TierListWidget()
+
+        self.__initWidget()
+        self.__initLayout()
+
+        StyleSheet.OPGG_TIER_INTERFACE.apply(self)
+
+    def __initWidget(self):
+        pass
+
+    def __initLayout(self):
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.vBoxLayout.addWidget(self.tierList)
 
 
 class TierListWidget(QFrame):
@@ -55,8 +64,6 @@ class TierListWidget(QFrame):
         self.scrollWidget.setObjectName("scrollWidget")
 
         self.titleBar.sortRequested.connect(self.__onSortRequested)
-
-        StyleSheet.TIER_LIST_WIDGET.apply(self)
 
     def __initLayout(self):
         self.scrollLayout.setContentsMargins(0, 0, 0, 0)

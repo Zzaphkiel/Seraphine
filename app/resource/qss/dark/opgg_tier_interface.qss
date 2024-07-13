@@ -20,7 +20,9 @@ ListTitleBar {
 
 #scrollArea {
     border: none;
-    background-color: transparent;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    background-color: rgba(185, 185, 185, 0.051);
 }
 
 #scrollWidget {
