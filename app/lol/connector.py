@@ -926,6 +926,9 @@ class LolClientConnector(QObject):
         res = await self.__get("/entitlements/v1/token")
         res = await res.json()
 
+        if 'accessToken' not in res:
+            raise ReferenceError()
+
         return res['accessToken']
 
     async def restartClient(self):
