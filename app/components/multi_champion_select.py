@@ -111,7 +111,7 @@ class ChampionsSelectWidget(QWidget):
         self.championsShowLayout.setVerticalSpacing(7)
         self.championsShowLayout.setContentsMargins(5, 5, 5, 5)
         self.championsShowLayout.setAnimation(
-            250, QEasingCurve.Type.InOutCubic)
+            450, QEasingCurve.Type.OutQuart)
 
         self.scrollWidget.setLayout(self.championsShowLayout)
         self.scrollArea.setWidget(self.scrollWidget)

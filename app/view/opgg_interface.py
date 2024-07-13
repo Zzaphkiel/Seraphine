@@ -123,7 +123,7 @@ class OpggInterface(OpggInterfaceBase):
         self.__initLayout()
 
     def __initWindow(self):
-        self.setMinimumSize(640, 821)
+        self.setFixedSize(640, 821)
         self.setWindowIcon(QIcon("app/resource/images/opgg.svg"))
         self.setWindowTitle("OP.GG")
 

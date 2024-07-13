@@ -4,7 +4,7 @@ import time
 
 from qasync import asyncSlot
 from PyQt5.QtGui import QColor, QPainter, QIcon, QPixmap
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedLayout, QWidget, QApplication, QStackedWidget,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy, QLabel)
 
@@ -41,7 +41,7 @@ class TierListWidget(QFrame):
 
         self.scrollArea = SmoothScrollArea()
         self.scrollWidget = QFrame()
-        self.scrollLayout = QVBoxLayout()
+        self.scrollLayout = FlowLayout(needAni=True, isTight=True)
 
         self.allChampionShowing = True
 
@@ -61,7 +61,8 @@ class TierListWidget(QFrame):
     def __initLayout(self):
         self.scrollLayout.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.setAlignment(Qt.AlignTop)
-        self.scrollLayout.setSpacing(3)
+        self.scrollLayout.setVerticalSpacing(3)
+        self.scrollLayout.setAnimation(450, QEasingCurve.Type.OutQuart)
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
         self.scrollArea.setWidgetResizable(True)
@@ -75,23 +76,15 @@ class TierListWidget(QFrame):
 
     def updateList(self, data: list):
         if len(self.items) != 0:
-            self.clear()
-
-            for item in self.items:
-                item.deleteLater()
+            self.scrollLayout.takeAllWidgets()
 
         self.items = [ListItem(0, x) for x in data]
-        self.__update(self.items)
+        self.__update()
 
-    def clear(self):
-        for i in reversed(range(self.scrollLayout.count())):
-            item = self.scrollLayout.itemAt(i)
-            self.scrollLayout.removeItem(item)
+    def __update(self):
+        self.scrollLayout.removeAllWidgets()
 
-    def __update(self, items: list):
-        self.clear()
-
-        for i, x in enumerate(items, start=1):
+        for i, x in enumerate(self.items, start=1):
             x.setCounter(i)
             self.scrollLayout.addWidget(x)
 
@@ -106,7 +99,7 @@ class TierListWidget(QFrame):
             def fun(x): return -x.info.get(key)
 
         self.items.sort(key=fun)
-        self.__update(self.items)
+        self.__update()
 
     def filterChampions(self, type: str, x):
         self.allChampionShowing = False
@@ -203,6 +196,7 @@ class ListItem(ColorAnimationFrame):
     def __init__(self, number, info, parent: QWidget = None):
         super().__init__(type=f"tier{info['tier']}", parent=parent)
         # super().__init__(type="default", parent=parent)
+        self.setFixedWidth(589)
 
         self.championId = info['championId']
         self.name = info['name']
