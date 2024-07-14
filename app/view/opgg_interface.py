@@ -14,6 +14,7 @@ from app.lol.champions import ChampionAlias
 from app.common.logger import logger
 from app.common.config import qconfig, cfg
 from app.common.style_sheet import StyleSheet
+from app.common.signals import signalBus
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
@@ -194,6 +195,8 @@ class OpggInterface(OpggInterfaceBase):
         self.toggleButton.changed.connect(self.__onToggleButtonClicked)
         self.searchButton.clicked.connect(self.__onSearchButtonClicked)
 
+        signalBus.tierChampionClicked.connect(self.__onTierListChampionClicked)
+
     def __setComboBoxCurrentData(self, comboBox: ComboBox, data) -> int:
         """
         这 `ComboBox` 居然没提供通过 `userData` 设置当前项的函数，我帮它实现一个
@@ -261,7 +264,7 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
-        print("init")
+        print('init')
 
     def setComboBoxesEnabled(self, enabled):
         self.toggleButton.setEnabled(enabled)
@@ -284,17 +287,15 @@ class OpggInterface(OpggInterfaceBase):
 
         self.filterLock = not enabled
 
-    @asyncSlot(int)
-    async def __onFilterTextChanged(self, _):
-        # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
-        if self.filterLock:
-            return
+    async def updateAndSwitchTo(self, current, to):
+        """
+        这个函数做三件事情：
 
-        self.filterLock = True
-
-        # 判断一下是刷新梯队列表还是 build 界面
-        current = self.stackedWidget.currentWidget()
-
+        1. 显示转圈界面，并锁住上方的 combo box
+        2. 刷新 `to` 界面
+        3. - 若更新成功，则转到 `to` 界面并解锁 combo box
+           - 若更新失败，则转到错误界面
+        """
         # 显示转圈圈界面，并且锁住上方的 combo box
         self.setCurrentInterface(self.waitingInterface)
 
@@ -304,25 +305,39 @@ class OpggInterface(OpggInterfaceBase):
 
         try:
             # 尝试刷新当前的界面
-            await self.__updateInterface(current)
+            await self.__updateInterface(to)
 
             # 让转圈消失，显示界面
-            self.setCurrentInterface(current)
+            self.setCurrentInterface(to)
         except Exception as e:
             logger.error(
-                f"Get OPGG data failed, exception: {e}, interface: {current}", TAG)
+                f"Get OPGG data failed, exception: {e}, interface: {to}", TAG)
 
-            # 记录一下是由哪里进入到的出错的界面
-            self.errorInterface.setFromInterface(current)
+            # 记录一下是想要进入到哪个界面时加载出错了
+            self.errorInterface.setFromInterface(to)
 
             # 显示出错的界面
             self.setCurrentInterface(self.errorInterface)
+
+    @asyncSlot(int)
+    async def __onFilterTextChanged(self, _):
+        # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
+        if self.filterLock:
+            return
+
+        self.filterLock = True
+
+        # 上方 Combo box 改变的时候，相当于从自己跳转到自己
+        current = self.stackedWidget.currentWidget()
+        await self.updateAndSwitchTo(current, current)
 
         self.filterLock = False
 
     async def __updateInterface(self, interface: QWidget):
         if interface is self.tierInterface:
             await self.__updateTierInterface()
+        elif interface is self.buildInterface:
+            await self.__updateBuildInterface()
 
     async def __updateTierInterface(self):
         mode = self.modeComboBox.currentData()
@@ -375,6 +390,20 @@ class OpggInterface(OpggInterfaceBase):
         version = data['version']
         self.versionLabel.setText(self.tr("Version: ") + version)
         self.tierInterface.tierList.updateList(res)
+
+    @asyncSlot(int)
+    async def __onTierListChampionClicked(self, championId):
+        self.buildInterface.setCurrentChampionId(championId)
+        await self.updateAndSwitchTo(self.tierInterface, self.buildInterface)
+
+    async def __updateBuildInterface(self):
+        mode = self.modeComboBox.currentData()
+        region = self.regionComboBox.currentData()
+        tier = self.tierComboBox.currentData()
+        position = self.positionComboBox.currentData()
+        championId = self.buildInterface.getCurrentChampionId()
+
+        print(f"{mode = }, {region = }, {tier = }, {position = }, {championId = }")
 
     @asyncClose
     async def closeEvent(self, e):

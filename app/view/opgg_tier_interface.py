@@ -9,6 +9,7 @@ from qasync import asyncSlot
 from app.components.animation_frame import ColorAnimationFrame
 from app.components.transparent_button import TransparentButton
 from app.components.champion_icon_widget import RoundIcon
+from app.common.signals import signalBus
 from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import BodyLabel, SmoothScrollArea, FlowLayout
 
@@ -268,6 +269,8 @@ class ListItem(ColorAnimationFrame):
         self.banRateLabel.setFixedWidth(width)
         self.countersLabel.setFixedWidth(80)
 
+        self.clicked.connect(self.__onClicked)
+
     def __initLayout(self):
         self.countersLayout.setContentsMargins(0, 0, 0, 0)
         self.countersLayout.setSpacing(2)
@@ -288,3 +291,6 @@ class ListItem(ColorAnimationFrame):
 
     def setCounter(self, x):
         self.numberLabel.setText(str(x))
+
+    def __onClicked(self):
+        signalBus.tierChampionClicked.emit(self.championId)

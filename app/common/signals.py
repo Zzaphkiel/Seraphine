@@ -33,5 +33,8 @@ class SignalBus(QObject):
     # style:
     customColorChanged = pyqtSignal(str)
 
+    # OPGG:
+    tierChampionClicked = pyqtSignal(int)
+
 
 signalBus = SignalBus()

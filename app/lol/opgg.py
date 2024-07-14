@@ -35,9 +35,8 @@ class Opgg(QObject):
         return await self.__get(url, params)
 
     @alru_cache(maxsize=128)
-    async def getDataVersion(self, region, mode):
-        url = f"/api/{region}/champions/{mode}/versions"
-        return await self.__get(url)
+    async def getChampionBuild(self, region, mode, championId, position, tier):
+        return await self.__fetchChampionBuild(self, region, mode, championId, position, tier)
 
     @alru_cache(maxsize=128)
     async def getTierList(self, region, mode, tier):

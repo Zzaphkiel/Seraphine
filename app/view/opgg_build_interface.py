@@ -18,11 +18,32 @@ class BuildInterface(QFrame):
         super().__init__(parent=parent)
 
         self.vBoxLayout = QVBoxLayout(self)
+        self.championId = None
 
         self.__initWidget()
         self.__initLayout()
 
         StyleSheet.OPGG_BUILD_INTERFACE.apply(self)
+
+    def __initWidget(self):
+        pass
+
+    def __initLayout(self):
+        pass
+
+    def setCurrentChampionId(self, id):
+        self.championId = id
+
+    def getCurrentChampionId(self):
+        return self.championId
+
+
+class ChampionTitleBar(QFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.__initWidget()
+        self.__initLayout()
 
     def __initWidget(self):
         pass
