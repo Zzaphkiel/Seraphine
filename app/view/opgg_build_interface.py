@@ -29,6 +29,7 @@ class BuildInterface(QFrame):
         self.summonerSpells = SummonerSpellsWidget()
         self.championSkills = ChampionSkillsWidget()
         self.championItems = ChampionItemWidget()
+        self.championCounters = ChampionCountersWidget()
 
         self.__initWidget()
         self.__initLayout()
@@ -53,6 +54,7 @@ class BuildInterface(QFrame):
         self.scrollLayout.addWidget(self.summonerSpells)
         self.scrollLayout.addWidget(self.championSkills)
         self.scrollLayout.addWidget(self.championItems)
+        self.scrollLayout.addWidget(self.championCounters)
 
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.setContentsMargins(0, 0, 0, 0)
@@ -200,6 +202,15 @@ class BuildWidgetBase(ColorAnimationFrame):
     def __init__(self, parent=None):
         super().__init__(type='default', parent=parent)
         self._pressedBackgroundColor = self._hoverBackgroundColor
+        self.setVisible(False)
+
+
+class SeparatorLine(QFrame):
+    def __init__(self, shape, parent=None):
+        super().__init__(parent)
+        self.setFrameShape(shape)
+        self.setLineWidth(1)
+        self.setObjectName("separatorLine")
 
 
 class Spell(QFrame):
@@ -277,17 +288,13 @@ class SummonerSpellsWidget(BuildWidgetBase):
         self.spell1 = Spell()
         self.spell2 = Spell()
 
-        self.vLine = QFrame()
+        self.vLine = SeparatorLine(QFrame.Shape.VLine)
 
         self.__initWidget()
         self.__initLayout()
 
-        self.setVisible(False)
-
     def __initWidget(self):
-        self.vLine.setFrameShape(QFrame.Shape.VLine)
-        self.vLine.setLineWidth(1)
-        self.vLine.setObjectName("separatorLine")
+        pass
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(11, 9, 11, 9)
@@ -339,8 +346,6 @@ class ChampionSkillsWidget(BuildWidgetBase):
 
         self.__initWidget()
         self.__initLayout()
-
-        self.setVisible(False)
 
     def __initWidget(self):
         self.pickRateLabel.setObjectName("boldBodyLabel")
@@ -411,7 +416,7 @@ class ChampionSkillsWidget(BuildWidgetBase):
 
 
 class ItemsWidget(QFrame):
-    def __init__(self, data, parent: QWidget = None):
+    def __init__(self, data, useSeparator=False, parent: QWidget = None):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -424,6 +429,8 @@ class ItemsWidget(QFrame):
         self.gamesLabel = QLabel()
 
         self.pickRateLabel = QLabel()
+
+        self.useSeparator = useSeparator
 
         self.__initWidget()
         self.__initLayout()
@@ -463,11 +470,19 @@ class ItemsWidget(QFrame):
         self.hBoxLayout.addWidget(self.pickRateLabel)
 
     def updateItems(self, data):
-        for i in data['icons']:
+        for x, i in enumerate(data['icons']):
             icon = RoundedLabel()
             icon.setPicture(i)
             icon.setFixedSize(self.iconSize, self.iconSize)
             self.iconsLayout.addWidget(icon)
+
+            if x != len(data['icons']) - 1 and self.useSeparator:
+                arrow = IconWidget(Icon.GRAYCHEVRONRIGHT)
+                arrow.setFixedSize(20, 20)
+
+                self.iconsLayout.addSpacing(6)
+                self.iconsLayout.addWidget(arrow)
+                self.iconsLayout.addSpacing(6)
 
         self.winRateLabel.setText(f"{data['win']/data['play']*100:.2f}%")
         self.pickRateLabel.setText(f"{data['pickRate']*100:.2f}%")
@@ -487,23 +502,11 @@ class ChampionItemWidget(BuildWidgetBase):
         self.coreItems = QVBoxLayout()
         self.lastItems = QHBoxLayout()
 
-        self.vLine = QFrame()
-        self.hLine1 = QFrame()
-        self.hLine2 = QFrame()
+        self.vLine = SeparatorLine(QFrame.Shape.VLine)
+        self.hLine1 = SeparatorLine(QFrame.Shape.HLine)
+        self.hLine2 = SeparatorLine(QFrame.Shape.HLine)
 
-        self.__initWidget()
         self.__initLayout()
-
-    def __initWidget(self):
-        self.vLine.setFrameShape(QFrame.Shape.VLine)
-        self.vLine.setLineWidth(1)
-        self.vLine.setObjectName("separatorLine")
-        self.hLine1.setFrameShape(QFrame.Shape.HLine)
-        self.hLine1.setLineWidth(1)
-        self.hLine1.setObjectName("separatorLine")
-        self.hLine2.setFrameShape(QFrame.Shape.HLine)
-        self.hLine2.setLineWidth(1)
-        self.hLine2.setObjectName("separatorLine")
 
     def __initLayout(self):
         self.bootsAndStartLayout.setContentsMargins(0, 0, 0, 0)
@@ -531,7 +534,7 @@ class ChampionItemWidget(BuildWidgetBase):
         self.vBoxLayout.addSpacing(4)
         self.vBoxLayout.addLayout(self.coreItems)
 
-    def __updateClass(self, layout: QLayout, data: list):
+    def __updateLayout(self, layout: QLayout, data: list):
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             layout.removeItem(item)
@@ -539,9 +542,11 @@ class ChampionItemWidget(BuildWidgetBase):
             if widget := item.widget():
                 widget.deleteLater()
 
+        useSeparator = layout is self.coreItems
+
         if not layout is self.lastItems:
-            for i in data:
-                items = ItemsWidget(i)
+            for i, x in enumerate(data):
+                items = ItemsWidget(x, useSeparator)
                 layout.addWidget(items)
         else:
             for icon in data:
@@ -550,7 +555,26 @@ class ChampionItemWidget(BuildWidgetBase):
                 layout.addWidget(label)
 
     def updateWidget(self, data):
-        self.__updateClass(self.startItems, data['startItems'])
-        self.__updateClass(self.boots, data['boots'])
-        self.__updateClass(self.coreItems, data['coreItems'])
-        self.__updateClass(self.lastItems, data['lastItems'])
+        self.__updateLayout(self.startItems, data['startItems'])
+        self.__updateLayout(self.boots, data['boots'])
+        self.__updateLayout(self.coreItems, data['coreItems'])
+        self.__updateLayout(self.lastItems, data['lastItems'])
+
+        self.setVisible(True)
+
+
+class ChampionCountersWidget(BuildWidgetBase):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        pass
+
+    def __initLayout(self):
+        pass
+
+    def updateWidget(self, data):
+        self.setVisible(True)

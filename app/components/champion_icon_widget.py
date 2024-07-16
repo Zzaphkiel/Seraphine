@@ -116,7 +116,7 @@ class RoundedLabel(QLabel):
         self.setPixmap(QPixmap(imagePath))
 
         self.havePic = imagePath != None
-        self.radius = 5.0
+        self.radius = 4.0
         self.borderWidth = 2
 
     def paintEvent(self, e):
@@ -127,7 +127,8 @@ class RoundedLabel(QLabel):
         painter.setRenderHints(QPainter.Antialiasing)
 
         pixmap = self.pixmap().scaled(
-            self.size()*self.devicePixelRatioF(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+            self.size()*self.devicePixelRatioF(),
+            Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
 
         path = QPainterPath()
         path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius)

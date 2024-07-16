@@ -420,11 +420,10 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
-        print('init')
+        # print('init')
 
         # self.toggleButton.click()
-
-        # data = json.load(open("test.json"))
+        # data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
         # data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
         # self.buildInterface.updateInterface(data)
 
