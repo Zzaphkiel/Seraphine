@@ -124,7 +124,7 @@ class TierListWidget(QFrame):
 
         else:
             for item in self.items:
-                self.setVisible(x in item.info['name'])
+                item.setVisible(x in item.info['name'])
 
     def showAllChampions(self):
         if self.allChampionShowing:

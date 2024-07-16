@@ -36,7 +36,19 @@ class Opgg(QObject):
 
     @alru_cache(maxsize=128)
     async def getChampionBuild(self, region, mode, championId, position, tier):
-        return await self.__fetchChampionBuild(self, region, mode, championId, position, tier)
+        raw = await self.__fetchChampionBuild(region, mode, championId, position, tier)
+        version = raw['meta']['version']
+
+        map = {
+            'ranked': OpggDataParser.parseRankedChampionBuild(raw, position)
+        }
+
+        res = await map[mode]
+
+        return {
+            'data': res,
+            'version': version
+        }
 
     @alru_cache(maxsize=128)
     async def getTierList(self, region, mode, tier):
@@ -45,9 +57,9 @@ class Opgg(QObject):
         version = raw['meta']['version']
 
         if mode == 'ranked':
-            res = await self.__parseRankedTierList(raw)
+            res = await OpggDataParser.parseRankedTierList(raw)
         else:
-            res = await self.__parseOtherTierList(raw)
+            res = await OpggDataParser.parseOtherTierList(raw)
 
         return {
             'data': res,
@@ -68,7 +80,18 @@ class Opgg(QObject):
             # 因为这函数有 cache，直接无脑调用一下妥了
             _ = await self.getTierList(region, mode, tier)
 
-    async def __parseRankedTierList(self, data):
+    async def __get(self, url, params=None):
+        res = await self.session.get(url, params=params, ssl=False, proxy=None)
+        return await res.json()
+
+    async def close(self):
+        if self.session:
+            await self.session.close()
+
+
+class OpggDataParser:
+    @staticmethod
+    async def parseRankedTierList(data):
         '''
         召唤师峡谷模式下的原始梯队数据，是所有英雄所有位置一起返回的
 
@@ -115,7 +138,8 @@ class Opgg(QObject):
 
         return res
 
-    async def __parseOtherTierList(self, data):
+    @staticmethod
+    async def parseOtherTierList(data):
         '''
         处理其他模式下的原始梯队数据
         '''
@@ -152,12 +176,113 @@ class Opgg(QObject):
 
         return sorted(res, key=lambda x: x['rank'])
 
-    async def __get(self, url, params=None):
-        res = await self.session.get(url, params=params, ssl=False, proxy=None)
-        return await res.json()
+    @staticmethod
+    async def parseRankedChampionBuild(data, position):
+        '''
+        TODO
+        处理排位模式下的英雄 Build
+        '''
 
-    async def close(self):
-        await self.session.close()
+        data = data['data']
+
+        summary = data['summary']
+        championId = summary['id']
+        icon = await connector.getChampionIcon(championId)
+        name = connector.manager.getChampionNameById(championId)
+
+        positions = summary['positions']
+
+        for p in positions:
+            if p['name'] != position:
+                continue
+
+            stats: dict = p['stats']
+            winRate = stats.get('win_rate')
+            pickRate = stats.get('pick_rate')
+            banRate = stats.get('ban_rate')
+            kda = stats.get('kda')
+
+            tierData: dict = stats['tier_data']
+            tier = tierData.get("tier")
+            rank = tierData.get("rank")
+
+        summonerSpells = []
+        for s in data['summoner_spells']:
+            icons = [await connector.getSummonerSpellIcon(id)
+                     for id in s['ids']]
+
+            summonerSpells.append({
+                'ids': s['ids'],
+                'icons': icons,
+                'win': s['win'],
+                'play': s['play'],
+                'pickRate': s['pick_rate']
+            })
+
+        skills = {
+            "masteries": data['skill_masteries'][0]['ids'],
+            "order": data['skills'][0]['order'],
+            'play': data['skills'][0]['play'],
+            'win': data['skills'][0]['win'],
+            'pickRate': data['skills'][0]['pick_rate']
+        }
+
+        boots = []
+        for i in data['boots'][:3]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            boots.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate']
+            })
+
+        startItems = []
+        for i in data['starter_items'][:3]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            startItems.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate']
+            })
+
+        coreItems = []
+        for i in data['core_items'][:5]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            coreItems.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate']
+            })
+
+        lastItems = []
+        for i in data['last_items'][:16]:
+            lastItems.append(await connector.getItemIcon(i['ids'][0]))
+
+        return {
+            "summary": {
+                'name': name,
+                'championId': championId,
+                'icon': icon,
+                'position': position,
+                'winRate': winRate,
+                'pickRate': pickRate,
+                'banRate': banRate,
+                'kda': kda,
+                'tier': tier,
+                'rank': rank
+            },
+            "summonerSpells": summonerSpells,
+            "championSkills": skills,
+            "items": {
+                "boots": boots,
+                "startItems": startItems,
+                "coreItems": coreItems,
+                "lastItems": lastItems,
+            }
+        }
 
 
 opgg = Opgg()

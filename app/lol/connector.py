@@ -284,7 +284,8 @@ class LolClientConnector(QObject):
         except:
             pass
 
-        await self.lcuSess.close()
+        if self.lcuSess:
+            await self.lcuSess.close()
 
         if self.sgpSess:
             await self.sgpSess.close()
@@ -878,8 +879,6 @@ class LolClientConnector(QObject):
         }
 
         res = await self.__post('/lol-chat/v1/friend-requests', data=data)
-
-        print(await res.read())
 
     @retry()
     def sendNotificationMsg(self, title, content):

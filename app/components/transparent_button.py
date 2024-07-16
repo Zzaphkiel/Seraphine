@@ -23,10 +23,15 @@ class TransparentToggleButton(ToolButton):
 
         self.clicked.connect(self.__onButtonClicked)
 
-    def __onButtonClicked(self):
+    def toggle(self):
         new = 1 - self.currentIcon
         self.currentIcon = new
         self.setIcon(self.icons[new])
+
+        return new
+
+    def __onButtonClicked(self):
+        new = self.toggle()
 
         self.changed.emit(new)
 

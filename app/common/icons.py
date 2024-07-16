@@ -20,6 +20,7 @@ class Icon(FluentIconBase, Enum):
     SLIDESEARCH = 'SlideSearch'
     CHEVRONLEFT = "ChevronLeft"
     CHEVRONRIGHT = "ChevronRight"
+    GRAYCHEVRONRIGHT = "GrayChevronRight"
     COPY = 'Copy'
     COMMENT = 'Comment'
     VIDEO_PERSON = 'VideoPerson'

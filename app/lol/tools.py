@@ -39,6 +39,14 @@ class ToolsTranslator(QObject):
         self.bottom = self.tr("BOT")
         self.support = self.tr("SUP")
 
+        self.positionMap = {
+            "TOP": self.top,
+            "JUNGLE": self.jungle,
+            "MID": self.middle,
+            "ADC": self.bottom,
+            "SUPPORT": self.support
+        }
+
         self.rankedSolo = self.tr('Ranked Solo')
         self.rankedFlex = self.tr("Ranked Flex")
 

@@ -50,7 +50,7 @@ class ColorChangeable(QObject):
             colorManager.regiesterWidget(self)
 
             # 更新自己的颜色
-            c1, c2, c3, c4 = self.__getColors()
+            c1, c2, c3, c4 = self.getColors()
             self.setColor(c1, c2, c3, c4)
         else:
             self.type = None
@@ -58,7 +58,7 @@ class ColorChangeable(QObject):
         # 如果自己被析构了，就将自己 manager 中记录的自己的引用给删了
         self.destroyed.connect(lambda: colorManager.removeWidget(self))
 
-    def __getColors(self):
+    def getColors(self):
         return colorManager.getColor(self.type)
 
     def setColor(self, c1: QColor, c2: QColor, c3: QColor, c4: QColor):
@@ -73,7 +73,7 @@ class ColorChangeable(QObject):
             return
 
         colorManager.regiesterWidget(self)
-        c1, c2, c3, c4 = self.__getColors()
+        c1, c2, c3, c4 = self.getColors()
         self.setColor(c1, c2, c3, c4)
 
 

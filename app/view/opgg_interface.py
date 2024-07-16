@@ -1,4 +1,5 @@
 import sys
+import json
 
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon
@@ -9,7 +10,7 @@ from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
 
 from app.common.icons import Icon
 from app.lol.connector import connector
-from app.lol.opgg import opgg
+from app.lol.opgg import opgg, OpggDataParser
 from app.lol.champions import ChampionAlias
 from app.common.logger import logger
 from app.common.config import qconfig, cfg
@@ -88,7 +89,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        # setTheme(Theme.DARK)
+        setTheme(Theme.LIGHT)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -120,6 +121,9 @@ class OpggInterface(OpggInterfaceBase):
 
         self.__initWindow()
         self.__initLayout()
+
+        # self.debugButton.click()
+        self.debugButton.setVisible(False)
 
     def __initWindow(self):
         self.setFixedSize(640, 821)
@@ -258,14 +262,6 @@ class OpggInterface(OpggInterfaceBase):
         else:
             self.tierInterface.tierList.filterChampions('name', text)
 
-    @asyncSlot(bool)
-    async def __onDebugButtonClicked(self, _):
-        await opgg.start()
-        await connector.autoStart()
-        await ChampionAlias.checkAndUpdate()
-
-        print('init')
-
     def setComboBoxesEnabled(self, enabled):
         self.toggleButton.setEnabled(enabled)
         self.searchButton.setEnabled(enabled)
@@ -287,13 +283,34 @@ class OpggInterface(OpggInterfaceBase):
 
         self.filterLock = not enabled
 
+    @asyncSlot(int)
+    async def __onFilterTextChanged(self, _):
+        # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
+        if self.filterLock:
+            return
+
+        self.filterLock = True
+
+        # 上方 Combo box 改变的时候，相当于从自己跳转到自己
+        current = self.stackedWidget.currentWidget()
+        await self.updateAndSwitchTo(current, current)
+
+        self.filterLock = False
+
+    @asyncSlot(int)
+    async def __onTierListChampionClicked(self, championId):
+        self.buildInterface.setCurrentChampionId(championId)
+        self.toggleButton.toggle()
+        await self.updateAndSwitchTo(self.tierInterface, self.buildInterface)
+
     async def updateAndSwitchTo(self, current, to):
         """
         这个函数做三件事情：
 
         1. 显示转圈界面，并锁住上方的 combo box
-        2. 刷新 `to` 界面
-        3. - 若更新成功，则转到 `to` 界面并解锁 combo box
+        2. 尝试刷新 `to` 界面
+        3. 解锁上方的 combo box
+        4. - 若更新成功，则转到 `to` 界面
            - 若更新失败，则转到错误界面
         """
         # 显示转圈圈界面，并且锁住上方的 combo box
@@ -313,31 +330,22 @@ class OpggInterface(OpggInterfaceBase):
             logger.error(
                 f"Get OPGG data failed, exception: {e}, interface: {to}", TAG)
 
+            # DEBUG
+            print(e)
+
             # 记录一下是想要进入到哪个界面时加载出错了
             self.errorInterface.setFromInterface(to)
 
             # 显示出错的界面
             self.setCurrentInterface(self.errorInterface)
 
-    @asyncSlot(int)
-    async def __onFilterTextChanged(self, _):
-        # 给函数加个互斥锁，防止在该函数内修改了 combo box 的值，导致无限递归
-        if self.filterLock:
-            return
-
-        self.filterLock = True
-
-        # 上方 Combo box 改变的时候，相当于从自己跳转到自己
-        current = self.stackedWidget.currentWidget()
-        await self.updateAndSwitchTo(current, current)
-
-        self.filterLock = False
-
     async def __updateInterface(self, interface: QWidget):
-        if interface is self.tierInterface:
-            await self.__updateTierInterface()
-        elif interface is self.buildInterface:
-            await self.__updateBuildInterface()
+        map = {
+            self.tierInterface: self.__updateTierInterface,
+            self.buildInterface: self.__updateBuildInterface
+        }
+
+        await map[interface]()
 
     async def __updateTierInterface(self):
         mode = self.modeComboBox.currentData()
@@ -391,11 +399,6 @@ class OpggInterface(OpggInterfaceBase):
         self.versionLabel.setText(self.tr("Version: ") + version)
         self.tierInterface.tierList.updateList(res)
 
-    @asyncSlot(int)
-    async def __onTierListChampionClicked(self, championId):
-        self.buildInterface.setCurrentChampionId(championId)
-        await self.updateAndSwitchTo(self.tierInterface, self.buildInterface)
-
     async def __updateBuildInterface(self):
         mode = self.modeComboBox.currentData()
         region = self.regionComboBox.currentData()
@@ -404,6 +407,26 @@ class OpggInterface(OpggInterfaceBase):
         championId = self.buildInterface.getCurrentChampionId()
 
         print(f"{mode = }, {region = }, {tier = }, {position = }, {championId = }")
+        data = await opgg.getChampionBuild(region, mode, championId, position, tier)
+        res = data['data']
+        self.buildInterface.updateInterface(res)
+
+        version = data['version']
+        self.versionLabel.setText(self.tr("Version: ") + version)
+
+    @asyncSlot(bool)
+    async def __onDebugButtonClicked(self, _):
+        await opgg.start()
+        await connector.autoStart()
+        await ChampionAlias.checkAndUpdate()
+
+        print('init')
+
+        # self.toggleButton.click()
+
+        # data = json.load(open("test.json"))
+        # data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
+        # self.buildInterface.updateInterface(data)
 
     @asyncClose
     async def closeEvent(self, e):

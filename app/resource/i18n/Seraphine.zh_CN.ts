@@ -224,6 +224,15 @@
         <location filename="../../view/auxiliary_interface.py" line="1531"/>
         <source>Default settings must be set.
 
+                If champions set by lane are not available, default settings will be used.</source>
+        <translation type="obsolete">必须设置默认英雄
+
+                若非排位模式或按位置设置英雄不可用，则将使用默认设置</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="1531"/>
+        <source>Default settings must be set.
+
 If champions set by lane are not available, default settings will be used.</source>
         <translation>必须设置默认英雄
 
@@ -336,6 +345,15 @@ If champions set by lane are not available, default settings will be used.</sour
         <location filename="../../view/auxiliary_interface.py" line="1247"/>
         <source>Reset</source>
         <translation>恢复默认</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="1259"/>
+        <source>Default settings must be set.
+
+                If champions set by lane are not available, default settings will be used.</source>
+        <translation type="obsolete">必须设置默认英雄
+
+                若非排位模式或按位置设置英雄不可用，则将使用默认设置</translation>
     </message>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="1259"/>
@@ -520,7 +538,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>卸下头像框</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="59"/>
+        <location filename="../../view/auxiliary_interface.py" line="67"/>
         <source>Remove prestige crest from your profile icon (need your summoner level &gt;=
                 525)</source>
         <translation type="obsolete">卸下你的召唤师头像框（需要召唤师等级大于等于 525）</translation>
@@ -541,11 +559,6 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>客户端</translation>
     </message>
     <message>
-        <location filename="../../view/auxiliary_interface.py" line="67"/>
-        <source>Remove prestige crest from your profile icon (need your summoner level &gt;= 525)</source>
-        <translation>卸下你的召唤师头像框（需要召唤师等级大于等于 525）</translation>
-    </message>
-    <message>
         <location filename="../../view/auxiliary_interface.py" line="83"/>
         <source>Restart client</source>
         <translation>重启客户端</translation>
@@ -554,6 +567,11 @@ If champions set by lane are not available, default settings will be used.</sour
         <location filename="../../view/auxiliary_interface.py" line="83"/>
         <source>Restart the LOL client without re queuing</source>
         <translation>重启客户端而不需要重新排队</translation>
+    </message>
+    <message>
+        <location filename="../../view/auxiliary_interface.py" line="67"/>
+        <source>Remove prestige crest from your profile icon (need your summoner level &gt;= 525)</source>
+        <translation>卸下你的召唤师头像框（需要召唤师等级大于等于 525）</translation>
     </message>
 </context>
 <context>
@@ -713,6 +731,37 @@ If champions set by lane are not available, default settings will be used.</sour
     </message>
 </context>
 <context>
+    <name>ChampionSkillsWidget</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="341"/>
+        <source>Skills</source>
+        <translation type="obsolete">英雄技能</translation>
+    </message>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="405"/>
+        <source>Games</source>
+        <translation>局游戏</translation>
+    </message>
+</context>
+<context>
+    <name>ChampionTitleBar</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="87"/>
+        <source>Win Rate</source>
+        <translation>胜率</translation>
+    </message>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="92"/>
+        <source>Pick Rate</source>
+        <translation>登场率</translation>
+    </message>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="96"/>
+        <source>Ban Rate</source>
+        <translation>禁用率</translation>
+    </message>
+</context>
+<context>
     <name>ChampionsCard</name>
     <message>
         <location filename="../../view/career_interface.py" line="715"/>
@@ -827,12 +876,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ErrorInterface</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="412"/>
+        <location filename="../../view/opgg_interface.py" line="461"/>
         <source>Fetch data failed 😭</source>
         <translation>数据拉取失败 😭</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="413"/>
+        <location filename="../../view/opgg_interface.py" line="462"/>
         <source>Please wait and try again</source>
         <translation>请等待后重试</translation>
     </message>
@@ -1122,6 +1171,14 @@ If champions set by lane are not available, default settings will be used.</sour
     </message>
 </context>
 <context>
+    <name>ItemsWidget</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="473"/>
+        <source>Games</source>
+        <translation>局游戏</translation>
+    </message>
+</context>
+<context>
     <name>LineEditSettingCard</name>
     <message>
         <location filename="../../components/setting_cards.py" line="35"/>
@@ -1137,32 +1194,32 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ListTitleBar</name>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="148"/>
+        <location filename="../../view/opgg_tier_interface.py" line="149"/>
         <source>Champion</source>
         <translation>英雄</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="149"/>
+        <location filename="../../view/opgg_tier_interface.py" line="150"/>
         <source>Tier</source>
         <translation>梯队</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="150"/>
+        <location filename="../../view/opgg_tier_interface.py" line="151"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="151"/>
+        <location filename="../../view/opgg_tier_interface.py" line="152"/>
         <source>Pick Rate</source>
         <translation>登场率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="152"/>
+        <location filename="../../view/opgg_tier_interface.py" line="153"/>
         <source>Ban Rate</source>
         <translation>禁用率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="153"/>
+        <location filename="../../view/opgg_tier_interface.py" line="154"/>
         <source>Counters</source>
         <translation>劣势对抗</translation>
     </message>
@@ -1316,10 +1373,10 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>你第一次点击了关闭按钮</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="684"/>
+        <location filename="../../view/main_window.py" line="713"/>
         <source>Choose action for close button (you can modify it at any time in the settings
                 page)</source>
-        <translation type="obsolete">请选择点击关闭按钮的默认行为（您可以今后任意时间在设置界面修改它）</translation>
+        <translation type="obsolete">请选择点击关闭按钮的默认行为</translation>
     </message>
     <message>
         <location filename="../../view/main_window.py" line="351"/>
@@ -1417,11 +1474,6 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>，</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="713"/>
-        <source>Choose action for close button (you can modify it at any time in the settings page)</source>
-        <translation>请选择点击关闭按钮的默认行为</translation>
-    </message>
-    <message>
         <location filename="../../view/main_window.py" line="390"/>
         <source>Get cmdline error</source>
         <translation>获取启动参数失败</translation>
@@ -1430,6 +1482,11 @@ If champions set by lane are not available, default settings will be used.</sour
         <location filename="../../view/main_window.py" line="390"/>
         <source>Try running Seraphine as an administrator</source>
         <translation>请尝试使用管理员身份启动 Seraphine</translation>
+    </message>
+    <message>
+        <location filename="../../view/main_window.py" line="713"/>
+        <source>Choose action for close button (you can modify it at any time in the settings page)</source>
+        <translation>请选择点击关闭按钮的默认行为</translation>
     </message>
 </context>
 <context>
@@ -1626,122 +1683,122 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>OpggInterface</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="132"/>
+        <location filename="../../view/opgg_interface.py" line="136"/>
         <source>Ranked</source>
         <translation>召唤师峡谷</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="134"/>
+        <location filename="../../view/opgg_interface.py" line="138"/>
         <source>Aram</source>
         <translation>极地大乱斗</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="136"/>
+        <location filename="../../view/opgg_interface.py" line="140"/>
         <source>Arena</source>
         <translation>斗魂竞技场</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="138"/>
+        <location filename="../../view/opgg_interface.py" line="142"/>
         <source>Urf</source>
         <translation>无限火力</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="140"/>
+        <location filename="../../view/opgg_interface.py" line="144"/>
         <source>Nexus Blitz</source>
         <translation>极限闪击</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="143"/>
+        <location filename="../../view/opgg_interface.py" line="147"/>
         <source>All regions</source>
         <translation>全球</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="145"/>
+        <location filename="../../view/opgg_interface.py" line="149"/>
         <source>Korea</source>
         <translation>韩服</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="148"/>
+        <location filename="../../view/opgg_interface.py" line="152"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="150"/>
+        <location filename="../../view/opgg_interface.py" line="154"/>
         <source>Gold -</source>
         <translation>黄金 -</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="152"/>
+        <location filename="../../view/opgg_interface.py" line="156"/>
         <source>Gold +</source>
         <translation>黄金 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="154"/>
+        <location filename="../../view/opgg_interface.py" line="158"/>
         <source>Platinum +</source>
         <translation>铂金 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="156"/>
+        <location filename="../../view/opgg_interface.py" line="160"/>
         <source>Emerald +</source>
         <translation>翡翠 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="158"/>
+        <location filename="../../view/opgg_interface.py" line="162"/>
         <source>Diamond +</source>
         <translation>钻石 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="160"/>
+        <location filename="../../view/opgg_interface.py" line="164"/>
         <source>Master</source>
         <translation>大师</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="162"/>
+        <location filename="../../view/opgg_interface.py" line="166"/>
         <source>Master +</source>
         <translation>大师 +</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="164"/>
+        <location filename="../../view/opgg_interface.py" line="168"/>
         <source>Grandmaster</source>
         <translation>宗师</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="166"/>
+        <location filename="../../view/opgg_interface.py" line="170"/>
         <source>Challenger</source>
         <translation>王者</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="128"/>
+        <location filename="../../view/opgg_interface.py" line="132"/>
         <source>Show Tier / Build</source>
         <translation>显示梯队 / 英雄详情</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="169"/>
+        <location filename="../../view/opgg_interface.py" line="173"/>
         <source>Top</source>
         <translation>上路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="171"/>
+        <location filename="../../view/opgg_interface.py" line="175"/>
         <source>Jungle</source>
         <translation>打野</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="173"/>
+        <location filename="../../view/opgg_interface.py" line="177"/>
         <source>Mid</source>
         <translation>中路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="175"/>
+        <location filename="../../view/opgg_interface.py" line="179"/>
         <source>Bottom</source>
         <translation>下路</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="177"/>
+        <location filename="../../view/opgg_interface.py" line="181"/>
         <source>Support</source>
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="376"/>
+        <location filename="../../view/opgg_interface.py" line="412"/>
         <source>Version: </source>
         <translation>游戏版本：</translation>
     </message>
@@ -2150,7 +2207,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>SearchLineEditFlyout</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="449"/>
+        <location filename="../../view/opgg_interface.py" line="498"/>
         <source>Search champions</source>
         <translation>搜索英雄</translation>
     </message>
@@ -2278,7 +2335,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>对局详情中显示段位</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="62"/>
+        <location filename="../../view/setting_interface.py" line="61"/>
         <source>Show tier icon in game information interface. Enabling this option affects
                 APP&apos;s performance</source>
         <translation type="obsolete">在对局详情界面中显示段位图标，启动该选项将影响加载该界面的速度</translation>
@@ -2334,10 +2391,10 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>真的要删除吗？</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="304"/>
+        <location filename="../../view/setting_interface.py" line="322"/>
         <source>Game resources will be downloaded again
                 when they are used by Seraphine, which will cost more time</source>
-        <translation type="obsolete">游戏资源将会在它们要被 Seraphine 使用时重新下载
+        <translation type="obsolete">游戏资源将会在它们要被 Seraphine 使用时重新下载，
                 这有可能会消耗更多的时间</translation>
     </message>
     <message>
@@ -2461,11 +2518,6 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="61"/>
-        <source>Show tier icon in game information interface. Enabling this option affects APP&apos;s performance</source>
-        <translation>在对局详情界面中显示段位图标，启动该选项将影响加载该界面的速度</translation>
-    </message>
-    <message>
         <location filename="../../view/setting_interface.py" line="89"/>
         <source>Open</source>
         <translation>打开文件夹</translation>
@@ -2481,13 +2533,6 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>打开日志文件夹</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="322"/>
-        <source>Game resources will be downloaded again
-when they are used by Seraphine, which will cost more time</source>
-        <translation>游戏资源将会在它们要被 Seraphine 使用时重新下载，
-这有可能会消耗更多的时间</translation>
-    </message>
-    <message>
         <location filename="../../view/setting_interface.py" line="70"/>
         <source>Set client path and order (The first one will be used as the default value)</source>
         <translation type="obsolete">设置客户端路径及顺序（第一个会被作为默认值）</translation>
@@ -2501,6 +2546,18 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../view/setting_interface.py" line="80"/>
         <source>Log</source>
         <translation>日志</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="61"/>
+        <source>Show tier icon in game information interface. Enabling this option affects APP&apos;s performance</source>
+        <translation>在对局详情界面中显示段位，启动该选项将影响加载该界面的速度</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="322"/>
+        <source>Game resources will be downloaded again
+when they are used by Seraphine, which will cost more time</source>
+        <translation>游戏资源将会在它们要被 Seraphine 使用时重新下载，
+这有可能会消耗更多的时间</translation>
     </message>
 </context>
 <context>
@@ -2544,6 +2601,19 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../view/auxiliary_interface.py" line="841"/>
         <source>Please input summoner&apos;s name</source>
         <translation>请输入召唤师名</translation>
+    </message>
+</context>
+<context>
+    <name>Spell</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="267"/>
+        <source>Games</source>
+        <translation>局游戏</translation>
+    </message>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="306"/>
+        <source>Summoner Spells</source>
+        <translation type="obsolete">召唤师技能</translation>
     </message>
 </context>
 <context>
@@ -2633,6 +2703,14 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../view/game_info_interface.py" line="438"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
+    </message>
+</context>
+<context>
+    <name>SummonerSpellsWidget</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="308"/>
+        <source>Summoner Spells</source>
+        <translation type="obsolete">召唤师技能</translation>
     </message>
 </context>
 <context>
@@ -2747,12 +2825,12 @@ when they are used by Seraphine, which will cost more time</source>
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="42"/>
+        <location filename="../../lol/tools.py" line="50"/>
         <source>Ranked Solo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="43"/>
+        <location filename="../../lol/tools.py" line="51"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
@@ -2849,10 +2927,10 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">当英雄联盟客户端完全启动后，请点击“连接客户端”按钮</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="203"/>
+        <location filename="../../components/message_box.py" line="219"/>
         <source>Please clicked &quot;Connect To Client&quot; button manually when LOL launched
                 completely</source>
-        <translation type="obsolete">请您在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
+        <translation type="obsolete">请在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>
     <message>
         <location filename="../../components/message_box.py" line="219"/>
