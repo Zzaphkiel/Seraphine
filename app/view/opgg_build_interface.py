@@ -11,8 +11,9 @@ from app.components.animation_frame import ColorAnimationFrame
 from app.components.transparent_button import TransparentButton
 from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.common.style_sheet import StyleSheet
-from app.common.qfluentwidgets import BodyLabel, SmoothScrollArea, FlowLayout, IconWidget
+from app.common.qfluentwidgets import SmoothScrollArea, IconWidget, isDarkTheme
 from app.common.icons import Icon
+from app.common.config import qconfig
 
 
 class BuildInterface(QFrame):
@@ -71,6 +72,7 @@ class BuildInterface(QFrame):
         self.summonerSpells.updateWidget(data['summonerSpells'])
         self.championSkills.updateWidget(data['championSkills'])
         self.championItems.updateWidget(data['items'])
+        self.championCounters.updateWidget(data['counters'])
 
 
 class ChampionTitleBar(ColorAnimationFrame):
@@ -82,7 +84,7 @@ class ChampionTitleBar(ColorAnimationFrame):
         self.hBoxLayout.setAlignment(Qt.AlignLeft)
 
         self.nameLayout = QVBoxLayout()
-        self.icon = RoundIcon('app/resource/images/champion-0.png', 54, 3, 3)
+        self.icon = RoundIcon('app/resource/images/champion-0.png', 54, 2, 3)
         self.name = QLabel()
         self.position = QLabel()
 
@@ -563,9 +565,80 @@ class ChampionItemWidget(BuildWidgetBase):
         self.setVisible(True)
 
 
+class CounterChampionWidget(QFrame):
+    def __init__(self, data, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.winRate = data['winRate']
+        self.icon = RoundIcon(data['icon'], 28, 2, 2)
+        self.nameLabel = QLabel(data['name'])
+        self.winRateLabel = QLabel(f"{self.winRate*100:.2f}%")
+        self.playsLabel = QLabel(f"{data['play']:,} " + self.tr("Games"))
+
+        if self.winRate > 0.5:
+            self.color = min(255 * (data['winRate'] - 0.5)*16 + 40, 255)
+        else:
+            self.color = min(255 * (0.5 - data['winRate'])*12 + 40, 200)
+
+        self.__initWidget()
+        self.__initLayout()
+
+        self.setFixedHeight(32)
+
+    def __initWidget(self):
+        self.nameLabel.setObjectName("bodyLabel")
+        self.nameLabel.setContentsMargins(0, 0, 0, 2)
+
+        self.winRateLabel.setObjectName("boldBodyLabel")
+        self.winRateLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.winRateLabel.setFixedWidth(43)
+        self.winRateLabel.setContentsMargins(0, 0, 0, 2)
+
+        self.playsLabel.setObjectName("grayBodyLabel")
+        self.playsLabel.setAlignment(Qt.AlignCenter)
+        self.playsLabel.setFixedWidth(81)
+        self.playsLabel.setContentsMargins(0, 0, 0, 2)
+
+        self.__setColor()
+        qconfig.themeChanged.connect(self.__setColor)
+
+    def __initLayout(self):
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.addWidget(self.icon)
+        self.hBoxLayout.addSpacing(4)
+        self.hBoxLayout.addWidget(self.nameLabel)
+        self.hBoxLayout.addSpacerItem(QSpacerItem(
+            0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hBoxLayout.addWidget(self.playsLabel)
+        self.hBoxLayout.addSpacing(22)
+        self.hBoxLayout.addWidget(self.winRateLabel)
+
+    def __setColor(self):
+        if self.winRate > 0.5:
+            if not isDarkTheme():
+                color = f"color: rgb({self.color}, 0, 0)"
+            else:
+                color = f"color: rgb(255, {255 - self.color}, {255 - self.color})"
+        else:
+            if not isDarkTheme():
+                color = f"color: rgb(0, {self.color}, 0)"
+            else:
+                color = f"color: rgb({255 - self.color}, 255, {255 - self.color})"
+
+        self.winRateLabel.setStyleSheet(color)
+
+
 class ChampionCountersWidget(BuildWidgetBase):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.strongAgainstLayout = QVBoxLayout()
+        self.separatorLine = SeparatorLine(QFrame.Shape.VLine)
+        self.weakAgainstLayout = QVBoxLayout()
 
         self.__initWidget()
         self.__initLayout()
@@ -574,7 +647,34 @@ class ChampionCountersWidget(BuildWidgetBase):
         pass
 
     def __initLayout(self):
-        pass
+        self.strongAgainstLayout.setAlignment(Qt.AlignTop)
+        self.strongAgainstLayout.setContentsMargins(0, 0, 0, 0)
+        self.strongAgainstLayout.setSpacing(6)
+        self.weakAgainstLayout.setAlignment(Qt.AlignTop)
+        self.weakAgainstLayout.setContentsMargins(0, 0, 0, 0)
+        self.weakAgainstLayout.setSpacing(6)
+
+        self.hBoxLayout.setContentsMargins(13, 11, 13, 11)
+        self.hBoxLayout.addLayout(self.strongAgainstLayout)
+        self.hBoxLayout.addSpacing(4)
+        self.hBoxLayout.addWidget(self.separatorLine)
+        self.hBoxLayout.addSpacing(4)
+        self.hBoxLayout.addLayout(self.weakAgainstLayout)
+
+    def __updateLayout(self, layout: QLayout, data: list):
+        for i in reversed(range(layout.count())):
+            item = layout.itemAt(i)
+            layout.removeItem(item)
+
+            if widget := item.widget():
+                widget.deleteLater()
+
+        for x in data:
+            item = CounterChampionWidget(x)
+            layout.addWidget(item)
 
     def updateWidget(self, data):
+        self.__updateLayout(self.strongAgainstLayout, data['strongAgainst'])
+        self.__updateLayout(self.weakAgainstLayout, data['weakAgainst'])
+
         self.setVisible(True)

@@ -42,7 +42,7 @@ BuildWidgetBase {
 
 #boldBodyLabel {
     font: bold 13px 'Segoe UI', 'Microsoft YaHei';
-    color: white
+    color: --ThemeColorDark1;
 }
 
 #grayBodyLabel {
@@ -51,7 +51,7 @@ BuildWidgetBase {
 }
 
 #separatorLine {
-    color: rgb(60, 60, 60);
+    color: rgb(80, 80, 80);
 }
 
 SkillIcon {

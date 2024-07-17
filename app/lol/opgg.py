@@ -261,6 +261,25 @@ class OpggDataParser:
         for i in data['last_items'][:16]:
             lastItems.append(await connector.getItemIcon(i['ids'][0]))
 
+        strongAgainst = []
+        weakAgainst = []
+
+        for c in data['counters']:
+            winRate = c['win'] / c['play']
+            arr = strongAgainst if winRate >= 0.5 else weakAgainst
+
+            arr.append({
+                'championId': (id := c['champion_id']),
+                'name': connector.manager.getChampionNameById(id),
+                'icon': await connector.getChampionIcon(id),
+                'play': c['play'],
+                'win': c['win'],
+                'winRate': winRate
+            })
+
+        strongAgainst.sort(key=lambda x: -x['winRate'])
+        weakAgainst.sort(key=lambda x: x['winRate'])
+
         return {
             "summary": {
                 'name': name,
@@ -281,6 +300,10 @@ class OpggDataParser:
                 "startItems": startItems,
                 "coreItems": coreItems,
                 "lastItems": lastItems,
+            },
+            "counters": {
+                "strongAgainst": strongAgainst,
+                "weakAgainst": weakAgainst,
             }
         }
 

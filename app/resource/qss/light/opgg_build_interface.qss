@@ -40,7 +40,7 @@ BuildWidgetBase {
 
 #boldBodyLabel {
     font: bold 13px 'Segoe UI', 'Microsoft YaHei';
-    color: black;
+    color: --ThemeColorLight1;
 }
 
 #grayBodyLabel {
