@@ -8,16 +8,6 @@ class RoundIcon(QFrame):
         super().__init__(parent)
         self.image = QPixmap(icon)
 
-        width = self.image.width() - 2*overscaled
-        height = self.image.height() - 2*overscaled
-
-        self.image = self.image.copy(overscaled, overscaled, width, height)
-
-        size = self.size() * self.devicePixelRatioF()
-        self.image = self.image.scaled(size,
-                                       Qt.AspectRatioMode.KeepAspectRatio,
-                                       Qt.TransformationMode.SmoothTransformation)
-
         self.overscaled = overscaled
         self.borderWidth = borderWidth
 
@@ -27,10 +17,21 @@ class RoundIcon(QFrame):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
+        width = self.image.width() - 2*self.overscaled
+        height = self.image.height() - 2*self.overscaled
+
+        image = self.image.copy(
+            self.overscaled, self.overscaled, width, height)
+
+        size = self.size() * self.devicePixelRatioF()
+        image = image.scaled(size,
+                             Qt.AspectRatioMode.KeepAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
+
         path = QPainterPath()
         path.addEllipse(0, 0, self.width(), self.height())
         painter.setClipPath(path)
-        painter.drawPixmap(self.rect(), self.image)
+        painter.drawPixmap(self.rect(), image)
 
         painter.setPen(
             QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
@@ -56,17 +57,8 @@ class RoundIconButton(QFrame):
 
         self.image = QPixmap(icon)
 
-        width = self.image.width() - 2*overscaled
-        height = self.image.height() - 2*overscaled
-
-        self.image = self.image.copy(overscaled, overscaled, width, height)
-
-        size = self.size() * self.devicePixelRatioF()
-        self.image = self.image.scaled(size,
-                                       Qt.AspectRatioMode.KeepAspectRatio,
-                                       Qt.TransformationMode.SmoothTransformation)
-
         self.borderWidth = borderWidth
+        self.overscaled = overscaled
 
         self.championName: str = championName
         self.championId = championId
@@ -84,6 +76,17 @@ class RoundIconButton(QFrame):
         path.addEllipse(0, 0, self.width(), self.height())
         painter.setClipPath(path)
 
+        width = self.image.width() - 2*self.overscaled
+        height = self.image.height() - 2*self.overscaled
+
+        image = self.image.copy(
+            self.overscaled, self.overscaled, width, height)
+
+        size = self.size() * self.devicePixelRatioF()
+        image = image.scaled(size,
+                             Qt.AspectRatioMode.KeepAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
+
         if self.isPressed:
             painter.setOpacity(0.63)
         elif self.isHover:
@@ -91,7 +94,7 @@ class RoundIconButton(QFrame):
         else:
             painter.setOpacity(1)
 
-        painter.drawPixmap(self.rect(), self.image)
+        painter.drawPixmap(self.rect(), image)
 
         painter.setPen(
             QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
@@ -122,13 +125,13 @@ class RoundIconButton(QFrame):
 
 
 class RoundedLabel(QLabel):
-    def __init__(self, imagePath=None, parent=None):
+    def __init__(self, imagePath=None, radius=4.0, borderWidth=2, parent=None):
         super().__init__(parent)
         self.setPixmap(QPixmap(imagePath))
 
         self.havePic = imagePath != None
-        self.radius = 4.0
-        self.borderWidth = 2
+        self.radius = radius
+        self.borderWidth = borderWidth
 
     def paintEvent(self, e):
         if not self.havePic:

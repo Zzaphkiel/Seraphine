@@ -6,7 +6,7 @@ from PyQt5.QtGui import QPixmap, QPen, QPainter, QColor
 from app.common.qfluentwidgets import isDarkTheme, Theme
 from app.common.signals import signalBus
 from app.common.config import cfg
-from app.components.champion_icon_widget import RoundIcon
+from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.components.color_label import ColorLabel
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 
@@ -163,14 +163,8 @@ class ItemsKdaCsGold(QFrame):
         self.itemsLayout.setSpacing(0)
 
         for item in items:
-            image = QLabel()
-            image.setPixmap(
-                QPixmap(item).scaled(
-                    34, 34, Qt.KeepAspectRatio, Qt.SmoothTransformation
-                )
-            )
+            image = RoundedLabel(item, 1)
             image.setFixedSize(34, 34)
-            image.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
 
             self.itemsLayout.addWidget(image)
 

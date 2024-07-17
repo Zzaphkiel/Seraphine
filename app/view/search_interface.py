@@ -20,7 +20,7 @@ from app.common.style_sheet import StyleSheet, ColorChangeable
 from app.common.icons import Icon
 from app.common.config import cfg
 from app.common.signals import signalBus
-from app.components.champion_icon_widget import RoundIcon
+from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.components.search_line_edit import SearchLineEdit
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import ColorAnimationFrame, CardWidget
@@ -720,8 +720,14 @@ class SummonerInfoBar(CardWidget):
         self.levelLabel.setAlignment(Qt.AlignCenter)
         self.levelLabel.setFixedWidth(20)
 
-        self.items = [QPixmap(icon).scaled(
-            21, 21, Qt.KeepAspectRatio, Qt.SmoothTransformation) for icon in summoner["itemIcons"]]
+        # self.items = [QPixmap(icon).scaled(
+        #     21, 21, Qt.KeepAspectRatio, Qt.SmoothTransformation) for icon in summoner["itemIcons"]]
+
+        self.items = []
+        for icon in summoner['itemIcons']:
+            label = RoundedLabel(icon, 0)
+            label.setFixedSize(23, 23)
+            self.items.append(label)
 
         if summoner["rankInfo"]:
             if summoner['rankIcon'] != None:
@@ -766,14 +772,9 @@ class SummonerInfoBar(CardWidget):
 
         self.itemsLayout.setSpacing(0)
         self.spellsLayout.setContentsMargins(0, 0, 0, 0)
-        for icon in self.items:
-            itemLabel = QLabel()
-            itemLabel.setPixmap(icon)
-            itemLabel.setStyleSheet(
-                "QLabel {border: 1px solid rgb(70, 55, 20)}")
-            itemLabel.setFixedSize(23, 23)
 
-            self.itemsLayout.addWidget(itemLabel)
+        for icon in self.items:
+            self.itemsLayout.addWidget(icon)
 
         self.hBoxLayout.setContentsMargins(6, 0, 6, 0)
         self.hBoxLayout.addWidget(self.runeIcon)
