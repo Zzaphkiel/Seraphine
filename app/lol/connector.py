@@ -2,7 +2,7 @@ import inspect
 import os
 import json
 import threading
-import traceback
+import re
 from collections import deque
 
 import requests
@@ -213,6 +213,7 @@ class LolClientConnector(QObject):
         self.inMainLand = False
 
         self.manager = None
+        self.perksStyleCache = None
 
         self.dqLock = threading.Lock()
         self.callStack = deque(maxlen=10)
@@ -242,6 +243,7 @@ class LolClientConnector(QObject):
         await self.__initManager()
         self.__initFolder()
         await self.__runListener()
+        await self.__initRuneStyle()
 
         logger.critical(f"connector started, server: {self.server}", TAG)
 
@@ -347,6 +349,34 @@ class LolClientConnector(QObject):
                                  'gz100', 'nj100', 'hn10', 'tj101', 'bgp2'}
 
             self.inMainLand = self.server.lower() in mainlandPlatforms
+
+    async def __initRuneStyle(self):
+        res = {}
+
+        for item in self.manager.perks['styles']:
+            id = item['id']
+            name = item['name']
+
+            slots = []
+
+            for s in item['slots']:
+                perks = [{
+                    "runeId": perk,
+                    "icon": await self.getRuneIcon(perk),
+                    "name": self.manager.getRuneName(perk),
+                    "desc": self.manager.getRuneDesc(perk),
+                } for perk in s['perks']
+                ]
+
+                slots.append(perks)
+
+            res[id] = {
+                "name": name,
+                "icon": await self.getRuneIcon(id),
+                "slots": slots
+            }
+
+        self.manager.perkStyles = res
 
     async def __json_retry_get(self, url, max_retries=5):
         """
@@ -1017,7 +1047,14 @@ class JsonManager:
         self.items = {item["id"]: item["iconPath"] for item in itemData}
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
         self.runes = {item["id"]: {"icon": item["iconPath"],
-                                   'name': item['name']} for item in runeData}
+                                   'name': item['name'],
+                                   'desc': item['longDesc']
+                                   } for item in runeData}
+
+        for item in self.runes.values():
+            desc: str = item['desc']
+            desc = desc.replace("<br>", "\n")
+            item['desc'] = re.sub(r"\<.*?\>", "", desc)
 
         self.champs = {item["id"]: item["name"] for item in champions}
 
@@ -1027,7 +1064,8 @@ class JsonManager:
             for item in queueData
         }
 
-        self.perks = perks
+        self.perks: dict = perks
+        self.perkStyles: dict = None
 
         # 给高贵的名人堂皮肤一个专属于它们的成员变量（划掉）
         # 名人堂皮肤里有 augments 参数，使用它们可以让召唤师生涯背景带上签名^^_
@@ -1070,10 +1108,18 @@ class JsonManager:
             return "/lol-game-data/assets/data/spells/icons2d/summoner_empty.png"
 
     def getRuneIconPath(self, runeId):
-        return self.runes[runeId]['icon']
+        try:
+            return self.runes[runeId]['icon']
+        except:
+            for item in self.perks['styles']:
+                if item['id'] == runeId:
+                    return item['iconPath']
 
     def getRuneName(self, runeId):
         return self.runes[runeId]['name']
+
+    def getRuneDesc(self, runeId):
+        return self.runes[runeId]['desc']
 
     def getSummonerProfileIconPath(self, iconId):
         return f"/lol-game-data/assets/v1/profile-icons/{iconId}.jpg"
@@ -1159,7 +1205,7 @@ class JsonManager:
         return self.skinAugments.get(skinId)
 
     def getPerkStyles(self):
-        return self.perks
+        return self.perkStyles
 
 
 connector = LolClientConnector()
