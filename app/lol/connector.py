@@ -332,13 +332,14 @@ class LolClientConnector(QObject):
         spells = await self.__json_retry_get(
             "/lol-game-data/assets/v1/summoner-spells.json")
         runes = await self.__json_retry_get("/lol-game-data/assets/v1/perks.json")
+        perks = await self.__json_retry_get("/lol-game-data/assets/v1/perkstyles.json")
         queues = await self.__json_retry_get("/lol-game-queues/v1/queues")
         champions = await self.__json_retry_get(
             "/lol-game-data/assets/v1/champion-summary.json")
         skins = await self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
 
         self.manager = JsonManager(
-            items, spells, runes, queues, champions, skins)
+            items, spells, runes, queues, champions, skins, perks)
 
     def __initPlatformInfo(self):
         if self.server:
@@ -1012,10 +1013,11 @@ class LolClientConnector(QObject):
 
 
 class JsonManager:
-    def __init__(self, itemData, spellData, runeData, queueData, champions, skins):
+    def __init__(self, itemData, spellData, runeData, queueData, champions, skins, perks):
         self.items = {item["id"]: item["iconPath"] for item in itemData}
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
-        self.runes = {item["id"]: item["iconPath"] for item in runeData}
+        self.runes = {item["id"]: {"icon": item["iconPath"],
+                                   'name': item['name']} for item in runeData}
 
         self.champs = {item["id"]: item["name"] for item in champions}
 
@@ -1024,6 +1026,8 @@ class JsonManager:
             item["id"]: {"mapId": item["mapId"], "name": item["name"]}
             for item in queueData
         }
+
+        self.perks = perks
 
         # 给高贵的名人堂皮肤一个专属于它们的成员变量（划掉）
         # 名人堂皮肤里有 augments 参数，使用它们可以让召唤师生涯背景带上签名^^_
@@ -1066,7 +1070,10 @@ class JsonManager:
             return "/lol-game-data/assets/data/spells/icons2d/summoner_empty.png"
 
     def getRuneIconPath(self, runeId):
-        return self.runes[runeId]
+        return self.runes[runeId]['icon']
+
+    def getRuneName(self, runeId):
+        return self.runes[runeId]['name']
 
     def getSummonerProfileIconPath(self, iconId):
         return f"/lol-game-data/assets/v1/profile-icons/{iconId}.jpg"
@@ -1150,6 +1157,9 @@ class JsonManager:
 
     def getSkinAugments(self, skinId):
         return self.skinAugments.get(skinId)
+
+    def getPerkStyles(self):
+        return self.perks
 
 
 connector = LolClientConnector()

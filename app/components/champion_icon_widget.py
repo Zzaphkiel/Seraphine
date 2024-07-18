@@ -135,7 +135,7 @@ class RoundedLabel(QLabel):
 
     def paintEvent(self, e):
         if not self.havePic:
-            return
+            return super().paintEvent(e)
 
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
@@ -149,9 +149,11 @@ class RoundedLabel(QLabel):
         painter.setClipPath(path)
         painter.drawPixmap(self.rect(), pixmap)
 
-        painter.setPen(
-            QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
-        painter.drawRoundedRect(QRectF(self.rect()), self.radius, self.radius)
+        if self.borderWidth != 0:
+            painter.setPen(
+                QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
+            painter.drawRoundedRect(
+                QRectF(self.rect()), self.radius, self.radius)
 
     def setPicture(self, imagePath):
         self.havePic = True
@@ -162,3 +164,8 @@ class RoundedLabel(QLabel):
     def setRedius(self, radius):
         self.radius = radius
         self.repaint()
+
+    def setText(self, text):
+        self.havePic = False
+
+        return super().setText(text)

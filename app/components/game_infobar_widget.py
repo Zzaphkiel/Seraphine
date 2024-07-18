@@ -69,27 +69,12 @@ class ResultModeSpell(QFrame):
         self.modeLabel = QLabel(mode)
         self.modeLabel.setStyleSheet("QLabel {font: 12px;}")
 
-        self.spell1 = QLabel()
-        self.spell2 = QLabel()
-        self.spell1.setPixmap(
-            QPixmap(spell1).scaled(
-                22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        )
-        self.spell2.setPixmap(
-            QPixmap(spell2).scaled(
-                22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        )
-
+        self.spell1 = RoundedLabel(spell1, 0, 2)
+        self.spell2 = RoundedLabel(spell2, 0, 2)
         self.spell1.setFixedSize(22, 22)
         self.spell2.setFixedSize(22, 22)
-        self.spell1.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
-        self.spell2.setStyleSheet("QLabel {border: 1px solid rgb(70, 55, 20)}")
 
-        self.rune = QLabel()
-        self.rune.setPixmap(
-            QPixmap(rune).scaled(
-                24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        )
+        self.rune = RoundedLabel(rune, 0, 0)
         self.rune.setFixedSize(24, 24)
 
         self.__initLayout()
@@ -128,26 +113,21 @@ class ItemsKdaCsGold(QFrame):
         self.goldLabel = QLabel(format(gold, ","))
 
         self.kdaLabel.setAlignment(Qt.AlignCenter)
+        self.kdaLabel.setContentsMargins(0, 0, 0, 2)
         self.csLabel.setAlignment(Qt.AlignCenter)
+        self.csLabel.setContentsMargins(0, 0, 0, 2)
         self.goldLabel.setAlignment(Qt.AlignCenter)
+        self.goldLabel.setContentsMargins(0, 0, 0, 2)
         self.goldLabel.setFixedWidth(55)
 
-        self.csIcon = QLabel()
+        self.csIcon = RoundedLabel(borderWidth=0, radius=0)
         color = "white" if isDarkTheme() else "black"
-        self.csIcon.setPixmap(
-            QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
-            )
-        )
+        self.csIcon.setPicture(f"app/resource/images/Minions_{color}.png")
         self.csIcon.setFixedSize(16, 16)
         self.csIcon.setAlignment(Qt.AlignCenter)
 
-        self.goldIcon = QLabel()
-        self.goldIcon.setPixmap(
-            QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
-            )
-        )
+        self.goldIcon = RoundedLabel(borderWidth=0, radius=0)
+        self.goldIcon.setPicture(f"app/resource/images/Gold_{color}.png")
         self.goldIcon.setFixedSize(16, 16)
         self.goldIcon.setAlignment(Qt.AlignCenter)
 
@@ -187,16 +167,8 @@ class ItemsKdaCsGold(QFrame):
 
     def __updateIconColor(self, theme: Theme):
         color = "white" if theme == Theme.DARK else "black"
-        self.csIcon.setPixmap(
-            QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
-            )
-        )
-        self.goldIcon.setPixmap(
-            QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-                16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation
-            )
-        )
+        self.csIcon.setPicture(f"app/resource/images/Minions_{color}.png")
+        self.goldIcon.setPicture(f"app/resource/images/Gold_{color}.png")
 
 
 class MapTime(QFrame):
