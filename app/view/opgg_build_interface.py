@@ -15,7 +15,8 @@ from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (SmoothScrollArea, IconWidget, isDarkTheme,
                                        ToolTipFilter, ToolTipPosition, PushButton,
                                        PrimaryToolButton, FluentIcon, PillToolButton,
-                                       TransparentToolButton, PrimaryPushButton)
+                                       TransparentToolButton, PrimaryPushButton,
+                                       setCustomStyleSheet)
 from app.common.icons import Icon
 from app.common.config import qconfig
 from app.lol.connector import connector
@@ -24,7 +25,7 @@ from app.lol.connector import connector
 class BuildInterface(QFrame):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-
+        self.championId = None
         self.vBoxLayout = QVBoxLayout(self)
 
         self.scrollArea = SmoothScrollArea()
@@ -77,7 +78,7 @@ class BuildInterface(QFrame):
     def updateInterface(self, data):
         self.titleBar.updateWidget(data['summary'])
         self.summonerSpells.updateWidget(data['summonerSpells'])
-        self.championPerks.updateWidget(data['perks'])
+        self.championPerks.updateWidget(data['perks'], data['summary'])
         self.championSkills.updateWidget(data['championSkills'])
         self.championItems.updateWidget(data['items'])
         self.championCounters.updateWidget(data['counters'])
@@ -741,8 +742,9 @@ class ChampionPerksWidget(BuildWidgetBase):
         self.hBoxLayout.addWidget(self.vLine)
         self.hBoxLayout.addLayout(self.perkSelectLayout)
 
-    def updateWidget(self, data: list):
+    def updateWidget(self, data: list, summary: dict):
         self.data = data
+        self.summary = summary
 
         self.perksView.setCurrentPerks(
             data[0]['primaryId'], data[0]['secondaryId'], data[0]['perks'])
@@ -770,7 +772,11 @@ class ChampionPerksWidget(BuildWidgetBase):
 
     @asyncSlot(bool)
     async def __onSetRunePageButtonClicked(self, _):
-        print(self.data[self.selectedIndex])
+        data = self.data[self.selectedIndex]
+        name = "Seraphine" + self.tr(": ") + self.summary['name']
+
+        await connector.deleteCurrentRunePage()
+        await connector.createRunePage(name, data['primaryId'], data['secondaryId'], data['perks'])
 
 
 class PerksSummaryWidget(NoBorderColorAnimationFrame):

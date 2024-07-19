@@ -855,6 +855,36 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
+    @retry()
+    async def getCurrentRunePage(self):
+        res = await self.__get("/lol-perks/v1/currentpage")
+
+        return await res.json()
+
+    @retry()
+    async def deleteCurrentRunePage(self):
+        page = await self.getCurrentRunePage()
+
+        res = None
+        if page.get('isDeletable'):
+            id = page['id']
+
+            res = await self.__delete(f"/lol-perks/v1/pages/{id}")
+            res = await res.json()
+
+    @retry()
+    async def createRunePage(self, name, primaryId, secondaryId, perks):
+        body = {
+            "name": name,
+            "primaryStyleId": primaryId,
+            "subStyleId": secondaryId,
+            "selectedPerkIds": perks,
+            "current": True
+        }
+
+        res = await self.__post("/lol-perks/v1/pages", data=body)
+        return await res.json()
+
     async def spectate(self, summonerName):
         info = await self.getSummonerByName(summonerName)
         puuid = info.get('puuid')
@@ -1022,6 +1052,10 @@ class LolClientConnector(QObject):
     @needLcu()
     async def __put(self, path, data=None):
         return await self.lcuSess.put(path, json=data, ssl=False)
+
+    @needLcu()
+    async def __delete(self, path):
+        return await self.lcuSess.delete(path, ssl=False)
 
     @needLcu()
     async def __patch(self, path, data=None):
