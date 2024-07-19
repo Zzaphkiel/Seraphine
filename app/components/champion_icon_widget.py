@@ -1,19 +1,29 @@
 from PyQt5.QtCore import QEvent, Qt, pyqtSignal, QRectF, QSize
-from PyQt5.QtGui import QColor, QMouseEvent, QPainter, QPainterPath, QPen, QPixmap
+from PyQt5.QtGui import (QColor, QMouseEvent, QPainter, QPainterPath,
+                         QPen, QPixmap, qGray, qAlpha, qRgba)
 from PyQt5.QtWidgets import QWidget, QFrame, QLabel
+import time
 
 
 class RoundIcon(QFrame):
-    def __init__(self, icon=None, diameter=None, overscaled=None, borderWidth=None, parent=None) -> None:
+    def __init__(self, icon=None, diameter=None, overscaled=0,
+                 borderWidth=1, drawBackground=False, enabled=True, parent=None) -> None:
         super().__init__(parent)
         self.image = QPixmap(icon)
 
         self.overscaled = overscaled
         self.borderWidth = borderWidth
+        self.drawBackground = drawBackground
+        self.enabled = enabled
+
+        self.havePic = icon != None
 
         self.setFixedSize(diameter, diameter)
 
     def paintEvent(self, event) -> None:
+        if not self.havePic:
+            return
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
@@ -24,28 +34,44 @@ class RoundIcon(QFrame):
             self.overscaled, self.overscaled, width, height)
 
         size = self.size() * self.devicePixelRatioF()
-        image = image.scaled(size,
-                             Qt.AspectRatioMode.KeepAspectRatio,
-                             Qt.TransformationMode.SmoothTransformation)
+        image: QPixmap = image.scaled(size,
+                                      Qt.AspectRatioMode.KeepAspectRatio,
+                                      Qt.TransformationMode.SmoothTransformation)
 
         path = QPainterPath()
         path.addEllipse(0, 0, self.width(), self.height())
+
         painter.setClipPath(path)
+
+        if not self.enabled:
+            painter.setOpacity(0.15)
+
+        if self.drawBackground:
+            painter.save()
+            painter.setBrush(QColor(0, 0, 0))
+            painter.drawEllipse(0, 0, self.width(), self.height())
+            painter.restore()
+
         painter.drawPixmap(self.rect(), image)
 
-        painter.setPen(
-            QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
-        painter.drawEllipse(0, 0, self.width(), self.height())
+        if self.borderWidth != 0 and self.enabled:
+            painter.save()
+            painter.setPen(
+                QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
+            painter.drawEllipse(0, 0, self.width(), self.height())
+            painter.restore()
 
         return super().paintEvent(event)
 
     def setIcon(self, icon):
+        self.havePic = True
         self.image = QPixmap(icon)
-        width = self.image.width() - 2*self.overscaled
-        height = self.image.height() - 2*self.overscaled
 
-        self.image = self.image.copy(
-            self.overscaled, self.overscaled, width, height)
+        self.repaint()
+
+    def setEnabeld(self, enabled):
+        self.enabled = enabled
+
         self.repaint()
 
 

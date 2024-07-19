@@ -280,6 +280,19 @@ class OpggDataParser:
         strongAgainst.sort(key=lambda x: -x['winRate'])
         weakAgainst.sort(key=lambda x: x['winRate'])
 
+        perks = [{
+            'primaryId': (mainId := perk['primary_page_id']),
+            "primaryIcon": await connector.getRuneIcon(mainId),
+            'secondaryId': (subId := perk['secondary_page_id']),
+            "secondaryIcon": await connector.getRuneIcon(subId),
+            'perks': (perkIds := perk['primary_rune_ids']+perk['secondary_rune_ids']+perk['stat_mod_ids']),
+            "icons": [await connector.getRuneIcon(id) for id in perkIds],
+            'play': perk['play'],
+            'win': perk['win'],
+            'pickRate': perk['pick_rate'],
+        } for perk in data['runes']
+        ]
+
         return {
             "summary": {
                 'name': name,
@@ -304,7 +317,8 @@ class OpggDataParser:
             "counters": {
                 "strongAgainst": strongAgainst,
                 "weakAgainst": weakAgainst,
-            }
+            },
+            "perks": perks
         }
 
 

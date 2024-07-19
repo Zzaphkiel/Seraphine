@@ -193,6 +193,8 @@ class AuxiliaryInterface(SeraphineInterface):
         await self.autoBanChampionsCard.initChampionList(champions)
         await self.profileBackgroundCard.initChampionList(champions)
 
+        return champions
+
 
 class OnlineStatusCard(ExpandGroupSettingCard):
     def __init__(self, title, content, parent=None):

@@ -42,7 +42,7 @@ class RoundLevel(QFrame):
 class RoundIconWithLevel(QWidget):
     def __init__(self, icon, level, parent=None):
         super().__init__(parent)
-        self.icon = RoundIcon(icon, 58, 6, 4, self)
+        self.icon = RoundIcon(icon, 58, 6, 4, parent=self)
         self.level = RoundLevel(level, 22, self)
         self.level.move(42, 36)
 

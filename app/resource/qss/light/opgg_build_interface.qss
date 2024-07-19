@@ -85,3 +85,13 @@ SkillIcon[name=R] {
     color: white;
     background-color: rgb(83, 131, 232);
 }
+
+PerksSummaryWidget {
+    /* border: 1px solid rgba(0, 0, 0, 0.095); */
+    border-radius: 6px;
+}
+
+PerksSummaryWidget[selected=true] {
+    border: 2px solid --ThemeColorLight1;
+    border-radius: 6px;
+}

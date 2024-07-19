@@ -1,19 +1,24 @@
+from typing import List
 
 from PyQt5.QtWidgets import (QHBoxLayout, QWidget, QFrame, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QLabel, QHBoxLayout, QWidget, QLabel, QFrame,
-                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout)
+                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout, QGridLayout)
 from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
 from PyQt5.QtGui import QPixmap, QColor
 from qasync import asyncSlot
 
 from app.lol.tools import ToolsTranslator
-from app.components.animation_frame import ColorAnimationFrame
+from app.components.animation_frame import ColorAnimationFrame, NoBorderColorAnimationFrame
 from app.components.transparent_button import TransparentButton
 from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.common.style_sheet import StyleSheet
-from app.common.qfluentwidgets import SmoothScrollArea, IconWidget, isDarkTheme
+from app.common.qfluentwidgets import (SmoothScrollArea, IconWidget, isDarkTheme,
+                                       ToolTipFilter, ToolTipPosition, PushButton,
+                                       PrimaryToolButton, FluentIcon, PillToolButton,
+                                       TransparentToolButton, PrimaryPushButton)
 from app.common.icons import Icon
 from app.common.config import qconfig
+from app.lol.connector import connector
 
 
 class BuildInterface(QFrame):
@@ -31,6 +36,7 @@ class BuildInterface(QFrame):
         self.championSkills = ChampionSkillsWidget()
         self.championItems = ChampionItemWidget()
         self.championCounters = ChampionCountersWidget()
+        self.championPerks = ChampionPerksWidget()
 
         self.__initWidget()
         self.__initLayout()
@@ -53,6 +59,7 @@ class BuildInterface(QFrame):
 
         self.scrollLayout.addWidget(self.titleBar)
         self.scrollLayout.addWidget(self.summonerSpells)
+        self.scrollLayout.addWidget(self.championPerks)
         self.scrollLayout.addWidget(self.championSkills)
         self.scrollLayout.addWidget(self.championItems)
         self.scrollLayout.addWidget(self.championCounters)
@@ -70,6 +77,7 @@ class BuildInterface(QFrame):
     def updateInterface(self, data):
         self.titleBar.updateWidget(data['summary'])
         self.summonerSpells.updateWidget(data['summonerSpells'])
+        self.championPerks.updateWidget(data['perks'])
         self.championSkills.updateWidget(data['championSkills'])
         self.championItems.updateWidget(data['items'])
         self.championCounters.updateWidget(data['counters'])
@@ -566,13 +574,13 @@ class ChampionItemWidget(BuildWidgetBase):
 
 
 class CounterChampionWidget(QFrame):
-    def __init__(self, data, parent: QWidget = None):
+    def __init__(self, data, right=False, parent: QWidget = None):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
 
         self.winRate = data['winRate']
-        self.icon = RoundIcon(data['icon'], 28, 2, 2)
+        self.icon = RoundIcon(data['icon'], 26, 4, 3)
         self.nameLabel = QLabel(data['name'])
         self.winRateLabel = QLabel(f"{self.winRate*100:.2f}%")
         self.playsLabel = QLabel(f"{data['play']:,} " + self.tr("Games"))
@@ -581,6 +589,8 @@ class CounterChampionWidget(QFrame):
             self.color = min(255 * (data['winRate'] - 0.5)*16 + 40, 255)
         else:
             self.color = min(255 * (0.5 - data['winRate'])*12 + 40, 200)
+
+        self.right = right
 
         self.__initWidget()
         self.__initLayout()
@@ -612,7 +622,10 @@ class CounterChampionWidget(QFrame):
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.playsLabel)
-        self.hBoxLayout.addSpacing(22)
+        if self.right:
+            self.hBoxLayout.addSpacing(22)
+        else:
+            self.hBoxLayout.addSpacing(14)
         self.hBoxLayout.addWidget(self.winRateLabel)
 
     def __setColor(self):
@@ -661,7 +674,7 @@ class ChampionCountersWidget(BuildWidgetBase):
         self.hBoxLayout.addSpacing(4)
         self.hBoxLayout.addLayout(self.weakAgainstLayout)
 
-    def __updateLayout(self, layout: QLayout, data: list):
+    def __updateLayout(self, layout: QLayout, data: list, right):
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             layout.removeItem(item)
@@ -670,11 +683,316 @@ class ChampionCountersWidget(BuildWidgetBase):
                 widget.deleteLater()
 
         for x in data:
-            item = CounterChampionWidget(x)
+            item = CounterChampionWidget(x, right)
             layout.addWidget(item)
 
     def updateWidget(self, data):
-        self.__updateLayout(self.strongAgainstLayout, data['strongAgainst'])
-        self.__updateLayout(self.weakAgainstLayout, data['weakAgainst'])
+        self.__updateLayout(self.strongAgainstLayout,
+                            data['strongAgainst'], False)
+        self.__updateLayout(self.weakAgainstLayout, data['weakAgainst'], True)
 
         self.setVisible(True)
+
+
+class ChampionPerksWidget(BuildWidgetBase):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.perkShowLayout = QVBoxLayout()
+        self.setRuneButton = PrimaryPushButton(self.tr("Set Rune Page"))
+        self.perksView = PerksWidget()
+
+        self.vLine = SeparatorLine(QFrame.Shape.VLine)
+
+        self.perkSelectLayout = QVBoxLayout()
+        self.summaryWidgets = [PerksSummaryWidget(),
+                               PerksSummaryWidget(),
+                               PerksSummaryWidget()]
+
+        self.data = None
+        self.selectedIndex = 0
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        for i, widget in enumerate(self.summaryWidgets):
+            widget.clicked.connect(
+                lambda index=i: self.__onSummaryWidgetClicked(index))
+
+        self.setRuneButton.clicked.connect(self.__onSetRunePageButtonClicked)
+
+    def __initLayout(self):
+        self.perkShowLayout.setContentsMargins(0, 0, 0, 0)
+        self.perkShowLayout.addWidget(self.perksView)
+
+        self.perkSelectLayout.setContentsMargins(0, 0, 0, 0)
+        self.perkSelectLayout.setSpacing(4)
+        for widget in self.summaryWidgets:
+            self.perkSelectLayout.addWidget(widget)
+
+        self.perkSelectLayout.addWidget(self.setRuneButton)
+
+        self.hBoxLayout.setAlignment(Qt.AlignLeft)
+        self.hBoxLayout.setContentsMargins(7, 7, 4, 7)
+        self.hBoxLayout.addLayout(self.perkShowLayout)
+        self.hBoxLayout.addWidget(self.vLine)
+        self.hBoxLayout.addLayout(self.perkSelectLayout)
+
+    def updateWidget(self, data: list):
+        self.data = data
+
+        self.perksView.setCurrentPerks(
+            data[0]['primaryId'], data[0]['secondaryId'], data[0]['perks'])
+
+        for d, widget in zip(data, self.summaryWidgets):
+            widget.updateSummary(d)
+
+        self.summaryWidgets[0].setProperty("selected", True)
+        self.summaryWidgets[0].style().polish(self.summaryWidgets[0])
+        self.setVisible(True)
+
+    def __onSummaryWidgetClicked(self, index):
+        last = self.summaryWidgets[self.selectedIndex]
+        last.setProperty("selected", False)
+        last.style().polish(last)
+
+        new: PerksSummaryWidget = self.summaryWidgets[index]
+        new.setProperty("selected", True)
+        new.style().polish(new)
+
+        self.selectedIndex = index
+        data = self.data[index]
+        self.perksView.setCurrentPerks(
+            data['primaryId'], data['secondaryId'], data['perks'])
+
+    @asyncSlot(bool)
+    async def __onSetRunePageButtonClicked(self, _):
+        print(self.data[self.selectedIndex])
+
+
+class PerksSummaryWidget(NoBorderColorAnimationFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(type='default', parent=parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.hBoxLayout = QHBoxLayout()
+        self.runeIcon = RoundIcon(diameter=32, borderWidth=0)
+
+        self.playsLayout = QVBoxLayout()
+        self.winRateLabel = QLabel()
+        self.playsLabel = QLabel()
+        self.pickRateLabel = QLabel()
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.winRateLabel.setObjectName("bodyLabel")
+        self.winRateLabel.setAlignment(Qt.AlignCenter)
+        self.playsLabel.setObjectName("grayBodyLabel")
+        self.playsLabel.setAlignment(Qt.AlignCenter)
+        self.playsLabel.setFixedWidth(81)
+        self.pickRateLabel.setObjectName("boldBodyLabel")
+        self.pickRateLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.pickRateLabel.setFixedWidth(43)
+
+    def __initLayout(self):
+        self.playsLayout.setAlignment(Qt.AlignCenter)
+        self.playsLayout.setContentsMargins(0, 0, 0, 0)
+        self.playsLayout.setSpacing(0)
+        self.playsLayout.addWidget(self.winRateLabel)
+        self.playsLayout.addWidget(self.playsLabel)
+
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.addWidget(self.runeIcon)
+        # self.hBoxLayout.addWidget(self.subIcon)
+        self.hBoxLayout.addSpacerItem(QSpacerItem(
+            0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.hBoxLayout.addLayout(self.playsLayout)
+        self.hBoxLayout.addSpacing(21)
+        self.hBoxLayout.addWidget(self.pickRateLabel)
+
+        self.vBoxLayout.setContentsMargins(5, 5, 8, 5)
+        self.vBoxLayout.setSpacing(0)
+        self.vBoxLayout.addLayout(self.hBoxLayout)
+
+    def updateSummary(self, data):
+        self.runeIcon.setIcon(data['icons'][0])
+        self.winRateLabel.setText(f"{data['win'] / data['play']*100:.2f}%")
+        self.playsLabel.setText(f"{data['play']:,} " + self.tr("Games"))
+        self.pickRateLabel.setText(f"{data['pickRate']*100:.2f}%")
+
+
+class PerksWidget(QFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        # self.setStyleSheet("PerksWidget{border: 1px solid black;}")
+        self.gridLayout = QGridLayout(self)
+
+        self.iconSize = 26
+
+        self.mainTitleIcon = RoundIcon(diameter=self.iconSize, borderWidth=0)
+
+        self.primaryPerksLayout = QVBoxLayout()
+        self.primaryPerksSlots = [
+            QHBoxLayout(),
+            QHBoxLayout(),
+            QHBoxLayout(),
+            QHBoxLayout(),
+        ]
+
+        self.secondaryTitleIcon = RoundIcon(
+            diameter=self.iconSize, borderWidth=0)
+
+        self.secondaryPerksLayout = QVBoxLayout()
+        self.secondaryPerksSlots = [
+            QHBoxLayout(),
+            QHBoxLayout(),
+            QHBoxLayout(),
+        ]
+
+        self.shardsPerksLayout = QVBoxLayout()
+        self.shardsPerksSlots = [
+            QHBoxLayout(),
+            QHBoxLayout(),
+            QHBoxLayout(),
+        ]
+
+        self.perks = {}
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        pass
+
+    def __initLayout(self):
+        self.primaryPerksLayout.setSpacing(8)
+        self.primaryPerksLayout.setContentsMargins(0, 0, 0, 0)
+        for layout in self.primaryPerksSlots:
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(10)
+            self.primaryPerksLayout.addLayout(layout)
+
+        self.primaryPerksSlots[0].setSpacing(0)
+
+        self.secondaryPerksLayout.setSpacing(8)
+        self.secondaryPerksLayout.setContentsMargins(0, 0, 0, 0)
+        for layout in self.secondaryPerksSlots:
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(10)
+            self.secondaryPerksLayout.addLayout(layout)
+
+        self.shardsPerksLayout.setSpacing(8)
+        self.shardsPerksLayout.setContentsMargins(0, 0, 0, 0)
+        for layout in self.shardsPerksSlots:
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(10)
+            self.shardsPerksLayout.addLayout(layout)
+
+        self.gridLayout.setAlignment(Qt.AlignCenter)
+        self.gridLayout.setHorizontalSpacing(20)
+        self.gridLayout.setContentsMargins(0, 0, 4, 4)
+        self.gridLayout.addWidget(
+            self.mainTitleIcon, 0, 0, alignment=Qt.AlignCenter)
+        self.gridLayout.addWidget(
+            self.secondaryTitleIcon, 0, 1, alignment=Qt.AlignCenter)
+        self.gridLayout.addLayout(
+            self.primaryPerksLayout, 1, 0, alignment=Qt.AlignCenter)
+        self.gridLayout.addLayout(
+            self.secondaryPerksLayout, 1, 1, alignment=Qt.AlignCenter)
+        self.gridLayout.addLayout(
+            self.shardsPerksLayout, 1, 2, alignment=Qt.AlignCenter)
+
+    def __clearPerks(self, layouts: List[QLayout]):
+        for layout in layouts:
+            for i in reversed(range(layout.count())):
+                item = layout.itemAt(i)
+                layout.removeItem(item)
+
+                if widget := item.widget():
+                    widget.deleteLater()
+
+    def clear(self):
+        self.__clearPerks(self.primaryPerksSlots)
+        self.__clearPerks(self.secondaryPerksSlots)
+        self.__clearPerks(self.shardsPerksSlots)
+
+        self.perks = {}
+        self.shards = {}
+
+    def setPerkStyle(self, main, sub):
+        styles = connector.manager.getPerkStyles()
+
+        main = styles[main]
+        self.mainTitleIcon.setIcon(main['icon'])
+        self.mainTitleIcon.setToolTip(main['name'])
+        self.mainTitleIcon.installEventFilter(ToolTipFilter(
+            self.mainTitleIcon, 200, ToolTipPosition.TOP))
+
+        for i, slot in enumerate(main['slots'][:4]):
+            for perk in slot:
+                if i != 0:
+                    icon = RoundIcon(
+                        perk['icon'], self.iconSize, 0, 2, enabled=False)
+                else:
+                    icon = RoundIcon(
+                        perk['icon'], self.iconSize + 12, 0, 0, enabled=False)
+
+                self.primaryPerksSlots[i].addWidget(icon)
+                self.perks[perk['runeId']] = icon
+
+                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.installEventFilter(ToolTipFilter(
+                    icon, 200, ToolTipPosition.TOP))
+
+        sub = styles[sub]
+        self.secondaryTitleIcon.setIcon(sub['icon'])
+        self.secondaryTitleIcon.setToolTip(sub['name'])
+        self.secondaryTitleIcon.installEventFilter(ToolTipFilter(
+            self.secondaryTitleIcon, 200, ToolTipPosition.TOP))
+
+        for i, slot in enumerate(sub['slots'][1:4]):
+            for perk in slot:
+                icon = RoundIcon(
+                    perk['icon'], self.iconSize, 0, 2, enabled=False)
+                self.secondaryPerksSlots[i].addWidget(icon)
+                self.perks[perk['runeId']] = icon
+
+                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.installEventFilter(ToolTipFilter(
+                    icon, 200, ToolTipPosition.TOP))
+
+        for i, slot in enumerate(main['slots'][4:]):
+            for perk in slot:
+                icon = RoundIcon(perk['icon'], self.iconSize-4,
+                                 0, 0, drawBackground=True, enabled=False)
+                self.shardsPerksSlots[i].addWidget(icon)
+
+                self.shards[(perk['runeId'], i)] = icon
+
+                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.installEventFilter(ToolTipFilter(
+                    icon, 200, ToolTipPosition.TOP))
+
+    def setPerks(self, perks):
+        for id in perks[:-3]:
+            icon: RoundIcon = self.perks[id]
+            icon.setEnabeld(True)
+
+        for (i, id) in enumerate(perks[-3:]):
+            icon: RoundIcon = self.shards[(id), i]
+            icon.setEnabeld(True)
+
+    def setCurrentPerks(self, primaryId, secondaryId, perks):
+        self.clear()
+
+        self.setPerkStyle(primaryId, secondaryId)
+        self.setPerks(perks)

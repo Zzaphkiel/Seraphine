@@ -20,8 +20,9 @@ from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundA
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
                                        Theme, PushButton, SearchLineEdit, ToolButton,
-                                       FlyoutViewBase, Flyout)
+                                       FlyoutViewBase, Flyout, FlyoutAnimationType)
 from app.components.transparent_button import TransparentToggleButton
+from app.components.multi_champion_select import ChampionSelectFlyout
 from app.view.opgg_tier_interface import TierInterface
 from app.view.opgg_build_interface import BuildInterface
 
@@ -187,6 +188,8 @@ class OpggInterface(OpggInterfaceBase):
         self.__setComboBoxCurrentData(
             self.regionComboBox, cfg.get(cfg.opggRegion))
 
+        self.stackedWidget.currentChanged.connect(
+            self.__onStackedWidgetCurrentChanged)
         self.modeComboBox.currentIndexChanged.connect(
             self.__onFilterTextChanged)
         self.regionComboBox.currentIndexChanged.connect(
@@ -238,18 +241,25 @@ class OpggInterface(OpggInterfaceBase):
     def __onToggleButtonClicked(self, index):
         self.stackedWidget.setCurrentIndex(index)
 
+    def __onStackedWidgetCurrentChanged(self):
+        widget = self.stackedWidget.currentWidget()
+        self.setComboBoxesEnabled(True)
+
+        if widget is self.waitingInterface:
+            self.setComboBoxesEnabled(False)
+        elif widget in [self.buildInterface, self.errorInterface]:
+            self.searchButton.setEnabled(False)
+
     def __onSearchButtonClicked(self):
-        # 如果当前界面在梯队列表界面，则显示一个普通的搜索框用来筛选下方的英雄
-        if self.stackedWidget.currentWidget() is self.tierInterface:
-            # 点击之后弹出的搜索框是空白的，让下方的所有英雄重新显示出来比较符合直觉
-            self.tierInterface.tierList.showAllChampions()
+        # 点击之后弹出的搜索框是空白的，让下方的所有英雄重新显示出来比较符合直觉
+        self.tierInterface.tierList.showAllChampions()
 
-            view = SearchLineEditFlyout()
-            Flyout.make(view, self.searchButton, self, isDeleteOnClose=True)
-            view.textChanged.connect(self.__onSearchLineTextChanged)
+        view = SearchLineEditFlyout()
+        Flyout.make(view, self.searchButton, self, isDeleteOnClose=True)
+        view.textChanged.connect(self.__onSearchLineTextChanged)
 
-            # 点一下搜索按钮之后，自动让弹出的搜索框获得焦点，可以少点一次鼠标
-            view.searchLineEdit.setFocus()
+        # 点一下搜索按钮之后，自动让弹出的搜索框获得焦点，可以少点一次鼠标
+        view.searchLineEdit.setFocus()
 
     def __onSearchLineTextChanged(self, text):
         if text == '':
@@ -271,7 +281,6 @@ class OpggInterface(OpggInterfaceBase):
         self.positionComboBox.setEnabled(enabled)
 
     def setCurrentInterface(self, widget: QWidget):
-        self.setComboBoxesEnabled(widget is not self.waitingInterface)
         self.stackedWidget.setCurrentWidget(widget)
 
     def setAutoRefreshEnabled(self, enabled):
