@@ -9,14 +9,13 @@ from qasync import asyncSlot
 
 from app.lol.tools import ToolsTranslator
 from app.components.animation_frame import ColorAnimationFrame, NoBorderColorAnimationFrame
-from app.components.transparent_button import TransparentButton
+from app.components.transparent_button import PrimaryButton
 from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (SmoothScrollArea, IconWidget, isDarkTheme,
                                        ToolTipFilter, ToolTipPosition, PushButton,
                                        PrimaryToolButton, FluentIcon, PillToolButton,
-                                       TransparentToolButton, PrimaryPushButton,
-                                       setCustomStyleSheet)
+                                       TransparentToolButton)
 from app.common.icons import Icon
 from app.common.config import qconfig
 from app.lol.connector import connector
@@ -702,7 +701,7 @@ class ChampionPerksWidget(BuildWidgetBase):
         self.hBoxLayout = QHBoxLayout(self)
 
         self.perkShowLayout = QVBoxLayout()
-        self.setRuneButton = PrimaryPushButton(self.tr("Set Rune Page"))
+        self.setRuneButton = PrimaryButton(self.tr("Set Rune Page"))
         self.perksView = PerksWidget()
 
         self.vLine = SeparatorLine(QFrame.Shape.VLine)
@@ -776,7 +775,8 @@ class ChampionPerksWidget(BuildWidgetBase):
         name = "Seraphine" + self.tr(": ") + self.summary['name']
 
         await connector.deleteCurrentRunePage()
-        await connector.createRunePage(name, data['primaryId'], data['secondaryId'], data['perks'])
+        await connector.createRunePage(
+            name, data['primaryId'], data['secondaryId'], data['perks'])
 
 
 class PerksSummaryWidget(NoBorderColorAnimationFrame):

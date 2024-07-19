@@ -90,7 +90,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        setTheme(Theme.LIGHT)
+        setTheme(Theme.DARK)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -123,7 +123,7 @@ class OpggInterface(OpggInterfaceBase):
         self.__initWindow()
         self.__initLayout()
 
-        # self.debugButton.click()
+        self.debugButton.click()
         self.debugButton.setVisible(False)
 
     def __initWindow(self):
@@ -416,12 +416,11 @@ class OpggInterface(OpggInterfaceBase):
         championId = self.buildInterface.getCurrentChampionId()
 
         print(f"{mode = }, {region = }, {tier = }, {position = }, {championId = }")
-        data = await opgg.getChampionBuild(region, mode, championId, position, tier)
-        res = data['data']
-        self.buildInterface.updateInterface(res)
 
-        version = data['version']
-        self.versionLabel.setText(self.tr("Version: ") + version)
+        data = await opgg.getChampionBuild(region, mode, championId, position, tier)
+
+        self.buildInterface.updateInterface(data['data'])
+        self.versionLabel.setText(self.tr("Version: ") + data['version'])
 
     @asyncSlot(bool)
     async def __onDebugButtonClicked(self, _):
@@ -431,10 +430,10 @@ class OpggInterface(OpggInterfaceBase):
 
         # print('init')
 
-        # self.toggleButton.click()
-        # data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
-        # data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
-        # self.buildInterface.updateInterface(data)
+        self.toggleButton.click()
+        data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
+        data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
+        self.buildInterface.updateInterface(data)
 
     @asyncClose
     async def closeEvent(self, e):

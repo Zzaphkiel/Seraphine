@@ -18,3 +18,23 @@ TransparentButton:pressed {
     background-color: rgba(0, 0, 0, 6);
     border: none;
 }
+
+PrimaryButton {
+    color: white;
+    background-color: --ThemeColorPrimary;
+    border: 1px solid --ThemeColorLight1;
+    border-bottom: 1px solid --ThemeColorDark1;
+    font: 13px 'Segoe UI', 'Microsoft YaHei';
+}
+
+PrimaryButton:hover {
+    background-color: --ThemeColorLight1;
+    border: 1px solid --ThemeColorLight2;
+    border-bottom: 1px solid --ThemeColorDark1;
+}
+
+PrimaryButton:pressed {
+    color: rgba(255, 255, 255, 0.63);
+    background-color: --ThemeColorLight3;
+    border: 1px solid --ThemeColorLight3;
+}

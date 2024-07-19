@@ -111,3 +111,7 @@ class TransparentButton(QPushButton):
             x = self.width() - w - x
 
         self._drawIcon(self._icon, painter, QRectF(x, y, w, h))
+
+
+class PrimaryButton(TransparentButton):
+    pass
