@@ -90,7 +90,7 @@ class OpggInterface(OpggInterfaceBase):
     def __init__(self, parent=None):
         super().__init__()
 
-        setTheme(Theme.DARK)
+        # setTheme(Theme.LIGHT)
         self.vBoxLayout = QVBoxLayout(self)
 
         self.filterLayout = QHBoxLayout()
@@ -123,7 +123,7 @@ class OpggInterface(OpggInterfaceBase):
         self.__initWindow()
         self.__initLayout()
 
-        self.debugButton.click()
+        # self.debugButton.click()
         self.debugButton.setVisible(False)
 
     def __initWindow(self):
@@ -327,7 +327,8 @@ class OpggInterface(OpggInterfaceBase):
 
         # 如果是在出错的界面请求的更新，则需要知道是因为刷新了啥才进入到的出错界面
         if current is self.errorInterface:
-            current = self.errorInterface.getFromInterface()
+            # 将目标界面置为进入错误界面之前的界面
+            to = self.errorInterface.getFromInterface()
 
         try:
             # 尝试刷新当前的界面
@@ -428,12 +429,15 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
+        await self.__onFilterTextChanged(1)
+
         # print('init')
 
-        self.toggleButton.click()
-        data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
-        data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
-        self.buildInterface.updateInterface(data)
+        # self.toggleButton.click()
+        # data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
+        # data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
+        # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
+        # self.buildInterface.updateInterface(data)
 
     @asyncClose
     async def closeEvent(self, e):

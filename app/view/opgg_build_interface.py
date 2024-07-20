@@ -574,7 +574,7 @@ class ChampionItemWidget(BuildWidgetBase):
 
 
 class CounterChampionWidget(QFrame):
-    def __init__(self, data, right=False, parent: QWidget = None):
+    def __init__(self, data, parent: QWidget = None):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
@@ -589,8 +589,6 @@ class CounterChampionWidget(QFrame):
             self.color = min(255 * (data['winRate'] - 0.5)*16 + 40, 255)
         else:
             self.color = min(255 * (0.5 - data['winRate'])*12 + 40, 200)
-
-        self.right = right
 
         self.__initWidget()
         self.__initLayout()
@@ -617,15 +615,12 @@ class CounterChampionWidget(QFrame):
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.icon)
-        self.hBoxLayout.addSpacing(4)
+        self.hBoxLayout.addSpacing(2)
         self.hBoxLayout.addWidget(self.nameLabel)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.playsLabel)
-        if self.right:
-            self.hBoxLayout.addSpacing(22)
-        else:
-            self.hBoxLayout.addSpacing(14)
+        self.hBoxLayout.addSpacing(14)
         self.hBoxLayout.addWidget(self.winRateLabel)
 
     def __setColor(self):
@@ -674,7 +669,7 @@ class ChampionCountersWidget(BuildWidgetBase):
         self.hBoxLayout.addSpacing(4)
         self.hBoxLayout.addLayout(self.weakAgainstLayout)
 
-    def __updateLayout(self, layout: QLayout, data: list, right):
+    def __updateLayout(self, layout: QLayout, data: list):
         for i in reversed(range(layout.count())):
             item = layout.itemAt(i)
             layout.removeItem(item)
@@ -683,13 +678,14 @@ class ChampionCountersWidget(BuildWidgetBase):
                 widget.deleteLater()
 
         for x in data:
-            item = CounterChampionWidget(x, right)
+            item = CounterChampionWidget(x)
             layout.addWidget(item)
 
     def updateWidget(self, data):
         self.__updateLayout(self.strongAgainstLayout,
-                            data['strongAgainst'], False)
-        self.__updateLayout(self.weakAgainstLayout, data['weakAgainst'], True)
+                            data['strongAgainst'])
+        self.__updateLayout(self.weakAgainstLayout,
+                            data['weakAgainst'])
 
         self.setVisible(True)
 
