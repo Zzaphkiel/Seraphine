@@ -1,5 +1,6 @@
 import sys
 import json
+import traceback
 
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon
@@ -123,7 +124,7 @@ class OpggInterface(OpggInterfaceBase):
         self.__initWindow()
         self.__initLayout()
 
-        # self.debugButton.click()
+        self.debugButton.click()
         self.debugButton.setVisible(False)
 
     def __initWindow(self):
@@ -337,11 +338,11 @@ class OpggInterface(OpggInterfaceBase):
             # 让转圈消失，显示界面
             self.setCurrentInterface(to)
         except Exception as e:
-            logger.error(
-                f"Get OPGG data failed, exception: {e}, interface: {to}", TAG)
+            stack = traceback.format_exc()
+            logger.error(f"Get OPGG data failed, {stack}\n{e}", TAG)
 
             # DEBUG
-            print(e)
+            print(f"{stack}\n{e}")
 
             # 记录一下是想要进入到哪个界面时加载出错了
             self.errorInterface.setFromInterface(to)
@@ -416,6 +417,20 @@ class OpggInterface(OpggInterfaceBase):
         position = self.positionComboBox.currentData()
         championId = self.buildInterface.getCurrentChampionId()
 
+        # 只有在排位模式下，可以选择对应的分路
+        if mode != 'ranked':
+            position = 'none'
+            self.positionComboBox.setVisible(False)
+        else:
+            self.positionComboBox.setVisible(True)
+
+        # 斗魂竞技场的段位选择只能是 "all"
+        if mode == 'arena':
+            tier = 'all'
+            self.tierComboBox.setVisible(False)
+        else:
+            self.tierComboBox.setVisible(True)
+
         print(f"{mode = }, {region = }, {tier = }, {position = }, {championId = }")
 
         data = await opgg.getChampionBuild(region, mode, championId, position, tier)
@@ -429,15 +444,15 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
-        await self.__onFilterTextChanged(1)
+        # await self.__onFilterTextChanged(1)
 
-        # print('init')
+        print('init')
 
-        # self.toggleButton.click()
-        # data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
-        # data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
-        # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
-        # self.buildInterface.updateInterface(data)
+        self.toggleButton.click()
+        data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
+        data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
+        self.buildInterface.setCurrentChampionId(data['summary']['championId'])
+        self.buildInterface.updateInterface(data)
 
     @asyncClose
     async def closeEvent(self, e):

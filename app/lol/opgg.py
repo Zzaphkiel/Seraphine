@@ -29,7 +29,11 @@ class Opgg(QObject):
 
     @alru_cache(maxsize=128)
     async def __fetchChampionBuild(self, region, mode, championId, position, tier):
-        url = f"/api/{region}/champions/{mode}/{championId}/{position}"
+        if mode != 'arena':
+            url = f"/api/{region}/champions/{mode}/{championId}/{position}"
+        else:
+            url = f"/api/{region}/champions/{mode}/{championId}"
+
         params = {"tier": tier}
 
         return await self.__get(url, params)
@@ -37,13 +41,18 @@ class Opgg(QObject):
     @alru_cache(maxsize=128)
     async def getChampionBuild(self, region, mode, championId, position, tier):
         raw = await self.__fetchChampionBuild(region, mode, championId, position, tier)
+        print(raw)
+
         version = raw['meta']['version']
 
         map = {
-            'ranked': OpggDataParser.parseRankedChampionBuild(raw, position)
+            'ranked': OpggDataParser.parseRankedChampionBuild,
+            'aram': OpggDataParser.parseRankedChampionBuild,
+            'urf': OpggDataParser.parseRankedChampionBuild,
+            'nexus_blitz': OpggDataParser.parseRankedChampionBuild,
         }
 
-        res = await map[mode]
+        res = await map[mode](raw, position)
 
         return {
             'data': res,
@@ -178,11 +187,6 @@ class OpggDataParser:
 
     @staticmethod
     async def parseRankedChampionBuild(data, position):
-        '''
-        TODO
-        处理排位模式下的英雄 Build
-        '''
-
         data = data['data']
 
         summary = data['summary']
@@ -190,13 +194,12 @@ class OpggDataParser:
         icon = await connector.getChampionIcon(championId)
         name = connector.manager.getChampionNameById(championId)
 
-        positions = summary['positions']
+        if position != 'none':
+            for p in summary['positions']:
+                if p['name'] == position:
+                    stats: dict = p['stats']
+                    break
 
-        for p in positions:
-            if p['name'] != position:
-                continue
-
-            stats: dict = p['stats']
             winRate = stats.get('win_rate')
             pickRate = stats.get('pick_rate')
             banRate = stats.get('ban_rate')
@@ -205,6 +208,15 @@ class OpggDataParser:
             tierData: dict = stats['tier_data']
             tier = tierData.get("tier")
             rank = tierData.get("rank")
+
+        else:
+            stats = summary['average_stats']
+            winRate = stats.get('win_rate')
+            pickRate = stats.get('pick_rate')
+            banRate = stats.get('ban_rate')
+            kda = stats.get('kda')
+            tier = stats.get("tier")
+            rank = stats.get("rank")
 
         summonerSpells = []
         for s in data['summoner_spells']:

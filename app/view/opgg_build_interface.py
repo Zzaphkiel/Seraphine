@@ -125,11 +125,25 @@ class ChampionTitleBar(ColorAnimationFrame):
         self.icon.setIcon(data['icon'])
 
         self.name.setText(data['name'])
-        self.position.setText(ts.positionMap[data['position']])
+
+        if data['position'] != 'none':
+            self.position.setText(ts.positionMap[data['position']])
+            self.position.setVisible(True)
+        else:
+            self.position.setVisible(False)
 
         self.winRateLabel.setText(f"{data['winRate']*100:.2f}%")
         self.pickRateLabel.setText(f"{data['pickRate']*100:.2f}%")
-        self.banRateLabel.setText(f"{data['banRate']*100:.2f}%")
+
+        if data['banRate']:
+            self.banRateLabel.setText(f"{data['banRate']*100:.2f}%")
+            self.banRateLabel.setVisible(True)
+            self.banRateTextLabel.setVisible(True)
+            self.line2.setVisible(True)
+        else:
+            self.banRateLabel.setVisible(False)
+            self.banRateTextLabel.setVisible(False)
+            self.line2.setVisible(False)
 
         _, _, _, color = self.getColors()
         self.line1.setStyleSheet(f"color: {color.name(QColor.HexArgb)};")
@@ -682,10 +696,15 @@ class ChampionCountersWidget(BuildWidgetBase):
             layout.addWidget(item)
 
     def updateWidget(self, data):
-        self.__updateLayout(self.strongAgainstLayout,
-                            data['strongAgainst'])
-        self.__updateLayout(self.weakAgainstLayout,
-                            data['weakAgainst'])
+        strong = data['strongAgainst']
+        weak = data['weakAgainst']
+
+        if len(strong) == 0 and len(weak) == 0:
+            self.setVisible(False)
+            return
+
+        self.__updateLayout(self.strongAgainstLayout, strong)
+        self.__updateLayout(self.weakAgainstLayout, weak)
 
         self.setVisible(True)
 
@@ -740,15 +759,16 @@ class ChampionPerksWidget(BuildWidgetBase):
     def updateWidget(self, data: list, summary: dict):
         self.data = data
         self.summary = summary
+        self.selectedIndex = 0
 
         self.perksView.setCurrentPerks(
             data[0]['primaryId'], data[0]['secondaryId'], data[0]['perks'])
 
-        for d, widget in zip(data, self.summaryWidgets):
+        for i, (d, widget) in enumerate(zip(data, self.summaryWidgets)):
             widget.updateSummary(d)
+            widget.setProperty('selected', i == 0)
+            widget.style().polish(widget)
 
-        self.summaryWidgets[0].setProperty("selected", True)
-        self.summaryWidgets[0].style().polish(self.summaryWidgets[0])
         self.setVisible(True)
 
     def __onSummaryWidgetClicked(self, index):
@@ -986,12 +1006,12 @@ class PerksWidget(QFrame):
 
     def setPerks(self, perks):
         for id in perks[:-3]:
-            icon: RoundIcon = self.perks[id]
-            icon.setEnabeld(True)
+            if icon := self.perks.get(id):
+                icon.setEnabeld(True)
 
         for (i, id) in enumerate(perks[-3:]):
-            icon: RoundIcon = self.shards[(id), i]
-            icon.setEnabeld(True)
+            if icon := self.shards.get((id, i)):
+                icon.setEnabeld(True)
 
     def setCurrentPerks(self, primaryId, secondaryId, perks):
         self.clear()
