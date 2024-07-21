@@ -28,8 +28,8 @@
 ### 或通过本地构建
 下载项目源码 `zip` 压缩包解压至文件夹或通过 `git`
 ```shell
-cd Seraphine
 git clone https://github.com/Zzaphkiel/Seraphine.git
+cd Seraphine
 ```
 创建并激活新的 conda 环境
 ```shell
