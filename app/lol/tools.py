@@ -1404,15 +1404,15 @@ async def autoPick(data, selection: ChampionSelection):
                localPlayerCellId, data['myTeam']), None)
     pos = pos.get('assignedPosition')
 
-    if pos == 'TOP':
+    if pos == 'top':
         candidates = cfg.get(cfg.autoSelectChampionTop)
-    elif pos == 'JUGGLE':
+    elif pos == 'jungle':
         candidates = cfg.get(cfg.autoSelectChampionJug)
-    elif pos == 'MIDDLE':
+    elif pos == 'middle':
         candidates = cfg.get(cfg.autoSelectChampionMid)
-    elif pos == 'BOTTOM':
+    elif pos == 'bottom':
         candidates = cfg.get(cfg.autoSelectChampionBot)
-    elif pos == 'UTILITY':
+    elif pos == 'utility':
         candidates = cfg.get(cfg.autoSelectChampionSup)
     else:
         candidates = []
@@ -1482,15 +1482,15 @@ async def autoBan(data, selection: ChampionSelection):
                     filter(lambda x: x['cellId'] == localPlayerCellId, data['myTeam']), None)
                 pos = pos.get('assignedPosition')
 
-                if pos == 'TOP':
+                if pos == 'top':
                     candidates = cfg.get(cfg.autoBanChampionTop)
-                elif pos == 'JUGGLE':
+                elif pos == 'jungle':
                     candidates = cfg.get(cfg.autoBanChampionJug)
-                elif pos == 'MIDDLE':
+                elif pos == 'middle':
                     candidates = cfg.get(cfg.autoBanChampionMid)
-                elif pos == 'BOTTOM':
+                elif pos == 'bottom':
                     candidates = cfg.get(cfg.autoBanChampionBot)
-                elif pos == 'UTILITY':
+                elif pos == 'utility':
                     candidates = cfg.get(cfg.autoBanChampionSup)
                 else:
                     candidates = []
