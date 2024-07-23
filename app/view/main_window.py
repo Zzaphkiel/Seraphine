@@ -706,7 +706,6 @@ class MainWindow(FluentWindow):
         self.processListener.terminate()
         self.checkUpdateThread.terminate()
         self.checkNoticeThread.terminate()
-        # self.minimizeThread.terminate()  # 该功能不再支持 -- By Hpero4
 
     @asyncClose
     async def closeEvent(self, a0) -> None:

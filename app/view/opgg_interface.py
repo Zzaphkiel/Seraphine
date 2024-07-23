@@ -188,6 +188,8 @@ class OpggInterface(OpggInterfaceBase):
             self.tierComboBox, cfg.get(cfg.opggTier))
         self.__setComboBoxCurrentData(
             self.regionComboBox, cfg.get(cfg.opggRegion))
+        self.__setComboBoxCurrentData(
+            self.positionComboBox, cfg.get(cfg.opggPosition))
 
         self.stackedWidget.currentChanged.connect(
             self.__onStackedWidgetCurrentChanged)
@@ -366,6 +368,7 @@ class OpggInterface(OpggInterfaceBase):
 
         cfg.set(cfg.opggRegion, region)
         cfg.set(cfg.opggTier, tier)
+        cfg.set(cfg.opggPosition, position)
 
         logger.info(
             f"Get tier list: {mode}, {region}, {tier}, {position}", TAG)

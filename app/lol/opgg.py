@@ -96,6 +96,7 @@ class Opgg(QObject):
 
 
 class OpggDataParser:
+
     @staticmethod
     async def parseRankedTierList(data):
         '''

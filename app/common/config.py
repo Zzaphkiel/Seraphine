@@ -150,6 +150,8 @@ class Config(QConfig):
     opggTier = ConfigItem("Functions", "OpggTier", "emerald_plus", OptionsValidator([
         "ibsg", "gold_plus", "platinum_plus", "emerald_plus", "diamond_plus", "master", "master_plus", "grandmaster", "challenger"
     ]))
+    opggPosition = ConfigItem("Functions", "OpggPosition", "MID", OptionsValidator([
+        "TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]))
 
 
 YEAR = 2023
