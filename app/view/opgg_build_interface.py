@@ -88,6 +88,9 @@ class BuildInterface(QFrame):
         self.championAugments.updateWidget(data.get('augments'))
         self.championSynergies.updateWidget(data.get('synergies'))
 
+        self.scrollArea.delegate.vScrollBar.resetValue(0)
+        self.scrollArea.verticalScrollBar().setSliderPosition(0)
+
 
 class ChampionTitleBar(ColorAnimationFrame):
     def __init__(self, parent: QWidget = None):

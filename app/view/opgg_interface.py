@@ -445,13 +445,16 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
-        await self.__onFilterTextChanged(1)
+        await self.initWindow()
 
         # self.toggleButton.click()
         # data = json.load(open("C:/Users/zaphkiel/Desktop/test1.json"))
         # data = await OpggDataParser.parseArenaChampionBuild(data)
         # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
         # self.buildInterface.updateInterface(data)
+
+    async def initWindow(self):
+        self.__onFilterTextChanged(1)
 
     # @asyncClose
     # async def closeEvent(self, e):

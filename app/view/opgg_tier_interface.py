@@ -86,6 +86,9 @@ class TierListWidget(QFrame):
         if len(self.items) != 0:
             self.scrollLayout.takeAllWidgets()
 
+        self.scrollArea.delegate.vScrollBar.resetValue(0)
+        self.scrollArea.verticalScrollBar().setSliderPosition(0)
+
         self.items = [ListItem(0, x) for x in data]
         self.__update()
 

@@ -106,7 +106,7 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
 
-        # self.opggInterface = OpggInterface()
+        self.opggInterface = OpggInterface()
 
         logger.critical("Seraphine initialized", TAG)
 
@@ -158,15 +158,15 @@ class MainWindow(FluentWindow):
 
         pos = NavigationItemPosition.BOTTOM
 
-        # self.navigationInterface.addItem(
-        #     routeKey='Opgg',
-        #     icon=QIcon("app/resource/images/opgg.svg"),
-        #     text="OP.GG",
-        #     onClick=lambda: self.opggInterface.show(),
-        #     selectable=False,
-        #     position=pos,
-        #     tooltip="OP.GG"
-        # )
+        self.navigationInterface.addItem(
+            routeKey='Opgg',
+            icon=QIcon("app/resource/images/opgg.svg"),
+            text="OP.GG",
+            onClick=lambda: self.opggInterface.show(),
+            selectable=False,
+            position=pos,
+            tooltip="OP.GG"
+        )
 
         self.navigationInterface.addItem(
             routeKey='Fix',
@@ -490,6 +490,8 @@ class MainWindow(FluentWindow):
         # 加载大乱斗buff -- By Hpero4
         aramInitT = asyncio.create_task(AramBuff.checkAndUpdate())
         championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
+
+        asyncio.create_task(self.opggInterface.initWindow())
 
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
