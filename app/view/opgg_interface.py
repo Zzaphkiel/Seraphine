@@ -431,7 +431,8 @@ class OpggInterface(OpggInterfaceBase):
         else:
             self.tierComboBox.setVisible(True)
 
-        print(f"{mode = }, {region = }, {tier = }, {position = }, {championId = }")
+        logger.info(
+            f"Get champion build, {mode}, {region}, {tier}, {position}, {championId}", TAG)
 
         data = await opgg.getChampionBuild(region, mode, championId, position, tier)
 
@@ -446,20 +447,18 @@ class OpggInterface(OpggInterfaceBase):
 
         await self.__onFilterTextChanged(1)
 
-        print('init')
-
         # self.toggleButton.click()
         # data = json.load(open("C:/Users/zaphkiel/Desktop/test1.json"))
         # data = await OpggDataParser.parseArenaChampionBuild(data)
         # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
         # self.buildInterface.updateInterface(data)
 
-    @asyncClose
-    async def closeEvent(self, e):
-        await connector.close()
-        await opgg.close()
+    # @asyncClose
+    # async def closeEvent(self, e):
+    #     await connector.close()
+    #     await opgg.close()
 
-        return super().closeEvent(e)
+    #     return super().closeEvent(e)
 
 
 class WaitingInterface(QFrame):

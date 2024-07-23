@@ -267,6 +267,12 @@ class ListItem(ColorAnimationFrame):
         self.banRateLabel.setFixedWidth(width)
         self.countersLabel.setFixedWidth(80)
 
+        self.nameLabel.setContentsMargins(0, 0, 0, 2)
+        # self.tierLabel.setContentsMargins(0, 0, 0, 2)
+        # self.winRateLabel.setContentsMargins(0, 0, 0, 2)
+        # self.pickRateLabel.setContentsMargins(0, 0, 0, 2)
+        # self.banRateLabel.setContentsMargins(0, 0, 0, 2)
+
         self.clicked.connect(self.__onClicked)
 
     def __initLayout(self):
