@@ -85,12 +85,12 @@
         <translation type="obsolete">第一率：</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1130"/>
+        <location filename="../../view/opgg_build_interface.py" line="1133"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1145"/>
+        <location filename="../../view/opgg_build_interface.py" line="1148"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
@@ -743,12 +743,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChampionPerksWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="750"/>
+        <location filename="../../view/opgg_build_interface.py" line="753"/>
         <source>Set Rune Page</source>
         <translation>设为当前符文页</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="826"/>
+        <location filename="../../view/opgg_build_interface.py" line="829"/>
         <source>: </source>
         <translation>：</translation>
     </message>
@@ -769,7 +769,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">英雄技能</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="462"/>
+        <location filename="../../view/opgg_build_interface.py" line="465"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -777,27 +777,27 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChampionTitleBar</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="154"/>
+        <location filename="../../view/opgg_build_interface.py" line="157"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="157"/>
+        <location filename="../../view/opgg_build_interface.py" line="160"/>
         <source>Pick Rate</source>
         <translation>登场率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="161"/>
+        <location filename="../../view/opgg_build_interface.py" line="164"/>
         <source>Ban Rate</source>
         <translation>禁用率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="145"/>
+        <location filename="../../view/opgg_build_interface.py" line="148"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="148"/>
+        <location filename="../../view/opgg_build_interface.py" line="151"/>
         <source>Average Place</source>
         <translation>平均排名</translation>
     </message>
@@ -881,7 +881,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>CounterChampionWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="627"/>
+        <location filename="../../view/opgg_build_interface.py" line="630"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -925,12 +925,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ErrorInterface</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="490"/>
+        <location filename="../../view/opgg_interface.py" line="495"/>
         <source>Fetch data failed 😭</source>
         <translation>数据拉取失败 😭</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="491"/>
+        <location filename="../../view/opgg_interface.py" line="496"/>
         <source>Please wait and try again</source>
         <translation>请等待后重试</translation>
     </message>
@@ -1222,7 +1222,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ItemsWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="540"/>
+        <location filename="../../view/opgg_build_interface.py" line="543"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -1243,32 +1243,32 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ListTitleBar</name>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="149"/>
+        <location filename="../../view/opgg_tier_interface.py" line="152"/>
         <source>Champion</source>
         <translation>英雄</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="150"/>
+        <location filename="../../view/opgg_tier_interface.py" line="153"/>
         <source>Tier</source>
         <translation>梯队</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="151"/>
+        <location filename="../../view/opgg_tier_interface.py" line="154"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="152"/>
+        <location filename="../../view/opgg_tier_interface.py" line="155"/>
         <source>Pick Rate</source>
         <translation>登场率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="153"/>
+        <location filename="../../view/opgg_tier_interface.py" line="156"/>
         <source>Ban Rate</source>
         <translation>禁用率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_tier_interface.py" line="154"/>
+        <location filename="../../view/opgg_tier_interface.py" line="157"/>
         <source>Counters</source>
         <translation>劣势对抗</translation>
     </message>
@@ -1312,7 +1312,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>对局信息</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="602"/>
+        <location filename="../../view/main_window.py" line="604"/>
         <source>Start LOL</source>
         <translation>启动游戏</translation>
     </message>
@@ -1332,12 +1332,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">客户端已连接</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="677"/>
+        <location filename="../../view/main_window.py" line="679"/>
         <source>Invalid path</source>
         <translation>路径非法</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="677"/>
+        <location filename="../../view/main_window.py" line="679"/>
         <source>Please set the correct directory of the LOL client in the setting page</source>
         <translation>请在设置页面中设置正确的 LOL 客户端路径</translation>
     </message>
@@ -1347,7 +1347,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>启动页</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="666"/>
+        <location filename="../../view/main_window.py" line="668"/>
         <source>Start LOL successfully</source>
         <translation>启动客户端成功</translation>
     </message>
@@ -1402,12 +1402,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>战绩查询 👀</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="721"/>
+        <location filename="../../view/main_window.py" line="722"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="720"/>
+        <location filename="../../view/main_window.py" line="721"/>
         <source>Minimize</source>
         <translation>最小化到任务栏</translation>
     </message>
@@ -1417,7 +1417,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="713"/>
+        <location filename="../../view/main_window.py" line="714"/>
         <source>Do you wish to exit?</source>
         <translation>你第一次点击了关闭按钮</translation>
     </message>
@@ -1508,17 +1508,17 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>请确保能连接至 GitHub</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="584"/>
+        <location filename="../../view/main_window.py" line="586"/>
         <source> (</source>
         <translation>（</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="584"/>
+        <location filename="../../view/main_window.py" line="586"/>
         <source>)</source>
         <translation>）</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="589"/>
+        <location filename="../../view/main_window.py" line="591"/>
         <source>, </source>
         <translation>，</translation>
     </message>
@@ -1533,7 +1533,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>请尝试使用管理员身份启动 Seraphine</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="713"/>
+        <location filename="../../view/main_window.py" line="714"/>
         <source>Choose action for close button (you can modify it at any time in the settings page)</source>
         <translation>请选择点击关闭按钮的默认行为</translation>
     </message>
@@ -1847,7 +1847,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_interface.py" line="439"/>
+        <location filename="../../view/opgg_interface.py" line="443"/>
         <source>Version: </source>
         <translation>游戏版本：</translation>
     </message>
@@ -1896,7 +1896,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>PerksSummaryWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="882"/>
+        <location filename="../../view/opgg_build_interface.py" line="885"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -2264,7 +2264,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>SearchLineEditFlyout</name>
     <message>
-        <location filename="../../view/opgg_interface.py" line="527"/>
+        <location filename="../../view/opgg_interface.py" line="532"/>
         <source>Search champions</source>
         <translation>搜索英雄</translation>
     </message>
@@ -2277,97 +2277,97 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="67"/>
+        <location filename="../../view/setting_interface.py" line="74"/>
         <source>General</source>
         <translation>通用</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="70"/>
+        <location filename="../../view/setting_interface.py" line="77"/>
         <source>Choose folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="70"/>
+        <location filename="../../view/setting_interface.py" line="77"/>
         <source>Client Path</source>
         <translation>客户端路径</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="100"/>
+        <location filename="../../view/setting_interface.py" line="107"/>
         <source>Auto-start LOL</source>
         <translation>自动启动游戏</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="100"/>
+        <location filename="../../view/setting_interface.py" line="107"/>
         <source>Launch LOL client upon opening Seraphine automatically</source>
         <translation>启动 Seraphine 时自动启动 LOL 客户端</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="123"/>
+        <location filename="../../view/setting_interface.py" line="130"/>
         <source>Personalization</source>
         <translation>个性化</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="134"/>
+        <location filename="../../view/setting_interface.py" line="141"/>
         <source>Application theme</source>
         <translation>应用主题</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="134"/>
+        <location filename="../../view/setting_interface.py" line="141"/>
         <source>Change the appearance of Seraphine</source>
         <translation>调整 Seraphine 的外观主题</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="134"/>
+        <location filename="../../view/setting_interface.py" line="141"/>
         <source>Light</source>
         <translation>浅色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="134"/>
+        <location filename="../../view/setting_interface.py" line="141"/>
         <source>Dark</source>
         <translation>深色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="165"/>
+        <location filename="../../view/setting_interface.py" line="172"/>
         <source>Use system setting</source>
         <translation>跟随系统设置</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="145"/>
+        <location filename="../../view/setting_interface.py" line="152"/>
         <source>Theme color</source>
         <translation>主题色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="145"/>
+        <location filename="../../view/setting_interface.py" line="152"/>
         <source>Change the theme color of Seraphine</source>
         <translation>调整 Seraphine 的主题色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="155"/>
+        <location filename="../../view/setting_interface.py" line="162"/>
         <source>Interface zoom</source>
         <translation>界面缩放</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="155"/>
+        <location filename="../../view/setting_interface.py" line="162"/>
         <source>Change the size of widgets and fonts</source>
         <translation>调整部件和字体的大小</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="296"/>
+        <location filename="../../view/setting_interface.py" line="304"/>
         <source>Updated successfully</source>
         <translation>更新成功</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="290"/>
+        <location filename="../../view/setting_interface.py" line="298"/>
         <source>Configuration takes effect after restart</source>
         <translation>设置在重启软件后生效</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="165"/>
+        <location filename="../../view/setting_interface.py" line="172"/>
         <source>Language</source>
         <translation>语言</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="165"/>
+        <location filename="../../view/setting_interface.py" line="172"/>
         <source>Set your preferred language for Seraphine</source>
         <translation>选择 Seraphine 所使用的语言</translation>
     </message>
@@ -2387,7 +2387,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>调整在个人生涯界面中显示的最大对局数量</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="61"/>
+        <location filename="../../view/setting_interface.py" line="63"/>
         <source>Show tier in game information</source>
         <translation>对局详情中显示段位</translation>
     </message>
@@ -2398,52 +2398,52 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">在对局详情界面中显示段位图标，启动该选项将影响加载该界面的速度</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="198"/>
+        <location filename="../../view/setting_interface.py" line="205"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="189"/>
+        <location filename="../../view/setting_interface.py" line="196"/>
         <source>Provide feedback</source>
         <translation>提供反馈</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="189"/>
+        <location filename="../../view/setting_interface.py" line="196"/>
         <source>Help us improve Seraphine by providing feedback</source>
         <translation>通过提供反馈帮助我们改善 Seraphine</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="198"/>
+        <location filename="../../view/setting_interface.py" line="205"/>
         <source>Copyright</source>
         <translation>版权所有</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="198"/>
+        <location filename="../../view/setting_interface.py" line="205"/>
         <source>Version</source>
         <translation>当前版本</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="106"/>
+        <location filename="../../view/setting_interface.py" line="113"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="106"/>
+        <location filename="../../view/setting_interface.py" line="113"/>
         <source>Delete cache</source>
         <translation>清除缓存</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="106"/>
+        <location filename="../../view/setting_interface.py" line="113"/>
         <source>Delete all game resources (Apply it when game resources update)</source>
         <translation>删除所有游戏资源的缓存（建议在游戏资源有更新时使用）</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="198"/>
+        <location filename="../../view/setting_interface.py" line="205"/>
         <source>View GitHub</source>
         <translation>查看 GitHub</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="322"/>
+        <location filename="../../view/setting_interface.py" line="330"/>
         <source>Really?</source>
         <translation>真的要删除吗？</translation>
     </message>
@@ -2455,52 +2455,52 @@ If champions set by lane are not available, default settings will be used.</sour
                 这有可能会消耗更多的时间</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="330"/>
+        <location filename="../../view/setting_interface.py" line="338"/>
         <source>Confirm delete</source>
         <translation>确定删除</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="126"/>
+        <location filename="../../view/setting_interface.py" line="133"/>
         <source>Mica effect</source>
         <translation>云母效果</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="126"/>
+        <location filename="../../view/setting_interface.py" line="133"/>
         <source>Apply semi transparent to windows and surfaces (only available on Win11)</source>
         <translation>窗口和表面显示半透明（仅在 Win11 上可用）</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="116"/>
+        <location filename="../../view/setting_interface.py" line="123"/>
         <source>Minimize to tray on close</source>
         <translation>最小化到任务栏托盘</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="116"/>
+        <location filename="../../view/setting_interface.py" line="123"/>
         <source>Minimize to system tray when clicking close</source>
         <translation>点击右上角关闭时将程序最小化到托盘</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="296"/>
+        <location filename="../../view/setting_interface.py" line="304"/>
         <source>Settings have been applied</source>
         <translation>设置已应用</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="54"/>
+        <location filename="../../view/setting_interface.py" line="56"/>
         <source>Rank filter other mode</source>
         <translation>排位过滤</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="54"/>
+        <location filename="../../view/setting_interface.py" line="56"/>
         <source>Filter out other modes on the Game Information interface when ranking</source>
         <translation>打开此选项后，当你在排位时，对局信息界面将只显示排位模式对局战绩</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="176"/>
+        <location filename="../../view/setting_interface.py" line="183"/>
         <source>Check for updates</source>
         <translation>检查更新</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="176"/>
+        <location filename="../../view/setting_interface.py" line="183"/>
         <source>Automatically check for updates when software starts</source>
         <translation>在 Seraphine 启动时自动检查更新</translation>
     </message>
@@ -2520,12 +2520,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">在游戏时通过避免渲染窗口以减少 CPU 使用</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="82"/>
+        <location filename="../../view/setting_interface.py" line="89"/>
         <source>Log Level</source>
         <translation>日志等级</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="82"/>
+        <location filename="../../view/setting_interface.py" line="89"/>
         <source>The level of logging for Seraphine (take effect after restart)</source>
         <translation>修改 Seraphine 记录日志的等级（重启后生效）</translation>
     </message>
@@ -2535,12 +2535,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="182"/>
+        <location filename="../../view/setting_interface.py" line="189"/>
         <source>Using a proxy when connecting to GitHub</source>
         <translation>连接 GitHub 时启用 HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="174"/>
+        <location filename="../../view/setting_interface.py" line="181"/>
         <source>Update</source>
         <translation>软件更新</translation>
     </message>
@@ -2560,32 +2560,32 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>该值越大数据加载速度越快，但越可能引起客户端闪退</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="149"/>
+        <location filename="../../view/setting_interface.py" line="156"/>
         <source>Game tabs color</source>
         <translation>对局卡片颜色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="149"/>
+        <location filename="../../view/setting_interface.py" line="156"/>
         <source>Change the color of game tabs</source>
         <translation>改变对局卡片提示胜利 / 失败的颜色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="182"/>
+        <location filename="../../view/setting_interface.py" line="189"/>
         <source>HTTP proxy</source>
         <translation>HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="89"/>
+        <location filename="../../view/setting_interface.py" line="96"/>
         <source>Open</source>
         <translation>打开文件夹</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="89"/>
+        <location filename="../../view/setting_interface.py" line="96"/>
         <source>Log file</source>
         <translation>日志文件</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="89"/>
+        <location filename="../../view/setting_interface.py" line="96"/>
         <source>Open log directory</source>
         <translation>打开日志文件夹</translation>
     </message>
@@ -2595,26 +2595,36 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">设置客户端路径及顺序（第一个会被作为默认值）</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="70"/>
+        <location filename="../../view/setting_interface.py" line="77"/>
         <source>Set client path and order</source>
         <translation>设置客户端路径以及顺序</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="80"/>
+        <location filename="../../view/setting_interface.py" line="87"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="61"/>
+        <location filename="../../view/setting_interface.py" line="63"/>
         <source>Show tier icon in game information interface. Enabling this option affects APP&apos;s performance</source>
         <translation>在对局详情界面中显示段位，启动该选项将影响加载该界面的速度</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="322"/>
+        <location filename="../../view/setting_interface.py" line="330"/>
         <source>Game resources will be downloaded again
 when they are used by Seraphine, which will cost more time</source>
         <translation>游戏资源将会在它们要被 Seraphine 使用时重新下载，
 这有可能会消耗更多的时间</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="69"/>
+        <source>Show OPGG window automatically</source>
+        <translation>自动显示 OPGG 窗口</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="69"/>
+        <source>Show OPGG window automatically when champion selection starts</source>
+        <translation>在英雄选择开始时自动显示 OPGG 窗口</translation>
     </message>
 </context>
 <context>
@@ -2663,7 +2673,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>Spell</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="326"/>
+        <location filename="../../view/opgg_build_interface.py" line="329"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -2786,17 +2796,17 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SynergyItemWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1216"/>
+        <location filename="../../view/opgg_build_interface.py" line="1219"/>
         <source>Average Place</source>
         <translation>平均排名</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1221"/>
+        <location filename="../../view/opgg_build_interface.py" line="1224"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1228"/>
+        <location filename="../../view/opgg_build_interface.py" line="1231"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>

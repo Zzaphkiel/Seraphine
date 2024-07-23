@@ -49,7 +49,9 @@ class SettingInterface(SeraphineInterface):
             self.tr("Number of games:"),
             10, 10, 100,
             Icon.SLIDESEARCH,
-            self.tr("Setting the maximum number of games shows in the career interface"), self.functionGroup)
+            self.tr(
+                "Setting the maximum number of games shows in the career interface"),
+            self.functionGroup)
 
         self.gameInfoFilterCard = SwitchSettingCard(
             Icon.FILTER, self.tr("Rank filter other mode"),
@@ -60,9 +62,14 @@ class SettingInterface(SeraphineInterface):
 
         self.gameInfoShowTierCard = SwitchSettingCard(
             Icon.TROPHY, self.tr("Show tier in game information"),
-            self.
-            tr("Show tier icon in game information interface. Enabling this option affects APP's performance"
-               ), cfg.showTierInGameInfo)
+            self.tr(
+                "Show tier icon in game information interface. Enabling this option affects APP's performance"),
+            cfg.showTierInGameInfo)
+
+        self.autoShowOpggCard = SwitchSettingCard(
+            Icon.WINDOW, self.tr("Show OPGG window automatically"),
+            self.tr("Show OPGG window automatically when champion selection starts"),
+            cfg.autoShowOpgg)
 
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
@@ -230,6 +237,7 @@ class SettingInterface(SeraphineInterface):
         self.functionGroup.addSettingCard(self.careerGamesCount)
         self.functionGroup.addSettingCard(self.gameInfoFilterCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
+        self.functionGroup.addSettingCard(self.autoShowOpggCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
         # self.generalGroup.addSettingCard(self.enableStartWithComputer)
