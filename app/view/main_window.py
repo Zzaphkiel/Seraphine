@@ -727,8 +727,7 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-
-            # self.opggInterface.close()
+            self.opggInterface.close()
 
             return super().closeEvent(a0)
         else:
