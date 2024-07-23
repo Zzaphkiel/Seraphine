@@ -124,7 +124,7 @@ class OpggInterface(OpggInterfaceBase):
         self.__initWindow()
         self.__initLayout()
 
-        self.debugButton.click()
+        # self.debugButton.click()
         self.debugButton.setVisible(False)
 
     def __initWindow(self):
@@ -444,15 +444,15 @@ class OpggInterface(OpggInterfaceBase):
         await connector.autoStart()
         await ChampionAlias.checkAndUpdate()
 
-        # await self.__onFilterTextChanged(1)
+        await self.__onFilterTextChanged(1)
 
         print('init')
 
-        self.toggleButton.click()
-        data = json.load(open("C:/Users/zaphkiel/Desktop/test.json"))
-        data = await OpggDataParser.parseRankedChampionBuild(data, "ADC")
-        self.buildInterface.setCurrentChampionId(data['summary']['championId'])
-        self.buildInterface.updateInterface(data)
+        # self.toggleButton.click()
+        # data = json.load(open("C:/Users/zaphkiel/Desktop/test1.json"))
+        # data = await OpggDataParser.parseArenaChampionBuild(data)
+        # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
+        # self.buildInterface.updateInterface(data)
 
     @asyncClose
     async def closeEvent(self, e):

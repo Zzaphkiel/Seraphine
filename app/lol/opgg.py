@@ -41,22 +41,19 @@ class Opgg(QObject):
     @alru_cache(maxsize=128)
     async def getChampionBuild(self, region, mode, championId, position, tier):
         raw = await self.__fetchChampionBuild(region, mode, championId, position, tier)
-        print(raw)
+        # print(raw)
 
         version = raw['meta']['version']
 
-        map = {
-            'ranked': OpggDataParser.parseRankedChampionBuild,
-            'aram': OpggDataParser.parseRankedChampionBuild,
-            'urf': OpggDataParser.parseRankedChampionBuild,
-            'nexus_blitz': OpggDataParser.parseRankedChampionBuild,
-        }
-
-        res = await map[mode](raw, position)
+        if mode != 'arena':
+            res = await OpggDataParser.parseOtherChampionBuild(raw, position)
+        else:
+            res = await OpggDataParser.parseArenaChampionBuild(raw)
 
         return {
             'data': res,
-            'version': version
+            'version': version,
+            'mode': mode,
         }
 
     @alru_cache(maxsize=128)
@@ -186,7 +183,7 @@ class OpggDataParser:
         return sorted(res, key=lambda x: x['rank'])
 
     @staticmethod
-    async def parseRankedChampionBuild(data, position):
+    async def parseOtherChampionBuild(data, position):
         data = data['data']
 
         summary = data['summary']
@@ -330,7 +327,124 @@ class OpggDataParser:
                 "strongAgainst": strongAgainst,
                 "weakAgainst": weakAgainst,
             },
-            "perks": perks
+            "perks": perks,
+        }
+
+    @staticmethod
+    async def parseArenaChampionBuild(data):
+        data = data['data']
+
+        summary = data['summary']
+        championId = summary['id']
+        name = connector.manager.getChampionNameById(championId)
+        icon = await connector.getChampionIcon(championId)
+
+        stats = summary['average_stats']
+        play = stats['play']
+        winRate = stats['win'] / play
+        firstRate = stats['first_place'] / play
+        averagePlace = stats['total_place'] / play
+        pickRate = stats['pick_rate']
+        banRate = stats['ban_rate']
+        tier = stats['tier']
+
+        skills = {
+            "masteries": data['skill_masteries'][0]['ids'],
+            "order": data['skills'][0]['order'],
+            'play': data['skills'][0]['play'],
+            'win': data['skills'][0]['win'],
+            'pickRate': data['skills'][0]['pick_rate']
+        }
+
+        boots = []
+        for i in data['boots'][:3]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            boots.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate'],
+                "averatePlace": i['total_place'] / i['play'],
+                "firstRate": i['first_place'] / i['play']
+            })
+
+        startItems = []
+        for i in data['starter_items'][:3]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            startItems.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate'],
+                "averatePlace": i['total_place'] / i['play'],
+                "firstRate": i['first_place'] / i['play']
+            })
+
+        coreItems = []
+        for i in data['core_items'][:5]:
+            icons = [await connector.getItemIcon(id) for id in i['ids']]
+            coreItems.append({
+                "icons": icons,
+                "play": i['play'],
+                "win": i['win'],
+                'pickRate': i['pick_rate'],
+                "averatePlace": i['total_place'] / i['play'],
+                "firstRate": i['first_place'] / i['play']
+            })
+
+        lastItems = []
+        for i in data['last_items'][:16]:
+            lastItems.append(await connector.getItemIcon(i['ids'][0]))
+
+        augments = []
+        for item in data['augment_group']:
+            arr = [{
+                "id": (augId := aug['id']),
+                "icon": await connector.getAugmentIcon(augId),
+                "name": connector.manager.getAugmentsName(augId),
+                "win": aug['win'],
+                'play': aug['play'],
+                "totalPlace": aug['total_place'],
+                "firstPlace": aug['first_place'],
+                'pickRate': aug['pick_rate']
+            }for aug in item['augments']]
+
+            augments.append(arr)
+
+        synergies = [{
+            "championId": (chId := syn['champion_id']),
+            'icon': await connector.getChampionIcon(chId),
+            "name": connector.manager.getChampionNameById(chId),
+            "win": syn['win'],
+            'play': syn['play'],
+            "totalPlace": syn['total_place'],
+            "firstPlace": syn['first_place'],
+            'pickRate': syn['pick_rate']
+        }for syn in data['synergies']]
+
+        return {
+            "summary": {
+                "name": name,
+                "icon": icon,
+                "championId": championId,
+                "play": play,
+                "winRate": winRate,
+                "firstRate": firstRate,
+                "averagePlace": averagePlace,
+                "pickRate": pickRate,
+                "banRate": banRate,
+                "tier": tier,
+                "position": "none"
+            },
+            "championSkills": skills,
+            "items": {
+                "boots": boots,
+                "startItems": startItems,
+                "coreItems": coreItems,
+                "lastItems": lastItems,
+            },
+            "augments": augments,
+            "synergies": synergies,
         }
 
 

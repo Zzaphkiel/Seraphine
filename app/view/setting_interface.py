@@ -301,7 +301,7 @@ class SettingInterface(SeraphineInterface):
     def __onDeleteButtonClicked(self):
         folders = [
             'champion icons', 'item icons', 'profile icons', 'rune icons',
-            'summoner spell icons'
+            'summoner spell icons', "augment icons"
         ]
 
         for folder in folders:

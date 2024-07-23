@@ -8,10 +8,10 @@ from qasync import asyncSlot
 
 from app.components.animation_frame import ColorAnimationFrame
 from app.components.transparent_button import TransparentButton
-from app.components.champion_icon_widget import RoundIcon
+from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.common.signals import signalBus
 from app.common.style_sheet import StyleSheet
-from app.common.qfluentwidgets import BodyLabel, SmoothScrollArea, FlowLayout
+from app.common.qfluentwidgets import BodyLabel, SmoothScrollArea, FlowLayout, IconWidget
 
 
 class TierInterface(QFrame):
@@ -218,8 +218,7 @@ class ListItem(ColorAnimationFrame):
         self.numberLabel = BodyLabel(str(number))
         self.nameLabel = BodyLabel(info.get("name"))
         self.championIcon = RoundIcon(info.get("icon"), 28, 2, 2)
-        self.tierLabel = QLabel()
-        self.tierLabel.setPixmap(QPixmap(tierIcon))
+        self.tierLabel = RoundedLabel(tierIcon, borderWidth=0, radius=0)
 
         if info['winRate']:
             self.winRateLabel = BodyLabel(f"{info['winRate']*100:.2f}%")
@@ -259,11 +258,10 @@ class ListItem(ColorAnimationFrame):
         self.winRateLabel.setAlignment(Qt.AlignCenter)
         self.pickRateLabel.setAlignment(Qt.AlignCenter)
         self.banRateLabel.setAlignment(Qt.AlignCenter)
-        self.tierLabel.setAlignment(Qt.AlignCenter)
 
         width = 70
 
-        self.tierLabel.setFixedWidth(50)
+        # self.tierLabel.setFixedWidth(50)
         self.winRateLabel.setFixedWidth(width)
         self.pickRateLabel.setFixedWidth(width)
         self.banRateLabel.setFixedWidth(width)
@@ -283,6 +281,7 @@ class ListItem(ColorAnimationFrame):
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.tierLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacing(13)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)

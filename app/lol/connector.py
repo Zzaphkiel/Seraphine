@@ -324,6 +324,7 @@ class LolClientConnector(QObject):
             "profile icons",
             "rune icons",
             "summoner spell icons",
+            "augment icons"
         ]:
             p = f"app/resource/game/{folder}"
             if not os.path.exists(p):
@@ -339,9 +340,10 @@ class LolClientConnector(QObject):
         champions = await self.__json_retry_get(
             "/lol-game-data/assets/v1/champion-summary.json")
         skins = await self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
+        augments = await self.__json_retry_get("/lol-game-data/assets/v1/cherry-augments.json")
 
         self.manager = JsonManager(
-            items, spells, runes, queues, champions, skins, perks)
+            items, spells, runes, queues, champions, skins, perks, augments)
 
     def __initPlatformInfo(self):
         if self.server:
@@ -467,6 +469,19 @@ class LolClientConnector(QObject):
 
         if not os.path.exists(icon):
             path = self.manager.getItemIconPath(iconId)
+            res = await self.__get(path)
+
+            with open(icon, "wb") as f:
+                f.write(await res.read())
+
+        return icon
+
+    @retry()
+    async def getAugmentIcon(self, augmentId):
+        icon = f"app/resource/game/augment icons/{augmentId}.png"
+
+        if not os.path.exists(icon):
+            path = self.manager.getAugmentsIconPath(augmentId)
             res = await self.__get(path)
 
             with open(icon, "wb") as f:
@@ -1077,7 +1092,7 @@ class LolClientConnector(QObject):
 
 
 class JsonManager:
-    def __init__(self, itemData, spellData, runeData, queueData, champions, skins, perks):
+    def __init__(self, itemData, spellData, runeData, queueData, champions, skins, perks, augments):
         self.items = {item["id"]: item["iconPath"] for item in itemData}
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
         self.runes = {item["id"]: {"icon": item["iconPath"],
@@ -1125,6 +1140,10 @@ class JsonManager:
                 if 'skinAugments' in item and 'augments' in item['skinAugments']:
                     contentId = item['skinAugments']['augments'][0]['contentId']
                     self.skinAugments[item['id']] = contentId
+
+        self.cherryAugments = {
+            item['id']: item
+            for item in augments}
 
     def getItemIconPath(self, iconId):
         if iconId != 0:
@@ -1240,6 +1259,16 @@ class JsonManager:
 
     def getPerkStyles(self):
         return self.perkStyles
+
+    def getAugmentsIconPath(self, augmentId):
+        try:
+            return self.cherryAugments[augmentId]['augmentSmallIconPath']
+
+        except:
+            return "/lol-game-data/assets/ASSETS/Items/Icons2D/gp_ui_placeholder.png"
+
+    def getAugmentsName(self, augmentId):
+        return self.cherryAugments[augmentId]['nameTRA']
 
 
 connector = LolClientConnector()

@@ -151,13 +151,15 @@ class RoundIconButton(QFrame):
 
 
 class RoundedLabel(QLabel):
-    def __init__(self, imagePath=None, radius=4.0, borderWidth=2, parent=None):
+    def __init__(self, imagePath=None, radius=4.0, borderWidth=2, borderColor: QColor = None, drawBackground=False, parent=None):
         super().__init__(parent)
         self.setPixmap(QPixmap(imagePath))
 
         self.havePic = imagePath != None
         self.radius = radius
         self.borderWidth = borderWidth
+        self.borderColor = borderColor if borderColor else QColor(120, 90, 40)
+        self.drawBackground = drawBackground
 
     def paintEvent(self, e):
         if not self.havePic:
@@ -172,12 +174,23 @@ class RoundedLabel(QLabel):
 
         path = QPainterPath()
         path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius)
+
         painter.setClipPath(path)
+
+        if self.drawBackground:
+            painter.save()
+            painter.setBrush(QColor(0, 0, 0))
+            painter.setOpacity(0.8)
+            painter.drawRoundedRect(
+                QRectF(self.rect()), self.radius, self.radius)
+            painter.restore()
+
         painter.drawPixmap(self.rect(), pixmap)
 
         if self.borderWidth != 0:
             painter.setPen(
-                QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
+                QPen(self.borderColor, self.borderWidth, Qt.SolidLine))
+
             painter.drawRoundedRect(
                 QRectF(self.rect()), self.radius, self.radius)
 
