@@ -1328,10 +1328,7 @@ class ChampionSelection:
         self.isSkinPicked = False
 
     def reset(self):
-        self.isChampionBanned = False
-        self.isChampionPicked = False
-        self.isChampionPickedCompleted = False
-        self.isSkinPicked = False
+        self.__init__()
 
 
 async def autoSwap(data, selection: ChampionSelection):
@@ -1350,24 +1347,6 @@ async def autoSwap(data, selection: ChampionSelection):
             return True
 
 
-async def autoBenchSwap(data, selection):
-    """
-    自动选用英雄启用时，如果备战席该英雄可用，自动交换（比如极地大乱斗模式）
-    """
-    if not cfg.get(cfg.enableAutoSelectChampion) or not data['benchEnabled']:
-        return False
-
-    championId = connector.manager.getChampionIdByName(
-        cfg.get(cfg.autoSelectChampion))
-
-    for benchChampion in data['benchChampions']:
-        if benchChampion['championId'] == championId:
-            await connector.benchSwap(championId)
-            return True
-
-    return False
-
-
 async def autoTrade(data, selection):
     """
     英雄交换请求发生时，自动接受
@@ -1377,7 +1356,7 @@ async def autoTrade(data, selection):
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
-            await asyncio.sleep(1)
+            await asyncio.sleep(.5)
             await connector.acceptTrade(trade['id'])
             return True
 
@@ -1535,133 +1514,6 @@ async def rollAndSwapBack():
 
     await connector.reroll()
     await connector.benchSwap(championId)
-
-
-async def autoSelectSkinRandom(data, selection: ChampionSelection):
-    """
-    随机选皮肤
-    """
-    isAutoSelectSkinRandom = cfg.get(cfg.enableRandomSkin)
-    if not isAutoSelectSkinRandom or selection.isSkinPicked:
-        return
-
-    selection.isSkinPicked = True
-
-    skinCarousel = await connector.getSkinCarousel()
-    pickableSkinIds = []
-    for skin in skinCarousel:
-        if skin['disabled']:
-            continue
-
-        if not skin['ownership']['owned']:
-            continue
-        pickableSkinIds.append(skin['id'])
-
-        if len(skin['childSkins']) > 0:
-            for childSkin in skin['childSkins']:
-                if skin['ownership']['owned']:
-                    pickableSkinIds.append(childSkin['id'])
-
-    length = len(pickableSkinIds)
-    if length > 1:
-        await connector.selectConfig(pickableSkinIds[random.randint(0, length - 1)])
-        return True
-
-
-async def fixLeagueClientWindow():
-    """
-    ### 该函数已弃用
-
-    #### 需要管理员权限
-
-    调用 Win API 手动调整窗口大小 / 位置
-    详情请见 https://github.com/LeagueTavern/fix-lcu-window
-
-    @return: 当且仅当需要修复且权限不足时返回 `False`
-    """
-
-    windowHWnd = win32gui.FindWindow("RCLIENT", "League of Legends")
-
-    # 客户端只有在 DX 9 模式下这个玩意才不是 0
-    windowCefHWnd = win32gui.FindWindowEx(
-        windowHWnd, 0, "CefBrowserWindow", None)
-
-    if not windowHWnd or not windowCefHWnd:
-        return True
-
-    # struct WINDOWPLACEMENT {
-    #     UINT  length; (事实上并没有该字段)
-    #     UINT  flags;
-    #     UINT  showCmd;
-    #     POINT ptMinPosition;
-    #     POINT ptMaxPosition;
-    #     RECT  rcNormalPosition;
-    # } ;
-    placement = win32gui.GetWindowPlacement(windowHWnd)
-
-    if placement[1] == win32con.SW_SHOWMINIMIZED:
-        return True
-
-    # struct RECT {
-    #     LONG left;
-    #     LONG top;
-    #     LONG right;
-    #     LONG bottom;
-    # }
-    windowRect = win32gui.GetWindowRect(windowHWnd)
-    windowCefRect = win32gui.GetWindowRect(windowCefHWnd)
-
-    def needResize(rect):
-        return (rect[3] - rect[1]) / (rect[2] - rect[0]) != 0.5625
-
-    if not needResize(windowRect) and not needResize(windowCefRect):
-        return True
-
-    clientZoom = float(await connector.getClientZoom())
-
-    screenWidth = win32api.GetSystemMetrics(0)
-    screenHeight = win32api.GetSystemMetrics(1)
-
-    targetWindowWidth = int(1280 * clientZoom)
-    targetWindowHeight = int(720 * clientZoom)
-
-    def patchDpiChangedMessage(hWnd):
-        dpi = ctypes.windll.user32.GetDpiForWindow(hWnd)
-        wParam = win32api.MAKELONG(dpi, dpi)
-        lParam = ctypes.pointer((ctypes.c_int * 4)(0, 0, 0, 0))
-
-        WM_DPICHANGED = 0x02E0
-        win32api.SendMessage(hWnd, WM_DPICHANGED, wParam, lParam)
-
-    try:
-        patchDpiChangedMessage(windowHWnd)
-        patchDpiChangedMessage(windowCefHWnd)
-
-        SWP_SHOWWINDOW = 0x0040
-        win32gui.SetWindowPos(
-            windowHWnd,
-            0,
-            (screenWidth - targetWindowWidth) // 2,
-            (screenHeight - targetWindowHeight) // 2,
-            targetWindowWidth, targetWindowHeight,
-            SWP_SHOWWINDOW
-        )
-
-        win32gui.SetWindowPos(
-            windowCefHWnd,
-            0,
-            0,
-            0,
-            targetWindowWidth,
-            targetWindowHeight,
-            SWP_SHOWWINDOW
-        )
-
-    except:
-        # 需要管理员权限
-        return False
-
-    return True
 
 
 async def fixLCUWindowViaExe():

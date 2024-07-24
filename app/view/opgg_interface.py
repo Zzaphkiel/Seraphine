@@ -3,7 +3,7 @@ import json
 import traceback
 
 from qasync import asyncSlot, asyncClose
-from PyQt5.QtGui import QColor, QPainter, QIcon
+from PyQt5.QtGui import QColor, QPainter, QIcon, QShowEvent
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy)
@@ -113,6 +113,7 @@ class OpggInterface(OpggInterfaceBase):
         self.buildInterface = BuildInterface()
         self.waitingInterface = WaitingInterface()
         self.errorInterface = ErrorInterface()
+        self.homeInterface = HomeInterface()
 
         # 缓存一个召唤师峡谷的梯队数据，切换位置的时候不重新调 opgg 了
         self.cachedTier = None
@@ -126,9 +127,10 @@ class OpggInterface(OpggInterfaceBase):
 
         # self.debugButton.click()
         self.debugButton.setVisible(False)
+        self.setHomeInterfaceEnabled(True)
 
     def __initWindow(self):
-        self.setFixedSize(640, 821)
+        self.setFixedSize(640, 826)
         self.setWindowIcon(QIcon("app/resource/images/opgg.svg"))
         self.setWindowTitle("OP.GG")
 
@@ -234,8 +236,7 @@ class OpggInterface(OpggInterfaceBase):
         self.stackedWidget.addWidget(self.buildInterface)
         self.stackedWidget.addWidget(self.waitingInterface)
         self.stackedWidget.addWidget(self.errorInterface)
-
-        # self.stackedWidget.setCurrentWidget(self.buildInterface)
+        self.stackedWidget.addWidget(self.homeInterface)
 
         self.vBoxLayout.setAlignment(Qt.AlignTop)
         self.vBoxLayout.addLayout(self.filterLayout)
@@ -248,7 +249,7 @@ class OpggInterface(OpggInterfaceBase):
         widget = self.stackedWidget.currentWidget()
         self.setComboBoxesEnabled(True)
 
-        if widget is self.waitingInterface:
+        if widget in [self.waitingInterface, self.homeInterface]:
             self.setComboBoxesEnabled(False)
         elif widget in [self.buildInterface, self.errorInterface]:
             self.searchButton.setEnabled(False)
@@ -466,6 +467,13 @@ class OpggInterface(OpggInterfaceBase):
 
     #     return super().closeEvent(e)
 
+    def showEvent(self, a0: QShowEvent) -> None:
+        return super().showEvent(a0)
+
+    def setHomeInterfaceEnabled(self, enabeld):
+        interface = self.homeInterface if enabeld else self.tierInterface
+        self.stackedWidget.setCurrentWidget(interface)
+
 
 class WaitingInterface(QFrame):
     def __init__(self, parent: QWidget = None):
@@ -516,6 +524,32 @@ class ErrorInterface(QFrame):
         self.vBoxLayout.setAlignment(Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.title, alignment=Qt.AlignCenter)
         self.vBoxLayout.addWidget(self.content, alignment=Qt.AlignCenter)
+
+
+class HomeInterface(QFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.title = QLabel(self.tr("Waiting for LOL Client"))
+
+        self.__initWidget()
+        self.__initLayout()
+
+        StyleSheet.OPGG_HOME_INTERFACE.apply(self)
+
+    def setFromInterface(self, interface: QWidget):
+        self.fromInterface = interface
+
+    def getFromInterface(self):
+        return self.fromInterface
+
+    def __initWidget(self):
+        self.title.setObjectName("titleLabel")
+
+    def __initLayout(self):
+        self.vBoxLayout.setAlignment(Qt.AlignCenter)
+        self.vBoxLayout.addWidget(self.title, alignment=Qt.AlignCenter)
 
 
 class SearchLineEditFlyout(FlyoutViewBase):

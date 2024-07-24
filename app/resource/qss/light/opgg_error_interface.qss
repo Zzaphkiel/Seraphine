@@ -5,7 +5,7 @@
 
 #contentLabel {
     font: 16px 'Segoe UI', 'Microsoft YaHei';
-    color: black;
+    color: rgb(131, 131, 131);
 }
 
 ErrorInterface {

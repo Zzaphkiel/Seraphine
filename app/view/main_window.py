@@ -41,7 +41,7 @@ from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
 from app.lol.connector import connector
 from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                           autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
+                           autoSwap, autoTrade, ChampionSelection, SERVERS_NAME,
                            SERVERS_SUBSET)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
@@ -492,6 +492,7 @@ class MainWindow(FluentWindow):
         championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
 
         asyncio.create_task(self.opggInterface.initWindow())
+        self.opggInterface.setHomeInterfaceEnabled(False)
 
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
@@ -568,6 +569,7 @@ class MainWindow(FluentWindow):
 
         self.startInterface.showLoadingPage()
         self.careerInterface.setLoadingPageEnabled(True)
+        self.opggInterface.setHomeInterfaceEnabled(True)
 
         self.setWindowTitle("Seraphine")
 
@@ -846,6 +848,9 @@ class MainWindow(FluentWindow):
     async def __onChampionSelectBegin(self):
         self.championSelection.reset()
 
+        if cfg.get(cfg.autoShowOpgg):
+            self.opggInterface.show()
+
         session = await connector.getChampSelectSession()
 
         currentSummonerId = self.currentSummoner['summonerId']
@@ -862,7 +867,7 @@ class MainWindow(FluentWindow):
         phase = {
             'PLANNING': [autoPick],
             'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap],
-            'FINALIZATION': [autoTrade, autoSelectSkinRandom],
+            'FINALIZATION': [autoTrade],
             # 'GAME_STARTING': []
         }
 
