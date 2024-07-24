@@ -9,6 +9,9 @@ import base64
 import subprocess
 import psutil
 import win32api
+import win32gui
+
+from PyQt5.QtCore import QRectF
 
 from app.common.config import cfg, VERSION
 from app.common.logger import logger
@@ -307,3 +310,27 @@ def getLolClientVersion():
 
     # 缩短至大版本号
     return re.search(r"\d+\.\d+", lolVer).group(0)
+
+
+def getLolClientWindowPos() -> QRectF:
+    # 获取客户端窗口句柄
+    hwnd = win32gui.FindWindow("RCLIENT", "League of Legends")
+
+    # 如果没客户端，就直接 return 一个 None
+    if not hwnd:
+        return None
+
+    # 获取客户端窗口位置
+    # struct RECT {
+    #     LONG left;
+    #     LONG top;
+    #     LONG right;
+    #     LONG bottom;
+    # }
+    rect = win32gui.GetWindowRect(hwnd)
+
+    # 窗口最小化的时候，比例不是 16:9，直接 return 一个 None
+    if (rect[3] - rect[1]) / (rect[2] - rect[0]) != 0.5625:
+        return None
+
+    return QRectF(rect[0], rect[1], rect[2] - rect[0], rect[3] - rect[1])

@@ -1,22 +1,24 @@
 import sys
-import json
+import win32api
 import traceback
 
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon, QShowEvent
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QRect
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
-                             QFrame, QVBoxLayout, QSpacerItem, QSizePolicy)
+                             QFrame, QVBoxLayout, QSpacerItem, QSizePolicy,
+                             QApplication)
 
 
 from app.common.icons import Icon
 from app.lol.connector import connector
-from app.lol.opgg import opgg, OpggDataParser
+from app.lol.opgg import opgg
 from app.lol.champions import ChampionAlias
 from app.common.logger import logger
 from app.common.config import qconfig, cfg
 from app.common.style_sheet import StyleSheet
 from app.common.signals import signalBus
+from app.common.util import getLolClientWindowPos
 from app.common.qfluentwidgets import (FramelessWindow, isDarkTheme, BackgroundAnimationWidget,
                                        FluentTitleBar,  ComboBox, BodyLabel, ToolTipFilter,
                                        ToolTipPosition, IndeterminateProgressRing, setTheme,
@@ -451,24 +453,40 @@ class OpggInterface(OpggInterfaceBase):
 
         await self.initWindow()
 
-        # self.toggleButton.click()
-        # data = json.load(open("C:/Users/zaphkiel/Desktop/test1.json"))
-        # data = await OpggDataParser.parseArenaChampionBuild(data)
-        # self.buildInterface.setCurrentChampionId(data['summary']['championId'])
-        # self.buildInterface.updateInterface(data)
-
     async def initWindow(self):
         self.__onFilterTextChanged(1)
 
-    # @asyncClose
-    # async def closeEvent(self, e):
-    #     await connector.close()
-    #     await opgg.close()
-
-    #     return super().closeEvent(e)
-
     def showEvent(self, a0: QShowEvent) -> None:
+        """在显示的时候，自动显示在客户端正右侧"""
+
+        size: QSize = self.size()
+        pos = getLolClientWindowPos()
+
+        if not pos:
+            self.__moveRightCenter()
+            return super().showEvent(a0)
+
+        dpi = self.devicePixelRatioF()
+
+        # 别问为什么要这么算，我也不知道，反正它能跑
+        x = pos.right()
+        y = pos.center().y() - size.height() * dpi / 2
+
+        rect = QRect(x / dpi, y / dpi, size.width(), size.height())
+
+        # 如果超出右边界，则直接 return 了
+        screenWidth = win32api.GetSystemMetrics(0)
+        if rect.left() * dpi > screenWidth:
+            self.__moveRightCenter()
+            return super().showEvent(a0)
+
+        self.setGeometry(rect)
         return super().showEvent(a0)
+
+    def __moveRightCenter(self):
+        desktop = QApplication.desktop().availableGeometry()
+        w, h = desktop.width(), desktop.height()
+        self.move(w - self.width(), h // 2 - self.height() // 2)
 
     def setHomeInterfaceEnabled(self, enabeld):
         interface = self.homeInterface if enabeld else self.tierInterface
