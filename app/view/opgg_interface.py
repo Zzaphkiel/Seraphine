@@ -29,10 +29,10 @@ from app.components.multi_champion_select import ChampionSelectFlyout
 from app.view.opgg_tier_interface import TierInterface
 from app.view.opgg_build_interface import BuildInterface
 
-TAG = 'OpggInterface'
+TAG = 'OpggWindow'
 
 
-class OpggInterfaceBase(BackgroundAnimationWidget, FramelessWindow):
+class OpggWindowBase(BackgroundAnimationWidget, FramelessWindow):
     def __init__(self, parent=None):
         self._isMicaEnabled = False
         self._lightBackgroundColor = QColor(243, 243, 243)
@@ -89,7 +89,7 @@ class OpggInterfaceBase(BackgroundAnimationWidget, FramelessWindow):
         return self._isMicaEnabled
 
 
-class OpggInterface(OpggInterfaceBase):
+class OpggWindow(OpggWindowBase):
     def __init__(self, parent=None):
         super().__init__()
 

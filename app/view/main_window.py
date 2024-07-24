@@ -24,7 +24,7 @@ from app.view.career_interface import CareerInterface
 from app.view.search_interface import SearchInterface
 from app.view.game_info_interface import GameInfoInterface
 from app.view.auxiliary_interface import AuxiliaryInterface
-from app.view.opgg_interface import OpggInterface
+from app.view.opgg_interface import OpggWindow
 from app.common.util import (github, getLolClientPid, getTasklistPath,
                              getLolClientPidSlowly, getLoLPathByRegistry)
 from app.components.avatar_widget import NavigationAvatarWidget
@@ -106,7 +106,7 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
 
-        self.opggInterface = OpggInterface()
+        self.opggWindow = OpggWindow()
 
         logger.critical("Seraphine initialized", TAG)
 
@@ -162,7 +162,7 @@ class MainWindow(FluentWindow):
             routeKey='Opgg',
             icon=QIcon("app/resource/images/opgg.svg"),
             text="OP.GG",
-            onClick=lambda: self.opggInterface.show(),
+            onClick=lambda: self.opggWindow.show(),
             selectable=False,
             position=pos,
             tooltip="OP.GG"
@@ -491,8 +491,8 @@ class MainWindow(FluentWindow):
         aramInitT = asyncio.create_task(AramBuff.checkAndUpdate())
         championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
 
-        asyncio.create_task(self.opggInterface.initWindow())
-        self.opggInterface.setHomeInterfaceEnabled(False)
+        asyncio.create_task(self.opggWindow.initWindow())
+        self.opggWindow.setHomeInterfaceEnabled(False)
 
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
@@ -569,7 +569,7 @@ class MainWindow(FluentWindow):
 
         self.startInterface.showLoadingPage()
         self.careerInterface.setLoadingPageEnabled(True)
-        self.opggInterface.setHomeInterfaceEnabled(True)
+        self.opggWindow.setHomeInterfaceEnabled(True)
 
         self.setWindowTitle("Seraphine")
 
@@ -728,7 +728,7 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-            self.opggInterface.close()
+            self.opggWindow.close()
 
             return super().closeEvent(a0)
         else:
@@ -849,7 +849,7 @@ class MainWindow(FluentWindow):
         self.championSelection.reset()
 
         if cfg.get(cfg.autoShowOpgg):
-            self.opggInterface.show()
+            self.opggWindow.show()
 
         session = await connector.getChampSelectSession()
 
