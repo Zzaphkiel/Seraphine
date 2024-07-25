@@ -67,8 +67,8 @@ class SettingInterface(SeraphineInterface):
             cfg.showTierInGameInfo)
 
         self.autoShowOpggCard = SwitchSettingCard(
-            Icon.WINDOW, self.tr("Show OPGG window automatically"),
-            self.tr("Show OPGG window automatically when champion selection starts"),
+            Icon.WINDOW, self.tr("Show OP.GG window automatically"),
+            self.tr("Show OP.GG window automatically when champion selection starts"),
             cfg.autoShowOpgg)
 
         self.generalGroup = SettingCardGroup(self.tr("General"),

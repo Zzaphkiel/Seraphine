@@ -66,7 +66,7 @@ class Config(QConfig):
 
     showTierInGameInfo = ConfigItem("Functions", "ShowTierInGameInfo", False,
                                     BoolValidator())
-    autoShowOpgg = ConfigItem("Functions", "AutoShowOpgg", True,
+    autoShowOpgg = ConfigItem("Functions", "AutoShowOpgg", False,
                               BoolValidator())
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,

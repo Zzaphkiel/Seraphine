@@ -2755,12 +2755,22 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../view/setting_interface.py" line="69"/>
         <source>Show OPGG window automatically</source>
-        <translation>自动显示 OPGG 窗口</translation>
+        <translation type="obsolete">自动显示 OPGG 窗口</translation>
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="69"/>
         <source>Show OPGG window automatically when champion selection starts</source>
-        <translation>在英雄选择开始时自动显示 OPGG 窗口</translation>
+        <translation type="obsolete">在英雄选择开始时自动显示 OPGG 窗口</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="69"/>
+        <source>Show OP.GG window automatically</source>
+        <translation>自动显示 OP.GG 窗口</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="69"/>
+        <source>Show OP.GG window automatically when champion selection starts</source>
+        <translation>在英雄选择开始时自动显示 OP.GG 窗口</translation>
     </message>
 </context>
 <context>
