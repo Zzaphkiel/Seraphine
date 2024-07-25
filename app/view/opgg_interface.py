@@ -466,17 +466,15 @@ class OpggWindow(OpggWindowBase):
             self.__moveRightCenter()
             return super().showEvent(a0)
 
-        dpi = self.devicePixelRatioF()
-
         # 别问为什么要这么算，我也不知道，反正它能跑
+        dpi = self.devicePixelRatioF()
         x = pos.right()
         y = pos.center().y() - size.height() * dpi / 2
-
         rect = QRect(x / dpi, y / dpi, size.width(), size.height())
 
         # 如果超出右边界，则直接 return 了
         screenWidth = win32api.GetSystemMetrics(0)
-        if rect.left() * dpi > screenWidth:
+        if (rect.left() + size.width()) * dpi > screenWidth:
             self.__moveRightCenter()
             return super().showEvent(a0)
 
@@ -484,6 +482,9 @@ class OpggWindow(OpggWindowBase):
         return super().showEvent(a0)
 
     def __moveRightCenter(self):
+        """
+        将窗口移动到屏幕最右侧的中心
+        """
         desktop = QApplication.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w - self.width(), h // 2 - self.height() // 2)
