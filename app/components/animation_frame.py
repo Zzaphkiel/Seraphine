@@ -94,3 +94,30 @@ class ColorAnimationFrame(CardWidget, ColorChangeable):
 
     def _pressedBackgroundColor(self):
         return self.pressedBackgroundColor
+
+
+class NoBorderColorAnimationFrame(CardWidget, ColorChangeable):
+    def __init__(self, type: str = None, parent=None):
+        # `BackgroundAnimationWidget` 的 `__init__` 里调用了 `super().__init__()`
+        # 这里不能再 `ColorChangeable.__init__()` 了，不然它会被 `__init__` 两次
+        CardWidget.__init__(self, parent=parent, type=type)
+
+    def setColor(self, c1: QColor, c2: QColor, c3: QColor, c4: QColor):
+        self.normalBackgroundColor = c1
+        self.hoverBackgroundColor = c2
+        self.pressedBackgroundColor = c3
+
+        try:
+            # 由于同样原因，这里不 try 就报错咯 ^^_
+            self._updateBackgroundColor()
+        except:
+            return
+
+    def _normalBackgroundColor(self):
+        return self.normalBackgroundColor
+
+    def _hoverBackgroundColor(self):
+        return self.hoverBackgroundColor
+
+    def _pressedBackgroundColor(self):
+        return self.pressedBackgroundColor

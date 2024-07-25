@@ -2,7 +2,7 @@ import inspect
 import os
 import json
 import threading
-import traceback
+import re
 from collections import deque
 
 import requests
@@ -15,7 +15,7 @@ from PyQt5.QtCore import pyqtSignal, QObject
 from app.common.config import cfg, Language
 from app.common.logger import logger
 from app.common.signals import signalBus
-from app.common.util import getPortTokenServerByPid
+from app.common.util import getPortTokenServerByPid, getTasklistPath, getLolClientPid
 from app.lol.exceptions import *
 
 requests.packages.urllib3.disable_warnings()
@@ -213,9 +213,19 @@ class LolClientConnector(QObject):
         self.inMainLand = False
 
         self.manager = None
+        self.perksStyleCache = None
 
         self.dqLock = threading.Lock()
         self.callStack = deque(maxlen=10)
+
+    async def autoStart(self):
+        '''
+        只是为了 debug 的时候省事罢了
+        '''
+        path = getTasklistPath()
+        pid = getLolClientPid(path)
+
+        await self.start(pid)
 
     async def start(self, pid):
         self.pid = pid
@@ -233,6 +243,7 @@ class LolClientConnector(QObject):
         await self.__initManager()
         self.__initFolder()
         await self.__runListener()
+        await self.__initRuneStyle()
 
         logger.critical(f"connector started, server: {self.server}", TAG)
 
@@ -275,7 +286,8 @@ class LolClientConnector(QObject):
         except:
             pass
 
-        await self.lcuSess.close()
+        if self.lcuSess:
+            await self.lcuSess.close()
 
         if self.sgpSess:
             await self.sgpSess.close()
@@ -312,6 +324,7 @@ class LolClientConnector(QObject):
             "profile icons",
             "rune icons",
             "summoner spell icons",
+            "augment icons"
         ]:
             p = f"app/resource/game/{folder}"
             if not os.path.exists(p):
@@ -322,13 +335,15 @@ class LolClientConnector(QObject):
         spells = await self.__json_retry_get(
             "/lol-game-data/assets/v1/summoner-spells.json")
         runes = await self.__json_retry_get("/lol-game-data/assets/v1/perks.json")
+        perks = await self.__json_retry_get("/lol-game-data/assets/v1/perkstyles.json")
         queues = await self.__json_retry_get("/lol-game-queues/v1/queues")
         champions = await self.__json_retry_get(
             "/lol-game-data/assets/v1/champion-summary.json")
         skins = await self.__json_retry_get("/lol-game-data/assets/v1/skins.json")
+        augments = await self.__json_retry_get("/lol-game-data/assets/v1/cherry-augments.json")
 
         self.manager = JsonManager(
-            items, spells, runes, queues, champions, skins)
+            items, spells, runes, queues, champions, skins, perks, augments)
 
     def __initPlatformInfo(self):
         if self.server:
@@ -336,6 +351,34 @@ class LolClientConnector(QObject):
                                  'gz100', 'nj100', 'hn10', 'tj101', 'bgp2'}
 
             self.inMainLand = self.server.lower() in mainlandPlatforms
+
+    async def __initRuneStyle(self):
+        res = {}
+
+        for item in self.manager.perks['styles']:
+            id = item['id']
+            name = item['name']
+
+            slots = []
+
+            for s in item['slots']:
+                perks = [{
+                    "runeId": perk,
+                    "icon": await self.getRuneIcon(perk),
+                    "name": self.manager.getRuneName(perk),
+                    "desc": self.manager.getRuneDesc(perk),
+                } for perk in s['perks']
+                ]
+
+                slots.append(perks)
+
+            res[id] = {
+                "name": name,
+                "icon": await self.getRuneIcon(id),
+                "slots": slots
+            }
+
+        self.manager.perkStyles = res
 
     async def __json_retry_get(self, url, max_retries=5):
         """
@@ -426,6 +469,19 @@ class LolClientConnector(QObject):
 
         if not os.path.exists(icon):
             path = self.manager.getItemIconPath(iconId)
+            res = await self.__get(path)
+
+            with open(icon, "wb") as f:
+                f.write(await res.read())
+
+        return icon
+
+    @retry()
+    async def getAugmentIcon(self, augmentId):
+        icon = f"app/resource/game/augment icons/{augmentId}.png"
+
+        if not os.path.exists(icon):
+            path = self.manager.getAugmentsIconPath(augmentId)
             res = await self.__get(path)
 
             with open(icon, "wb") as f:
@@ -814,6 +870,36 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
+    @retry()
+    async def getCurrentRunePage(self):
+        res = await self.__get("/lol-perks/v1/currentpage")
+
+        return await res.json()
+
+    @retry()
+    async def deleteCurrentRunePage(self):
+        page = await self.getCurrentRunePage()
+
+        res = None
+        if page.get('isDeletable'):
+            id = page['id']
+
+            res = await self.__delete(f"/lol-perks/v1/pages/{id}")
+            res = await res.json()
+
+    @retry()
+    async def createRunePage(self, name, primaryId, secondaryId, perks):
+        body = {
+            "name": name,
+            "primaryStyleId": primaryId,
+            "subStyleId": secondaryId,
+            "selectedPerkIds": perks,
+            "current": True
+        }
+
+        res = await self.__post("/lol-perks/v1/pages", data=body)
+        return await res.json()
+
     async def spectate(self, summonerName):
         info = await self.getSummonerByName(summonerName)
         puuid = info.get('puuid')
@@ -869,8 +955,6 @@ class LolClientConnector(QObject):
         }
 
         res = await self.__post('/lol-chat/v1/friend-requests', data=data)
-
-        print(await res.read())
 
     @retry()
     def sendNotificationMsg(self, title, content):
@@ -988,6 +1072,10 @@ class LolClientConnector(QObject):
         return await self.lcuSess.put(path, json=data, ssl=False)
 
     @needLcu()
+    async def __delete(self, path):
+        return await self.lcuSess.delete(path, ssl=False)
+
+    @needLcu()
     async def __patch(self, path, data=None):
         return await self.lcuSess.patch(path, json=data, ssl=False)
 
@@ -1007,10 +1095,23 @@ class LolClientConnector(QObject):
 
 
 class JsonManager:
-    def __init__(self, itemData, spellData, runeData, queueData, champions, skins):
+    def __init__(self, itemData, spellData, runeData, queueData, champions, skins, perks, augments):
         self.items = {item["id"]: item["iconPath"] for item in itemData}
         self.spells = {item["id"]: item["iconPath"] for item in spellData[:-3]}
-        self.runes = {item["id"]: item["iconPath"] for item in runeData}
+        self.runes = {item["id"]: {"icon": item["iconPath"],
+                                   'name': item['name'],
+                                   'desc': item['longDesc']
+                                   } for item in runeData}
+
+        for item in self.runes.values():
+            desc: str = item['desc']
+
+            # 移除除了 <br>、<i>、</i>、<font color='xxx'> 和 </font> 以外的所有 html 标签
+            partten = r"(?!<br\s*/?>|<i>|</i>|<b>|</b>|<font color='[^']+'>|</font>)(<[^>]+>)"
+            desc = re.sub(partten, '', desc)
+
+            # 移除末尾多余的换行
+            item['desc'] = desc.strip().strip("<br>")
 
         self.champs = {item["id"]: item["name"] for item in champions}
 
@@ -1019,6 +1120,9 @@ class JsonManager:
             item["id"]: {"mapId": item["mapId"], "name": item["name"]}
             for item in queueData
         }
+
+        self.perks: dict = perks
+        self.perkStyles: dict = None
 
         # 给高贵的名人堂皮肤一个专属于它们的成员变量（划掉）
         # 名人堂皮肤里有 augments 参数，使用它们可以让召唤师生涯背景带上签名^^_
@@ -1045,6 +1149,10 @@ class JsonManager:
                     contentId = item['skinAugments']['augments'][0]['contentId']
                     self.skinAugments[item['id']] = contentId
 
+        self.cherryAugments = {
+            item['id']: item
+            for item in augments}
+
     def getItemIconPath(self, iconId):
         if iconId != 0:
             try:
@@ -1061,7 +1169,18 @@ class JsonManager:
             return "/lol-game-data/assets/data/spells/icons2d/summoner_empty.png"
 
     def getRuneIconPath(self, runeId):
-        return self.runes[runeId]
+        try:
+            return self.runes[runeId]['icon']
+        except:
+            for item in self.perks['styles']:
+                if item['id'] == runeId:
+                    return item['iconPath']
+
+    def getRuneName(self, runeId):
+        return self.runes[runeId]['name']
+
+    def getRuneDesc(self, runeId):
+        return self.runes[runeId]['desc']
 
     def getSummonerProfileIconPath(self, iconId):
         return f"/lol-game-data/assets/v1/profile-icons/{iconId}.jpg"
@@ -1145,6 +1264,19 @@ class JsonManager:
 
     def getSkinAugments(self, skinId):
         return self.skinAugments.get(skinId)
+
+    def getPerkStyles(self):
+        return self.perkStyles
+
+    def getAugmentsIconPath(self, augmentId):
+        try:
+            return self.cherryAugments[augmentId]['augmentSmallIconPath']
+
+        except:
+            return "/lol-game-data/assets/ASSETS/Items/Icons2D/gp_ui_placeholder.png"
+
+    def getAugmentsName(self, augmentId):
+        return self.cherryAugments[augmentId]['nameTRA']
 
 
 connector = LolClientConnector()

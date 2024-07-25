@@ -20,7 +20,7 @@ from app.common.style_sheet import StyleSheet, ColorChangeable
 from app.common.icons import Icon
 from app.common.config import cfg
 from app.common.signals import signalBus
-from app.components.champion_icon_widget import RoundIcon
+from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.components.search_line_edit import SearchLineEdit
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import ColorAnimationFrame, CardWidget
@@ -403,20 +403,20 @@ class TeamView(QFrame):
         self.summonersLayout = QVBoxLayout()
 
         self.teamResultLabel = ColorLabel()
-        self.towerIconLabel = QLabel()
+        self.towerIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.towerKillsLabel = QLabel()
-        self.inhibitorIconLabel = QLabel()
+        self.inhibitorIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.inhibitorKillsLabel = QLabel()
-        self.baronIconLabel = QLabel()
+        self.baronIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.baronKillsLabel = QLabel()
-        self.dragonIconLabel = QLabel()
+        self.dragonIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.dragonKillsLabel = QLabel()
-        self.riftHeraldIconLabel = QLabel()
+        self.riftHeraldIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.riftHeraldKillsLabel = QLabel()
 
         self.bansButton = PushButton("Bans")
-        self.csIconLabel = QLabel()
-        self.goldIconLabel = QLabel()
+        self.csIconLabel = RoundedLabel(radius=0, borderWidth=0)
+        self.goldIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.dmgIconLabel = QLabel()
         self.kdaLabel = QLabel()
 
@@ -433,20 +433,18 @@ class TeamView(QFrame):
     def __initWidget(self):
         self.teamResultLabel.setObjectName("teamResult")
 
-        self.towerIconLabel.setFixedWidth(24)
-        self.inhibitorIconLabel.setFixedWidth(24)
-        self.baronIconLabel.setFixedWidth(24)
-        self.dragonIconLabel.setFixedWidth(24)
-        self.riftHeraldIconLabel.setFixedWidth(24)
+        self.towerIconLabel.setFixedSize(22, 22)
+        self.inhibitorIconLabel.setFixedSize(18, 18)
+        self.baronIconLabel.setFixedSize(17, 17)
+        self.dragonIconLabel.setFixedSize(18, 18)
+        self.riftHeraldIconLabel.setFixedSize(18, 18)
 
         self.bansButton.setVisible(False)
 
         self.kdaLabel.setFixedWidth(100)
         self.kdaLabel.setAlignment(Qt.AlignCenter)
-        self.csIconLabel.setFixedWidth(50)
-        self.csIconLabel.setAlignment(Qt.AlignCenter)
-        self.goldIconLabel.setFixedWidth(60)
-        self.goldIconLabel.setAlignment(Qt.AlignCenter)
+        self.csIconLabel.setFixedSize(18, 18)
+        self.goldIconLabel.setFixedSize(18, 18)
         self.dmgIconLabel.setFixedWidth(70)
         self.dmgIconLabel.setAlignment(Qt.AlignCenter)
 
@@ -517,26 +515,30 @@ class TeamView(QFrame):
         self.titleBarLayout.addWidget(self.towerKillsLabel)
         self.titleBarLayout.addSpacing(18)
         self.titleBarLayout.addWidget(self.inhibitorIconLabel)
+        self.titleBarLayout.addSpacing(5)
         self.titleBarLayout.addWidget(self.inhibitorKillsLabel)
         self.titleBarLayout.addSpacing(18)
         self.titleBarLayout.addWidget(self.baronIconLabel)
+        self.titleBarLayout.addSpacing(5)
         self.titleBarLayout.addWidget(self.baronKillsLabel)
         self.titleBarLayout.addSpacing(18)
         self.titleBarLayout.addWidget(self.dragonIconLabel)
+        self.titleBarLayout.addSpacing(5)
         self.titleBarLayout.addWidget(self.dragonKillsLabel)
         self.titleBarLayout.addSpacing(18)
         self.titleBarLayout.addWidget(self.riftHeraldIconLabel)
+        self.titleBarLayout.addSpacing(5)
         self.titleBarLayout.addWidget(self.riftHeraldKillsLabel)
         self.titleBarLayout.addSpacerItem(QSpacerItem(
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.titleBarLayout.addWidget(self.bansButton)
         self.titleBarLayout.addSpacing(59)
         self.titleBarLayout.addWidget(self.kdaLabel)
-        self.titleBarLayout.addSpacing(6)
+        self.titleBarLayout.addSpacing(24)
         self.titleBarLayout.addWidget(self.csIconLabel)
-        self.titleBarLayout.addSpacing(6)
+        self.titleBarLayout.addSpacing(43)
         self.titleBarLayout.addWidget(self.goldIconLabel)
-        self.titleBarLayout.addSpacing(6)
+        self.titleBarLayout.addSpacing(28)
         self.titleBarLayout.addWidget(self.dmgIconLabel)
         self.titleBarLayout.addSpacing(7)
 
@@ -585,24 +587,17 @@ class TeamView(QFrame):
         self.dragonKillsLabel.setText(str(dragonKills))
         self.riftHeraldKillsLabel.setText(str(riftHeraldKills))
 
-        self.towerIconLabel.setPixmap(QPixmap(towerIcon).scaled(
-            20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.inhibitorIconLabel.setPixmap(QPixmap(inhibitorIcon).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.baronIconLabel.setPixmap(QPixmap(baronIcon).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.dragonIconLabel.setPixmap(QPixmap(dragonIcon).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.riftHeraldIconLabel.setPixmap(QPixmap(riftHeraldIcon).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.towerIconLabel.setPicture(towerIcon)
+        self.inhibitorIconLabel.setPicture(inhibitorIcon)
+        self.baronIconLabel.setPicture(baronIcon)
+        self.dragonIconLabel.setPicture(dragonIcon)
+        self.riftHeraldIconLabel.setPicture(riftHeraldIcon)
 
         self.dmgIconLabel.setText("DMG")
 
         color = "white" if isDarkTheme() else "black"
-        self.goldIconLabel.setPixmap(QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.csIconLabel.setPixmap(QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.goldIconLabel.setPicture(f"app/resource/images/Gold_{color}.png")
+        self.csIconLabel.setPicture(f"app/resource/images/Minions_{color}.png")
 
         if len(bans) != 0:
             self.bansButton.setVisible(True)
@@ -637,10 +632,8 @@ class TeamView(QFrame):
 
     def __updateIconColor(self, theme: Theme):
         color = "white" if theme == Theme.DARK else "black"
-        self.goldIconLabel.setPixmap(QPixmap(f"app/resource/images/Gold_{color}.png").scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.csIconLabel.setPixmap(QPixmap(f"app/resource/images/Minions_{color}.png").scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.goldIconLabel.setPicture(f"app/resource/images/Gold_{color}.png")
+        self.csIconLabel.setPicture(f"app/resource/images/Minions_{color}.png")
 
     def __onBansButtonClicked(self):
         flyout = BansFlyoutView(self.bansInfo)
@@ -665,19 +658,19 @@ class SummonerInfoBar(CardWidget):
         self.setFixedHeight(39)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.runeIcon = QLabel()
+        self.runeIcon = RoundedLabel(radius=0, borderWidth=0)
 
         self.spellsLayout = QHBoxLayout()
 
-        self.spell1Icon = QLabel()
-        self.spell2Icon = QLabel()
+        self.spell1Icon = RoundedLabel(radius=0, borderWidth=1)
+        self.spell2Icon = RoundedLabel(radius=0, borderWidth=1)
 
         self.levelLabel = QLabel()
         self.championIconLabel = RoundIcon(summoner["championIcon"], 25, 0, 3)
         self.summonerName = SummonerName(
             summoner["summonerName"], isPublic=summoner["isPublic"])
 
-        self.rankIcon = QLabel()
+        self.rankIcon = RoundedLabel(radius=0, borderWidth=0)
 
         self.itemsLayout = QHBoxLayout()
         self.items = []
@@ -702,31 +695,27 @@ class SummonerInfoBar(CardWidget):
         self.summonerName.setSizePolicy(
             QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.runeIcon.setPixmap(QPixmap(summoner["runeIcon"]).scaled(
-            23, 23, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.runeIcon.setPicture(QPixmap(summoner["runeIcon"]))
+        self.runeIcon.setFixedSize(23, 23)
         self.spell1Icon.setFixedSize(18, 18)
-        self.spell1Icon.setPixmap(QPixmap(summoner["spell1Icon"]).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.spell1Icon.setPicture(summoner["spell1Icon"])
         self.spell2Icon.setFixedSize(18, 18)
-        self.spell2Icon.setPixmap(QPixmap(summoner["spell2Icon"]).scaled(
-            16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        self.spell1Icon.setStyleSheet(
-            "QLabel {border: 1px solid rgb(70, 55, 20)}")
-        self.spell2Icon.setStyleSheet(
-            "QLabel {border: 1px solid rgb(70, 55, 20)}")
+        self.spell2Icon.setPicture(summoner["spell2Icon"])
 
         self.levelLabel.setText(str(summoner["champLevel"]))
         self.levelLabel.setObjectName("levelLabel")
         self.levelLabel.setAlignment(Qt.AlignCenter)
         self.levelLabel.setFixedWidth(20)
 
-        self.items = [QPixmap(icon).scaled(
-            21, 21, Qt.KeepAspectRatio, Qt.SmoothTransformation) for icon in summoner["itemIcons"]]
+        self.items = []
+        for icon in summoner['itemIcons']:
+            label = RoundedLabel(icon, 0)
+            label.setFixedSize(23, 23)
+            self.items.append(label)
 
         if summoner["rankInfo"]:
-            if summoner['rankIcon'] != None:
-                self.rankIcon.setPixmap(QPixmap(summoner["rankIcon"]).scaled(
-                    30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            if summoner['rankIcon'] != None and summoner['rankIcon'] != '':
+                self.rankIcon.setPicture(summoner["rankIcon"])
                 self.rankIcon.setFixedSize(30, 30)
 
                 tier, divison, lp = summoner["tier"], summoner["division"], summoner["lp"]
@@ -740,6 +729,7 @@ class SummonerInfoBar(CardWidget):
             else:
                 self.rankIcon.setText(str(summoner['lp']))
                 self.rankIcon.setFixedWidth(40)
+                self.rankIcon.setAlignment(Qt.AlignCenter)
 
         self.kdaLabel.setText(
             f"{summoner['kills']} / {summoner['deaths']} / {summoner['assists']}")
@@ -766,14 +756,9 @@ class SummonerInfoBar(CardWidget):
 
         self.itemsLayout.setSpacing(0)
         self.spellsLayout.setContentsMargins(0, 0, 0, 0)
-        for icon in self.items:
-            itemLabel = QLabel()
-            itemLabel.setPixmap(icon)
-            itemLabel.setStyleSheet(
-                "QLabel {border: 1px solid rgb(70, 55, 20)}")
-            itemLabel.setFixedSize(23, 23)
 
-            self.itemsLayout.addWidget(itemLabel)
+        for icon in self.items:
+            self.itemsLayout.addWidget(icon)
 
         self.hBoxLayout.setContentsMargins(6, 0, 6, 0)
         self.hBoxLayout.addWidget(self.runeIcon)
@@ -803,7 +788,8 @@ class GameTitleBar(QFrame, ColorChangeable):
         self.setFixedHeight(78)
         self.titleBarLayout = QHBoxLayout(self)
         self.infoLayout = QVBoxLayout()
-        self.mapIcon = QLabel()
+
+        self.mapIcon = RoundedLabel(borderWidth=0, radius=0)
         self.resultLabel = QLabel()
         self.infoLabel = QLabel()
         self.copyGameIdButton = ToolButton(Icon.COPY)
@@ -842,8 +828,6 @@ class GameTitleBar(QFrame, ColorChangeable):
 
     def updateTitleBar(self, game):
         isCherry = game["queueId"] == 1700
-        mapIcon = QPixmap(game["mapIcon"]).scaled(
-            54, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         self.remake = game['remake']
         self.win = game['win']
@@ -879,7 +863,8 @@ class GameTitleBar(QFrame, ColorChangeable):
 
         self.gameId = game['gameId']
 
-        self.mapIcon.setPixmap(mapIcon)
+        self.mapIcon.setPicture(game['mapIcon'])
+        self.mapIcon.setFixedSize(54, 54)
         self.resultLabel.setText(result)
         self.infoLabel.setText(
             f"{game['mapName']}  ·  {game['modeName']}  ·  {game['gameDuration']}  ·  {game['gameCreation']}  ·  "

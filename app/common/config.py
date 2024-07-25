@@ -59,13 +59,15 @@ class Config(QConfig):
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 100))
     apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,
-                                           RangeValidator(1, 20), restart=True)
+                                           RangeValidator(1, 100), restart=True)
 
     gameInfoFilter = ConfigItem(
         "Functions", "GameInfoFilter", False, BoolValidator())
 
     showTierInGameInfo = ConfigItem("Functions", "ShowTierInGameInfo", False,
                                     BoolValidator())
+    autoShowOpgg = ConfigItem("Functions", "AutoShowOpgg", True,
+                              BoolValidator())
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,
                                           BoolValidator())
@@ -145,11 +147,13 @@ class Config(QConfig):
     enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
     proxyAddr = ConfigItem("General", "HttpProxy", "")
 
-    opggRegion = ConfigItem("Function", "OpggRegion", "kr",
+    opggRegion = ConfigItem("Functions", "OpggRegion", "kr",
                             OptionsValidator(["kr", "global"]), restart=True)
-    opggTier = ConfigItem("Function", "OpggTier", "emerald_plus", OptionsValidator([
+    opggTier = ConfigItem("Functions", "OpggTier", "emerald_plus", OptionsValidator([
         "ibsg", "gold_plus", "platinum_plus", "emerald_plus", "diamond_plus", "master", "master_plus", "grandmaster", "challenger"
     ]))
+    opggPosition = ConfigItem("Functions", "OpggPosition", "MID", OptionsValidator([
+        "TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]))
 
 
 YEAR = 2023

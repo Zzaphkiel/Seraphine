@@ -1,0 +1,44 @@
+TierListWidget {
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+TierListWidget {
+    background-color: transparent;
+}
+
+ListTitleBar {
+    border: 1px solid rgb(60, 60, 60);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+#scrollArea {
+    border: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    background-color: rgba(185, 185, 185, 0.051);
+}
+
+#scrollWidget {
+    background-color: transparent;
+}
+
+ListItem {
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 6px;
+    background-color: transparent;
+}
+
+#countersLabel,
+#counterLabel,
+#championLabel {
+    color: white;
+    font: 14px 'Microsoft YaHei', 'Segoe UI';
+    padding: 6px 6px 8px 8px;
+}

@@ -33,5 +33,8 @@ class SignalBus(QObject):
     # style:
     customColorChanged = pyqtSignal(str)
 
+    # OPGG:
+    toOpggBuildInterface = pyqtSignal(int, str, str)
+
 
 signalBus = SignalBus()

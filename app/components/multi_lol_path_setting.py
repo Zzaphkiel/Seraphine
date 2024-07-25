@@ -9,7 +9,6 @@ from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, Search
 
 
 from app.common.style_sheet import StyleSheet
-from app.components.champion_icon_widget import RoundIcon, RoundIconButton
 from app.components.draggable_widget import DraggableItem, ItemsDraggableWidget
 
 

@@ -1,5 +1,5 @@
 
-from PyQt5.QtCore import (Qt, pyqtSignal, QSize)
+from PyQt5.QtCore import (Qt, pyqtSignal, QSize, QEasingCurve)
 from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout,
                              QLabel, QWidget)
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, SearchLineEdit,
@@ -79,13 +79,14 @@ class ChampionsSelectWidget(QWidget):
         super().__init__(parent=parent)
 
         self.champions = champions
+        self.items: list[RoundIconButton] = []
 
         self.searchLineEdit = SearchLineEdit()
 
         self.vBoxLayout = QVBoxLayout(self)
         self.scrollArea = SmoothScrollArea()
         self.scrollWidget = QWidget()
-        self.championsShowLayout = FlowLayout(needAni=False)
+        self.championsShowLayout = FlowLayout(needAni=True, isTight=True)
 
         self.__initWidget()
         self.__initLayout()
@@ -98,6 +99,7 @@ class ChampionsSelectWidget(QWidget):
 
         for i, [name, icon] in self.champions.items():
             button = RoundIconButton(icon, 38, 4, 2, name, i)
+            self.items.append(button)
             button.clicked.connect(self.championClicked)
 
             self.championsShowLayout.addWidget(button)
@@ -108,6 +110,8 @@ class ChampionsSelectWidget(QWidget):
         self.championsShowLayout.setHorizontalSpacing(7)
         self.championsShowLayout.setVerticalSpacing(7)
         self.championsShowLayout.setContentsMargins(5, 5, 5, 5)
+        self.championsShowLayout.setAnimation(
+            450, QEasingCurve.Type.OutQuart)
 
         self.scrollWidget.setLayout(self.championsShowLayout)
         self.scrollArea.setWidget(self.scrollWidget)
@@ -121,25 +125,19 @@ class ChampionsSelectWidget(QWidget):
         self.vBoxLayout.addWidget(self.scrollArea)
 
     def __onSearchLineTextChanged(self, text: str):
-        for i in reversed(range(self.championsShowLayout.count())):
-            widget = self.championsShowLayout.itemAt(i).widget()
+        if text == "":
+            self.__showAllChampions()
+            return
 
-            self.championsShowLayout.removeWidget(widget)
-            widget.deleteLater()
+        if ChampionAlias.isAvailable():
+            ids = ChampionAlias.getChampionIdsByAliasFuzzily(text)
+            for icon in self.items:
+                icon.setVisible(icon.championId in ids)
+        else:
+            for icon in self.items:
+                icon.setVisible(text in icon.championName)
 
-        champions = self.__getChampionIdsByAlias(text)
-
-        for i in champions:
-            champion = self.champions[i]
-            name = champion[0]
-            icon = champion[1]
-
-            button = RoundIconButton(icon, 38, 4, 2, name, i)
-            button.clicked.connect(self.championClicked)
-
-            self.championsShowLayout.addWidget(button)
-
-        self.championsShowLayout.update()
+        self.scrollWidget.repaint()
 
     def __getChampionIdsByAlias(self, alias):
         if ChampionAlias.isAvailable():
@@ -147,6 +145,10 @@ class ChampionsSelectWidget(QWidget):
         else:
             return [id for id, [name, _] in self.champions.items()
                     if alias in name]
+
+    def __showAllChampions(self):
+        for icon in self.items:
+            icon.setVisible(True)
 
 
 class MultiChampionSelectWidget(QWidget):

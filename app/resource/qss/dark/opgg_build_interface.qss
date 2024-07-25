@@ -1,0 +1,98 @@
+BuildInterface {
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.051);
+}
+
+#scrollArea {
+    border: none;
+    background-color: transparent
+}
+
+#scrollWidget {
+    background-color: transparent;
+}
+
+ChampionTitleBar {
+    border: 1px solid;
+    border-radius: 6px;
+}
+
+
+BuildWidgetBase {
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 6px;
+}
+
+
+#titleLabel {
+    font: bold 22px 'Microsoft YaHei', 'Segoe UI';
+    color: white
+}
+
+#subtitleLabel {
+    font: bold 17px 'Microsoft YaHei', 'Segoe UI';
+    color: white
+}
+
+#bodyLabel {
+    font: 13px 'Segoe UI', 'Microsoft YaHei';
+    color: white
+}
+
+#boldBodyLabel {
+    font: bold 13px 'Segoe UI', 'Microsoft YaHei';
+    color: --ThemeColorDark1;
+}
+
+#grayBodyLabel {
+    font: 13px 'Segoe UI', 'Microsoft YaHei';
+    color: rgb(148, 148, 148);
+}
+
+#separatorLine {
+    color: rgb(80, 80, 80);
+}
+
+SkillIcon {
+    padding: 0px, 0px, 0px, 0px;
+    font: bold 12px 'Segoe UI', 'Microsoft YaHei';
+    border: 1px solid rgb(60, 60, 60);
+    border-radius: 5px;
+}
+
+SkillIcon[type=main] {
+    font-size: 16px;
+}
+
+SkillIcon[name=Q] {
+    color: rgb(67, 175, 253);
+    border-color: rgba(67, 175, 253, 0.5);
+    background-color: rgba(67, 175, 253, 0.095);
+}
+
+SkillIcon[name=W] {
+    color: rgb(0, 255, 208);
+    border-color: rgba(0, 255, 208, 0.5);
+    background-color: rgba(0, 255, 208, 0.095);
+}
+
+SkillIcon[name=E] {
+    color: rgb(255, 157, 52);
+    border-color: rgba(255, 157, 52, 0.5);
+    background-color: rgba(255, 157, 52, 0.095);
+}
+
+SkillIcon[name=R] {
+    color: white;
+    background-color: rgb(83, 131, 232);
+}
+
+PerksSummaryWidget {
+    border-radius: 6px;
+}
+
+PerksSummaryWidget[selected=true] {
+    border: 2px solid --ThemeColorDark1;
+    border-radius: 6px;
+}

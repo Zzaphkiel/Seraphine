@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 
 from app.common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                                        FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                                       ToolTipFilter, FluentIcon, ToolTipPosition)
+                                       ToolTipFilter, FluentIcon, ToolTipPosition, FluentWindowBase)
 
 from app.view.start_interface import StartInterface
 from app.view.setting_interface import SettingInterface
@@ -24,6 +24,7 @@ from app.view.career_interface import CareerInterface
 from app.view.search_interface import SearchInterface
 from app.view.game_info_interface import GameInfoInterface
 from app.view.auxiliary_interface import AuxiliaryInterface
+from app.view.opgg_window import OpggWindow
 from app.common.util import (github, getLolClientPid, getTasklistPath,
                              getLolClientPidSlowly, getLoLPathByRegistry)
 from app.components.avatar_widget import NavigationAvatarWidget
@@ -33,18 +34,18 @@ from app.common.config import cfg, VERSION, BETA
 from app.common.logger import logger
 from app.common.signals import signalBus
 from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                        WaitingForLolMessageBox, ExceptionMessageBox,)
+                                        WaitingForLolMessageBox, ExceptionMessageBox)
 from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                                 SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
 from app.lol.connector import connector
 from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                           autoSwap, autoTrade, autoSelectSkinRandom, ChampionSelection, SERVERS_NAME,
-                           SERVERS_SUBSET)
+                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick,
+                           autoComplete, autoSwap, autoTrade, ChampionSelection,
+                           SERVERS_NAME, SERVERS_SUBSET, showOpggBuild)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
-# from app.lol.opgg import opgg
+from app.lol.opgg import opgg
 
 import threading
 
@@ -105,6 +106,8 @@ class MainWindow(FluentWindow):
 
         self.splashScreen.finish()
 
+        self.opggWindow = OpggWindow()
+
         logger.critical("Seraphine initialized", TAG)
 
     def __initConfig(self):
@@ -156,6 +159,16 @@ class MainWindow(FluentWindow):
         pos = NavigationItemPosition.BOTTOM
 
         self.navigationInterface.addItem(
+            routeKey='Opgg',
+            icon=QIcon("app/resource/images/opgg.svg"),
+            text="OP.GG",
+            onClick=self.showOpggWindow,
+            selectable=False,
+            position=pos,
+            tooltip="OP.GG"
+        )
+
+        self.navigationInterface.addItem(
             routeKey='Fix',
             icon=Icon.ARROWCIRCLE,
             text=self.tr("Back to Lobby"),
@@ -177,7 +190,7 @@ class MainWindow(FluentWindow):
         )
 
         self.navigationInterface.insertSeparator(
-            2, NavigationItemPosition.BOTTOM)
+            3, NavigationItemPosition.BOTTOM)
 
         self.avatarWidget = NavigationAvatarWidget(
             avatar="app/resource/images/game.png", name=self.tr("Start LOL"))
@@ -456,6 +469,7 @@ class MainWindow(FluentWindow):
         if not res:
             return
 
+        await opgg.start()
         self.checkAndSwitchTo(self.careerInterface)
         self.isClientProcessRunning = True
 
@@ -476,6 +490,9 @@ class MainWindow(FluentWindow):
         # 加载大乱斗buff -- By Hpero4
         aramInitT = asyncio.create_task(AramBuff.checkAndUpdate())
         championsInit = asyncio.create_task(ChampionAlias.checkAndUpdate())
+
+        asyncio.create_task(self.opggWindow.initWindow())
+        self.opggWindow.setHomeInterfaceEnabled(False)
 
         # ---- 240413 ---- By Hpero4
         # 如果你希望 self.__onGameStatusChanged(status) 和 self.__unlockInterface() 并行执行, 可以这样使用:
@@ -542,6 +559,7 @@ class MainWindow(FluentWindow):
             self.searchInterface.gameLoadingTask = None
 
         await connector.close()
+        await opgg.close()
 
         self.isClientProcessRunning = False
         self.currentSummoner = None
@@ -551,6 +569,7 @@ class MainWindow(FluentWindow):
 
         self.startInterface.showLoadingPage()
         self.careerInterface.setLoadingPageEnabled(True)
+        self.opggWindow.setHomeInterfaceEnabled(True)
 
         self.setWindowTitle("Seraphine")
 
@@ -689,7 +708,6 @@ class MainWindow(FluentWindow):
         self.processListener.terminate()
         self.checkUpdateThread.terminate()
         self.checkNoticeThread.terminate()
-        # self.minimizeThread.terminate()  # 该功能不再支持 -- By Hpero4
 
     @asyncClose
     async def closeEvent(self, a0) -> None:
@@ -710,7 +728,7 @@ class MainWindow(FluentWindow):
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
-            # await opgg.close()
+            self.opggWindow.close()
 
             return super().closeEvent(a0)
         else:
@@ -829,8 +847,10 @@ class MainWindow(FluentWindow):
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
         self.championSelection.reset()
-
         session = await connector.getChampSelectSession()
+
+        if cfg.get(cfg.autoShowOpgg):
+            self.opggWindow.show()
 
         currentSummonerId = self.currentSummoner['summonerId']
         info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
@@ -845,8 +865,8 @@ class MainWindow(FluentWindow):
 
         phase = {
             'PLANNING': [autoPick],
-            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap],
-            'FINALIZATION': [autoTrade, autoSelectSkinRandom],
+            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
+            'FINALIZATION': [autoTrade, showOpggBuild],
             # 'GAME_STARTING': []
         }
 
@@ -940,6 +960,10 @@ class MainWindow(FluentWindow):
         # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
         self.searchInterface.waitingForDrawSelect(gameId)
         await self.searchInterface.updateGameDetailView(gameId, self.careerInterface.puuid)
+
+    def showOpggWindow(self):
+        self.opggWindow.show()
+        self.opggWindow.raise_()
 
     @asyncSlot()
     async def __refreshCareerInterface(self):

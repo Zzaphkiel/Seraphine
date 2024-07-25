@@ -51,13 +51,16 @@ class Logger:
         self.logger = logging.getLogger(name)
         self.logger.setLevel(cfg.get(cfg.logLevel))
 
+        # 这里为什么不直接用相对路径捏？
         log_directory = os.path.join(os.getcwd(), 'log')
         if not os.path.exists(log_directory):
             os.makedirs(log_directory)
 
         log_file = self._get_log_file()
-        file_handler = CustomRotatingFileHandler(log_file, maxBytes=2 * 1024 * 1024, backupCount=20, encoding='utf-8')
-        formatter = logging.Formatter('%(asctime)s - [%(TAG)s] %(levelname)s - %(message)s')
+        file_handler = CustomRotatingFileHandler(
+            log_file, maxBytes=2 * 1024 * 1024, backupCount=20, encoding='utf-8')
+        formatter = logging.Formatter(
+            '%(asctime)s - [%(TAG)s] %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
         self.logger.addHandler(file_handler)
 
@@ -68,7 +71,8 @@ class Logger:
 
     def _get_log_file(self):
         today = datetime.now().strftime('%Y-%m-%d')
-        log_file = f"{self.name}_{today}_%s.log" % logging.getLevelName(cfg.get(cfg.logLevel))
+        log_file = f"{self.name}_{today}_%s.log" % logging.getLevelName(
+            cfg.get(cfg.logLevel))
         log_path = os.path.join('log', log_file)
         return log_path
 
@@ -97,7 +101,8 @@ class Logger:
 
     def get_traceback_string(self, exception):
         # 获取异常的调用堆栈信息的字符串形式
-        traceback_list = traceback.format_exception(type(exception), exception, exception.__traceback__)
+        traceback_list = traceback.format_exception(
+            type(exception), exception, exception.__traceback__)
         traceback_str = ''.join(traceback_list)
         return traceback_str
 

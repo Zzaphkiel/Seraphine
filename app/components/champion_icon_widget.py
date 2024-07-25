@@ -1,39 +1,78 @@
-from PyQt5.QtCore import QEvent, Qt, pyqtSignal
-from PyQt5.QtGui import QColor, QMouseEvent, QPainter, QPainterPath, QPen, QPixmap
-from PyQt5.QtWidgets import QWidget, QFrame
+from PyQt5.QtCore import QEvent, Qt, pyqtSignal, QRectF, QSize
+from PyQt5.QtGui import (QColor, QMouseEvent, QPainter, QPainterPath,
+                         QPen, QPixmap, qGray, qAlpha, qRgba)
+from PyQt5.QtWidgets import QWidget, QFrame, QLabel
+import time
 
 
 class RoundIcon(QFrame):
-    def __init__(self, icon, diameter, overscaled, borderWidth, parent=None) -> None:
+    def __init__(self, icon=None, diameter=None, overscaled=0,
+                 borderWidth=1, drawBackground=False, enabled=True, parent=None) -> None:
         super().__init__(parent)
-
         self.image = QPixmap(icon)
+
         self.overscaled = overscaled
         self.borderWidth = borderWidth
+        self.drawBackground = drawBackground
+        self.enabled = enabled
+
+        self.havePic = icon != None
 
         self.setFixedSize(diameter, diameter)
 
     def paintEvent(self, event) -> None:
+        if not self.havePic:
+            return
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        image = self.image.scaled(self.width() + self.overscaled,
-                                  self.height() + self.overscaled,
-                                  Qt.AspectRatioMode.KeepAspectRatio,
-                                  Qt.TransformationMode.SmoothTransformation)
-        image.scroll(-self.overscaled // 2, -
-                     self.overscaled // 2, image.rect())
+        width = self.image.width() - 2*self.overscaled
+        height = self.image.height() - 2*self.overscaled
+
+        image = self.image.copy(
+            self.overscaled, self.overscaled, width, height)
+
+        size = self.size() * self.devicePixelRatioF()
+        image: QPixmap = image.scaled(size,
+                                      Qt.AspectRatioMode.KeepAspectRatio,
+                                      Qt.TransformationMode.SmoothTransformation)
 
         path = QPainterPath()
         path.addEllipse(0, 0, self.width(), self.height())
-        painter.setClipPath(path)
-        painter.drawPixmap(0, 0, image)
 
-        painter.setPen(
-            QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
-        painter.drawEllipse(0, 0, self.width(), self.height())
+        painter.setClipPath(path)
+
+        if not self.enabled:
+            painter.setOpacity(0.15)
+
+        if self.drawBackground:
+            painter.save()
+            painter.setBrush(QColor(0, 0, 0))
+            painter.drawEllipse(0, 0, self.width(), self.height())
+            painter.restore()
+
+        painter.drawPixmap(self.rect(), image)
+
+        if self.borderWidth != 0 and self.enabled:
+            painter.save()
+            painter.setPen(
+                QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
+            painter.drawEllipse(0, 0, self.width(), self.height())
+            painter.restore()
 
         return super().paintEvent(event)
+
+    def setIcon(self, icon):
+        self.havePic = True
+        self.image = QPixmap(icon)
+
+        self.repaint()
+
+    def setEnabeld(self, enabled):
+        self.enabled = enabled
+
+        self.repaint()
 
 
 class RoundIconButton(QFrame):
@@ -43,8 +82,9 @@ class RoundIconButton(QFrame):
         super().__init__(parent)
 
         self.image = QPixmap(icon)
-        self.overscaled = overscaled
+
         self.borderWidth = borderWidth
+        self.overscaled = overscaled
 
         self.championName: str = championName
         self.championId = championId
@@ -58,16 +98,20 @@ class RoundIconButton(QFrame):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        image = self.image.scaled(self.width() + self.overscaled,
-                                  self.height() + self.overscaled,
-                                  Qt.AspectRatioMode.KeepAspectRatio,
-                                  Qt.TransformationMode.SmoothTransformation)
-        image.scroll(-self.overscaled // 2, -
-                     self.overscaled // 2, image.rect())
-
         path = QPainterPath()
         path.addEllipse(0, 0, self.width(), self.height())
         painter.setClipPath(path)
+
+        width = self.image.width() - 2*self.overscaled
+        height = self.image.height() - 2*self.overscaled
+
+        image = self.image.copy(
+            self.overscaled, self.overscaled, width, height)
+
+        size = self.size() * self.devicePixelRatioF()
+        image = image.scaled(size,
+                             Qt.AspectRatioMode.KeepAspectRatio,
+                             Qt.TransformationMode.SmoothTransformation)
 
         if self.isPressed:
             painter.setOpacity(0.63)
@@ -76,7 +120,7 @@ class RoundIconButton(QFrame):
         else:
             painter.setOpacity(1)
 
-        painter.drawPixmap(0, 0, image)
+        painter.drawPixmap(self.rect(), image)
 
         painter.setPen(
             QPen(QColor(120, 90, 40), self.borderWidth, Qt.SolidLine))
@@ -104,3 +148,63 @@ class RoundIconButton(QFrame):
         self.update()
         self.clicked.emit(self.championId)
         return super().mouseReleaseEvent(a0)
+
+
+class RoundedLabel(QLabel):
+    def __init__(self, imagePath=None, radius=4.0, borderWidth=2, borderColor: QColor = None, drawBackground=False, parent=None):
+        super().__init__(parent)
+        self.setPixmap(QPixmap(imagePath))
+
+        self.havePic = imagePath != None
+        self.radius = radius
+        self.borderWidth = borderWidth
+        self.borderColor = borderColor if borderColor else QColor(120, 90, 40)
+        self.drawBackground = drawBackground
+
+    def paintEvent(self, e):
+        if not self.havePic:
+            return super().paintEvent(e)
+
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing)
+
+        pixmap = self.pixmap().scaled(
+            self.size()*self.devicePixelRatioF(),
+            Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius)
+
+        painter.setClipPath(path)
+
+        if self.drawBackground:
+            painter.save()
+            painter.setBrush(QColor(0, 0, 0))
+            painter.setOpacity(0.8)
+            painter.drawRoundedRect(
+                QRectF(self.rect()), self.radius, self.radius)
+            painter.restore()
+
+        painter.drawPixmap(self.rect(), pixmap)
+
+        if self.borderWidth != 0:
+            painter.setPen(
+                QPen(self.borderColor, self.borderWidth, Qt.SolidLine))
+
+            painter.drawRoundedRect(
+                QRectF(self.rect()), self.radius, self.radius)
+
+    def setPicture(self, imagePath):
+        self.havePic = True
+
+        self.setPixmap(QPixmap(imagePath))
+        self.repaint()
+
+    def setRedius(self, radius):
+        self.radius = radius
+        self.repaint()
+
+    def setText(self, text):
+        self.havePic = False
+
+        return super().setText(text)

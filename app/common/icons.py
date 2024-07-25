@@ -20,6 +20,7 @@ class Icon(FluentIconBase, Enum):
     SLIDESEARCH = 'SlideSearch'
     CHEVRONLEFT = "ChevronLeft"
     CHEVRONRIGHT = "ChevronRight"
+    GRAYCHEVRONRIGHT = "GrayChevronRight"
     COPY = 'Copy'
     COMMENT = 'Comment'
     VIDEO_PERSON = 'VideoPerson'
@@ -60,6 +61,8 @@ class Icon(FluentIconBase, Enum):
     DOCUMENT = 'Document'
     ARROWREPEAT = "ArrowRepeat"
     QUESTION_CIRCLE = 'QuestionCircle'
+    LEFTARROW = 'LeftArrow'
+    WINDOW = "Window"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

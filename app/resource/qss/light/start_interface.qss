@@ -4,7 +4,8 @@ QScrollArea {
 }
 
 QLabel#label1 {
-    font: 33px 'Microsoft YaHei'
+    font: bold 33px 'Microsoft YaHei', 'Segoe UI', ;
+    color: black;
 }
 
 QLabel#label2,

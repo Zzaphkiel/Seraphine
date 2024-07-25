@@ -1,7 +1,7 @@
 import sys
 
-from PyQt5.QtCore import (
-    Qt, QRectF, QPoint, QPropertyAnimation, QParallelAnimationGroup, QEasingCurve)
+from PyQt5.QtCore import (Qt, QRectF, QPoint, QPropertyAnimation, QParallelAnimationGroup,
+                          QEasingCurve, QSize, QRect)
 from PyQt5.QtGui import QHideEvent, QPainter, QPainterPath, QPen, QFont, QPixmap, QColor
 from PyQt5.QtWidgets import (QWidget, QApplication, QMainWindow, QHBoxLayout,
                              QLabel, QVBoxLayout, QGridLayout, QFrame, QGraphicsDropShadowEffect)
@@ -97,26 +97,28 @@ class RoundLevelAvatar(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        scaledImage = self.image.scaled(
-            self.width() - int(self.sep),
-            self.height() - int(self.sep),
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-            Qt.TransformationMode.SmoothTransformation)
+        size = (self.size() - QSize(int(self.sep), int(self.sep))) * \
+            self.devicePixelRatioF()
 
+        image = self.image
         if 'champion' in self.iconPath:
-            scaledImage = scaledImage.scaled(self.width() - int(self.sep) + 8,
-                                             self.height() - int(self.sep) + 8,
-                                             Qt.AspectRatioMode.KeepAspectRatio,
-                                             Qt.TransformationMode.SmoothTransformation)
-            scaledImage.scroll(-4, -4, scaledImage.rect())
+            width = image.width() - 10
+            height = image.height() - 10
+            image = image.copy(5, 5, width, height)
+
+        scaledImage = image.scaled(size,
+                                   Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+                                   Qt.TransformationMode.SmoothTransformation)
 
         clipPath = QPainterPath()
-        clipPath.addEllipse(self.sep // 2, self.sep // 2,
-                            self.width() - self.sep,
-                            self.height() - self.sep)
+
+        rect = QRectF(self.sep // 2, self.sep // 2,
+                      self.width() - self.sep,
+                      self.height() - self.sep)
+        clipPath.addEllipse(rect)
 
         painter.setClipPath(clipPath)
-        painter.drawPixmap(int(self.sep // 2), int(self.sep // 2), scaledImage)
+        painter.drawPixmap(rect.toRect(), scaledImage)
 
     def updateIcon(self, icon: str, xpSinceLastLevel=None, xpUntilNextLevel=None, text=""):
         self.iconPath = icon
