@@ -149,7 +149,7 @@ class ItemsKdaCsGold(QFrame):
             self.itemsLayout.addWidget(image)
 
         self.kdaLabel.setFixedWidth(90)
-        self.csLabel.setFixedWidth(30)
+        self.csLabel.setFixedWidth(40)
 
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.vBoxLayout.setSpacing(0)
