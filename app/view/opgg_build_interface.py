@@ -2,7 +2,8 @@ from typing import List
 
 from PyQt5.QtWidgets import (QHBoxLayout, QWidget, QFrame, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QLabel, QHBoxLayout, QWidget, QLabel, QFrame,
-                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout, QGridLayout)
+                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout, QGridLayout,
+                             )
 from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
 from PyQt5.QtGui import QPixmap, QColor
 from qasync import asyncSlot
@@ -1009,7 +1010,7 @@ class PerksWidget(QFrame):
                 self.primaryPerksSlots[i].addWidget(icon)
                 self.perks[perk['runeId']] = icon
 
-                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.setToolTip(f"<b>{perk['name']}</b><br><br>{perk['desc']}")
                 icon.installEventFilter(ToolTipFilter(
                     icon, 200, ToolTipPosition.TOP))
 
@@ -1026,7 +1027,7 @@ class PerksWidget(QFrame):
                 self.secondaryPerksSlots[i].addWidget(icon)
                 self.perks[perk['runeId']] = icon
 
-                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.setToolTip(f"<b>{perk['name']}</b><br><br>{perk['desc']}")
                 icon.installEventFilter(ToolTipFilter(
                     icon, 200, ToolTipPosition.TOP))
 
@@ -1038,7 +1039,7 @@ class PerksWidget(QFrame):
 
                 self.shards[(perk['runeId'], i)] = icon
 
-                icon.setToolTip(f"{perk['name']}\n\n{perk['desc']}")
+                icon.setToolTip(f"<b>{perk['name']}</b><br><br>{perk['desc']}")
                 icon.installEventFilter(ToolTipFilter(
                     icon, 200, ToolTipPosition.TOP))
 

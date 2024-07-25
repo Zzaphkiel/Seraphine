@@ -162,7 +162,7 @@ class MainWindow(FluentWindow):
             routeKey='Opgg',
             icon=QIcon("app/resource/images/opgg.svg"),
             text="OP.GG",
-            onClick=lambda: self.opggWindow.show(),
+            onClick=self.showOpggWindow,
             selectable=False,
             position=pos,
             tooltip="OP.GG"
@@ -961,6 +961,10 @@ class MainWindow(FluentWindow):
         # 先画框再加载对局 否则快速切换(如筛选或换人)会导致找不到widget -- By Hpero4
         self.searchInterface.waitingForDrawSelect(gameId)
         await self.searchInterface.updateGameDetailView(gameId, self.careerInterface.puuid)
+
+    def showOpggWindow(self):
+        self.opggWindow.show()
+        self.opggWindow.raise_()
 
     @asyncSlot()
     async def __refreshCareerInterface(self):
