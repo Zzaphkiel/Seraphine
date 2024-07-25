@@ -376,7 +376,7 @@ class SummonerInfoView(ColorAnimationFrame):
             pe.setColor(QPalette.WindowText, QColor(0, 163, 80))
         elif 4 <= kda < 5:
             pe.setColor(QPalette.WindowText, QColor(0, 147, 255))
-        elif 5 < kda:
+        elif 5 <= kda:
             pe.setColor(QPalette.WindowText, QColor(240, 111, 0))
         self.kdaValLabel.setPalette(pe)
 
