@@ -1103,7 +1103,7 @@ class JsonManager:
         for item in self.runes.values():
             desc: str = item['desc']
             desc = re.sub(r'(?!<br\s*/?>)<[^>]+>', '', desc)
-            item['desc'] = desc.strip()
+            item['desc'] = desc.strip().strip("<br>")
 
         self.champs = {item["id"]: item["name"] for item in champions}
 
