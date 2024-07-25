@@ -35,6 +35,13 @@ class TransparentToggleButton(ToolButton):
 
         self.changed.emit(new)
 
+    def setCurrentIcon(self, index):
+        if self.currentIcon == index:
+            return
+
+        self.setIcon(self.icons[index])
+        self.currentIcon = index
+
 
 class TransparentButton(QPushButton):
     def __init__(self, text: str, parent: QWidget = None):

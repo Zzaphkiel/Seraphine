@@ -24,7 +24,7 @@ from app.view.career_interface import CareerInterface
 from app.view.search_interface import SearchInterface
 from app.view.game_info_interface import GameInfoInterface
 from app.view.auxiliary_interface import AuxiliaryInterface
-from app.view.opgg_interface import OpggWindow
+from app.view.opgg_window import OpggWindow
 from app.common.util import (github, getLolClientPid, getTasklistPath,
                              getLolClientPidSlowly, getLoLPathByRegistry)
 from app.components.avatar_widget import NavigationAvatarWidget
@@ -34,15 +34,15 @@ from app.common.config import cfg, VERSION, BETA
 from app.common.logger import logger
 from app.common.signals import signalBus
 from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                        WaitingForLolMessageBox, ExceptionMessageBox,)
+                                        WaitingForLolMessageBox, ExceptionMessageBox)
 from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                                 SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
 from app.lol.connector import connector
 from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick, autoComplete,
-                           autoSwap, autoTrade, ChampionSelection, SERVERS_NAME,
-                           SERVERS_SUBSET)
+                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick,
+                           autoComplete, autoSwap, autoTrade, ChampionSelection,
+                           SERVERS_NAME, SERVERS_SUBSET, showOpggBuild)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
 from app.lol.opgg import opgg
@@ -847,11 +847,10 @@ class MainWindow(FluentWindow):
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
         self.championSelection.reset()
+        session = await connector.getChampSelectSession()
 
         if cfg.get(cfg.autoShowOpgg):
             self.opggWindow.show()
-
-        session = await connector.getChampSelectSession()
 
         currentSummonerId = self.currentSummoner['summonerId']
         info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
@@ -866,8 +865,8 @@ class MainWindow(FluentWindow):
 
         phase = {
             'PLANNING': [autoPick],
-            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap],
-            'FINALIZATION': [autoTrade],
+            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
+            'FINALIZATION': [autoTrade, showOpggBuild],
             # 'GAME_STARTING': []
         }
 

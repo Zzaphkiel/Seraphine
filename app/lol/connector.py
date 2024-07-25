@@ -1102,7 +1102,12 @@ class JsonManager:
 
         for item in self.runes.values():
             desc: str = item['desc']
-            desc = re.sub(r'(?!<br\s*/?>)<[^>]+>', '', desc)
+
+            # 移除除了 <br>、<i>、</i>、<font color='xxx'> 和 </font> 以外的所有 html 标签
+            partten = r"(?!<br\s*/?>|<i>|</i>|<b>|</b>|<font color='[^']+'>|</font>)(<[^>]+>)"
+            desc = re.sub(partten, '', desc)
+
+            # 移除末尾多余的换行
             item['desc'] = desc.strip().strip("<br>")
 
         self.champs = {item["id"]: item["name"] for item in champions}

@@ -209,7 +209,8 @@ class OpggWindow(OpggWindowBase):
         self.toggleButton.changed.connect(self.__onToggleButtonClicked)
         self.searchButton.clicked.connect(self.__onSearchButtonClicked)
 
-        signalBus.tierChampionClicked.connect(self.__onTierListChampionClicked)
+        signalBus.toOpggBuildInterface.connect(
+            self.__toChampionBuildInterface)
 
     def __setComboBoxCurrentData(self, comboBox: ComboBox, data) -> int:
         """
@@ -255,6 +256,9 @@ class OpggWindow(OpggWindowBase):
             self.setComboBoxesEnabled(False)
         elif widget in [self.buildInterface, self.errorInterface]:
             self.searchButton.setEnabled(False)
+
+        if (index := self.stackedWidget.currentIndex()) in [0, 1]:
+            self.toggleButton.setCurrentIcon(index)
 
     def __onSearchButtonClicked(self):
         # 点击之后弹出的搜索框是空白的，让下方的所有英雄重新显示出来比较符合直觉
@@ -304,18 +308,28 @@ class OpggWindow(OpggWindowBase):
         if self.filterLock:
             return
 
-        self.filterLock = True
-
         # 上方 Combo box 改变的时候，相当于从自己跳转到自己
         current = self.stackedWidget.currentWidget()
+
+        self.setAutoRefreshEnabled(False)
         await self.updateAndSwitchTo(current, current)
 
-        self.filterLock = False
+    @asyncSlot(int, str, str)
+    async def __toChampionBuildInterface(self, championId, mode, pos):
+        if championId == self.buildInterface.getCurrentChampionId() and \
+                (mode == "" or mode == self.modeComboBox.currentData()):
+            self.setCurrentInterface(self.buildInterface)
+            return
 
-    @asyncSlot(int)
-    async def __onTierListChampionClicked(self, championId):
+        self.setAutoRefreshEnabled(False)
         self.buildInterface.setCurrentChampionId(championId)
-        self.toggleButton.toggle()
+
+        if mode:
+            self.__setComboBoxCurrentData(self.modeComboBox, mode)
+
+        if pos:
+            self.__setComboBoxCurrentData(self.positionComboBox, pos)
+
         await self.updateAndSwitchTo(self.tierInterface, self.buildInterface)
 
     async def updateAndSwitchTo(self, current, to):
@@ -328,6 +342,7 @@ class OpggWindow(OpggWindowBase):
         4. - 若更新成功，则转到 `to` 界面
            - 若更新失败，则转到错误界面
         """
+
         # 显示转圈圈界面，并且锁住上方的 combo box
         self.setCurrentInterface(self.waitingInterface)
 
@@ -354,6 +369,8 @@ class OpggWindow(OpggWindowBase):
 
             # 显示出错的界面
             self.setCurrentInterface(self.errorInterface)
+        finally:
+            self.setAutoRefreshEnabled(True)
 
     async def __updateInterface(self, interface: QWidget):
         map = {

@@ -301,4 +301,4 @@ class ListItem(ColorAnimationFrame):
         self.numberLabel.setText(str(x))
 
     def __onClicked(self):
-        signalBus.tierChampionClicked.emit(self.championId)
+        signalBus.toOpggBuildInterface.emit(self.championId, "", "")

@@ -1,20 +1,14 @@
 import itertools
-import random
 import time
-import win32gui
-import win32con
-import win32api
 import ctypes
 
-import qasync
 import asyncio
 from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QApplication
 
-from .exceptions import SummonerRankInfoNotFound, SummonerGamesNotFound
+from .exceptions import SummonerRankInfoNotFound
 from ..common.config import cfg, Language
-from ..lol.connector import LolClientConnector, connector
-
+from ..lol.connector import connector
+from ..common.signals import signalBus
 SERVERS_NAME = {
     "NJ100": "联盟一区", "GZ100": "联盟二区", "CQ100": "联盟三区", "TJ100": "联盟四区", "TJ101": "联盟五区",
     "HN10": "黑色玫瑰", "HN1": "艾欧尼亚", "BGP2": "峡谷之巅"
@@ -1326,6 +1320,7 @@ class ChampionSelection:
         self.isChampionPicked = False
         self.isChampionPickedCompleted = False
         self.isSkinPicked = False
+        self.isOpggBuildShowed = False
 
     def reset(self):
         self.__init__()
@@ -1361,6 +1356,39 @@ async def autoTrade(data, selection):
             return True
 
     return False
+
+
+async def showOpggBuild(data, selection: ChampionSelection):
+    if selection.isOpggBuildShowed:
+        return
+
+    cellId = data['localPlayerCellId']
+    championId = await connector.getCurrentChampion()
+
+    for player in data['myTeam']:
+        if player['cellId'] == cellId:
+            position = player.get('assignedPosition')
+
+    map = {
+        'TOP': "TOP",
+        'JUNGLE': "JUNGLE",
+        'MIDDLE': "MID",
+        'BOTTOM': "ADC",
+        'UTILITY': "SUPPORT",
+    }
+
+    position = map.get(position, "")
+
+    if championId == 0:
+        return
+
+    if data.get('benchEnabled'):
+        mode = "aram"
+    else:
+        mode = ""
+
+    selection.isOpggBuildShowed = True
+    signalBus.toOpggBuildInterface.emit(championId, mode, position)
 
 
 async def autoPick(data, selection: ChampionSelection):
