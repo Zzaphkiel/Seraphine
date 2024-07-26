@@ -257,6 +257,10 @@ class OpggWindow(OpggWindowBase):
         elif widget in [self.buildInterface, self.errorInterface]:
             self.searchButton.setEnabled(False)
 
+        if widget is self.tierInterface \
+                and not self.buildInterface.getCurrentChampionId():
+            self.toggleButton.setEnabled(False)
+
         if (index := self.stackedWidget.currentIndex()) in [0, 1]:
             self.toggleButton.setCurrentIcon(index)
 
