@@ -1037,10 +1037,14 @@ class LolClientConnector(QObject):
         logger.debug(
             f"getRankedStatsByPuuidViaSGP called, {puuid = }", TAG)
 
-        url = f'/leagues-ledge/v2/leagueLadders/puuid/{puuid}'
+        url = f'/leagues-ledge/v2/rankedStats/puuid/{puuid}'
         res = await self.__sgp__get(url)
+        res = await res.json()
 
-        return await res.json()
+        if "errorCode" in res:
+            raise SummonerRankInfoNotFound()
+
+        return res
 
     async def getSummonerByPuuidViaSGP(self, puuid):
         """

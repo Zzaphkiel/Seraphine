@@ -925,12 +925,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ErrorInterface</name>
     <message>
-        <location filename="../../view/opgg_window.py" line="539"/>
+        <location filename="../../view/opgg_window.py" line="543"/>
         <source>Fetch data failed 😭</source>
         <translation>数据拉取失败 😭</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_window.py" line="540"/>
+        <location filename="../../view/opgg_window.py" line="544"/>
         <source>Please wait and try again</source>
         <translation>请等待后重试</translation>
     </message>
@@ -1222,7 +1222,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>HomeInterface</name>
     <message>
-        <location filename="../../view/opgg_window.py" line="570"/>
+        <location filename="../../view/opgg_window.py" line="574"/>
         <source>Waiting for LOL Client</source>
         <translation>等待客户端连接中</translation>
     </message>
@@ -1405,7 +1405,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>匹配中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="980"/>
+        <location filename="../../view/main_window.py" line="983"/>
         <source>Exception occurred 😥</source>
         <translation>程序出现异常 😥</translation>
     </message>
@@ -1983,7 +1983,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_window.py" line="463"/>
+        <location filename="../../view/opgg_window.py" line="467"/>
         <source>Version: </source>
         <translation>游戏版本：</translation>
     </message>
@@ -2400,7 +2400,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>SearchLineEditFlyout</name>
     <message>
-        <location filename="../../view/opgg_window.py" line="602"/>
+        <location filename="../../view/opgg_window.py" line="606"/>
         <source>Search champions</source>
         <translation>搜索英雄</translation>
     </message>
@@ -3064,6 +3064,16 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../lol/tools.py" line="45"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
+    </message>
+    <message>
+        <location filename="../../lol/tools.py" line="47"/>
+        <source>Unranked</source>
+        <translation>未定级</translation>
+    </message>
+    <message>
+        <location filename="../../lol/tools.py" line="48"/>
+        <source>Unknown</source>
+        <translation>未知</translation>
     </message>
 </context>
 <context>

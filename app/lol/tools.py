@@ -44,6 +44,9 @@ class ToolsTranslator(QObject):
         self.rankedSolo = self.tr('Ranked Solo')
         self.rankedFlex = self.tr("Ranked Flex")
 
+        self.unranked = self.tr("Unranked")
+        self.unknown = self.tr("Unknown")
+
 
 def translateTier(orig: str, short=False) -> str:
     if orig == '':
@@ -234,19 +237,19 @@ async def parseGameData(game):
 
     position = None
 
-    pt = ToolsTranslator()
+    tt = ToolsTranslator()
 
     if queueId in [420, 440]:
         if lane == 'TOP':
-            position = pt.top
+            position = tt.top
         elif lane == "JUNGLE":
-            position = pt.jungle
+            position = tt.jungle
         elif lane == 'MIDDLE':
-            position = pt.middle
+            position = tt.middle
         elif role == 'SUPPORT':
-            position = pt.support
+            position = tt.support
         elif lane == 'BOTTOM' and role == 'CARRY':
-            position = pt.bottom
+            position = tt.bottom
 
     return {
         'queueId': queueId,
@@ -578,15 +581,18 @@ def getRecentChampions(games):
 
 def parseRankInfo(info):
     """
-    解析 getRankedStatsByPuuid 的数据;
-    /lol-ranked/v1/ranked-stats/{puuid}
+    解析 `connector.getRankedStatsByPuuid()` 的数据。
 
-    :param info: 接口返回值, 允许为空 (接口异常时抛出SummonerRankInfoNotFound, 需要捕获置空)
+
+    api: `/lol-ranked/v1/ranked-stats/{puuid}`
+
+    :param info: 接口返回值, 允许为空（接口异常时抛出 `SummonerRankInfoNotFound`, 需要捕获置空）
 
     """
+    tt = ToolsTranslator()
+
     soloIcon = flexIcon = "app/resource/images/UNRANKED.svg"
-    # FIXME 中英以外的语言? -- By Hpero4
-    soloTier = flexTier = "Unknown" if cfg.language.value == Language.ENGLISH else "无数据"
+    soloTier = flexTier = tt.unknown
     soloDivision = flexDivision = ""
     soloRankInfo = flexRankInfo = {"leaguePoints": ""}
 
@@ -599,8 +605,7 @@ def parseRankInfo(info):
 
         if soloTier == "":
             soloIcon = "app/resource/images/UNRANKED.svg"
-            # FIXME 中英以外的语言? -- By Hpero4
-            soloTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+            soloTier = tt.unranked
         else:
             soloIcon = f"app/resource/images/{soloTier}.svg"
             soloTier = translateTier(soloTier, True)
@@ -612,8 +617,65 @@ def parseRankInfo(info):
 
         if flexTier == "":
             flexIcon = "app/resource/images/UNRANKED.svg"
-            # FIXME 中英以外的语言? -- By Hpero4
-            flexTier = "Unranked" if cfg.language.value == Language.ENGLISH else "未定级"
+            flexTier = tt.unranked
+        else:
+            flexIcon = f"app/resource/images/{flexTier}.svg"
+            flexTier = translateTier(flexTier, True)
+        if flexDivision == "NA":
+            flexDivision = ""
+
+    return {
+        "solo": {
+            "tier": soloTier,
+            "icon": soloIcon,
+            "division": soloDivision,
+            "lp": soloRankInfo["leaguePoints"],
+        },
+        "flex": {
+            "tier": flexTier,
+            "icon": flexIcon,
+            "division": flexDivision,
+            "lp": flexRankInfo["leaguePoints"],
+        },
+    }
+
+
+def parseRankInfoFromSGP(info):
+    '''解析来自 `connector.getRankedStatsByPuuidViaSGP()` 的数据'''
+
+    tt = ToolsTranslator()
+
+    soloIcon = flexIcon = "app/resource/images/UNRANKED.svg"
+    soloTier = flexTier = tt.unknown
+    soloDivision = flexDivision = ""
+    soloRankInfo = flexRankInfo = {"leaguePoints": ""}
+
+    if info:
+        for queue in info['queues']:
+            type = queue['queueType']
+            if type == 'RANKED_FLEX_SR':
+                flexRankInfo = queue
+            elif type == 'RANKED_SOLO_5x5':
+                soloRankInfo = queue
+
+        soloTier = soloRankInfo.get("tier", "")
+        soloDivision = soloRankInfo.get("rank", "NA")
+
+        if soloTier == "":
+            soloIcon = "app/resource/images/UNRANKED.svg"
+            soloTier = tt.unranked
+        else:
+            soloIcon = f"app/resource/images/{soloTier}.svg"
+            soloTier = translateTier(soloTier, True)
+        if soloDivision == "NA":
+            soloDivision = ""
+
+        flexTier = flexRankInfo.get("tier", "")
+        flexDivision = flexRankInfo.get("rank", "NA")
+
+        if flexTier == "":
+            flexIcon = "app/resource/images/UNRANKED.svg"
+            flexTier = tt.unranked
         else:
             flexIcon = f"app/resource/images/{flexTier}.svg"
             flexTier = translateTier(flexTier, True)
@@ -686,11 +748,11 @@ def parseDetailRankInfo(rankInfo):
     flexWinRate = flexWins * 100 // flexTotal if flexTotal != 0 else 0
     flexLp = flexRankInfo['leaguePoints']
 
-    t = ToolsTranslator()
+    pt = ToolsTranslator()
 
     return [
         [
-            t.rankedSolo,
+            pt.rankedSolo,
             str(soloTotal),
             str(soloWinRate) + ' %' if soloTotal != 0 else '--',
             str(soloWins),
@@ -701,7 +763,7 @@ def parseDetailRankInfo(rankInfo):
             f'{solxPreviousSeasonEndTier} {soloPreviousSeasonDivision}',
         ],
         [
-            t.rankedFlex,
+            pt.rankedFlex,
             str(flexTotal),
             str(flexWinRate) + ' %' if flexTotal != 0 else '--',
             str(flexWins),
@@ -1029,9 +1091,6 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
 async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
     '''
     使用 SGP 接口取战绩信息
-
-    目前不知道如何使用 SGP 接口得到召唤师的排位段位信息
-    其需要调用 LCU API 得到 TAT
     '''
     puuid = item.get('puuid')
 
@@ -1043,17 +1102,14 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
 
     championId = item.get('championId') or 0
     icon = await connector.getChampionIcon(championId)
-    # SGP 接口返回的 summoner name 不是最新的，导致右侧点击召唤师名后搜不到
-    # 重新使用 LCU API
-    # summoner = await connector.getSummonerByPuuidViaSGP(puuid)
-    summoner = await connector.getSummonerByPuuid(puuid)
+    summoner = await connector.getSummonerByPuuidViaSGP(puuid)
 
     try:
-        origRankInfo = await connector.getRankedStatsByPuuid(puuid)
+        origRankInfo = await connector.getRankedStatsByPuuidViaSGP(puuid)
     except SummonerRankInfoNotFound:
         origRankInfo = None
 
-    rankInfo = parseRankInfo(origRankInfo)
+    rankInfo = parseRankInfoFromSGP(origRankInfo)
 
     try:
         origGamesInfo = await connector.getSummonerGamesByPuuidViaSGP(puuid, 0, 14)
@@ -1075,7 +1131,8 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
     except:
         gamesInfo = []
     else:
-        # tagLine = getTagLineFromGame(origGamesInfo['games'][0], puuid)
+        summonerName, tagLine = getNameTagLineFromGame(
+            origGamesInfo['games'][0], puuid)
 
         tasks = [parseGamesDataFromSGP(game, puuid)
                  for game in origGamesInfo["games"][:11]]
@@ -1105,40 +1162,19 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
         recentlyChampionName = connector.manager.champs.get(
             recentlyChampionId)
 
-    return {
-        "name": summoner.get("gameName"),
-        'tagLine': summoner.get('tagLine'),
-        "icon": icon,
-        'championId': championId,
-        "level": summoner["summonerLevel"],
-        "rankInfo": rankInfo,
-        "gamesInfo": gamesInfo,
-        "xpSinceLastLevel": summoner["xpSinceLastLevel"],
-        "xpUntilNextLevel": summoner["xpUntilNextLevel"],
-        "puuid": puuid,
-        "summonerId": summoner['summonerId'],
-        "kda": [kill, deaths, assists],
-        "cellId": item.get("cellId"),
-        "selectedPosition": item.get("selectedPosition"),
-        "fateFlag": fateFlag,
-        "isPublic": summoner["privacy"] == "PUBLIC",
-        # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
-        "recentlyChampionName": recentlyChampionName
-    }
-
-    # 适用于 SGP API 返回值
+    # 适用于 LCU API 返回值
     # return {
     #     "name": summoner.get("gameName"),
-    #     'tagLine': tagLine,
+    #     'tagLine': summoner.get('tagLine'),
     #     "icon": icon,
     #     'championId': championId,
-    #     "level": summoner["level"],
+    #     "level": summoner["summonerLevel"],
     #     "rankInfo": rankInfo,
     #     "gamesInfo": gamesInfo,
-    #     "xpSinceLastLevel": summoner["expPoints"],
-    #     "xpUntilNextLevel": summoner["expToNextLevel"],
+    #     "xpSinceLastLevel": summoner["xpSinceLastLevel"],
+    #     "xpUntilNextLevel": summoner["xpUntilNextLevel"],
     #     "puuid": puuid,
-    #     "summonerId": summoner['id'],
+    #     "summonerId": summoner['summonerId'],
     #     "kda": [kill, deaths, assists],
     #     "cellId": item.get("cellId"),
     #     "selectedPosition": item.get("selectedPosition"),
@@ -1147,6 +1183,28 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
     #     # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
     #     "recentlyChampionName": recentlyChampionName
     # }
+
+    # 适用于 SGP API 返回值
+    return {
+        "name": summonerName,
+        'tagLine': tagLine,
+        "icon": icon,
+        'championId': championId,
+        "level": summoner["level"],
+        "rankInfo": rankInfo,
+        "gamesInfo": gamesInfo,
+        "xpSinceLastLevel": summoner["expPoints"],
+        "xpUntilNextLevel": summoner["expToNextLevel"],
+        "puuid": puuid,
+        "summonerId": summoner['id'],
+        "kda": [kill, deaths, assists],
+        "cellId": item.get("cellId"),
+        "selectedPosition": item.get("selectedPosition"),
+        "fateFlag": fateFlag,
+        "isPublic": summoner["privacy"] == "PUBLIC",
+        # 最近游戏的英雄 (用于上一局与与同一召唤师游玩之后显示)
+        "recentlyChampionName": recentlyChampionName
+    }
 
 
 def getTeammatesFromSGPGame(game, puuid):
@@ -1264,20 +1322,19 @@ async def parseGamesDataFromSGP(game, puuid):
     role = participant['role']
 
     position = None
-
-    pt = ToolsTranslator()
+    tt = ToolsTranslator()
 
     if queueId in [420, 440]:
         if lane == 'TOP':
-            position = pt.top
+            position = tt.top
         elif lane == "JUNGLE":
-            position = pt.jungle
+            position = tt.jungle
         elif lane == 'MIDDLE':
-            position = pt.middle
+            position = tt.middle
         elif role == 'SUPPORT':
-            position = pt.support
+            position = tt.support
         elif lane == 'BOTTOM' and role == 'CARRY':
-            position = pt.bottom
+            position = tt.bottom
 
     return {
         'queueId': queueId,
@@ -1306,10 +1363,10 @@ async def parseGamesDataFromSGP(game, puuid):
     }
 
 
-def getTagLineFromGame(game, puuid):
+def getNameTagLineFromGame(game, puuid):
     for player in game['json']['participants']:
         if player['puuid'] == puuid:
-            return player['riotIdTagline']
+            return player['riotIdGameName'], player['riotIdTagline']
 
     return None
 
