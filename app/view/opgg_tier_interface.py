@@ -91,6 +91,7 @@ class TierListWidget(QFrame):
 
         self.items = [ListItem(0, x) for x in data]
         self.__update()
+        self.titleBar.resetSelected()
 
     def __update(self):
         self.scrollLayout.removeAllWidgets()
@@ -151,11 +152,13 @@ class ListTitleBar(QFrame):
 
         self.counterLabel = QLabel("#")
         self.championLabel = QLabel(self.tr("Champion"))
-        self.tierLabel = TransparentButton(self.tr("Tier"))
+        self.rankLabel = TransparentButton(self.tr("Tier"))
         self.winRateLabel = TransparentButton(self.tr("Win Rate"))
         self.pickRateLabel = TransparentButton(self.tr("Pick Rate"))
         self.banRateLabel = TransparentButton(self.tr("Ban Rate"))
         self.countersLabel = QLabel(self.tr("Counters"))
+
+        self.selected: TransparentButton = self.rankLabel
 
         self.__initWidget()
         self.__initLayout()
@@ -168,7 +171,7 @@ class ListTitleBar(QFrame):
         self.hBoxLayout.addWidget(self.championLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
-        self.hBoxLayout.addWidget(self.tierLabel, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addWidget(self.rankLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacing(2)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
@@ -187,20 +190,40 @@ class ListTitleBar(QFrame):
 
         width = 70
 
-        self.tierLabel.setFixedWidth(50)
+        self.rankLabel.setFixedWidth(50)
         self.winRateLabel.setFixedWidth(width)
         self.pickRateLabel.setFixedWidth(width)
         self.banRateLabel.setFixedWidth(width)
         self.countersLabel.setFixedWidth(80)
 
-        self.tierLabel.clicked.connect(
-            lambda: self.sortRequested.emit("rank"))
+        self.rankLabel.clicked.connect(
+            lambda: self.__onSortButtonClicked("rank"))
         self.winRateLabel.clicked.connect(
-            lambda: self.sortRequested.emit("winRate"))
+            lambda: self.__onSortButtonClicked("winRate"))
         self.pickRateLabel.clicked.connect(
-            lambda: self.sortRequested.emit("pickRate"))
+            lambda: self.__onSortButtonClicked("pickRate"))
         self.banRateLabel.clicked.connect(
-            lambda: self.sortRequested.emit("banRate"))
+            lambda: self.__onSortButtonClicked("banRate"))
+
+        self.resetSelected()
+
+    def __onSortButtonClicked(self, type):
+        widget: TransparentButton = getattr(self, f"{type}Label")
+        self.__setSelected(widget)
+
+        self.sortRequested.emit(type)
+
+    def __setSelected(self, widget: TransparentButton):
+        self.selected.setProperty("selected", False)
+        self.selected.style().polish(self.selected)
+
+        widget.setProperty("selected", True)
+        widget.style().polish(widget)
+
+        self.selected = widget
+
+    def resetSelected(self):
+        self.__setSelected(self.rankLabel)
 
 
 class ListItem(ColorAnimationFrame):

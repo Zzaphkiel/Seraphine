@@ -8,6 +8,16 @@ TransparentButton {
     outline: none;
 }
 
+TransparentButton[selected=true] {
+    color: --ThemeColorDark1;
+    font-weight: bold;
+    background: none;
+    border: none;
+    border-radius: 5px;
+
+    padding: 6px 6px 6px 6px;
+    outline: none;
+}
 
 TransparentButton:hover {
     background-color: rgba(255, 255, 255, 9);
