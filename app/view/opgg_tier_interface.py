@@ -145,10 +145,9 @@ class ListTitleBar(QFrame):
 
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        self.hBoxLayout = QHBoxLayout(self)
 
         # self.setStyleSheet("border: 1px solid black;")
-
-        self.hBoxLayout = QHBoxLayout(self)
 
         self.counterLabel = QLabel("#")
         self.championLabel = QLabel(self.tr("Champion"))
@@ -164,7 +163,7 @@ class ListTitleBar(QFrame):
         self.__initLayout()
 
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(16, 6, 27, 6)
+        self.hBoxLayout.setContentsMargins(17, 6, 28, 6)
 
         self.hBoxLayout.addWidget(self.counterLabel, alignment=Qt.AlignCenter)
         # self.hBoxLayout.addSpacing()
@@ -172,8 +171,9 @@ class ListTitleBar(QFrame):
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.rankLabel, alignment=Qt.AlignCenter)
+        # self.hBoxLayout.addSpacing(1)
         self.hBoxLayout.addWidget(self.winRateLabel, alignment=Qt.AlignCenter)
-        self.hBoxLayout.addSpacing(2)
+        self.hBoxLayout.addSpacing(1)
         self.hBoxLayout.addWidget(self.pickRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addWidget(self.banRateLabel, alignment=Qt.AlignCenter)
         self.hBoxLayout.addSpacing(8)
@@ -230,6 +230,8 @@ class ListItem(ColorAnimationFrame):
     def __init__(self, number, info, parent: QWidget = None):
         super().__init__(type=f"tier{info['tier']}", parent=parent)
         # super().__init__(type="default", parent=parent)
+
+        # self.setStyleSheet("border: 1px solid black;")
         self.setFixedWidth(589)
 
         self.championId = info['championId']
