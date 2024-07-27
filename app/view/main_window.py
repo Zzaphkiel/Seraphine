@@ -3,6 +3,7 @@ import sys
 import traceback
 import time
 import copy
+import win32api
 from pathlib import Path
 
 import pyperclip
@@ -34,7 +35,8 @@ from app.common.config import cfg, VERSION, BETA
 from app.common.logger import logger
 from app.common.signals import signalBus
 from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
-                                        WaitingForLolMessageBox, ExceptionMessageBox)
+                                        WaitingForLolMessageBox, ExceptionMessageBox,
+                                        ChangeDpiMessageBox)
 from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                                 SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
@@ -66,6 +68,7 @@ class MainWindow(FluentWindow):
 
         self.__initConfig()
         self.__initWindow()
+        self.__checkWindowSize()
         self.__initSystemTray()
 
         # create sub interface
@@ -943,6 +946,22 @@ class MainWindow(FluentWindow):
 
     async def __onGameEnd(self):
         asyncio.create_task(self.gameInfoInterface.clear())
+
+    def __checkWindowSize(self):
+        w, h = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
+        size: QSize = self.size() * self.devicePixelRatioF()
+
+        if size.width() < w and size.height() < h:
+            return
+
+        for scale in [2.0, 1.75, 1.5, 1.25, 1]:
+            if scale * self.width() < w and scale * self.height() < h:
+                cfg.set(cfg.dpiScale, scale)
+                break
+
+        self.splashScreen.finish()
+        msg = ChangeDpiMessageBox(self.window())
+        msg.exec()
 
     @asyncSlot(str)
     async def __onCareerGameClicked(self, gameId):

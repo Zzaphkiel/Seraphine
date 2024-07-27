@@ -423,3 +423,37 @@ class MultiPathSettingMsgBox(MessageBoxBase):
     def __myOnCancelButtonClicked(self):
         self.reject()
         self.rejected.emit()
+
+
+class ChangeDpiMessageBox(MessageBoxBase):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+
+        self.myYesButton = PrimaryPushButton(
+            self.tr('OK'), self.buttonGroup)
+
+        self.titleLabel = TitleLabel(self.tr("Window is too big!"))
+        self.content = BodyLabel(
+            self.tr("We will reset your window size, please restart Seraphine."))
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.yesButton.setVisible(False)
+        self.cancelButton.setVisible(False)
+
+        self.buttonLayout.addWidget(self.myYesButton)
+
+        self.titleLabel.setContentsMargins(5, 0, 5, 0)
+        self.content.setContentsMargins(8, 0, 5, 0)
+
+        self.myYesButton.clicked.connect(self.__onYesButtonClicked)
+
+    def __initLayout(self):
+        self.viewLayout.addWidget(self.titleLabel)
+        self.viewLayout.addWidget(self.content)
+
+    def __onYesButtonClicked(self):
+        signalBus.terminateListeners.emit()
+        sys.exit()
