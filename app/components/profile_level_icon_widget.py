@@ -19,6 +19,7 @@ class ProgressArc(ProgressRing):
         self.text = text
         self.fontSize = fontSize
         self.drawVal = 0
+        self.ringGap = 30
         super().__init__(parent, useAni=useAni)
 
     def paintEvent(self, e):
@@ -35,7 +36,7 @@ class ProgressArc(ProgressRing):
         bc = self.darkBackgroundColor if isDarkTheme() else self.lightBackgroundColor
         pen = QPen(bc, cw, cap=Qt.RoundCap, join=Qt.RoundJoin)
         painter.setPen(pen)
-        painter.drawArc(rc, 315 * 16, 270 * 16)
+        painter.drawArc(rc, (self.ringGap-90)*16, (360-2*self.ringGap)*16)
 
         if self.maximum() <= self.minimum():
             return
@@ -43,13 +44,15 @@ class ProgressArc(ProgressRing):
         # draw bar
         pen.setColor(themeColor())
         painter.setPen(pen)
-        degree = int(self.drawVal / (self.maximum() - self.minimum()) * 270)
-        painter.drawArc(rc, -135 * 16, -degree * 16)
-        painter.setFont(QFont('Microsoft YaHei', self.fontSize, QFont.Bold))
-        text_rect = QRectF(0, self.height() * 0.85,
-                           self.width(), self.height() * 0.15)
+        degree = int(self.drawVal / (self.maximum() -
+                     self.minimum()) * (360 - 2*self.ringGap))
+        painter.drawArc(rc, -(self.ringGap + 90) * 16, -degree * 16)
 
-        painter.drawText(text_rect, Qt.AlignCenter, f"Lv.{self.text}")
+        painter.setFont(QFont('Microsoft YaHei', self.fontSize, QFont.Bold))
+        text_rect = QRectF(0, self.height() * 0.88,
+                           self.width(), self.height() * 0.12)
+
+        painter.drawText(text_rect, Qt.AlignCenter, f"{self.text}")
 
 
 class RoundLevelAvatar(QWidget):
@@ -73,7 +76,7 @@ class RoundLevelAvatar(QWidget):
         self.xpSinceLastLevel = xpSinceLastLevel
         self.xpUntilNextLevel = xpUntilNextLevel
         self.progressRing = ProgressArc(
-            self, text=text, fontSize=int(.1 * diameter))
+            self, text=text, fontSize=int(.09 * diameter))
         self.progressRing.setTextVisible(False)
         self.progressRing.setFixedSize(self.diameter, self.diameter)
 

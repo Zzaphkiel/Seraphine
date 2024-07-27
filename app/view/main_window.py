@@ -861,6 +861,8 @@ class MainWindow(FluentWindow):
     # 英雄选择时，英雄改变 / 楼层改变时触发
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
+        data = data['data']
+
         phase = {
             'PLANNING': [autoPick],
             'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
