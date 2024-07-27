@@ -1,24 +1,21 @@
 import aiohttp
-import asyncio
 from async_lru import alru_cache
 
-from PyQt5.QtCore import QObject
-from app.common.config import cfg
 from app.lol.connector import connector
 
 TAG = "opgg"
 
 
-class Opgg(QObject):
+class Opgg:
     def __init__(self):
         self.session = None
 
-        self.defaultModes = ['ranked', 'aram', 'arena']
-        self.defaultTier = cfg.get(cfg.opggTier)
-        self.defaultRegion = cfg.get(cfg.opggRegion)
-
     async def start(self):
         self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
+
+    async def close(self):
+        if self.session:
+            await self.session.close()
 
     @alru_cache(maxsize=512)
     async def __fetchTierList(self, region, mode, tier):
@@ -75,6 +72,7 @@ class Opgg(QObject):
 
     @alru_cache(maxsize=512)
     async def getChampionPositions(self, region, championId, tier):
+        # 这个调用因为有 cache，所以还是挺快的
         data = await self.__fetchTierList(region, "ranked", tier)
 
         for item in data['data']:
@@ -83,27 +81,9 @@ class Opgg(QObject):
 
         return []
 
-    async def initDefalutTier(self):
-        region = self.defaultRegion
-
-        for mode in self.defaultModes:
-            # 只在召唤师峡谷模式下按照默认段位取梯队
-
-            if mode == 'ranked':
-                tier = self.defaultTier
-            else:
-                tier = 'all'
-
-            # 因为这函数有 cache，直接无脑调用一下妥了
-            _ = await self.getTierList(region, mode, tier)
-
     async def __get(self, url, params=None):
         res = await self.session.get(url, params=params, ssl=False, proxy=None)
         return await res.json()
-
-    async def close(self):
-        if self.session:
-            await self.session.close()
 
 
 class OpggDataParser:

@@ -1377,7 +1377,7 @@ class ChampionSelection:
         self.isChampionPicked = False
         self.isChampionPickedCompleted = False
         self.isSkinPicked = False
-        self.isOpggBuildShowed = False
+        self.opggShowChampionId = None
 
     def reset(self):
         self.__init__()
@@ -1416,15 +1416,25 @@ async def autoTrade(data, selection):
 
 
 async def showOpggBuild(data, selection: ChampionSelection):
-    if selection.isOpggBuildShowed:
-        return
-
     cellId = data['localPlayerCellId']
-    championId = await connector.getCurrentChampion()
 
+    # 只有在英雄已经选定后才会尝试刷新 OPGG 界面
+    for actionGroup in data['actions']:
+        for action in actionGroup:
+            if action['actorCellId'] == cellId and \
+                    (not action['completed'] or action['type'] != 'pick'):
+                print(action['completed'])
+                return
+
+    # 拿一下位置和英雄 ID
     for player in data['myTeam']:
         if player['cellId'] == cellId:
             position = player.get('assignedPosition')
+            championId = player['championId'] or player['championPickIntent']
+
+    # 大乱斗模式下，即使锁定了也可能会换英雄，这里判断一下
+    if championId == selection.opggShowChampionId:
+        return
 
     map = {
         'TOP': "TOP",
@@ -1439,12 +1449,16 @@ async def showOpggBuild(data, selection: ChampionSelection):
     if championId == 0:
         return
 
+    # 判断一下是不是大乱斗
     if data.get('benchEnabled'):
         mode = "aram"
+    # 不知道怎么判断斗魂竞技场，用这种方式判断一下吧
+    elif len(data['myTeam']) == 2:
+        mode = 'arena'
     else:
         mode = ""
 
-    selection.isOpggBuildShowed = True
+    selection.opggShowChampionId = championId
     signalBus.toOpggBuildInterface.emit(championId, mode, position)
 
 
