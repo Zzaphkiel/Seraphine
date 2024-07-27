@@ -20,14 +20,14 @@ class Opgg(QObject):
     async def start(self):
         self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
 
-    @alru_cache(maxsize=128)
+    @alru_cache(maxsize=512)
     async def __fetchTierList(self, region, mode, tier):
         url = f"/api/{region}/champions/{mode}"
         params = {"tier": tier}
 
         return await self.__get(url, params)
 
-    @alru_cache(maxsize=128)
+    @alru_cache(maxsize=512)
     async def __fetchChampionBuild(self, region, mode, championId, position, tier):
         if mode != 'arena':
             url = f"/api/{region}/champions/{mode}/{championId}/{position}"
@@ -38,12 +38,13 @@ class Opgg(QObject):
 
         return await self.__get(url, params)
 
-    @alru_cache(maxsize=128)
+    @alru_cache(maxsize=512)
     async def getChampionBuild(self, region, mode, championId, position, tier):
-        raw = await self.__fetchChampionBuild(region, mode, championId, position, tier)
-        # print(raw)
+        positions = await self.getChampionPositions(region, championId, tier)
+        if position not in positions and mode == 'ranked':
+            position = positions[0]
 
-        version = raw['meta']['version']
+        raw = await self.__fetchChampionBuild(region, mode, championId, position, tier)
 
         if mode != 'arena':
             res = await OpggDataParser.parseOtherChampionBuild(raw, position)
@@ -52,11 +53,11 @@ class Opgg(QObject):
 
         return {
             'data': res,
-            'version': version,
+            'version': raw['meta']['version'],
             'mode': mode,
         }
 
-    @alru_cache(maxsize=128)
+    @alru_cache(maxsize=512)
     async def getTierList(self, region, mode, tier):
         raw = await self.__fetchTierList(region, mode, tier)
 
@@ -71,6 +72,16 @@ class Opgg(QObject):
             'data': res,
             'version': version
         }
+
+    @alru_cache(maxsize=512)
+    async def getChampionPositions(self, region, championId, tier):
+        data = await self.__fetchTierList(region, "ranked", tier)
+
+        for item in data['data']:
+            if item['id'] == championId:
+                return [p['name'] for p in item['positions']]
+
+        return []
 
     async def initDefalutTier(self):
         region = self.defaultRegion

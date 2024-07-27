@@ -12,7 +12,7 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        MessageBox, CheckBox, ToolTipFilter, ToolTipPosition)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
-from PyQt5.QtWidgets import (QWidget, QLabel, QCompleter, QVBoxLayout, QHBoxLayout, QGridLayout,
+from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QFrame, QSpacerItem, QSizePolicy)
 from qasync import asyncSlot
 

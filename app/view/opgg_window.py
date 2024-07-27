@@ -464,6 +464,16 @@ class OpggWindow(OpggWindowBase):
         data = await opgg.getChampionBuild(region, mode, championId, position, tier)
 
         self.buildInterface.updateInterface(data['data'])
+
+        # 若英雄没有在特定位置下的数据，则根据得到的数据重新设置一下位置的 combo box
+        if (pos := data['data']['summary']['position']) != position \
+                and mode == 'ranked':
+
+            # 在设置之前需要锁住 combo box changed 的槽函数，防止它自动刷新
+            self.setAutoRefreshEnabled(False)
+            self.__setComboBoxCurrentData(self.positionComboBox, pos)
+            self.setAutoRefreshEnabled(True)
+
         self.versionLabel.setText(self.tr("Version: ") + data['version'])
 
     @asyncSlot(bool)

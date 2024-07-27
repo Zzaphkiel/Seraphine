@@ -863,9 +863,6 @@ class MainWindow(FluentWindow):
     async def __onChampSelectChanged(self, data):
         data = data['data']
 
-        # print(data)
-        # print()
-
         phase = {
             'PLANNING': [autoPick],
             'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
