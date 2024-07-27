@@ -1423,7 +1423,6 @@ async def showOpggBuild(data, selection: ChampionSelection):
         for action in actionGroup:
             if action['actorCellId'] == cellId and \
                     (not action['completed'] or action['type'] != 'pick'):
-                print(action['completed'])
                 return
 
     # 拿一下位置和英雄 ID
