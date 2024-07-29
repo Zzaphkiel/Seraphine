@@ -6,20 +6,14 @@
   基于 LCU API 实现的英雄联盟战绩查询工具
 </p>
 
-<p align='center'>
-  <a href="https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Zzaphkiel/Seraphine?style=flat&label=License">
-  </a>
-  <a href="https://github.com/Zzaphkiel/Seraphine/forks">
-    <img src="https://img.shields.io/github/forks/Zzaphkiel/Seraphine?style=flat&label=Forks">
-  </a>
-  <a href="https://github.com/Zzaphkiel/Seraphine/stargazers">
-    <img src="https://img.shields.io/github/stars/Zzaphkiel/Seraphine?style=flat&label=Stars">
-  </a>
-  <a href="https://github.com/Zzaphkiel/Seraphine/releases">
-    <img src="https://img.shields.io/github/downloads/Zzaphkiel/Seraphine/total?style=flat&label=Downloads">
-  </a>
-</p>
+<div align="center">
+
+  [![License](https://img.shields.io/github/license/Zzaphkiel/Seraphine?style=flat&label=License)](https://github.com/Zzaphkiel/Seraphine/blob/main/LICENSE)
+  [![Forks](https://img.shields.io/github/forks/Zzaphkiel/Seraphine?style=flat&label=Forks)](https://github.com/Zzaphkiel/Seraphine/forks)
+  [![Stars](https://img.shields.io/github/stars/Zzaphkiel/Seraphine?style=flat&label=Stars)](https://github.com/Zzaphkiel/Seraphine/stargazers)
+  [![Downloads](https://img.shields.io/github/downloads/Zzaphkiel/Seraphine/total?style=flat&label=Downloads)](https://github.com/Zzaphkiel/Seraphine/releases)
+
+</div>
 
 ## 快速上手 🤗
 ### 直接使用打包好的程序
