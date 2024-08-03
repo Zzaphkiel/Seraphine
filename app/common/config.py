@@ -66,7 +66,7 @@ class Config(QConfig):
 
     showTierInGameInfo = ConfigItem("Functions", "ShowTierInGameInfo", False,
                                     BoolValidator())
-    autoShowOpgg = ConfigItem("Functions", "AutoShowOpgg", False,
+    autoShowOpgg = ConfigItem("Functions", "AutoShowOpgg", True,
                               BoolValidator())
     enableAutoAcceptMatching = ConfigItem("Functions",
                                           "EnableAutoAcceptMatching", False,
@@ -158,8 +158,8 @@ class Config(QConfig):
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
-VERSION = "0.13.1"
-BETA = "1.0.0-beta2"
+VERSION = "1.0.0"
+BETA = None
 FEEDBACK_URL = "https://github.com/Zzaphkiel/Seraphine/issues?q=is%3Aissue"
 GITHUB_URL = "https://github.com/Zzaphkiel/Seraphine"
 LOCAL_PATH = f"{os.getenv('APPDATA')}\\Seraphine"
