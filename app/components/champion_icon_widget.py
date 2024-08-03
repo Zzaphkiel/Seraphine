@@ -146,8 +146,9 @@ class RoundIconButton(QFrame):
     def mouseReleaseEvent(self, a0: QMouseEvent) -> None:
         self.isPressed = False
         self.update()
+        ret = super().mouseReleaseEvent(a0)
         self.clicked.emit(self.championId)
-        return super().mouseReleaseEvent(a0)
+        return ret
 
 
 class RoundedLabel(QLabel):

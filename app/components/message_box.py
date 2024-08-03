@@ -6,12 +6,14 @@ import sys
 import webbrowser
 import py7zr
 
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget
+from PyQt5.QtCore import Qt, pyqtSignal, QUrl
+from PyQt5.QtWidgets import QPushButton, QVBoxLayout, QWidget, QLabel, QFileDialog
+from PyQt5.QtGui import QFont, QPixmap
+
 from app.common.qfluentwidgets import (MessageBoxBase, SmoothScrollArea,
                                        BodyLabel, TextEdit, TitleLabel,
                                        ProgressBar,
-                                       PrimaryPushButton, ComboBox)
+                                       PrimaryPushButton, ComboBox, PipsScrollButtonDisplayMode, HorizontalPipsPager)
 
 from app.common.config import VERSION, cfg, LOCAL_PATH, BETA
 from app.common.util import getLolClientPidSlowly
@@ -390,7 +392,7 @@ class MultiPathSettingMsgBox(MessageBoxBase):
         self.myYesButton = PrimaryPushButton(self.tr('OK'), self.buttonGroup)
         self.myCancelButton = QPushButton(self.tr('Cancel'), self.buttonGroup)
 
-        self.titleLabel = TitleLabel(self.tr("Set LOL cLient path"))
+        self.titleLabel = TitleLabel(self.tr("Set LOL Client path"))
         self.pathsWidget = PathDraggableWidget(paths)
 
         self.__initWidget()
@@ -423,6 +425,62 @@ class MultiPathSettingMsgBox(MessageBoxBase):
     def __myOnCancelButtonClicked(self):
         self.reject()
         self.rejected.emit()
+
+
+class SplashesMessageBox(MessageBoxBase):
+    def __init__(self, skinList, parent=None):
+        super().__init__(parent)
+
+        self.skinList = skinList
+
+        self.splashesImg = QLabel(self)
+        self.splashesNameLabel = QLabel(self)
+        self.splashesNameLabel.setFont(QFont('Microsoft YaHei', 13))
+        self.pager = HorizontalPipsPager(self)
+        self.pager.setPreviousButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
+        self.pager.setNextButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
+        self.pager.setPageNumber(len(skinList))
+
+        self.saveButton = QPushButton(self.tr('Save'), self.buttonGroup)
+        self.saveButton.setObjectName('cancelButton')  # TODO own style
+
+        self.viewLayout.addWidget(self.splashesImg, 0, Qt.AlignCenter)
+        self.viewLayout.addWidget(self.splashesNameLabel, 0, Qt.AlignCenter)
+        self.viewLayout.addWidget(self.pager, 0, Qt.AlignCenter)
+
+        self.buttonLayout.removeWidget(self.cancelButton)
+        self.buttonLayout.addWidget(self.saveButton, 1, Qt.AlignVCenter)
+        self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignVCenter)
+
+        self.pager.currentIndexChanged.connect(self.__onChangeSplashes)
+        self.saveButton.clicked.connect(self.__onSaveSplashes)
+
+        self.pager.setCurrentIndex(0)
+
+    @asyncSlot(int)
+    async def __onChangeSplashes(self, idx):
+        skinItem = self.skinList[idx]
+        self.splashesNameLabel.setText(skinItem[0])
+
+        url = await connector.getChampionSplashes(skinItem[1], False)
+        img = QPixmap(url).scaled(1020, 565)
+        self.splashesImg.setPixmap(img)
+
+    @asyncSlot()
+    async def __onSaveSplashes(self):
+        saveTarget = QFileDialog.getSaveFileUrl(
+            self,
+            self.tr("Choose Path"),
+            QUrl(""),
+            "JPG Files (*.jpg *.jpeg)"
+        )
+
+        if not saveTarget[0].toLocalFile():
+            return
+
+        skinItem = self.skinList[self.pager.currentIndex()]
+        imgUrl = await connector.getChampionSplashes(skinItem[1], False)
+        shutil.copy(imgUrl, saveTarget[0].toLocalFile())
 
 
 class ChangeDpiMessageBox(MessageBoxBase):
