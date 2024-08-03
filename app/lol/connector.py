@@ -325,6 +325,7 @@ class LolClientConnector(QObject):
             "rune icons",
             "summoner spell icons",
             "augment icons"
+            "splashes",
         ]:
             p = f"app/resource/game/{folder}"
             if not os.path.exists(p):
@@ -488,6 +489,39 @@ class LolClientConnector(QObject):
                 f.write(await res.read())
 
         return icon
+
+    @retry()
+    async def getChampionSplashes(self, skinInfo, isCentered: bool):
+        """
+        :param skinInfo:
+            {
+                'skinId': 9000,
+                'splashPath': '/lol-game-data/.../xxxx.jpg',
+                'uncenteredSplashPath': '/lol-game-data/.../xxxx.jpg'
+            }
+        :param isCentered: True or False, 表示是否居中
+
+        注, splashPath获取到的原画是居中的;
+        如果你希望获取居中原画(如BP或生涯中看到的样式), 请使用'splashPath'
+
+        反之, 'uncenteredSplashPath'获取到的原画则是非居中的;
+        """
+        splashesId = skinInfo["skinId"]
+
+        if isCentered:
+            image = f"app/resource/game/splashes/{splashesId}_centered.jpg"
+            url = skinInfo["splashPath"]
+        else:
+            image = f"app/resource/game/splashes/{splashesId}_uncentered.jpg"
+            url = skinInfo["uncenteredSplashPath"]
+
+        if not os.path.exists(image):
+            res = await self.__get(url)
+
+            with open(image, "wb") as f:
+                f.write(await res.read())
+
+        return image
 
     @retry()
     async def getSummonerSpellIcon(self, spellId):
@@ -1139,14 +1173,22 @@ class JsonManager:
 
             if 'questSkinInfo' in item:
                 for tier in item['questSkinInfo']['tiers']:
-                    champion["skins"][tier["name"]] = tier["id"]
+                    champion["skins"][tier["name"]] = {
+                        "skinId": tier["id"],
+                        'splashPath': tier['splashPath'],
+                        'uncenteredSplashPath': tier['uncenteredSplashPath']
+                    }
                     champion["id"] = championId
 
                     if 'skinAugments' in tier and 'augments' in tier['skinAugments']:
                         contentId = tier['skinAugments']['augments'][0]['contentId']
                         self.skinAugments[tier['id']] = contentId
             else:
-                champion["skins"][item["name"]] = item["id"]
+                champion["skins"][item["name"]] = {
+                    "skinId": item["id"],
+                    'splashPath': item['splashPath'],
+                    'uncenteredSplashPath': item['uncenteredSplashPath']
+                }
                 champion["id"] = championId
 
                 if 'skinAugments' in item and 'augments' in item['skinAugments']:
@@ -1256,7 +1298,7 @@ class JsonManager:
             return []
 
     def getSkinIdByChampionAndSkinName(self, championName, skinName):
-        return self.champions[championName]["skins"][skinName]
+        return self.champions[championName]["skins"][skinName]["skinId"]
 
     def getChampionIdByName(self, championName):
         return self.champions[championName]["id"]

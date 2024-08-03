@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLay
 from qasync import asyncSlot
 
 from app.components.seraphine_interface import SeraphineInterface
-from app.components.message_box import MultiChampionSelectMsgBox
+from app.components.message_box import MultiChampionSelectMsgBox, SplashesMessageBox
 from app.components.champion_icon_widget import RoundIcon
 from app.components.multi_champion_select import ChampionSelectFlyout
 from app.lol.tools import fixLCUWindowViaExe
@@ -260,13 +260,16 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.championButton = PushButton(self.tr("Select champion"), self)
 
         self.skinLabel = QLabel(self.tr("Skin's name: "))
-        self.skinComboBox = ComboBox()
+        self.skinButton = PushButton(self.tr("Select Skin"), self)
 
         self.buttonWidget = QWidget(self.view)
         self.buttonLayout = QHBoxLayout(self.buttonWidget)
         self.pushButton = PushButton(self.tr("Apply"))
 
         self.completer = None
+
+        self.chosenSkinId = None
+        self.skins = None
 
         self.__initLayout()
         self.__initWidget()
@@ -284,7 +287,7 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.inputLayout.addWidget(
             self.skinLabel, 1, 0, alignment=Qt.AlignLeft)
         self.inputLayout.addWidget(
-            self.skinComboBox, 1, 1, alignment=Qt.AlignRight)
+            self.skinButton, 1, 1, alignment=Qt.AlignRight)
 
         self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
@@ -301,13 +304,14 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.championButton.setMinimumWidth(100)
         self.championButton.clicked.connect(self.__onSelectButtonClicked)
 
+        self.skinButton.setMinimumWidth(100)
+        self.skinButton.setEnabled(False)
+        self.skinButton.clicked.connect(self.__onSkinButtonClicked)
+
         self.pushButton.setMinimumWidth(100)
         self.pushButton.setEnabled(False)
         self.pushButton.clicked.connect(self.__onApplyButtonClicked)
 
-        self.skinComboBox.setEnabled(False)
-        self.skinComboBox.setMinimumWidth(250)
-        self.skinComboBox.setPlaceholderText(self.tr("Please select skin"))
 
     def __onSelectButtonClicked(self):
         view = ChampionSelectFlyout(self.champions)
@@ -315,6 +319,13 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
                              self, FlyoutAnimationType.SLIDE_RIGHT, True)
 
         view.championSelected.connect(self.__onChampionSelected)
+
+
+    def __onSkinButtonClicked(self):
+        w = SplashesMessageBox(self.skins, self.window())
+        if w.exec():
+            self.chosenSkinId = self.skins[w.pager.currentIndex()][1]["skinId"]
+            self.skinLabel.setText(self.tr("Skin's name: ") + self.skins[w.pager.currentIndex()][0])
 
     async def initChampionList(self, champions: dict = None):
         if champions:
@@ -330,27 +341,31 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __onChampionSelected(self, championId):
         self.w.fadeOut()
-        self.skinComboBox.clear()
+        self.championLabel.setText(self.tr("Champion's name: ") + connector.manager.getChampionNameById(championId))
+        self.skinLabel.setText(self.tr("Skin's name: "))
+        self.chosenSkinId = None
 
         name = self.champions[championId][0]
-        skins = connector.manager.getSkinListByChampionName(name)
+        self.skins = connector.manager.getSkinListByChampionName(name)
 
-        for skin in skins:
-            self.skinComboBox.addItem(skin[0], userData=skin[1])
+        self.skinButton.clicked.emit()
 
-        self.skinComboBox.setEnabled(True)
+        self.skinButton.setEnabled(True)
         self.pushButton.setEnabled(True)
 
     @asyncSlot()
     async def __onApplyButtonClicked(self):
-        skinId = self.skinComboBox.currentData()
-        contentId = connector.manager.getSkinAugments(skinId)
+        contentId = connector.manager.getSkinAugments(self.chosenSkinId)
 
         if contentId == None:
-            await connector.setProfileBackground(skinId)
+            await connector.setProfileBackground(self.chosenSkinId)
+            InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"), orient=Qt.Vertical,
+                            isClosable=True,
+                            position=InfoBarPosition.TOP_RIGHT, duration=5000,
+                            parent=self.window().auxiliaryFuncInterface)
             return
 
-        self.skinId = skinId
+        self.skinId = self.chosenSkinId
         self.contentId = contentId
 
         msg = MessageBox(
@@ -365,6 +380,10 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         msg.cancelButton.setText(self.tr("Unsigned Version"))
 
         msg.exec_()
+
+        InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"), orient=Qt.Vertical, isClosable=True,
+            position=InfoBarPosition.TOP_RIGHT, duration=5000,
+            parent=self.window().auxiliaryFuncInterface)
 
     @asyncSlot()
     async def __onMsgBoxYesButtonClicked(self):
