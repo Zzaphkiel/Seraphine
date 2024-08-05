@@ -162,7 +162,7 @@ class ChampionTitleBar(ColorAnimationFrame):
             self.winRateLabel.setText(f"{data['winRate']*100:.2f}%")
 
             self.pickRateTextLabel.setText(self.tr("Pick Rate"))
-            self.pickRateLabel.setText(f"{data['pickRate']*100:.2f}")
+            self.pickRateLabel.setText(f"{data['pickRate']*100:.2f}%")
 
             if banRate := data['banRate']:
                 self.banRateTextLabel.setText(self.tr("Ban Rate"))
