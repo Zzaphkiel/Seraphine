@@ -1393,7 +1393,6 @@ async def autoSwap(data, selection: ChampionSelection):
 
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
-            await asyncio.sleep(1)
             await connector.acceptTrade(pickOrderSwap['id'])
             selection.isChampionPickedCompleted = False
             return True
@@ -1408,7 +1407,6 @@ async def autoTrade(data, selection):
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
-            await asyncio.sleep(.5)
             await connector.acceptTrade(trade['id'])
             return True
 
@@ -1423,17 +1421,18 @@ async def showOpggBuild(data, selection: ChampionSelection):
         for action in actionGroup:
             if action['actorCellId'] == cellId and \
                     (not action['completed'] or action['type'] != 'pick'):
-                return
+                return False
 
     # 拿一下位置和英雄 ID
     for player in data['myTeam']:
         if player['cellId'] == cellId:
             position = player.get('assignedPosition')
             championId = player['championId'] or player['championPickIntent']
+            break
 
     # 大乱斗模式下，即使锁定了也可能会换英雄，这里判断一下
     if championId == selection.opggShowChampionId:
-        return
+        return False
 
     map = {
         'TOP': "TOP",
@@ -1446,7 +1445,7 @@ async def showOpggBuild(data, selection: ChampionSelection):
     position = map.get(position, "")
 
     if championId == 0:
-        return
+        return False
 
     # 判断一下是不是大乱斗
     if data.get('benchEnabled'):
@@ -1460,6 +1459,8 @@ async def showOpggBuild(data, selection: ChampionSelection):
     selection.opggShowChampionId = championId
     signalBus.toOpggBuildInterface.emit(championId, mode, position)
 
+    return True
+
 
 async def autoPick(data, selection: ChampionSelection):
     """
@@ -1469,6 +1470,8 @@ async def autoPick(data, selection: ChampionSelection):
         return
 
     localPlayerCellId = data['localPlayerCellId']
+
+    print(f"{localPlayerCellId = }")
 
     for player in data['myTeam']:
         if player["cellId"] != localPlayerCellId:
@@ -1506,11 +1509,15 @@ async def autoPick(data, selection: ChampionSelection):
 
     candidates = [x for x in candidates if x not in bans]
 
+    print(f"{candidates = }")
+
     if not candidates:
         selection.isChampionPicked = True
         return
 
     championId = candidates[0]
+
+    print(f"{championId = }")
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
@@ -1554,6 +1561,7 @@ async def autoBan(data, selection: ChampionSelection):
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
     if not isAutoBan or selection.isChampionBanned:
         return
+
     selection.isChampionBanned = True
 
     localPlayerCellId = data['localPlayerCellId']
