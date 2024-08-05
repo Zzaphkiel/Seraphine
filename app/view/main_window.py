@@ -948,8 +948,11 @@ class MainWindow(FluentWindow):
         asyncio.create_task(self.gameInfoInterface.clear())
 
     def __checkWindowSize(self):
+        if (dpi := self.devicePixelRatioF()) == 1.0:
+            return
+
         w, h = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
-        size: QSize = self.size() * self.devicePixelRatioF()
+        size: QSize = self.size() * dpi
 
         if size.width() < w and size.height() < h:
             return
