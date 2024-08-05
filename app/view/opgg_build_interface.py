@@ -57,7 +57,10 @@ class BuildInterface(QFrame):
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setViewportMargins(10, 10, 17, 10)
+        self.scrollArea.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # self.scrollArea.setViewportMargins(10, 10, 17, 10)
+        self.scrollArea.setViewportMargins(0, 0, 0, 0)
         self.scrollWidget.setContentsMargins(0, 0, 0, 0)
 
         self.scrollLayout.addWidget(self.titleBar)
@@ -436,6 +439,7 @@ class ChampionSkillsWidget(BuildWidgetBase):
         self.hBoxLayout.addLayout(self.gamesLayout)
         self.hBoxLayout.addSpacing(22)
         self.hBoxLayout.addWidget(self.pickRateLabel)
+        self.hBoxLayout.addSpacing(2)
 
     def __clearLayout(self, layout: QLayout):
         for i in reversed(range(layout.count())):
