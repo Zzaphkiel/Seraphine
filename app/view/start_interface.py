@@ -98,6 +98,7 @@ class StartInterface(SeraphineInterface):
         self.label3.setText(self.tr("(You can launch LOL by other means)"))
 
         self.label3.setVisible(True)
+        self.pathComboBox.setVisible(True)
 
         self.pushButton.setIcon(Icon.CIRCLERIGHT)
         self.pushButton.setText(self.tr("Start LOL Client"))
