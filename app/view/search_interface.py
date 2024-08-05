@@ -294,8 +294,8 @@ class GameDetailView(QFrame):
 
     def __initLayout(self):
         self.scrollArea.setObjectName("gameScrollArea")
-        self.scrollArea.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # self.scrollArea.setVerticalScrollBarPolicy(
+        #     Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollWidget.setObjectName("scrollWidget")
 
         self.scrollWidget.setLayout(self.scrollLayout)

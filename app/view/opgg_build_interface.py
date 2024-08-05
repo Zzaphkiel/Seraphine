@@ -57,10 +57,10 @@ class BuildInterface(QFrame):
         self.scrollWidget.setLayout(self.scrollLayout)
         self.scrollArea.setWidget(self.scrollWidget)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # self.scrollArea.setVerticalScrollBarPolicy(
+        #     Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         # self.scrollArea.setViewportMargins(10, 10, 17, 10)
-        self.scrollArea.setViewportMargins(0, 0, 0, 0)
+        self.scrollArea.setViewportMargins(0, 0, 15, 0)
         self.scrollWidget.setContentsMargins(0, 0, 0, 0)
 
         self.scrollLayout.addWidget(self.titleBar)
@@ -877,7 +877,7 @@ class PerksSummaryWidget(NoBorderColorAnimationFrame):
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addLayout(self.playsLayout)
-        self.hBoxLayout.addSpacing(21)
+        self.hBoxLayout.addSpacing(29)
         self.hBoxLayout.addWidget(self.pickRateLabel)
 
         self.vBoxLayout.setContentsMargins(5, 5, 8, 5)
