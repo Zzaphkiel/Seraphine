@@ -94,13 +94,13 @@ SummonerInfoBar {
     border-radius: 6px;
 }
 
-#scrollArea {
-    border: 1px solid rgba(0, 0, 0, 0.095);
-    border-radius: 6px;
-    background-color: rgba(245, 245, 245, 0.667);
+#gameScrollArea {
+    border: none;
+    background: transparent;
 }
 
 #scrollWidget {
+    border: none;
     background: transparent;
 }
 

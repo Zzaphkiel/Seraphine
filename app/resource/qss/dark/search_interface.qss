@@ -119,16 +119,15 @@ SummonerName {
     background-color: transparent;
 }
 
-#scrollArea {
-    border: 1px solid rgba(0, 0, 0, 0.095);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.051);
-}
-
-#scrollWidget {
+#gameScrollArea {
+    border: none;
     background: transparent;
 }
 
+#scrollWidget {
+    border: none;
+    background: transparent;
+}
 
 SummonerName:hover {
     color: --ThemeColorDark1;

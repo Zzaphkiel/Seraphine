@@ -293,7 +293,7 @@ class GameDetailView(QFrame):
         self.__initLayout()
 
     def __initLayout(self):
-        self.scrollArea.setObjectName("scrollArea")
+        self.scrollArea.setObjectName("gameScrollArea")
         self.scrollWidget.setObjectName("scrollWidget")
 
         self.scrollWidget.setLayout(self.scrollLayout)
@@ -304,6 +304,7 @@ class GameDetailView(QFrame):
 
         self.vBoxLayout.addWidget(self.titleBar)
 
+        self.scrollLayout.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.addWidget(self.teamView1)
         self.scrollLayout.addWidget(self.teamView2)
 
