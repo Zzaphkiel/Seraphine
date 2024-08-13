@@ -150,5 +150,7 @@ class SearchLineEdit(QSearchLineEdit):
             self._completerMenu.popup()
 
     def focusInEvent(self, e):
-        self._showCompleterMenu()
-        super().focusInEvent(e)
+        # FIX: BUG#379 特定条件下搜索栏候选条会反复得到并失去焦点, 导致UI卡死 -- By Hpero4
+        if e.reason() != 4:
+            self._showCompleterMenu()
+            super().focusInEvent(e)
