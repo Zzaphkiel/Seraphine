@@ -1105,6 +1105,8 @@ class SearchInterface(SeraphineInterface):
 
                 while not self.gameLoadingTask.cancelled() \
                         and not self.gameLoadingTask.done():
+                    # FIX: task有可能会错过cancel(), 导致必须等到查询结束; -- By Hpero4
+                    self.gameLoadingTask.cancel()
                     await asyncio.sleep(.2)
 
             self.puuid = summoner['puuid']
@@ -1130,6 +1132,7 @@ class SearchInterface(SeraphineInterface):
             # 启动任务，往 gamesTab 里丢数据
             # NOTE 既然创建新任务, 并且刷新了self.puuid 就应该用self的, 否则就违背了loadGames判断的初衷
 
+            # FIXME: 当从两名召唤师之间反复横跳时, 有可能会导致一puuid起了2个(或更多)task -- By Hpero4
             self.gameLoadingTask = asyncio.create_task(
                 self.__loadGames(self.puuid))
 
