@@ -331,7 +331,7 @@ class LolClientConnector(QObject):
             "profile icons",
             "rune icons",
             "summoner spell icons",
-            "augment icons"
+            "augment icons",
             "splashes",
         ]:
             p = f"app/resource/game/{folder}"
