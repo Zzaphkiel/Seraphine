@@ -3,6 +3,7 @@ import os
 import json
 import threading
 import re
+from asyncio import CancelledError
 from collections import deque
 
 import requests
@@ -86,6 +87,12 @@ def retry(count=5, retry_sep=0):
                 try:
                     async with connector.semaphore:
                         res = await func(*args, **kwargs)
+                except CancelledError:
+                    # Fix: 使用task.cancel()偶尔会停不下task -- By Hpero4
+                    #   在调用cancel()时, 会从调用栈的最底抛出CancelledError, 最终传递到loop终止task;
+                    #   由于CancelledError是BaseException的子类,
+                    #   若task恰好跑到被retry装饰的函数中, 会被retry中的BaseException捕获并吞掉, 从而无事发生
+                    raise
                 except BaseException as e:
                     time.sleep(retry_sep)
                     exce = e
@@ -324,7 +331,7 @@ class LolClientConnector(QObject):
             "profile icons",
             "rune icons",
             "summoner spell icons",
-            "augment icons"
+            "augment icons",
             "splashes",
         ]:
             p = f"app/resource/game/{folder}"

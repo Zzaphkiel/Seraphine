@@ -154,3 +154,8 @@ class SearchLineEdit(QSearchLineEdit):
         if e.reason() != 4:
             self._showCompleterMenu()
             super().focusInEvent(e)
+
+    def mousePressEvent(self, e):
+        if self.hasFocus():
+            self._showCompleterMenu()
+        super().mousePressEvent(e)

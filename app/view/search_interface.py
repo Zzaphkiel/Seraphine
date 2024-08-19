@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout, QFrame,
                              QSpacerItem, QSizePolicy, QLabel, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor
+
+from ..common.logger import logger
 from ..common.qfluentwidgets import (SmoothScrollArea, PushButton, ToolButton, InfoBar,
                                      InfoBarPosition, ToolTipFilter, ToolTipPosition,
                                      isDarkTheme, FlyoutViewBase, Flyout, Theme,
@@ -29,6 +31,23 @@ from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
 from ..components.seraphine_interface import SeraphineInterface
+
+
+TAG = "SearchInterface"
+
+
+def asyncLockDecorator(lockName):
+    """
+    给任何一个方法加锁, return时释放
+    args[0]是self, 通过getattr找到lockName
+    """
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            lock = getattr(args[0], lockName)
+            async with lock:
+                return await func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 class GamesTab(QFrame):
@@ -1008,6 +1027,8 @@ class SearchInterface(SeraphineInterface):
         self.detailViewLoadTask = None
         self.loadingGameId = 0
 
+        self.loadFirstPageLock = asyncio.Lock()
+
         self.__initWidget()
         self.__initLayout()
         self.__connectSignalToSlot()
@@ -1077,6 +1098,8 @@ class SearchInterface(SeraphineInterface):
             parent=self
         )
 
+    # Fix: 超快速的在候选栏选中两次同样puuid会起两个task加载战绩, 100%干掉客户端 -- By Hpero4
+    @asyncLockDecorator('loadFirstPageLock')
     async def searchAndShowFirstPage(self, puuid=None):
         name = self.searchLineEdit.text()
         if name == "":
@@ -1105,9 +1128,7 @@ class SearchInterface(SeraphineInterface):
 
                 while not self.gameLoadingTask.cancelled() \
                         and not self.gameLoadingTask.done():
-                    # FIX: task有可能会错过cancel(), 导致必须等到查询结束; -- By Hpero4
-                    self.gameLoadingTask.cancel()
-                    await asyncio.sleep(.2)
+                    await asyncio.sleep(.3)
 
             self.puuid = summoner['puuid']
             self.gamesView.gamesTab.clear()
@@ -1132,7 +1153,6 @@ class SearchInterface(SeraphineInterface):
             # 启动任务，往 gamesTab 里丢数据
             # NOTE 既然创建新任务, 并且刷新了self.puuid 就应该用self的, 否则就违背了loadGames判断的初衷
 
-            # FIXME: 当从两名召唤师之间反复横跳时, 有可能会导致一puuid起了2个(或更多)task -- By Hpero4
             self.gameLoadingTask = asyncio.create_task(
                 self.__loadGames(self.puuid))
 
@@ -1188,12 +1208,15 @@ class SearchInterface(SeraphineInterface):
         begIdx = 20
         endIdx = 29
 
+        logger.debug(f"welcome load games task: {puuid}", TAG)
+
         # NOTE 换了查询目标, 若之前正在查, 先等 task 被 release 掉 -- By Hpero4
         while self.gameLoadingTask \
                 and not self.gameLoadingTask.done() \
                 and puuid != self.puuid:
             await asyncio.sleep(.2)
 
+        logger.debug(f"start load {puuid}", TAG)
         # 连续查多个人时, 将前面正在查的task给release掉
         while self.puuid == puuid:
             # 为加载战绩详情让行
@@ -1205,6 +1228,7 @@ class SearchInterface(SeraphineInterface):
             ):
                 await asyncio.sleep(.2)
 
+            t1 = time.time()
             try:
                 games = await connector.getSummonerGamesByPuuidSlowly(
                     puuid, begIdx, endIdx)
@@ -1213,7 +1237,9 @@ class SearchInterface(SeraphineInterface):
                 # NOTE 触发 SummonerGamesNotFound 时, 异常信息会通过 connector 下发到 main_window 的 __onShowLcuConnectError
                 #  理论上会有弹框提示  -- By Hpero4
                 return
+            t2 = time.time()
 
+            logger.debug(f"load games {self.puuid} [{begIdx}-{endIdx}] finish {t2-t1}s", TAG)
             # 1000 局搜完了，或者正好上一次就是最后
             # 在切换了puuid时, 就不要再把数据刷到Games上了 -- By Hpero4
             if games['gameCount'] == 0 or self.puuid != puuid:
