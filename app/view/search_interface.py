@@ -1098,6 +1098,7 @@ class SearchInterface(SeraphineInterface):
             parent=self
         )
 
+    # Fix: 超快速的在候选栏选中两次同样puuid会起两个task加载战绩, 100%干掉客户端 -- By Hpero4
     @asyncLockDecorator('loadFirstPageLock')
     async def searchAndShowFirstPage(self, puuid=None):
         name = self.searchLineEdit.text()
@@ -1108,8 +1109,6 @@ class SearchInterface(SeraphineInterface):
             summoner = await connector.getSummonerByPuuid(name)
         else:
             summoner = await connector.getSummonerByName(name)
-            # Fix: 超快速的在候选栏选中两次同样puuid会起两个task加载战绩, 100%干掉客户端 -- By Hpero4
-            puuid = summoner['puuid']
 
         if 'errorCode' in summoner:
             self.__showSummonerNotFoundMsg()
