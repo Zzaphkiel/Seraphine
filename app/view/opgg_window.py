@@ -34,14 +34,14 @@ TAG = 'OpggWindow'
 
 class OpggWindowBase(BackgroundAnimationWidget, FramelessWindow):
     def __init__(self, parent=None):
-        self._isMicaEnabled = False
+        self._isMicaEnabled = cfg.get(cfg.micaEnabled)
         self._lightBackgroundColor = QColor(243, 243, 243)
         self._darkBackgroundColor = QColor(32, 32, 32)
 
         super().__init__(parent=parent)
 
         self.setTitleBar(FluentTitleBar(self))
-        self.setMicaEffectEnabled(True)
+        self.setMicaEffectEnabled(self._isMicaEnabled)
         self.setContentsMargins(0, 36, 0, 0)
 
         self.titleBar.hBoxLayout.setContentsMargins(14, 0, 0, 0)
