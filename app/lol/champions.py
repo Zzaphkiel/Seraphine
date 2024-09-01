@@ -1,11 +1,9 @@
 import json
 import os
-import re
-from functools import lru_cache, wraps
 
 import aiohttp
 
-from app.common.config import cfg, LOCAL_PATH
+from app.common.config import LOCAL_PATH
 from app.common.logger import logger
 from app.common.util import getLolClientVersion
 
@@ -76,9 +74,18 @@ class ChampionAlias:
 
         return ChampionAlias.getDataVersion() != lolVersion
 
+    @staticmethod
+    def computeDict(dic: dict, key, fun: callable):
+        dic[key] = fun(key, dic.get(key))
+
     @classmethod
     def getChampionsAlias(cls) -> dict:
-        return ChampionAlias.data['champions']
+        champions = ChampionAlias.data['champions']
+        cls.computeDict(champions, "901", lambda x, y: y + ",小火龙")# 斯莫德
+        cls.computeDict(champions, "950", lambda x, y: y + ",狗")# 纳亚菲利
+        cls.computeDict(champions, "902", lambda x, y: y + ",丁真")# 米利欧
+        cls.computeDict(champions, "897", lambda x, y: y + ",黑龙,n-word")# 奎桑提
+        return champions
 
     @classmethod
     def isAvailable(cls) -> bool:

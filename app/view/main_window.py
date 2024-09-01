@@ -244,7 +244,7 @@ class MainWindow(FluentWindow):
         self.settingInterface.careerGamesCount.pushButton.clicked.connect(
             self.__refreshCareerInterface)
         self.settingInterface.micaCard.checkedChanged.connect(
-            self.setMicaEffectEnabled)
+            self.__cascadeSetMicaEffect)
 
         # From main_window
         self.showUpdateMessageBox.connect(self.__onShowUpdateMessageBox)
@@ -991,6 +991,12 @@ class MainWindow(FluentWindow):
     async def __refreshCareerInterface(self):
         if self.isClientProcessRunning:
             self.careerInterface.refreshButton.click()
+
+    @asyncSlot()
+    async def __cascadeSetMicaEffect(self):
+        isMicaEnabled = cfg.get(cfg.micaEnabled)
+        self.setMicaEffectEnabled(isMicaEnabled)
+        self.opggWindow.setMicaEffectEnabled(isMicaEnabled)
 
     @asyncSlot()
     async def __onFixLCUButtonClicked(self):
