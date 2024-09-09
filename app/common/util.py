@@ -155,8 +155,18 @@ def getLolClientPid(path):
 
 
 def getLolClientPids(path):
-    processes = subprocess.check_output(
-        f'{path} /FI "imagename eq LeagueClientUx.exe" /NH', shell=True)
+    try:
+        processes = subprocess.check_output(
+            f'{path} /FI "imagename eq LeagueClientUx.exe" /NH',
+            shell=True,
+            stderr=subprocess.STDOUT
+        )
+    except subprocess.CalledProcessError as e:
+        logger.error(
+            'an error occurred when calling tasklist command, '
+            f'original output: {e.output.decode()}'
+        )
+        raise e
 
     pids = []
 
