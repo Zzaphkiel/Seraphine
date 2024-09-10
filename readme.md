@@ -38,6 +38,8 @@ pip install -r requirements.txt
 ```shell
 python main.py
 ```
+### 卸载 Seraphine 😑
+删除 Seraphine 所在文件夹并删除 `%AppData%/Seraphine` 文件夹即可。
 
 ## 功能一览 （持续更新中）🥰
 - 战绩查询功能（不支持云顶之弈）
@@ -97,8 +99,6 @@ Seraphine 提供的战绩查询相关功能的数据均是由英雄联盟客户�
 在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/Zzaphkiel/Seraphine/issues)。发布 issue 时请按照模板填写。**发布新 issue 前请先善用搜索功能，看看之前是否讨论过相关或类似的问题！**
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！[PR](https://github.com/Zzaphkiel/Seraphine/pulls) 也大欢迎！
-
-
 
 ## 您也可以自己打包可执行文件 📂
 在 `seraphine` 虚拟环境下安装 `Pyinstaller`，并确认环境支持 `7z` 命令
