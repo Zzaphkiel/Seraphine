@@ -884,7 +884,11 @@ class SpectateCard(ExpandGroupSettingCard):
             text = self.lineEdit.text()
             text = text.replace('\u2066', '').replace('\u2069', '')
 
-            await connector.spectate(text)
+            res = await connector.spectateDirectly(text)
+            pwd = os.getcwd()
+            os.chdir(f"{cfg.get(cfg.lolFolder)[0]}/../Game")
+            subprocess.Popen(['League of Legends.exe', f'{res}'])
+            os.chdir(pwd)
 
         except SummonerNotFound:
             info('error', self.tr("Summoner not found"),
