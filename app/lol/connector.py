@@ -1,17 +1,16 @@
+import asyncio
 import inspect
-import os
 import json
-import threading
+import os
 import re
+import threading
+import time
 from asyncio import CancelledError
 from collections import deque
 
-import requests
-import time
-
-import asyncio
 import aiohttp
-from PyQt5.QtCore import pyqtSignal, QObject
+import requests
+from PyQt5.QtCore import QObject
 
 from app.common.config import cfg, Language
 from app.common.logger import logger
@@ -69,7 +68,7 @@ def retry(count=5, retry_sep=0):
 
             # 构建参数字典，将参数名与对应的实参值一一对应
             params_dict = {param: arg for param,
-                           arg in zip(param_names, tmp_args)}
+            arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
@@ -965,6 +964,31 @@ class LolClientConnector(QObject):
 
         return res
 
+    async def spectateDirectly(self, summonerName):
+        """
+        用命令行唤起客户端，无需等待
+        """
+        info = await self.getSummonerByName(summonerName)
+        puuid = info.get('puuid')
+
+        if not puuid:
+            raise SummonerNotFound()
+
+        info = await self.getSummonerGamingInfoByPuuidViaSgp(puuid)
+
+        credentials = info.get('playerCredentials')
+        if credentials is None:
+            raise SummonerNotInGame()
+
+        credentials = info['playerCredentials']
+        params = (f"spectator {credentials['observerServerIp']}"
+                  f":{credentials['observerServerPort']}"
+                  f" {credentials['observerEncryptionKey']}"
+                  f" {credentials['gameId']}"
+                  f" {self.server}")
+
+        return params
+
     async def dodge(self):
         data = {
             "destination": 'lcdsServiceProxy',
@@ -1072,6 +1096,14 @@ class LolClientConnector(QObject):
         }
 
         res = await self.__sgp__get(url, params)
+        return await res.json()
+
+    async def getSummonerGamingInfoByPuuidViaSgp(self, puuid):
+        logger.debug(
+            f"getSummonerGamingInfoByPuuidViaSgp called, {puuid = }", TAG)
+
+        url = f"/gsm/v1/ledge/spectator/region/{self.server.lower()}/puuid/{puuid}"
+        res = await self.__sgp__get(url)
         return await res.json()
 
     async def getRankedStatsByPuuidViaSGP(self, puuid):
