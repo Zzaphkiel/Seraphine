@@ -1,31 +1,30 @@
-import threading
 import os
 import stat
-
-
-from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
-                                       SmoothScrollArea, SettingCard, LineEdit, PushButton,
-                                       setCustomStyleSheet, ComboBox, SwitchButton, ConfigItem,
-                                       qconfig, IndicatorPosition, InfoBar, InfoBarPosition,
-                                       SpinBox, ExpandGroupSettingCard, TransparentToolButton,
-                                       FluentIcon, Flyout, FlyoutAnimationType, TeachingTip,
-                                       MessageBox, CheckBox, ToolTipFilter, ToolTipPosition)
+import subprocess
+import threading
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
 from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QFrame, QSpacerItem, QSizePolicy)
 from qasync import asyncSlot
 
-from app.components.seraphine_interface import SeraphineInterface
-from app.components.message_box import MultiChampionSelectMsgBox, SplashesMessageBox
-from app.components.champion_icon_widget import RoundIcon
-from app.components.multi_champion_select import ChampionSelectFlyout
-from app.lol.tools import fixLCUWindowViaExe
-from app.common.icons import Icon
 from app.common.config import cfg
+from app.common.icons import Icon
+from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ExpandLayout,
+                                       SettingCard, LineEdit, PushButton,
+                                       setCustomStyleSheet, ComboBox, SwitchButton, ConfigItem,
+                                       qconfig, IndicatorPosition, InfoBar, InfoBarPosition,
+                                       SpinBox, ExpandGroupSettingCard, TransparentToolButton,
+                                       FluentIcon, Flyout, FlyoutAnimationType, MessageBox, ToolTipFilter,
+                                       ToolTipPosition)
 from app.common.style_sheet import StyleSheet
+from app.components.champion_icon_widget import RoundIcon
+from app.components.message_box import MultiChampionSelectMsgBox, SplashesMessageBox
+from app.components.multi_champion_select import ChampionSelectFlyout
+from app.components.seraphine_interface import SeraphineInterface
 from app.lol.connector import connector
 from app.lol.exceptions import *
+from app.lol.tools import fixLCUWindowViaExe
 
 
 class AuxiliaryInterface(SeraphineInterface):
@@ -312,14 +311,12 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         self.pushButton.setEnabled(False)
         self.pushButton.clicked.connect(self.__onApplyButtonClicked)
 
-
     def __onSelectButtonClicked(self):
         view = ChampionSelectFlyout(self.champions)
         self.w = Flyout.make(view, self.championButton,
                              self, FlyoutAnimationType.SLIDE_RIGHT, True)
 
         view.championSelected.connect(self.__onChampionSelected)
-
 
     def __onSkinButtonClicked(self):
         w = SplashesMessageBox(self.skins, self.window())
@@ -382,8 +379,8 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         msg.exec_()
 
         InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"), orient=Qt.Vertical, isClosable=True,
-            position=InfoBarPosition.TOP_RIGHT, duration=5000,
-            parent=self.window().auxiliaryFuncInterface)
+                        position=InfoBarPosition.TOP_RIGHT, duration=5000,
+                        parent=self.window().auxiliaryFuncInterface)
 
     @asyncSlot()
     async def __onMsgBoxYesButtonClicked(self):
@@ -541,10 +538,10 @@ class ProfileTierCard(ExpandGroupSettingCard):
         currentDivision = self.divisionBox.currentText()
         self.divisionBox.clear()
         if currentTier in [
-                self.tr("Na"),
-                self.tr('Master'),
-                self.tr('Grandmaster'),
-                self.tr('Challenger')
+            self.tr("Na"),
+            self.tr('Master'),
+            self.tr('Grandmaster'),
+            self.tr('Challenger')
         ]:
             self.divisionBox.addItems(['--'])
             self.divisionBox.setCurrentText('--')
@@ -896,7 +893,7 @@ class SpectateCard(ExpandGroupSettingCard):
             info('error', self.tr("Summoner isn't in game"), "")
         else:
             info('success', self.tr("Spectate successfully"),
-                 self.tr("Please wait"),)
+                 self.tr("Please wait"), )
 
 
 class AutoAcceptMatchingCard(ExpandGroupSettingCard):
@@ -1068,7 +1065,7 @@ class DodgeCard(SettingCard):
 
 class LockConfigCard(SettingCard):
 
-    def __init__(self, title, content,  parent):
+    def __init__(self, title, content, parent):
         super().__init__(Icon.LOCK, title, content, parent)
 
         self.switchButton = SwitchButton(indicatorPos=IndicatorPosition.RIGHT)
@@ -1343,9 +1340,9 @@ class AutoSelectChampionCard(ExpandGroupSettingCard):
             champions = getattr(self, f"{ty}Champions")
             button = getattr(self, f"{ty}SelectButton")
 
-            self.rankCfgLayout.addWidget(label, i+1, 0, Qt.AlignLeft)
-            self.rankCfgLayout.addWidget(champions, i+1, 1, Qt.AlignHCenter)
-            self.rankCfgLayout.addWidget(button, i+1, 2, Qt.AlignRight)
+            self.rankCfgLayout.addWidget(label, i + 1, 0, Qt.AlignLeft)
+            self.rankCfgLayout.addWidget(champions, i + 1, 1, Qt.AlignHCenter)
+            self.rankCfgLayout.addWidget(button, i + 1, 2, Qt.AlignRight)
 
         self.buttonsLayout.setVerticalSpacing(19)
         self.buttonsLayout.setContentsMargins(48, 18, 44, 18)
@@ -1617,9 +1614,9 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
             champions = getattr(self, f"{ty}Champions")
             button = getattr(self, f"{ty}SelectButton")
 
-            self.rankCfgLayout.addWidget(label, i+1, 0, Qt.AlignLeft)
-            self.rankCfgLayout.addWidget(champions, i+1, 1, Qt.AlignHCenter)
-            self.rankCfgLayout.addWidget(button, i+1, 2, Qt.AlignRight)
+            self.rankCfgLayout.addWidget(label, i + 1, 0, Qt.AlignLeft)
+            self.rankCfgLayout.addWidget(champions, i + 1, 1, Qt.AlignHCenter)
+            self.rankCfgLayout.addWidget(button, i + 1, 2, Qt.AlignRight)
 
         self.buttonsCfgLayout.setVerticalSpacing(19)
         self.buttonsCfgLayout.setContentsMargins(48, 18, 44, 18)
@@ -1676,7 +1673,7 @@ class AutoBanChampionCard(ExpandGroupSettingCard):
                 continue
 
             champions.updateChampions(
-                [self.champions[id][1]for id in selected])
+                [self.champions[id][1] for id in selected])
 
         return self.champions
 
