@@ -322,7 +322,8 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         w = SplashesMessageBox(self.skins, self.window())
         if w.exec():
             self.chosenSkinId = self.skins[w.pager.currentIndex()][1]["skinId"]
-            self.skinLabel.setText(self.tr("Skin's name: ") + self.skins[w.pager.currentIndex()][0])
+            self.skinLabel.setText(
+                self.tr("Skin's name: ") + self.skins[w.pager.currentIndex()][0])
 
     async def initChampionList(self, champions: dict = None):
         if champions:
@@ -338,7 +339,8 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __onChampionSelected(self, championId):
         self.w.fadeOut()
-        self.championLabel.setText(self.tr("Champion's name: ") + connector.manager.getChampionNameById(championId))
+        self.championLabel.setText(self.tr(
+            "Champion's name: ") + connector.manager.getChampionNameById(championId))
         self.skinLabel.setText(self.tr("Skin's name: "))
         self.chosenSkinId = None
 
@@ -823,11 +825,14 @@ class SpectateCard(ExpandGroupSettingCard):
         super().__init__(Icon.EYES, title, content, parent)
 
         self.inputWidget = QWidget(self.view)
-        self.inputLayout = QHBoxLayout(self.inputWidget)
+        self.inputLayout = QGridLayout(self.inputWidget)
 
         self.summonerNameLabel = QLabel(
-            self.tr("Summoners's name you want to spectate:"))
+            self.tr("Summoner's name you want to spectate:"))
         self.lineEdit = LineEdit()
+
+        self.spectateTypeLabel = QLabel(self.tr("Method:"))
+        self.spectateTypeComboBox = ComboBox()
 
         self.buttonWidget = QWidget(self.view)
         self.buttonLayout = QHBoxLayout(self.buttonWidget)
@@ -837,13 +842,19 @@ class SpectateCard(ExpandGroupSettingCard):
         self.__initWidget()
 
     def __initLayout(self):
-        self.inputLayout.setSpacing(19)
+        self.inputLayout.setVerticalSpacing(19)
         self.inputLayout.setAlignment(Qt.AlignTop)
         self.inputLayout.setContentsMargins(48, 18, 44, 18)
 
         self.inputLayout.addWidget(
-            self.summonerNameLabel, alignment=Qt.AlignLeft)
-        self.inputLayout.addWidget(self.lineEdit, alignment=Qt.AlignRight)
+            self.summonerNameLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.lineEdit, 0, 1, alignment=Qt.AlignRight)
+        self.inputLayout.addWidget(
+            self.spectateTypeLabel, 1, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.spectateTypeComboBox, 1, 1, alignment=Qt.AlignRight)
+
         self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
 
         self.buttonLayout.setContentsMargins(48, 18, 44, 18)
@@ -863,6 +874,10 @@ class SpectateCard(ExpandGroupSettingCard):
 
         self.button.setMinimumWidth(100)
         self.button.setEnabled(False)
+
+        self.spectateTypeComboBox.addItem("LCU API", userData="LCU")
+        self.spectateTypeComboBox.addItem(self.tr("CMD"), userData="CMD")
+        self.spectateTypeComboBox.setMinimumWidth(100)
 
         self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
         self.button.clicked.connect(self.__onButtonClicked)
@@ -884,11 +899,14 @@ class SpectateCard(ExpandGroupSettingCard):
             text = self.lineEdit.text()
             text = text.replace('\u2066', '').replace('\u2069', '')
 
-            res = await connector.spectateDirectly(text)
-            pwd = os.getcwd()
-            os.chdir(f"{cfg.get(cfg.lolFolder)[0]}/../Game")
-            subprocess.Popen(['League of Legends.exe', f'{res}'])
-            os.chdir(pwd)
+            if self.spectateTypeComboBox.currentData() == 'LCU':
+                await connector.spectate(text)
+            else:
+                res = await connector.spectateDirectly(text)
+                pwd = os.getcwd()
+                os.chdir(f"{cfg.get(cfg.lolFolder)[0]}/../Game")
+                subprocess.Popen(['League of Legends.exe', f'{res}'])
+                os.chdir(pwd)
 
         except SummonerNotFound:
             info('error', self.tr("Summoner not found"),
