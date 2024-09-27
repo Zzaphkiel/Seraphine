@@ -3,6 +3,7 @@ import inspect
 import json
 import os
 import re
+import subprocess
 import threading
 import time
 from asyncio import CancelledError
@@ -987,7 +988,10 @@ class LolClientConnector(QObject):
                   f" {credentials['gameId']}"
                   f" {self.server}")
 
-        return params
+        pwd = os.getcwd()
+        os.chdir(f"{cfg.get(cfg.lolFolder)[0]}/../Game")
+        subprocess.Popen(['League of Legends.exe', f'{params}'])
+        os.chdir(pwd)
 
     async def dodge(self):
         data = {
