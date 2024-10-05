@@ -230,9 +230,11 @@ def __getStyleSheetColor(color: QColor):
     r, g, b, a = color.getRgb()
 
     f1, f2 = 1.1, 0.9
-    r1, g1, b1 = min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)
-    r2, g2, b2 = min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)
-    a1, a2 = min(a + 25, 255), min(a + 50, 255)
+
+    type_conversion = lambda x: int(x)
+    r1, g1, b1 = map(type_conversion, [min(r * f1, 255), min(g * f1, 255), min(b * f1, 255)])
+    r2, g2, b2 = map(type_conversion, [min(r * f2, 255), min(g * f2, 255), min(b * f2, 255)])
+    a1, a2 = map(type_conversion, [min(a + 25, 255), min(a + 50, 255)])
 
     c1 = QColor.fromRgb(r1, g1, b1, a1)
     c2 = QColor.fromRgb(r2, g2, b2, a2)
