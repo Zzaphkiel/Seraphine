@@ -43,7 +43,7 @@ class CareerInterface(SeraphineInterface):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.currentSummonerName = None
+        self.loginSummonerPuuid = None
         self.puuid = None
         self.showTagLine = False
         self.recentTeammatesInfo = None
@@ -342,7 +342,7 @@ class CareerInterface(SeraphineInterface):
             self.__onRecentTeammatesButtonClicked)
 
     async def updateNameIconExp(self, info):
-        if not self.isCurrentSummoner():
+        if not self.isLoginSummoner():
             return
 
         name = info.get("gameName") or info['displayName']
@@ -454,7 +454,7 @@ class CareerInterface(SeraphineInterface):
             ]]
             self.copyButton.setEnabled(False)
 
-        if not self.isCurrentSummoner():
+        if not self.isLoginSummoner():
             for i in range(0, 2):
                 for j in [1, 2, 4]:
                     self.rankInfo[i][j] = '--'
@@ -482,7 +482,7 @@ class CareerInterface(SeraphineInterface):
 
         self.__updateGameInfo()
 
-        self.backToMeButton.setEnabled(not self.isCurrentSummoner())
+        self.backToMeButton.setEnabled(not self.isLoginSummoner())
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
@@ -555,14 +555,19 @@ class CareerInterface(SeraphineInterface):
         self.gameInfoLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def setCurrentSummonerName(self, name):
-        self.currentSummonerName = name
+    def setLoginSummonerPuuid(self, name):
+        self.loginSummonerPuuid = name
 
     def getSummonerName(self):
-        return self.name.text() if not self.showTagLine else f'{self.name.text()}{self.tagLineLabel.text()}'
+        if self.showTagLine:
+            res = f'{self.name.text()}{self.tagLineLabel.text()}'
+        else:
+            res = self.name.text()
 
-    def isCurrentSummoner(self):
-        return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
+        return res
+
+    def isLoginSummoner(self):
+        return self.loginSummonerPuuid == None or self.loginSummonerPuuid == self.puuid
 
     def __onRecentTeammatesButtonClicked(self):
         view = TeammatesFlyOut()

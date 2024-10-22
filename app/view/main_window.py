@@ -460,7 +460,7 @@ class MainWindow(FluentWindow):
         summoner = await connector.getCurrentSummoner()
         self.currentSummoner = summoner
         name = summoner.get("gameName") or summoner['displayName']
-        self.careerInterface.setCurrentSummonerName(name)
+        self.careerInterface.setLoginSummonerPuuid(summoner['puuid'])
 
         asyncio.create_task(self.careerInterface.updateInterface(
             summoner=summoner))
@@ -566,7 +566,7 @@ class MainWindow(FluentWindow):
 
         self.isClientProcessRunning = False
         self.currentSummoner = None
-        self.careerInterface.setCurrentSummonerName(None)
+        self.careerInterface.setLoginSummonerPuuid(None)
 
         await self.__updateAvatarIconName()
 
