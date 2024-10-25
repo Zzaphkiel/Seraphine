@@ -176,7 +176,7 @@ Seraphine is not endorsed by Riot Games and does not reflect the views or opinio
       <img src="https://contrib.rocks/image?repo=Zzaphkiel/Seraphine">
     </a>
   </p>
-- 感谢 [大乱斗之家](jddld.com) 为我们提供大乱斗 Buff 信息服务支持。
+- 感谢 [大乱斗之家](http://www.jddld.com) 为我们提供大乱斗 Buff 信息服务支持。
 - 感谢 [JetBrains](https://www.jetbrains.com.cn/) 为我们提供的免费许可证。
   
   Particularly, thanks to [JetBrains](https://www.jetbrains.com.cn/) for the free [PyCharm](https://www.jetbrains.com.cn/pycharm/) license.
