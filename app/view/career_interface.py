@@ -201,7 +201,7 @@ class CareerInterface(SeraphineInterface):
         self.nameLevelVLayout.addSpacerItem(
             QSpacerItem(1, 25, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
-        self.recentInfoHLayout.setSpacing(20)
+        self.recentInfoHLayout.setSpacing(15)
         self.recentInfoHLayout.addWidget(self.recent20GamesLabel,
                                          alignment=Qt.AlignCenter)
         self.recentInfoHLayout.addWidget(self.winsLabel,
@@ -467,16 +467,22 @@ class CareerInterface(SeraphineInterface):
             )
             self.winsLabel.setText(f"{self.tr('Wins:')} {games['wins']}")
             self.lossesLabel.setText(f"{self.tr('Losses:')} {games['losses']}")
-            self.kdaLabel.setText(
-                f"{self.tr('KDA:')} {games['kills']} / {games['deaths']} / {games['assists']}"
-            )
+
+            kda = f"{self.tr('KDA:')} {games['kills']} / {games['deaths']} / {games['assists']} "
+            kda += self.tr("(")
+            kda += f"{(games['kills'] + games['assists']) / (1 if games['deaths'] == 0 else games['deaths']):.1f}"
+            kda += self.tr(")")
+
+            self.kdaLabel.setText(kda)
+
         else:
             self.recent20GamesLabel.setText(
                 f"{self.tr('Recent matches')} {self.tr('(Last')} None {self.tr('games)')}"
             )
             self.winsLabel.setText(f"{self.tr('Wins:')} 0")
             self.lossesLabel.setText(f"{self.tr('Losses:')} 0")
-            self.kdaLabel.setText(f"{self.tr('KDA:')} 0 / 0 / 0")
+            self.kdaLabel.setText(
+                f"{self.tr('KDA:')} 0 / 0 / 0 " + self.tr("(") + "0" + self.tr(")"))
 
         self.games = games
 

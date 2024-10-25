@@ -25,14 +25,14 @@ TAG = "Connector"
 
 class PastRequest:
     def __init__(self, func: str, params_dict, kwargs):
-        self.func = func  # 此处需要func.__name__ 而不是func本身的obj
+        self.func = func  # 此处需要 func.__name__ 而不是 func 本身的 obj
         self.params_dict = params_dict
         self.kwargs = kwargs
         self.response = None
         self.timestamp = time.time()
 
     def __str__(self):
-        # 如果是None的成员, 不会被打印; 没打印response就是没有响应;
+        # 如果是 None 的成员, 不会被打印; 没打印 response 就是没有响应;
         attrs = [f"{k}={v!r}" for k, v in self.__dict__.items()
                  if v is not None]
         return f"PastRequest({', '.join(attrs)})"
@@ -68,7 +68,7 @@ def retry(count=5, retry_sep=0):
 
             # 构建参数字典，将参数名与对应的实参值一一对应
             params_dict = {param: arg for param,
-            arg in zip(param_names, tmp_args)}
+                           arg in zip(param_names, tmp_args)}
 
             logger.debug(f"args = {params_dict}|kwargs = {kwargs}", TAG)
             # logger.debug(f"args = {args[1:]}|kwargs = {kwargs}", TAG)
@@ -87,10 +87,10 @@ def retry(count=5, retry_sep=0):
                     async with connector.semaphore:
                         res = await func(*args, **kwargs)
                 except CancelledError:
-                    # Fix: 使用task.cancel()偶尔会停不下task -- By Hpero4
-                    #   在调用cancel()时, 会从调用栈的最底抛出CancelledError, 最终传递到loop终止task;
-                    #   由于CancelledError是BaseException的子类,
-                    #   若task恰好跑到被retry装饰的函数中, 会被retry中的BaseException捕获并吞掉, 从而无事发生
+                    # Fix: 使用 task.cancel() 偶尔会停不下 task -- By Hpero4
+                    #   在调用 cancel() 时, 会从调用栈的最底抛出 CancelledError, 最终传递到 loop 终止 task;
+                    #   由于 CancelledError 是 BaseException 的子类,
+                    #   若 task 恰好跑到被 retry 装饰的函数中, 会被 retry 中的 BaseException 捕获并吞掉, 从而无事发生
                     raise
                 except BaseException as e:
                     time.sleep(retry_sep)
@@ -175,6 +175,7 @@ class LcuWebSocket():
         address = f'wss://127.0.0.1:{self.port}/'
         self.ws = await self.session.ws_connect(address, ssl=False)
 
+        # see: https://hextechdocs.dev/getting-started-with-the-lcu-websocket/
         for event in self.events:
             await self.ws.send_json([5, event])
 

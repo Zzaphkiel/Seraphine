@@ -739,6 +739,16 @@ If champions set by lane are not available, default settings will be used.</sour
         <source>The server returned abnormal content.</source>
         <translation>服务器返回了不正常的内容</translation>
     </message>
+    <message>
+        <location filename="../../view/career_interface.py" line="484"/>
+        <source>(</source>
+        <translation>（</translation>
+    </message>
+    <message>
+        <location filename="../../view/career_interface.py" line="484"/>
+        <source>)</source>
+        <translation>）</translation>
+    </message>
 </context>
 <context>
     <name>ChampionPerksWidget</name>
@@ -805,22 +815,22 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChampionsCard</name>
     <message>
-        <location filename="../../view/career_interface.py" line="715"/>
+        <location filename="../../view/career_interface.py" line="726"/>
         <source>Total: </source>
         <translation>总：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="716"/>
+        <location filename="../../view/career_interface.py" line="727"/>
         <source>Wins: </source>
         <translation>胜：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="717"/>
+        <location filename="../../view/career_interface.py" line="728"/>
         <source>Losses: </source>
         <translation>负：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="718"/>
+        <location filename="../../view/career_interface.py" line="729"/>
         <source>Win Rate: </source>
         <translation>胜率：</translation>
     </message>
@@ -828,22 +838,22 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChangeClientMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="251"/>
+        <location filename="../../components/message_box.py" line="252"/>
         <source>Reconnect</source>
         <translation>重新连接</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="253"/>
+        <location filename="../../components/message_box.py" line="254"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="276"/>
+        <location filename="../../components/message_box.py" line="277"/>
         <source>Change client</source>
         <translation>更改连接的客户端</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="279"/>
+        <location filename="../../components/message_box.py" line="280"/>
         <source>Please select the target LOL client:</source>
         <translation>请选择目标客户端：</translation>
     </message>
@@ -853,12 +863,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">[当前]</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="286"/>
+        <location filename="../../components/message_box.py" line="287"/>
         <source>PID: </source>
         <translation>进程 ID：</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="286"/>
+        <location filename="../../components/message_box.py" line="287"/>
         <source>, </source>
         <translation>，</translation>
     </message>
@@ -868,7 +878,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">服务器：</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="289"/>
+        <location filename="../../components/message_box.py" line="290"/>
         <source>(current)</source>
         <translation>（当前连接）</translation>
     </message>
@@ -881,17 +891,17 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChangeDpiMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="494"/>
+        <location filename="../../components/message_box.py" line="495"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="497"/>
+        <location filename="../../components/message_box.py" line="498"/>
         <source>Window is too big!</source>
         <translation>窗口太大了！</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="498"/>
+        <location filename="../../components/message_box.py" line="499"/>
         <source>We will reset your window size, please restart Seraphine.</source>
         <translation>我们将会重新设置你的窗口大小，请重启 Seraphine</translation>
     </message>
@@ -956,12 +966,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ExceptionMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="331"/>
+        <location filename="../../components/message_box.py" line="332"/>
         <source>Copy to clipboard and exit</source>
         <translation>复制错误信息并退出</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="332"/>
+        <location filename="../../components/message_box.py" line="333"/>
         <source>Exit</source>
         <translation>直接退出</translation>
     </message>
@@ -1595,17 +1605,17 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>MultiChampionSelectMsgBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="348"/>
+        <location filename="../../components/message_box.py" line="349"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="349"/>
+        <location filename="../../components/message_box.py" line="350"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="351"/>
+        <location filename="../../components/message_box.py" line="352"/>
         <source>Choose Champions</source>
         <translation>选择英雄</translation>
     </message>
@@ -1613,12 +1623,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>MultiPathSettingMsgBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="392"/>
+        <location filename="../../components/message_box.py" line="393"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="393"/>
+        <location filename="../../components/message_box.py" line="394"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -1628,7 +1638,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">设置客户端路径和顺序</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="395"/>
+        <location filename="../../components/message_box.py" line="396"/>
         <source>Set LOL Client path</source>
         <translation>设置客户端路径和顺序</translation>
     </message>
@@ -1704,12 +1714,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>NoticeMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="192"/>
+        <location filename="../../components/message_box.py" line="193"/>
         <source>Ok</source>
         <translation>知道了</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="178"/>
+        <location filename="../../components/message_box.py" line="179"/>
         <source>Notice</source>
         <translation>公告</translation>
     </message>
@@ -2880,22 +2890,22 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SplashesMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="445"/>
+        <location filename="../../components/message_box.py" line="447"/>
         <source>Save</source>
         <translation>保存图片</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="475"/>
+        <location filename="../../components/message_box.py" line="476"/>
         <source>Choose Path</source>
         <translation>选择路径</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="456"/>
+        <location filename="../../components/message_box.py" line="458"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="457"/>
+        <location filename="../../components/message_box.py" line="459"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -3084,17 +3094,17 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>TeammateInfoBar</name>
     <message>
-        <location filename="../../view/career_interface.py" line="657"/>
+        <location filename="../../view/career_interface.py" line="668"/>
         <source>Total: </source>
         <translation>总：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="659"/>
+        <location filename="../../view/career_interface.py" line="670"/>
         <source>Wins: </source>
         <translation>胜：</translation>
     </message>
     <message>
-        <location filename="../../view/career_interface.py" line="661"/>
+        <location filename="../../view/career_interface.py" line="672"/>
         <source>Losses: </source>
         <translation>负：</translation>
     </message>
@@ -3102,47 +3112,47 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>ToolsTranslator</name>
     <message>
-        <location filename="../../lol/tools.py" line="30"/>
+        <location filename="../../lol/tools.py" line="33"/>
         <source>TOP</source>
         <translation>上路</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="31"/>
+        <location filename="../../lol/tools.py" line="34"/>
         <source>JUG</source>
         <translation>打野</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="32"/>
+        <location filename="../../lol/tools.py" line="35"/>
         <source>MID</source>
         <translation>中路</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="33"/>
+        <location filename="../../lol/tools.py" line="36"/>
         <source>BOT</source>
         <translation>下路</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="34"/>
+        <location filename="../../lol/tools.py" line="37"/>
         <source>SUP</source>
         <translation>辅助</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="44"/>
+        <location filename="../../lol/tools.py" line="47"/>
         <source>Ranked Solo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="45"/>
+        <location filename="../../lol/tools.py" line="48"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="47"/>
+        <location filename="../../lol/tools.py" line="50"/>
         <source>Unranked</source>
         <translation>未定级</translation>
     </message>
     <message>
-        <location filename="../../lol/tools.py" line="48"/>
+        <location filename="../../lol/tools.py" line="51"/>
         <source>Unknown</source>
         <translation>未知</translation>
     </message>
@@ -3150,7 +3160,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>UpdateMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="58"/>
+        <location filename="../../components/message_box.py" line="59"/>
         <source>Update detected</source>
         <translation>发现新版本</translation>
     </message>
@@ -3160,12 +3170,12 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">不再提醒</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="61"/>
+        <location filename="../../components/message_box.py" line="62"/>
         <source>current: v</source>
         <translation>当前版本：v</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="61"/>
+        <location filename="../../components/message_box.py" line="62"/>
         <source>new: v</source>
         <translation>新版本：v</translation>
     </message>
@@ -3175,12 +3185,12 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">立即下载 🤩</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="34"/>
+        <location filename="../../components/message_box.py" line="35"/>
         <source>Ok</source>
         <translation>知道了</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="61"/>
+        <location filename="../../components/message_box.py" line="62"/>
         <source>, </source>
         <translation>，</translation>
     </message>
@@ -3195,22 +3205,22 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">取消</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="32"/>
+        <location filename="../../components/message_box.py" line="33"/>
         <source>Update and Restart</source>
         <translation>自动下载安装（可能被拦截）</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="80"/>
+        <location filename="../../components/message_box.py" line="81"/>
         <source>Updating is only available on releases version</source>
         <translation>一键更新功能仅在发布版本可用</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="144"/>
+        <location filename="../../components/message_box.py" line="145"/>
         <source>Downloading finished, decompressing...</source>
         <translation>下载成功，正在解压缩...</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="35"/>
+        <location filename="../../components/message_box.py" line="36"/>
         <source>Manually Download</source>
         <translation>转到浏览器手动下载 🤩</translation>
     </message>
@@ -3218,17 +3228,17 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>WaitingForLolMessageBox</name>
     <message>
-        <location filename="../../components/message_box.py" line="199"/>
+        <location filename="../../components/message_box.py" line="200"/>
         <source>Connect To Client</source>
         <translation>连接客户端</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="201"/>
+        <location filename="../../components/message_box.py" line="202"/>
         <source>Exit Seraphine</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="218"/>
+        <location filename="../../components/message_box.py" line="219"/>
         <source>Tasklist is not available</source>
         <translation>我们无法自动连接至 LOL 客户端 😱</translation>
     </message>
@@ -3245,7 +3255,7 @@ when they are used by Seraphine, which will cost more time</source>
         <translation type="obsolete">请在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>
     <message>
-        <location filename="../../components/message_box.py" line="221"/>
+        <location filename="../../components/message_box.py" line="222"/>
         <source>Please clicked &quot;Connect To Client&quot; button manually when LOL launched completely</source>
         <translation>请在英雄联盟客户端完全启动后，点击 “连接客户端” 按钮</translation>
     </message>
