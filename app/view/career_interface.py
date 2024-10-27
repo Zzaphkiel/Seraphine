@@ -78,7 +78,7 @@ class CareerInterface(SeraphineInterface):
             self.tr('games)'))
         self.winsLabel = ColorLabel(self.tr("Wins:") + " None", 'win')
         self.lossesLabel = ColorLabel(self.tr("Losses:") + " None", 'lose')
-        self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
+        self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None" + self.tr("(") + "0" + self.tr(")"))
         self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
         self.filterComboBox = ComboBox()
@@ -555,8 +555,11 @@ class CareerInterface(SeraphineInterface):
         )
         self.winsLabel.setText(f"{self.tr('Wins:')} {wins}")
         self.lossesLabel.setText(f"{self.tr('Losses:')} {losses}")
-        self.kdaLabel.setText(
-            f"{self.tr('KDA:')} {kills} / {deaths} / {assists}")
+        kda = f"{self.tr('KDA:')} {kills} / {deaths} / {assists}"
+        kda += self.tr("(")
+        kda += f"{(kills + assists) / (1 if deaths == 0 else deaths):.1f}"
+        kda += self.tr(")")
+        self.kdaLabel.setText(kda)
 
         self.gameInfoLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -645,8 +648,8 @@ class TeammatesFlyOut(FlyoutViewBase):
         spacing = self.infopageVBoxLayout.spacing()
 
         if length < 5:
-            self.infopageVBoxLayout.addStretch(5-length)
-            self.infopageVBoxLayout.addSpacing(spacing * (5-length))
+            self.infopageVBoxLayout.addStretch(5 - length)
+            self.infopageVBoxLayout.addSpacing(spacing * (5 - length))
 
     def setLoadingPageEnabled(self, enable):
         index = 0 if enable else 1
