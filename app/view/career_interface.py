@@ -43,7 +43,7 @@ class CareerInterface(SeraphineInterface):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.currentSummonerName = None
+        self.loginSummonerPuuid = None
         self.puuid = None
         self.showTagLine = False
         self.recentTeammatesInfo = None
@@ -78,7 +78,7 @@ class CareerInterface(SeraphineInterface):
             self.tr('games)'))
         self.winsLabel = ColorLabel(self.tr("Wins:") + " None", 'win')
         self.lossesLabel = ColorLabel(self.tr("Losses:") + " None", 'lose')
-        self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None")
+        self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None" + self.tr("(") + "0" + self.tr(")"))
         self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
         self.filterComboBox = ComboBox()
@@ -201,7 +201,7 @@ class CareerInterface(SeraphineInterface):
         self.nameLevelVLayout.addSpacerItem(
             QSpacerItem(1, 25, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
-        self.recentInfoHLayout.setSpacing(20)
+        self.recentInfoHLayout.setSpacing(15)
         self.recentInfoHLayout.addWidget(self.recent20GamesLabel,
                                          alignment=Qt.AlignCenter)
         self.recentInfoHLayout.addWidget(self.winsLabel,
@@ -342,7 +342,7 @@ class CareerInterface(SeraphineInterface):
             self.__onRecentTeammatesButtonClicked)
 
     async def updateNameIconExp(self, info):
-        if not self.isCurrentSummoner():
+        if not self.isLoginSummoner():
             return
 
         name = info.get("gameName") or info['displayName']
@@ -454,7 +454,7 @@ class CareerInterface(SeraphineInterface):
             ]]
             self.copyButton.setEnabled(False)
 
-        if not self.isCurrentSummoner():
+        if not self.isLoginSummoner():
             for i in range(0, 2):
                 for j in [1, 2, 4]:
                     self.rankInfo[i][j] = '--'
@@ -467,22 +467,28 @@ class CareerInterface(SeraphineInterface):
             )
             self.winsLabel.setText(f"{self.tr('Wins:')} {games['wins']}")
             self.lossesLabel.setText(f"{self.tr('Losses:')} {games['losses']}")
-            self.kdaLabel.setText(
-                f"{self.tr('KDA:')} {games['kills']} / {games['deaths']} / {games['assists']}"
-            )
+
+            kda = f"{self.tr('KDA:')} {games['kills']} / {games['deaths']} / {games['assists']} "
+            kda += self.tr("(")
+            kda += f"{(games['kills'] + games['assists']) / (1 if games['deaths'] == 0 else games['deaths']):.1f}"
+            kda += self.tr(")")
+
+            self.kdaLabel.setText(kda)
+
         else:
             self.recent20GamesLabel.setText(
                 f"{self.tr('Recent matches')} {self.tr('(Last')} None {self.tr('games)')}"
             )
             self.winsLabel.setText(f"{self.tr('Wins:')} 0")
             self.lossesLabel.setText(f"{self.tr('Losses:')} 0")
-            self.kdaLabel.setText(f"{self.tr('KDA:')} 0 / 0 / 0")
+            self.kdaLabel.setText(
+                f"{self.tr('KDA:')} 0 / 0 / 0 " + self.tr("(") + "0" + self.tr(")"))
 
         self.games = games
 
         self.__updateGameInfo()
 
-        self.backToMeButton.setEnabled(not self.isCurrentSummoner())
+        self.backToMeButton.setEnabled(not self.isLoginSummoner())
 
         if 'champions' in info:
             self.championsCard.updateChampions(info['champions'])
@@ -549,20 +555,28 @@ class CareerInterface(SeraphineInterface):
         )
         self.winsLabel.setText(f"{self.tr('Wins:')} {wins}")
         self.lossesLabel.setText(f"{self.tr('Losses:')} {losses}")
-        self.kdaLabel.setText(
-            f"{self.tr('KDA:')} {kills} / {deaths} / {assists}")
+        kda = f"{self.tr('KDA:')} {kills} / {deaths} / {assists}"
+        kda += self.tr("(")
+        kda += f"{(kills + assists) / (1 if deaths == 0 else deaths):.1f}"
+        kda += self.tr(")")
+        self.kdaLabel.setText(kda)
 
         self.gameInfoLayout.addSpacerItem(
             QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
-    def setCurrentSummonerName(self, name):
-        self.currentSummonerName = name
+    def setLoginSummonerPuuid(self, name):
+        self.loginSummonerPuuid = name
 
     def getSummonerName(self):
-        return self.name.text() if not self.showTagLine else f'{self.name.text()}{self.tagLineLabel.text()}'
+        if self.showTagLine:
+            res = f'{self.name.text()}{self.tagLineLabel.text()}'
+        else:
+            res = self.name.text()
 
-    def isCurrentSummoner(self):
-        return self.currentSummonerName == None or self.currentSummonerName == self.name.text()
+        return res
+
+    def isLoginSummoner(self):
+        return self.loginSummonerPuuid == None or self.loginSummonerPuuid == self.puuid
 
     def __onRecentTeammatesButtonClicked(self):
         view = TeammatesFlyOut()
@@ -634,8 +648,8 @@ class TeammatesFlyOut(FlyoutViewBase):
         spacing = self.infopageVBoxLayout.spacing()
 
         if length < 5:
-            self.infopageVBoxLayout.addStretch(5-length)
-            self.infopageVBoxLayout.addSpacing(spacing * (5-length))
+            self.infopageVBoxLayout.addStretch(5 - length)
+            self.infopageVBoxLayout.addSpacing(spacing * (5 - length))
 
     def setLoadingPageEnabled(self, enable):
         index = 0 if enable else 1

@@ -22,6 +22,7 @@ from app.common.update import runUpdater
 from app.lol.connector import connector
 from app.components.multi_champion_select import MultiChampionSelectWidget
 from app.components.multi_lol_path_setting import PathDraggableWidget
+from app.components.champion_icon_widget import RoundedLabel
 
 
 class UpdateMessageBox(MessageBoxBase):
@@ -433,11 +434,13 @@ class SplashesMessageBox(MessageBoxBase):
 
         self.skinList = skinList
 
-        self.splashesImg = QLabel(self)
+        self.splashesImg = RoundedLabel(borderWidth=0, radius=6.0, parent=self)
+        self.splashesImg.setFixedSize(1020, 565)
         self.splashesNameLabel = QLabel(self)
         self.splashesNameLabel.setFont(QFont('Microsoft YaHei', 13))
         self.pager = HorizontalPipsPager(self)
-        self.pager.setPreviousButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
+        self.pager.setPreviousButtonDisplayMode(
+            PipsScrollButtonDisplayMode.ALWAYS)
         self.pager.setNextButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
         self.pager.setPageNumber(len(skinList))
 
@@ -452,6 +455,9 @@ class SplashesMessageBox(MessageBoxBase):
         self.buttonLayout.addWidget(self.saveButton, 1, Qt.AlignVCenter)
         self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignVCenter)
 
+        self.yesButton.setText(self.tr("OK"))
+        self.cancelButton.setText(self.tr("Cancel"))
+
         self.pager.currentIndexChanged.connect(self.__onChangeSplashes)
         self.saveButton.clicked.connect(self.__onSaveSplashes)
 
@@ -463,8 +469,7 @@ class SplashesMessageBox(MessageBoxBase):
         self.splashesNameLabel.setText(skinItem[0])
 
         url = await connector.getChampionSplashes(skinItem[1], False)
-        img = QPixmap(url).scaled(1020, 565)
-        self.splashesImg.setPixmap(img)
+        self.splashesImg.setPicture(url)
 
     @asyncSlot()
     async def __onSaveSplashes(self):

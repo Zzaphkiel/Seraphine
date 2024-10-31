@@ -357,10 +357,6 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
         if contentId == None:
             await connector.setProfileBackground(self.chosenSkinId)
-            InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"), orient=Qt.Vertical,
-                            isClosable=True,
-                            position=InfoBarPosition.TOP_RIGHT, duration=5000,
-                            parent=self.window().auxiliaryFuncInterface)
             return
 
         self.skinId = self.chosenSkinId

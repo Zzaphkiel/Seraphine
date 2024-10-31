@@ -1,6 +1,7 @@
 import itertools
 import time
 import ctypes
+from copy import deepcopy
 
 import asyncio
 from PyQt5.QtCore import QObject
@@ -9,6 +10,8 @@ from .exceptions import SummonerRankInfoNotFound
 from ..common.config import cfg, Language
 from ..lol.connector import connector
 from ..common.signals import signalBus
+
+
 SERVERS_NAME = {
     "NJ100": "联盟一区", "GZ100": "联盟二区", "CQ100": "联盟三区", "TJ100": "联盟四区", "TJ101": "联盟五区",
     "HN10": "黑色玫瑰", "HN1": "艾欧尼亚", "BGP2": "峡谷之巅"
@@ -1471,8 +1474,6 @@ async def autoPick(data, selection: ChampionSelection):
 
     localPlayerCellId = data['localPlayerCellId']
 
-    print(f"{localPlayerCellId = }")
-
     for player in data['myTeam']:
         if player["cellId"] != localPlayerCellId:
             continue
@@ -1493,15 +1494,15 @@ async def autoPick(data, selection: ChampionSelection):
     pos = pos.get('assignedPosition')
 
     if pos == 'top':
-        candidates = cfg.get(cfg.autoSelectChampionTop)
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionTop))
     elif pos == 'jungle':
-        candidates = cfg.get(cfg.autoSelectChampionJug)
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionJug))
     elif pos == 'middle':
-        candidates = cfg.get(cfg.autoSelectChampionMid)
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionMid))
     elif pos == 'bottom':
-        candidates = cfg.get(cfg.autoSelectChampionBot)
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionBot))
     elif pos == 'utility':
-        candidates = cfg.get(cfg.autoSelectChampionSup)
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionSup))
     else:
         candidates = []
 
@@ -1509,15 +1510,11 @@ async def autoPick(data, selection: ChampionSelection):
 
     candidates = [x for x in candidates if x not in bans]
 
-    print(f"{candidates = }")
-
     if not candidates:
         selection.isChampionPicked = True
         return
 
     championId = candidates[0]
-
-    print(f"{championId = }")
 
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
@@ -1576,15 +1573,15 @@ async def autoBan(data, selection: ChampionSelection):
                 pos = pos.get('assignedPosition')
 
                 if pos == 'top':
-                    candidates = cfg.get(cfg.autoBanChampionTop)
+                    candidates = deepcopy(cfg.get(cfg.autoBanChampionTop))
                 elif pos == 'jungle':
-                    candidates = cfg.get(cfg.autoBanChampionJug)
+                    candidates = deepcopy(cfg.get(cfg.autoBanChampionJug))
                 elif pos == 'middle':
-                    candidates = cfg.get(cfg.autoBanChampionMid)
+                    candidates = deepcopy(cfg.get(cfg.autoBanChampionMid))
                 elif pos == 'bottom':
-                    candidates = cfg.get(cfg.autoBanChampionBot)
+                    candidates = deepcopy(cfg.get(cfg.autoBanChampionBot))
                 elif pos == 'utility':
-                    candidates = cfg.get(cfg.autoBanChampionSup)
+                    candidates = deepcopy(cfg.get(cfg.autoBanChampionSup))
                 else:
                     candidates = []
 
