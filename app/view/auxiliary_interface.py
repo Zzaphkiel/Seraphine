@@ -1,6 +1,5 @@
 import os
 import stat
-import subprocess
 import threading
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
@@ -898,11 +897,7 @@ class SpectateCard(ExpandGroupSettingCard):
             if self.spectateTypeComboBox.currentData() == 'LCU':
                 await connector.spectate(text)
             else:
-                res = await connector.spectateDirectly(text)
-                pwd = os.getcwd()
-                os.chdir(f"{cfg.get(cfg.lolFolder)[0]}/../Game")
-                subprocess.Popen(['League of Legends.exe', f'{res}'])
-                os.chdir(pwd)
+                await connector.spectateDirectly(text)
 
         except SummonerNotFound:
             info('error', self.tr("Summoner not found"),
