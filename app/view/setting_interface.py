@@ -71,6 +71,13 @@ class SettingInterface(SeraphineInterface):
             self.tr("Show OP.GG window automatically when champion selection starts"),
             cfg.autoShowOpgg)
 
+        self.autoClearGameinfoCard = SwitchSettingCard(
+            Icon.ERASER, self.tr("Clear Game Information interface"),
+            self.tr(
+                "Clear Game Information interface automatically when back to lobby"),
+            cfg.autoClearGameinfo
+        )
+
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
 
@@ -236,15 +243,15 @@ class SettingInterface(SeraphineInterface):
         self.functionGroup.addSettingCard(self.apiConcurrencyCount)
         self.functionGroup.addSettingCard(self.careerGamesCount)
         self.functionGroup.addSettingCard(self.gameInfoFilterCard)
-        self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
+        self.functionGroup.addSettingCard(self.autoClearGameinfoCard)
         self.functionGroup.addSettingCard(self.autoShowOpggCard)
+        self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
-        # self.generalGroup.addSettingCard(self.enableStartWithComputer)
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
-        # self.generalGroup.addSettingCard(self.gameStartMinimizeCard)  # 该功能不再支持, 隐藏它 -- By Hpero4
+
         self.logGroup.addSettingCard(self.logLevelCard)
         self.logGroup.addSettingCard(self.viewLogCard)
 

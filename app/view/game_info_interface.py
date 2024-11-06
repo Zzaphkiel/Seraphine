@@ -134,7 +134,7 @@ class GameInfoInterface(SeraphineInterface):
                     view.updateAramInfo(
                         AramBuff.getInfoByChampionId(newChampionId))
 
-    async def clear(self):
+    def clear(self):
         self.allyChampions = {}
         self.allyOrder = []
 
@@ -318,8 +318,8 @@ class TeamSummoners(QFrame):
             item = self.vBoxLayout.itemAt(i)
             self.vBoxLayout.removeItem(item)
 
-            if item.widget():
-                item.widget().deleteLater()
+            if widget := item.widget():
+                widget.deleteLater()
 
         self.items = {}
 

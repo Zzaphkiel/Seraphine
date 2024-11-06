@@ -63,6 +63,7 @@ class Icon(FluentIconBase, Enum):
     QUESTION_CIRCLE = 'QuestionCircle'
     LEFTARROW = 'LeftArrow'
     WINDOW = "Window"
+    ERASER = "Eraser"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

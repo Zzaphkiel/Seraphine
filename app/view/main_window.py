@@ -945,7 +945,8 @@ class MainWindow(FluentWindow):
         self.checkAndSwitchTo(self.gameInfoInterface)
 
     async def __onGameEnd(self):
-        asyncio.create_task(self.gameInfoInterface.clear())
+        if cfg.get(cfg.autoClearGameinfo):
+            self.gameInfoInterface.clear()
 
     def __checkWindowSize(self):
         if (dpi := self.devicePixelRatioF()) == 1.0:

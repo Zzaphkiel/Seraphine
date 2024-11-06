@@ -155,6 +155,9 @@ class Config(QConfig):
     opggPosition = ConfigItem("Functions", "OpggPosition", "MID", OptionsValidator([
         "TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]))
 
+    autoClearGameinfo = ConfigItem(
+        "Functions", "AutoClearGameinfo", True, BoolValidator())
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
