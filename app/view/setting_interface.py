@@ -72,10 +72,10 @@ class SettingInterface(SeraphineInterface):
             cfg.autoShowOpgg)
 
         self.autoClearGameinfoCard = SwitchSettingCard(
-            Icon.ERASER, self.tr("Clear Game Information interface"),
+            Icon.ATTACHTEXT, self.tr("Reserve Game Information interface"),
             self.tr(
-                "Clear Game Information interface automatically when back to lobby"),
-            cfg.autoClearGameinfo
+                "Reserve Game Information interface until the next champion selection starts"),
+            cfg.enableReserveGameinfo
         )
 
         self.generalGroup = SettingCardGroup(self.tr("General"),

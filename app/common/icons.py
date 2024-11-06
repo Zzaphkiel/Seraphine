@@ -64,6 +64,7 @@ class Icon(FluentIconBase, Enum):
     LEFTARROW = 'LeftArrow'
     WINDOW = "Window"
     ERASER = "Eraser"
+    ATTACHTEXT = "AttachText"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

@@ -1398,42 +1398,42 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>游戏大厅</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="772"/>
+        <location filename="../../view/main_window.py" line="770"/>
         <source>Selecting Champions</source>
         <translation>英雄选择</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="790"/>
+        <location filename="../../view/main_window.py" line="788"/>
         <source>Gaming</source>
         <translation>游戏中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="797"/>
+        <location filename="../../view/main_window.py" line="795"/>
         <source>Waiting for status</source>
         <translation>等待游戏结果</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="799"/>
+        <location filename="../../view/main_window.py" line="797"/>
         <source>End of game</source>
         <translation>游戏结束</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="801"/>
+        <location filename="../../view/main_window.py" line="799"/>
         <source>Lobby</source>
         <translation>房间组队中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="809"/>
+        <location filename="../../view/main_window.py" line="807"/>
         <source>Ready check</source>
         <translation>匹配确认</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="812"/>
+        <location filename="../../view/main_window.py" line="810"/>
         <source>Match making</source>
         <translation>匹配中</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="1011"/>
+        <location filename="../../view/main_window.py" line="1009"/>
         <source>Exception occurred 😥</source>
         <translation>程序出现异常 😥</translation>
     </message>
@@ -1499,17 +1499,17 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>客户端信息请求失败</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="778"/>
+        <location filename="../../view/main_window.py" line="776"/>
         <source>Blue Team</source>
         <translation>蓝色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="780"/>
+        <location filename="../../view/main_window.py" line="778"/>
         <source>Red Team</source>
         <translation>红色方</translation>
     </message>
     <message>
-        <location filename="../../view/main_window.py" line="815"/>
+        <location filename="../../view/main_window.py" line="813"/>
         <source>Waiting reconnect</source>
         <translation>等待重新连接</translation>
     </message>
@@ -2818,12 +2818,22 @@ when they are used by Seraphine, which will cost more time</source>
     <message>
         <location filename="../../view/setting_interface.py" line="74"/>
         <source>Clear Game Information interface</source>
-        <translation>自动清空对局信息界面</translation>
+        <translation type="obsolete">自动清空对局信息界面</translation>
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="74"/>
         <source>Clear Game Information interface automatically when back to lobby</source>
-        <translation>在回到大厅或组队房间时清空对局信息界面</translation>
+        <translation type="obsolete">在回到大厅或组队房间时清空对局信息界面</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="74"/>
+        <source>Reserve Game Information interface</source>
+        <translation>保留对局信息界面内容</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="74"/>
+        <source>Reserve Game Information interface until the next champion selection starts</source>
+        <translation>保留上一局的对局信息内容直到下一次对局开始</translation>
     </message>
 </context>
 <context>

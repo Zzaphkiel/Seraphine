@@ -945,7 +945,7 @@ class MainWindow(FluentWindow):
         self.checkAndSwitchTo(self.gameInfoInterface)
 
     async def __onGameEnd(self):
-        if cfg.get(cfg.autoClearGameinfo):
+        if not cfg.get(cfg.enableReserveGameinfo):
             self.gameInfoInterface.clear()
 
     def __checkWindowSize(self):
