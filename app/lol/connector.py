@@ -6,6 +6,7 @@ import re
 import subprocess
 import threading
 import time
+import traceback
 from asyncio import CancelledError
 from collections import deque
 
@@ -912,7 +913,6 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
-    @retry()
     async def getCurrentRunePage(self):
         res = await self.__get("/lol-perks/v1/currentpage")
 
@@ -920,14 +920,20 @@ class LolClientConnector(QObject):
 
     @retry()
     async def deleteCurrentRunePage(self):
-        page = await self.getCurrentRunePage()
+        try:
+            page = await self.getCurrentRunePage()
 
-        res = None
-        if page.get('isDeletable'):
-            id = page['id']
+            res = None
+            if page.get('isDeletable'):
+                id = page['id']
 
-            res = await self.__delete(f"/lol-perks/v1/pages/{id}")
-            res = await res.json()
+                res = await self.__delete(f"/lol-perks/v1/pages/{id}")
+                res = await res.json()
+
+        except Exception as e:
+            stack = traceback.format_exc()
+            logger.error(
+                f"deleteCurrentRunePage error {stack = }, {e =}", TAG)
 
     @retry()
     async def createRunePage(self, name, primaryId, secondaryId, perks):
@@ -940,7 +946,7 @@ class LolClientConnector(QObject):
         }
 
         res = await self.__post("/lol-perks/v1/pages", data=body)
-        return await res.json()
+        res = await res.json()
 
     async def spectate(self, summonerName):
         info = await self.getSummonerByName(summonerName)
