@@ -2,7 +2,7 @@
 
 ## 编译
 ``` shell
-gcc main.c -o main.exe -O2 -static-libgcc
+gcc fix_lcu_window.c -o fix_lcu_window.exe -O2 -static-libgcc
 ```
 
 ## 运行

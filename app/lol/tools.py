@@ -1422,14 +1422,19 @@ async def showOpggBuild(data, selection: ChampionSelection):
     # 只有在英雄已经选定后才会尝试刷新 OPGG 界面
     for actionGroup in data['actions']:
         for action in actionGroup:
-            if action['actorCellId'] == cellId and \
-                    (not action['completed'] or action['type'] != 'pick'):
+            if not action['actorCellId'] == cellId:
+                continue
+
+            if action['type'] != 'pick':
+                continue
+
+            if not action['completed']:
                 return False
 
     # 拿一下位置和英雄 ID
     for player in data['myTeam']:
         if player['cellId'] == cellId:
-            position = player.get('assignedPosition')
+            position = player.get('assignedPosition', "")
             championId = player['championId'] or player['championPickIntent']
             break
 
@@ -1460,6 +1465,7 @@ async def showOpggBuild(data, selection: ChampionSelection):
         mode = ""
 
     selection.opggShowChampionId = championId
+
     signalBus.toOpggBuildInterface.emit(championId, mode, position)
 
     return True
