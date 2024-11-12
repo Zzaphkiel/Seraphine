@@ -219,7 +219,7 @@ class LolClientConnector(QObject):
         self.token = None
         self.sgpToken = None
         self.server = None
-        self.inMainLand = False
+        self.inTencent = False
 
         self.manager = None
         self.perksStyleCache = None
@@ -357,10 +357,10 @@ class LolClientConnector(QObject):
 
     def __initPlatformInfo(self):
         if self.server:
-            mainlandPlatforms = {'tj100', 'hn1', 'cq100',
-                                 'gz100', 'nj100', 'hn10', 'tj101', 'bgp2'}
+            platforms = {'tj100', 'hn1', 'cq100',
+                         'gz100', 'nj100', 'hn10', 'tj101', 'bgp2'}
 
-            self.inMainLand = self.server.lower() in mainlandPlatforms
+            self.inTencent = self.server.lower() in platforms
 
     async def __initRuneStyle(self):
         res = {}
@@ -1083,8 +1083,7 @@ class LolClientConnector(QObject):
 
     @retry()
     async def getSGPtoken(self):
-        res = await self.__get("/entitlements/v1/token")
-        res = await res.json()
+        res = await self.__json_retry_get("/entitlements/v1/token")
 
         if 'accessToken' not in res:
             raise ReferenceError()
@@ -1143,8 +1142,8 @@ class LolClientConnector(QObject):
         res = await self.__sgp__get(url)
         return await res.json()
 
-    def isInMainland(self):
-        return self.inMainLand
+    def isInTencent(self):
+        return self.inTencent
 
     @needLcu()
     async def __get(self, path, params=None):
@@ -1168,7 +1167,7 @@ class LolClientConnector(QObject):
         return await self.lcuSess.patch(path, json=data, ssl=False)
 
     async def __sgp__get(self, path, params=None):
-        assert self.inMainLand
+        assert self.inTencent
 
         headers = {
             "Authorization": f"Bearer {self.sgpToken}"
