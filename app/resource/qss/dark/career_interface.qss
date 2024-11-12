@@ -68,6 +68,26 @@ ItemsKdaCsGold>QLabel {
     font: 16px 'Segoe UI', 'Microsoft YaHei';
 }
 
+ItemsKdaCsGold>#kills {
+    font: bold 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
+ItemsKdaCsGold>#deaths {
+    font: bold 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
+ItemsKdaCsGold>#assists {
+    font: bold 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
+ItemsKdaCsGold>#slash1 {
+    font: bold 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
+ItemsKdaCsGold>#slash2 {
+    font: bold 16px 'Segoe UI', 'Microsoft YaHei';
+}
+
 ResultModeSpell>ColorLabel {
     font: bold 17px 'Segoe UI', 'Microsoft YaHei';
 }
