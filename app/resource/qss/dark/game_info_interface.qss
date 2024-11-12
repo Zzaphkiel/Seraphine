@@ -78,8 +78,27 @@ GameTab>QLabel {
 }
 
 GameTab>#time {
-    color: white;
     font: 11px;
+}
+
+GameTab>#kills {
+    font: bold 11px;
+}
+
+GameTab>#slash1 {
+    font: bold 11px;
+}
+
+GameTab>#deaths {
+    font: bold 11px;
+}
+
+GameTab>#slash2 {
+    font: bold 11px;
+}
+
+GameTab>#assists {
+    font: bold 11px;
 }
 
 

@@ -19,6 +19,7 @@ from app.components.champion_icon_widget import RoundIcon
 from app.components.profile_level_icon_widget import RoundLevelAvatar
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
+from app.components.color_label import ColorLabel
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
 from app.lol.aram import AramBuff
@@ -654,15 +655,21 @@ class GameTab(ColorAnimationFrame):
 
         self.hBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
+        self.infoLayout = QHBoxLayout()
 
         self.gameId = game['gameId']
         self.championIcon = RoundIcon(game['championIcon'], 30, 2, 2)
 
         self.modeName = QLabel(game['name'].replace("排位赛 ", ""))
 
-        self.time = QLabel(
-            f"{game['shortTime']}  {game['kills']}-{game['deaths']}-{game['assists']}"
-        )
+        self.kills = QLabel(str(game['kills']))
+        self.slash1 = QLabel("/")
+        self.deaths = ColorLabel(str(game['deaths']), type='lose')
+        self.slash2 = QLabel("/")
+        self.assists = QLabel(str(game['assists']))
+
+        self.time = QLabel(game['shortTime'])
+
         self.resultLabel = QLabel()
 
         if game['remake']:
@@ -679,17 +686,47 @@ class GameTab(ColorAnimationFrame):
         self.__initLayout()
 
     def __initWidget(self):
+        self.kills.setObjectName("kills")
+        self.slash1.setObjectName("slash1")
+        self.deaths.setObjectName("deaths")
+        self.slash2.setObjectName("slash2")
+        self.assists.setObjectName("assists")
+
         self.time.setObjectName("time")
+
+        self.kills.setFixedWidth(12)
+        self.slash1.setFixedWidth(6)
+        self.deaths.setFixedWidth(12)
+        self.slash2.setFixedWidth(6)
+        self.assists.setFixedWidth(12)
+
+        self.kills.setAlignment(Qt.AlignCenter)
+        self.slash1.setAlignment(Qt.AlignCenter)
+        self.deaths.setAlignment(Qt.AlignCenter)
+        self.slash2.setAlignment(Qt.AlignCenter)
+        self.assists.setAlignment(Qt.AlignCenter)
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(7, 7, 7, 7)
+        self.hBoxLayout.setSpacing(5)
+
+        self.infoLayout.setContentsMargins(0, 0, 0, 0)
+        self.infoLayout.setSpacing(0)
+
+        self.infoLayout.addWidget(self.time)
+        self.infoLayout.addSpacing(5)
+        self.infoLayout.addWidget(self.kills)
+        self.infoLayout.addWidget(self.slash1)
+        self.infoLayout.addWidget(self.deaths)
+        self.infoLayout.addWidget(self.slash2)
+        self.infoLayout.addWidget(self.assists)
 
         self.nameTimeKdaLayout.setSpacing(0)
         self.nameTimeKdaLayout.addWidget(self.modeName)
-        self.nameTimeKdaLayout.addWidget(self.time)
+        self.nameTimeKdaLayout.addLayout(self.infoLayout)
 
         self.hBoxLayout.addWidget(self.championIcon)
-        self.hBoxLayout.addSpacing(1)
+        # self.hBoxLayout.addSpacing(1)
         self.hBoxLayout.addLayout(self.nameTimeKdaLayout)
 
         self.hBoxLayout.addSpacerItem(
