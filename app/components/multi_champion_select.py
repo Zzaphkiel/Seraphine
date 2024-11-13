@@ -1,14 +1,21 @@
 
-from PyQt5.QtCore import (Qt, pyqtSignal, QSize, QEasingCurve)
-from PyQt5.QtWidgets import (QVBoxLayout, QHBoxLayout,
-                             QLabel, QWidget)
+import shutil
+
+from qasync import asyncSlot
+from PyQt5.QtCore import (Qt, pyqtSignal, QSize, QEasingCurve, QUrl)
+from PyQt5.QtWidgets import (
+    QVBoxLayout, QHBoxLayout, QLabel, QWidget, QFileDialog, QGraphicsOpacityEffect)
+from PyQt5.QtGui import QFont, QLinearGradient
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, SearchLineEdit,
-                                       FlowLayout, SmoothScrollArea, FlyoutViewBase)
+                                       FlowLayout, SmoothScrollArea, FlyoutViewBase,
+                                       PipsScrollButtonDisplayMode, HorizontalPipsPager,
+                                       PrimaryPushButton, PushButton)
 
 
 from app.common.style_sheet import StyleSheet
 from app.components.champion_icon_widget import RoundIcon, RoundIconButton
 from app.components.draggable_widget import DraggableItem, ItemsDraggableWidget
+from app.components.champion_icon_widget import TopRoundedLabel
 
 from app.lol.connector import connector
 from app.lol.champions import ChampionAlias
@@ -204,3 +211,82 @@ class ChampionSelectFlyout(FlyoutViewBase):
         self.selectWidget.championClicked.connect(self.championSelected)
 
         self.vBoxLayout.addWidget(self.selectWidget)
+
+
+class SplashesSelectWidget(QWidget):
+    selectedChanged = pyqtSignal(int, str)
+
+    def __init__(self, skinList, parent=None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+
+        self.viewLayout = QVBoxLayout()
+
+        self.buttonsGroup = QWidget()
+        self.buttonsLayout = QVBoxLayout()
+
+        self.skinList = skinList
+
+        self.splashesImg = TopRoundedLabel(radius=8.0, parent=self)
+        self.splashesNameLabel = QLabel()
+        self.pager = HorizontalPipsPager()
+
+        self.yesButton = PrimaryPushButton(self.tr("OK"))
+        self.saveButton = PushButton(self.tr('Save'))
+        self.cancelButton = PushButton(self.tr("Cancel"))
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initLayout(self):
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.viewLayout.addWidget(self.splashesImg, alignment=Qt.AlignCenter)
+
+        self.buttonsLayout.setContentsMargins(14, 14, 14, 22)
+        self.buttonsLayout.setSpacing(12)
+        self.buttonsLayout.addWidget(
+            self.splashesNameLabel, stretch=0, alignment=Qt.AlignCenter)
+        self.buttonsLayout.addWidget(
+            self.pager, stretch=0, alignment=Qt.AlignCenter)
+        self.buttonsGroup.setLayout(self.buttonsLayout)
+
+        self.vBoxLayout.setContentsMargins(1, 0, 1, 0)
+        self.vBoxLayout.setSpacing(0)
+
+        self.vBoxLayout.addLayout(self.viewLayout)
+        self.vBoxLayout.addWidget(self.buttonsGroup)
+
+    def __initWidget(self):
+        self.splashesImg.setFixedSize(384, 216)
+        self.splashesNameLabel.setFont(QFont('Microsoft YaHei', 13))
+        self.pager.setPreviousButtonDisplayMode(
+            PipsScrollButtonDisplayMode.ALWAYS)
+        self.pager.setNextButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
+        self.pager.setPageNumber(len(self.skinList))
+        self.pager.currentIndexChanged.connect(self.__onChangeSplashes)
+        self.pager.setCurrentIndex(0)
+
+        self.buttonsGroup.setObjectName("buttonsGroup")
+
+    @asyncSlot(int)
+    async def __onChangeSplashes(self, idx):
+        skinItem = self.skinList[idx]
+        self.splashesNameLabel.setText(skinItem[0])
+
+        url = await connector.getChampionSplashes(skinItem[1], False)
+        self.splashesImg.setPicture(url)
+
+        self.selectedChanged.emit(skinItem[1]['skinId'], skinItem[0])
+
+
+class SplashesFlyout(FlyoutViewBase):
+
+    def __init__(self, champions: dict, parent=None):
+        super().__init__(parent)
+
+        self.vBoxLayout = QVBoxLayout(self)
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.skinWidget = SplashesSelectWidget(champions)
+
+        self.vBoxLayout.addWidget(self.skinWidget)

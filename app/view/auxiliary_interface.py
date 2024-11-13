@@ -18,8 +18,8 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        ToolTipPosition)
 from app.common.style_sheet import StyleSheet
 from app.components.champion_icon_widget import RoundIcon
-from app.components.message_box import MultiChampionSelectMsgBox, SplashesMessageBox
-from app.components.multi_champion_select import ChampionSelectFlyout
+from app.components.message_box import MultiChampionSelectMsgBox
+from app.components.multi_champion_select import ChampionSelectFlyout, SplashesFlyout
 from app.components.seraphine_interface import SeraphineInterface
 from app.lol.connector import connector
 from app.lol.exceptions import *
@@ -318,11 +318,14 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
         view.championSelected.connect(self.__onChampionSelected)
 
     def __onSkinButtonClicked(self):
-        w = SplashesMessageBox(self.skins, self.window())
-        if w.exec():
-            self.chosenSkinId = self.skins[w.pager.currentIndex()][1]["skinId"]
-            self.skinLabel.setText(
-                self.tr("Skin's name: ") + self.skins[w.pager.currentIndex()][0])
+        view = SplashesFlyout(self.skins)
+        view.skinWidget.selectedChanged.connect(self.__onSkinSelectedChanged)
+        Flyout.make(view, self.skinButton, self,
+                    FlyoutAnimationType.SLIDE_RIGHT, True)
+
+    def __onSkinSelectedChanged(self, skinId, name):
+        self.chosenSkinId = skinId
+        self.skinLabel.setText(self.tr("Skin's name: ") + name)
 
     async def initChampionList(self, champions: dict = None):
         if champions:

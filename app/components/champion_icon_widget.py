@@ -1,7 +1,10 @@
 from PyQt5.QtCore import QEvent, Qt, pyqtSignal, QRectF, QSize
-from PyQt5.QtGui import (QColor, QMouseEvent, QPainter, QPainterPath,
+from PyQt5.QtGui import (QColor, QMouseEvent, QPainter, QPainterPath, QLinearGradient, QGradient,
                          QPen, QPixmap, qGray, qAlpha, qRgba)
-from PyQt5.QtWidgets import QWidget, QFrame, QLabel
+from PyQt5.QtWidgets import QWidget, QFrame, QLabel, QGraphicsOpacityEffect
+
+from app.common.qfluentwidgets import isDarkTheme
+
 import time
 
 
@@ -149,6 +152,66 @@ class RoundIconButton(QFrame):
         ret = super().mouseReleaseEvent(a0)
         self.clicked.emit(self.championId)
         return ret
+
+
+class TopRoundedLabel(QLabel):
+    def __init__(self, imagePath=None, radius=4.0, parent=None):
+        super().__init__(parent)
+        self.setPixmap(QPixmap(imagePath))
+
+        self.havePic = imagePath != None
+        self.radius = radius
+
+        self.opacity = QGraphicsOpacityEffect(opacity=1)
+        self.setGraphicsEffect(self.opacity)
+
+    def paintEvent(self, e):
+        if not self.havePic:
+            return super().paintEvent(e)
+
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing)
+
+        pixmap = self.pixmap().scaled(
+            self.size()*self.devicePixelRatioF(),
+            Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+
+        path = QPainterPath()
+
+        topPath = QPainterPath()
+        topRect = QRectF(self.rect().x(), self.rect().y(),
+                         self.rect().width(), self.rect().height())
+        topPath.addRoundedRect(topRect, self.radius, self.radius)
+
+        bottomPath = QPainterPath()
+        bottomRect = QRectF(self.rect().x(), self.rect().y() + self.rect().height() / 2,
+                            self.rect().width(), self.rect().height() / 2)
+        bottomPath.addRect(bottomRect)
+
+        path = topPath.united(bottomPath)
+        painter.setClipPath(path)
+
+        grad = QLinearGradient(0, 0, 0, self.rect().height())
+        grad.setColorAt(0.65, Qt.GlobalColor.black)
+        grad.setColorAt(1, Qt.GlobalColor.transparent)
+        self.opacity.setOpacityMask(grad)
+
+        painter.drawPixmap(self.rect(), pixmap)
+
+    def setPicture(self, imagePath):
+        self.havePic = True
+
+        self.setPixmap(QPixmap(imagePath))
+        self.repaint()
+
+    def setRedius(self, radius):
+        self.radius = radius
+        self.repaint()
+
+    def setText(self, text):
+        self.havePic = False
+
+        return super().setText(text)
 
 
 class RoundedLabel(QLabel):
