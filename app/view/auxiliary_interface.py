@@ -379,7 +379,8 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
         msg.exec_()
 
-        InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"), orient=Qt.Vertical, isClosable=True,
+        InfoBar.success(title=self.tr("Apply"), content=self.tr("Successfully"),
+                        orient=Qt.Vertical, isClosable=True,
                         position=InfoBarPosition.TOP_RIGHT, duration=5000,
                         parent=self.window().auxiliaryFuncInterface)
 

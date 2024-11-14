@@ -44,7 +44,7 @@ from app.lol.connector import connector
 from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
                            getAllyOrderByGameRole, getTeamColor, autoBan, autoPick,
                            autoComplete, autoSwap, autoTrade, ChampionSelection,
-                           SERVERS_NAME, SERVERS_SUBSET, showOpggBuild)
+                           SERVERS_NAME, SERVERS_SUBSET, showOpggBuild, autoShow)
 from app.lol.aram import AramBuff
 from app.lol.champions import ChampionAlias
 from app.lol.opgg import opgg
@@ -867,10 +867,9 @@ class MainWindow(FluentWindow):
         data = data['data']
 
         phase = {
-            'PLANNING': [autoPick],
+            'PLANNING': [autoShow],
             'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
             'FINALIZATION': [autoTrade, showOpggBuild],
-            # 'GAME_STARTING': []
         }
 
         for func in phase.get(data['timer']['phase'], []):

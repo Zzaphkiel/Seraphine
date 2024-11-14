@@ -1376,6 +1376,7 @@ def getNameTagLineFromGame(game, puuid):
 
 class ChampionSelection:
     def __init__(self):
+        self.isChampionShowed = False
         self.isChampionBanned = False
         self.isChampionPicked = False
         self.isChampionPickedCompleted = False
@@ -1421,6 +1422,7 @@ async def showOpggBuild(data, selection: ChampionSelection):
 
     # 只有在英雄已经选定后才会尝试刷新 OPGG 界面
     for actionGroup in data['actions']:
+        # 这里必须遍历完所有的 actorCellId == cellId 的所有 action
         for action in actionGroup:
             if not action['actorCellId'] == cellId:
                 continue
@@ -1475,6 +1477,7 @@ async def autoPick(data, selection: ChampionSelection):
     """
     自动选用英雄
     """
+
     if not cfg.get(cfg.enableAutoSelectChampion) or selection.isChampionPicked:
         return
 
@@ -1484,10 +1487,8 @@ async def autoPick(data, selection: ChampionSelection):
         if player["cellId"] != localPlayerCellId:
             continue
 
-        if bool(player['championId']):
-            return
-
-        if bool(player['championPickIntent']):
+        if bool(player['championId']) or bool(player['championPickIntent']):
+            selection.isChampionPicked = True
             return
 
         break
@@ -1528,7 +1529,6 @@ async def autoPick(data, selection: ChampionSelection):
                     and action['type'] == "pick"):
 
                 await connector.selectChampion(action['id'], championId)
-
                 selection.isChampionPicked = True
                 return True
 
@@ -1544,17 +1544,94 @@ async def autoComplete(data, selection: ChampionSelection):
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
-            if (action['actorCellId'] == localPlayerCellId
-                    and action['type'] == "pick"
-                    and action['isInProgress']
-                    and not action['completed']):
+            if action['actorCellId'] != localPlayerCellId:
+                continue
+
+            if action['type'] != 'pick':
+                continue
+
+            if not action['isInProgress']:
+                return False
+
+            if action['completed']:
                 selection.isChampionPickedCompleted = True
-                await asyncio.sleep(int(data['timer']['adjustedTimeLeftInPhase'] / 1000) - 1)
+                return False
 
-                if selection.isChampionPickedCompleted:
-                    await connector.selectChampion(action['id'], action['championId'], True)
+            break
 
-                return True
+    selection.isChampionPickedCompleted = True
+
+    sleepTime = int(data['timer']['adjustedTimeLeftInPhase'] / 1000) - 2
+    await asyncio.sleep(sleepTime)
+
+    data = await connector.getChampSelectSession()
+
+    if not data:
+        return
+
+    # 双方选过的英雄
+    cantSelect = []
+
+    # 双方 ban 掉的英雄
+    bans = itertools.chain(data["bans"]['myTeamBans'],
+                           data["bans"]['theirTeamBans'])
+
+    championIntent = 0
+    for actionGroup in data['actions']:
+        for action in actionGroup:
+            if (action['type'] == 'pick' and action['completed']
+                    and action['actorCellId'] != localPlayerCellId):
+                cantSelect.append(action['championId'])
+
+            if action['actorCellId'] != localPlayerCellId:
+                continue
+
+            if action['type'] != 'pick':
+                continue
+
+            if action['completed']:
+                return
+
+            # 现在亮着的英雄
+            championIntent = action['championId']
+            actionId = action['id']
+
+    if not championIntent:
+        return
+
+    cantSelect.extend(bans)
+
+    if championIntent not in cantSelect:
+        await connector.selectChampion(actionId, championIntent, True)
+        return True
+
+    pos = next(filter(lambda x: x['cellId'] ==
+               localPlayerCellId, data['myTeam']), None)
+    pos = pos.get('assignedPosition')
+
+    if pos == 'top':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionTop))
+    elif pos == 'jungle':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionJug))
+    elif pos == 'middle':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionMid))
+    elif pos == 'bottom':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionBot))
+    elif pos == 'utility':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionSup))
+    else:
+        candidates = []
+
+    candidates.extend(cfg.get(cfg.autoSelectChampion))
+
+    candidates = [x for x in candidates if x not in cantSelect]
+
+    if len(candidates) == 0:
+        return
+
+    await connector.selectChampion(actionId, candidates[0], True)
+
+    return True
 
 
 async def autoBan(data, selection: ChampionSelection):
@@ -1562,10 +1639,9 @@ async def autoBan(data, selection: ChampionSelection):
     自动禁用英雄
     """
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
+
     if not isAutoBan or selection.isChampionBanned:
         return
-
-    selection.isChampionBanned = True
 
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in data['actions']:
@@ -1599,8 +1675,10 @@ async def autoBan(data, selection: ChampionSelection):
                 isFriendly = cfg.get(cfg.pretentBan)
                 if isFriendly:
                     myTeam = (await connector.getChampSelectSession()).get("myTeam")
+
                     if not myTeam:
                         return
+
                     intents = [player["championPickIntent"]
                                for player in myTeam]
                     candidates = [x for x in candidates if x not in intents]
@@ -1610,6 +1688,62 @@ async def autoBan(data, selection: ChampionSelection):
 
                 championId = candidates[0]
                 await connector.banChampion(action['id'], championId, True)
+                selection.isChampionBanned = True
+
+                return True
+
+
+async def autoShow(data, selection: ChampionSelection):
+    '''在 B/P 前展示英雄'''
+    if selection.isChampionShowed:
+        return
+
+    if not cfg.get(cfg.enableAutoSelectChampion):
+        return
+
+    cellId = data['localPlayerCellId']
+
+    for player in data['myTeam']:
+        if player['cellId'] != cellId:
+            continue
+
+        if (player['championId'] != 0
+                or player['championPickIntent'] != 0):
+            selection.isChampionShowed = True
+            return
+
+        pos = player.get("assignedPosition", None)
+
+        break
+
+    if pos == 'top':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionTop))
+    elif pos == 'jungle':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionJug))
+    elif pos == 'middle':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionMid))
+    elif pos == 'bottom':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionBot))
+    elif pos == 'utility':
+        candidates = deepcopy(cfg.get(cfg.autoSelectChampionSup))
+    else:
+        candidates = []
+
+    default = deepcopy(cfg.get(cfg.autoSelectChampion))
+    candidates.extend(default)
+
+    if len(candidates) == 0:
+        selection.isChampionShowed = True
+        return
+
+    championId = candidates[0]
+    for actionGroup in reversed(data['actions']):
+        for action in actionGroup:
+            if (action['actorCellId'] == cellId and
+                    action['type'] == 'pick'):
+
+                await connector.selectChampion(action['id'], championId)
+                selection.isChampionShowed = True
 
                 return True
 
