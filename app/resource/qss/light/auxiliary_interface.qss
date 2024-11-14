@@ -22,12 +22,19 @@ ChampionsCard {
 
 SplashesSelectWidget>#buttonsGroup {
     background-color: rgb(243, 243, 243);
+    /* background-color: rgb(0, 255, 0, 0.5); */
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
+    border: none;
+}
+
+SplashesSelectWidget>#viewWidget {
+    background-color: rgb(243, 243, 243);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border: none;
 }

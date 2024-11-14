@@ -192,7 +192,7 @@ class TopRoundedLabel(QLabel):
         painter.setClipPath(path)
 
         grad = QLinearGradient(0, 0, 0, self.rect().height())
-        grad.setColorAt(0.65, Qt.GlobalColor.black)
+        grad.setColorAt(0.7, Qt.GlobalColor.black)
         grad.setColorAt(1, Qt.GlobalColor.transparent)
         self.opacity.setOpacityMask(grad)
 

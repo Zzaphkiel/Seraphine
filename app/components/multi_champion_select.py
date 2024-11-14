@@ -221,7 +221,8 @@ class SplashesSelectWidget(QWidget):
 
         self.vBoxLayout = QVBoxLayout(self)
 
-        self.viewLayout = QVBoxLayout()
+        self.viewWidget = QWidget()
+        self.viewLayout = QVBoxLayout(self.viewWidget)
 
         self.buttonsGroup = QWidget()
         self.buttonsLayout = QVBoxLayout()
@@ -254,7 +255,7 @@ class SplashesSelectWidget(QWidget):
         self.vBoxLayout.setContentsMargins(1, 0, 1, 0)
         self.vBoxLayout.setSpacing(0)
 
-        self.vBoxLayout.addLayout(self.viewLayout)
+        self.vBoxLayout.addWidget(self.viewWidget)
         self.vBoxLayout.addWidget(self.buttonsGroup)
 
     def __initWidget(self):
@@ -268,6 +269,7 @@ class SplashesSelectWidget(QWidget):
         self.pager.setCurrentIndex(0)
 
         self.buttonsGroup.setObjectName("buttonsGroup")
+        self.viewWidget.setObjectName("viewWidget")
 
     @asyncSlot(int)
     async def __onChangeSplashes(self, idx):
