@@ -312,14 +312,15 @@ class ProfileBackgroundCard(ExpandGroupSettingCard):
 
     def __onSelectButtonClicked(self):
         view = ChampionSelectFlyout(self.champions)
+        view.championSelected.connect(self.__onChampionSelected)
+
         self.w = Flyout.make(view, self.championButton,
                              self, FlyoutAnimationType.SLIDE_RIGHT, True)
 
-        view.championSelected.connect(self.__onChampionSelected)
-
     def __onSkinButtonClicked(self):
-        view = SplashesFlyout(self.skins)
+        view = SplashesFlyout(self.skins, self.chosenSkinId)
         view.skinWidget.selectedChanged.connect(self.__onSkinSelectedChanged)
+
         Flyout.make(view, self.skinButton, self,
                     FlyoutAnimationType.SLIDE_RIGHT, True)
 

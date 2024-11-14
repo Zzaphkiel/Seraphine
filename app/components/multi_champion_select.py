@@ -216,8 +216,11 @@ class ChampionSelectFlyout(FlyoutViewBase):
 class SplashesSelectWidget(QWidget):
     selectedChanged = pyqtSignal(int, str)
 
-    def __init__(self, skinList, parent=None):
+    def __init__(self, skinList, skinId, parent=None):
         super().__init__(parent)
+
+        self.skinList = skinList
+        self.skinId = skinId
 
         self.vBoxLayout = QVBoxLayout(self)
 
@@ -226,8 +229,6 @@ class SplashesSelectWidget(QWidget):
 
         self.buttonsGroup = QWidget()
         self.buttonsLayout = QVBoxLayout()
-
-        self.skinList = skinList
 
         self.splashesImg = TopRoundedLabel(radius=8.0, parent=self)
         self.splashesNameLabel = QLabel()
@@ -266,10 +267,22 @@ class SplashesSelectWidget(QWidget):
         self.pager.setNextButtonDisplayMode(PipsScrollButtonDisplayMode.ALWAYS)
         self.pager.setPageNumber(len(self.skinList))
         self.pager.currentIndexChanged.connect(self.__onChangeSplashes)
-        self.pager.setCurrentIndex(0)
+        self.__initPagerIndex()
 
         self.buttonsGroup.setObjectName("buttonsGroup")
         self.viewWidget.setObjectName("viewWidget")
+
+    def __initPagerIndex(self):
+        if not self.skinId:
+            self.pager.setCurrentIndex(0)
+            return
+
+        for i, item in enumerate(self.skinList):
+            if item[1]['skinId'] == self.skinId:
+                self.pager.setCurrentIndex(i)
+                return
+
+        self.pager.setCurrentIndex(0)
 
     @asyncSlot(int)
     async def __onChangeSplashes(self, idx):
@@ -284,11 +297,11 @@ class SplashesSelectWidget(QWidget):
 
 class SplashesFlyout(FlyoutViewBase):
 
-    def __init__(self, champions: dict, parent=None):
+    def __init__(self, champions: dict, skinId, parent=None):
         super().__init__(parent)
 
         self.vBoxLayout = QVBoxLayout(self)
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.skinWidget = SplashesSelectWidget(champions)
+        self.skinWidget = SplashesSelectWidget(champions, skinId)
 
         self.vBoxLayout.addWidget(self.skinWidget)
