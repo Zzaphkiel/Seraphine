@@ -1541,7 +1541,9 @@ async def autoComplete(data, selection: ChampionSelection):
     if not isAutoCompleted or selection.isChampionPickedCompleted:
         return
 
-    localPlayerCellId = data['localPlayerCellId']
+    if not (localPlayerCellId := data.get('localPlayerCellId', None)):
+        return
+
     for actionGroup in reversed(data['actions']):
         for action in actionGroup:
             if action['actorCellId'] != localPlayerCellId:
@@ -1668,6 +1670,10 @@ async def autoBan(data, selection: ChampionSelection):
                     candidates = []
 
                 candidates.extend(cfg.get(cfg.autoBanChampion))
+
+                bans = itertools.chain(data["bans"]['myTeamBans'],
+                                       data["bans"]['theirTeamBans'])
+                candidates = [x for x in candidates if x not in bans]
 
                 # 给队友一点预选的时间
                 await asyncio.sleep(cfg.get(cfg.autoBanDelay))

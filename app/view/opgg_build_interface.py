@@ -963,7 +963,7 @@ class PerksWidget(QFrame):
             self.shardsPerksLayout.addLayout(layout)
 
         self.gridLayout.setAlignment(Qt.AlignCenter)
-        self.gridLayout.setHorizontalSpacing(20)
+        self.gridLayout.setHorizontalSpacing(18)
         self.gridLayout.setContentsMargins(0, 0, 4, 4)
         self.gridLayout.addWidget(
             self.mainTitleIcon, 0, 0, alignment=Qt.AlignCenter)
