@@ -1,55 +1,52 @@
+import asyncio
+import copy
 import os
 import sys
-import traceback
+import threading
 import time
-import copy
-import win32api
+import traceback
 from pathlib import Path
 
 import pyperclip
-
-import asyncio
-from aiohttp.client_exceptions import ClientConnectorError
-from qasync import asyncClose, asyncSlot
+import win32api
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
+from aiohttp.client_exceptions import ClientConnectorError
+from qasync import asyncClose, asyncSlot
 
+from app.common.config import cfg, VERSION, BETA
+from app.common.icons import Icon
+from app.common.logger import logger
 from app.common.qfluentwidgets import (NavigationItemPosition, InfoBar, InfoBarPosition, Action,
                                        FluentWindow, SplashScreen, MessageBox, SmoothScrollArea,
-                                       ToolTipFilter, FluentIcon, ToolTipPosition, FluentWindowBase)
-
-from app.view.start_interface import StartInterface
-from app.view.setting_interface import SettingInterface
-from app.view.career_interface import CareerInterface
-from app.view.search_interface import SearchInterface
-from app.view.game_info_interface import GameInfoInterface
-from app.view.auxiliary_interface import AuxiliaryInterface
-from app.view.opgg_window import OpggWindow
+                                       ToolTipFilter, FluentIcon, ToolTipPosition)
+from app.common.signals import signalBus
 from app.common.util import (github, getLolClientPid, getTasklistPath,
                              getLolClientPidSlowly, getLoLPathByRegistry)
 from app.components.avatar_widget import NavigationAvatarWidget
-from app.components.temp_system_tray_menu import TmpSystemTrayMenu
-from app.common.icons import Icon
-from app.common.config import cfg, VERSION, BETA
-from app.common.logger import logger
-from app.common.signals import signalBus
 from app.components.message_box import (UpdateMessageBox, NoticeMessageBox,
                                         WaitingForLolMessageBox, ExceptionMessageBox,
                                         ChangeDpiMessageBox)
+from app.components.temp_system_tray_menu import TmpSystemTrayMenu
+from app.lol.aram import AramBuff
+from app.lol.champions import ChampionAlias
+from app.lol.connector import connector
 from app.lol.exceptions import (SummonerGamesNotFound, RetryMaximumAttempts,
                                 SummonerNotFound, SummonerNotInGame, SummonerRankInfoNotFound)
 from app.lol.listener import (LolProcessExistenceListener, StoppableThread)
-from app.lol.connector import connector
-from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
-                           getAllyOrderByGameRole, getTeamColor, autoBan, autoPick,
-                           autoComplete, autoSwap, autoTrade, ChampionSelection,
-                           SERVERS_NAME, SERVERS_SUBSET, showOpggBuild)
-from app.lol.aram import AramBuff
-from app.lol.champions import ChampionAlias
 from app.lol.opgg import opgg
-
-import threading
+from app.lol.phase import Planning, Selection
+from app.lol.tools import (parseAllyGameInfo, parseGameInfoByGameflowSession,
+                           getAllyOrderByGameRole, getTeamColor, ChampionSelection,
+                           SERVERS_NAME, SERVERS_SUBSET)
+from app.view.auxiliary_interface import AuxiliaryInterface
+from app.view.career_interface import CareerInterface
+from app.view.game_info_interface import GameInfoInterface
+from app.view.opgg_window import OpggWindow
+from app.view.search_interface import SearchInterface
+from app.view.setting_interface import SettingInterface
+from app.view.start_interface import StartInterface
 
 TAG = "MainWindow"
 
@@ -447,7 +444,7 @@ class MainWindow(FluentWindow):
     def show(self):
         self.activateWindow()
         self.setWindowState(self.windowState() & ~
-                            Qt.WindowMinimized | Qt.WindowActive)
+        Qt.WindowMinimized | Qt.WindowActive)
         self.showNormal()
 
     def __initListener(self):
@@ -849,8 +846,10 @@ class MainWindow(FluentWindow):
 
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
+        self.selection = Selection()
         self.championSelection.reset()
         session = await connector.getChampSelectSession()
+        await self.selection.act(session)
 
         if cfg.get(cfg.autoShowOpgg):
             self.opggWindow.show()
@@ -865,17 +864,7 @@ class MainWindow(FluentWindow):
     @asyncSlot(dict)
     async def __onChampSelectChanged(self, data):
         data = data['data']
-
-        phase = {
-            'PLANNING': [autoPick],
-            'BAN_PICK': [autoBan, autoPick, autoComplete, autoSwap, showOpggBuild],
-            'FINALIZATION': [autoTrade, showOpggBuild],
-            # 'GAME_STARTING': []
-        }
-
-        for func in phase.get(data['timer']['phase'], []):
-            if await func(data, self.championSelection):
-                break
+        await self.selection.act(data)
 
         # 更新头像
         await self.gameInfoInterface.updateAllyIcon(data['myTeam'])
@@ -1023,7 +1012,7 @@ class MainWindow(FluentWindow):
         logger.error(str(self.auxiliaryFuncInterface), "Crash")
         logger.error(str(self.settingInterface), "Crash")
 
-        content = f"Seraphine ver.{BETA or VERSION}\n{'-'*5}\n{content}"
+        content = f"Seraphine ver.{BETA or VERSION}\n{'-' * 5}\n{content}"
 
         w = ExceptionMessageBox(title, content, self.window())
 

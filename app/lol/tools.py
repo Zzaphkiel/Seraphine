@@ -1386,7 +1386,7 @@ class ChampionSelection:
         self.__init__()
 
 
-async def autoSwap(data, selection: ChampionSelection):
+async def autoSwap(data):
     """
     选用顺序交换请求发生时，自动接受
     """
@@ -1397,11 +1397,9 @@ async def autoSwap(data, selection: ChampionSelection):
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
             await connector.acceptTrade(pickOrderSwap['id'])
-            selection.isChampionPickedCompleted = False
-            return True
 
 
-async def autoTrade(data, selection):
+async def autoTrade(data):
     """
     英雄交换请求发生时，自动接受
     """
@@ -1471,11 +1469,11 @@ async def showOpggBuild(data, selection: ChampionSelection):
     return True
 
 
-async def autoPick(data, selection: ChampionSelection):
+async def autoPick(data):
     """
     自动选用英雄
     """
-    if not cfg.get(cfg.enableAutoSelectChampion) or selection.isChampionPicked:
+    if not cfg.get(cfg.enableAutoSelectChampion):
         return
 
     localPlayerCellId = data['localPlayerCellId']
@@ -1517,7 +1515,6 @@ async def autoPick(data, selection: ChampionSelection):
     candidates = [x for x in candidates if x not in bans]
 
     if not candidates:
-        selection.isChampionPicked = True
         return
 
     championId = candidates[0]
@@ -1528,8 +1525,6 @@ async def autoPick(data, selection: ChampionSelection):
                     and action['type'] == "pick"):
 
                 await connector.selectChampion(action['id'], championId)
-
-                selection.isChampionPicked = True
                 return True
 
 
@@ -1557,15 +1552,13 @@ async def autoComplete(data, selection: ChampionSelection):
                 return True
 
 
-async def autoBan(data, selection: ChampionSelection):
+async def autoBan(data):
     """
     自动禁用英雄
     """
     isAutoBan = cfg.get(cfg.enableAutoBanChampion)
-    if not isAutoBan or selection.isChampionBanned:
+    if not isAutoBan:
         return
-
-    selection.isChampionBanned = True
 
     localPlayerCellId = data['localPlayerCellId']
     for actionGroup in data['actions']:
