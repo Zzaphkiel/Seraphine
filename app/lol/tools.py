@@ -1397,7 +1397,7 @@ async def autoSwap(data, selection: ChampionSelection):
 
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
-            await connector.acceptTrade(pickOrderSwap['id'])
+            await connector.acceptSwap(pickOrderSwap['id'])
             selection.isChampionPickedCompleted = False
             return True
 

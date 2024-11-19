@@ -806,10 +806,16 @@ class LolClientConnector(QObject):
         res = await self.__get("/lol-champ-select/v1/session")
         return await res.json()
 
-    # 同意交换
+    # 同意交换英雄
     @retry()
     async def acceptTrade(self, id):
         res = await self.__post(f"/lol-champ-select/v1/session/trades/{id}/accept")
+        return await res.json()
+
+    # 同意交换楼层
+    @retry()
+    async def acceptSwap(self, id):
+        res = await self.__post(f"/lol-champ-select/v1/session/swaps/{id}/accept")
         return await res.json()
 
     # 备战席交换
