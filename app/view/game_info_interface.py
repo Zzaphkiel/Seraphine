@@ -19,7 +19,7 @@ from app.components.champion_icon_widget import RoundIcon
 from app.components.profile_level_icon_widget import RoundLevelAvatar
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
-from app.components.color_label import ColorLabel
+from app.components.color_label import DeathsLabel
 from app.lol.tools import parseSummonerOrder
 from app.lol.connector import connector
 from app.lol.aram import AramBuff
@@ -664,7 +664,7 @@ class GameTab(ColorAnimationFrame):
 
         self.kills = QLabel(str(game['kills']))
         self.slash1 = QLabel("/")
-        self.deaths = ColorLabel(str(game['deaths']), type='lose')
+        self.deaths = DeathsLabel(str(game['deaths']))
         self.slash2 = QLabel("/")
         self.assists = QLabel(str(game['assists']))
 

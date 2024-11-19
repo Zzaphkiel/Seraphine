@@ -7,7 +7,7 @@ from app.common.qfluentwidgets import isDarkTheme, Theme
 from app.common.signals import signalBus
 from app.common.config import cfg
 from app.components.champion_icon_widget import RoundIcon, RoundedLabel
-from app.components.color_label import ColorLabel
+from app.components.color_label import ColorLabel, DeathsLabel
 from app.components.animation_frame import CardWidget, ColorAnimationFrame
 
 
@@ -110,7 +110,7 @@ class ItemsKdaCsGold(QFrame):
 
         self.kills = QLabel(f"{kills}")
         self.slash1 = QLabel("/")
-        self.deaths = ColorLabel(f"{deaths}", type='lose')
+        self.deaths = DeathsLabel(f"{deaths}")
         self.slash2 = QLabel("/")
         self.assists = QLabel(f"{assists}")
 

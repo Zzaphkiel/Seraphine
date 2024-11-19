@@ -16,7 +16,8 @@ from ..common.logger import logger
 from ..common.qfluentwidgets import (SmoothScrollArea, PushButton, ToolButton, InfoBar,
                                      InfoBarPosition, ToolTipFilter, ToolTipPosition,
                                      isDarkTheme, FlyoutViewBase, Flyout, Theme,
-                                     IndeterminateProgressRing, ComboBox, StateToolTip)
+                                     IndeterminateProgressRing, ComboBox, StateToolTip,
+                                     setCustomStyleSheet, TransparentPushButton)
 
 from app.common.style_sheet import StyleSheet, ColorChangeable
 from app.common.icons import Icon
@@ -26,7 +27,7 @@ from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.components.search_line_edit import SearchLineEdit
 from app.components.summoner_name_button import SummonerName
 from app.components.animation_frame import ColorAnimationFrame, CardWidget
-from app.components.color_label import ColorLabel
+from app.components.color_label import ColorLabel, DeathsLabel
 from app.lol.connector import connector
 from app.lol.exceptions import SummonerGamesNotFound, SummonerNotFound
 from app.lol.tools import parseGameData, parseGameDetailData, parseGamesDataConcurrently
@@ -416,12 +417,14 @@ class GameDetailView(QFrame):
             self.extraTeamView6.updateSummoners(team8["summoners"])
 
 
-class TeamView(QFrame):
+class TeamView(QFrame, ColorChangeable):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        QFrame.__init__(self, parent=parent)
+        ColorChangeable.__init__(self, type=None)
 
         self.vBoxLayout = QVBoxLayout(self)
-        self.titleBarLayout = QHBoxLayout()
+        self.titleBarWidget = QWidget()
+        self.titleBarLayout = QHBoxLayout(self.titleBarWidget)
         self.summonersLayout = QVBoxLayout()
 
         self.teamResultLabel = ColorLabel()
@@ -436,11 +439,16 @@ class TeamView(QFrame):
         self.riftHeraldIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.riftHeraldKillsLabel = QLabel()
 
-        self.bansButton = PushButton("Bans")
+        self.bansButton = TransparentPushButton(self.tr("Bans"))
         self.csIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.goldIconLabel = RoundedLabel(radius=0, borderWidth=0)
         self.dmgIconLabel = QLabel()
-        self.kdaLabel = QLabel()
+
+        self.kills = QLabel()
+        self.slash1 = QLabel()
+        self.deaths = DeathsLabel()
+        self.slash2 = QLabel()
+        self.assists = QLabel()
 
         self.isToolTipInit = False
 
@@ -453,8 +461,9 @@ class TeamView(QFrame):
         cfg.themeChanged.connect(self.__updateIconColor)
 
     def __initWidget(self):
-        self.teamResultLabel.setObjectName("teamResult")
+        self.titleBarWidget.setObjectName("titleBarWidget")
 
+        self.teamResultLabel.setObjectName("teamResult")
         self.towerIconLabel.setFixedSize(22, 22)
         self.inhibitorIconLabel.setFixedSize(18, 18)
         self.baronIconLabel.setFixedSize(17, 17)
@@ -463,8 +472,17 @@ class TeamView(QFrame):
 
         self.bansButton.setVisible(False)
 
-        self.kdaLabel.setFixedWidth(100)
-        self.kdaLabel.setAlignment(Qt.AlignCenter)
+        self.kills.setFixedWidth(23)
+        self.kills.setAlignment(Qt.AlignCenter)
+        self.deaths.setFixedWidth(23)
+        self.deaths.setAlignment(Qt.AlignCenter)
+        self.assists.setFixedWidth(23)
+        self.assists.setAlignment(Qt.AlignCenter)
+        self.slash1.setFixedWidth(10)
+        self.slash1.setAlignment(Qt.AlignCenter)
+        self.slash2.setFixedWidth(10)
+        self.slash2.setAlignment(Qt.AlignCenter)
+
         self.csIconLabel.setFixedSize(18, 18)
         self.goldIconLabel.setFixedSize(18, 18)
         self.dmgIconLabel.setFixedWidth(70)
@@ -527,9 +545,10 @@ class TeamView(QFrame):
             self.dmgIconLabel, 500, ToolTipPosition.TOP))
 
     def __initLayout(self):
-        self.teamResultLabel.setFixedHeight(39)
+        self.teamResultLabel.setFixedHeight(49)
         self.teamResultLabel.setFixedWidth(60)
 
+        self.titleBarLayout.setContentsMargins(7, 0, 1, 0)
         self.titleBarLayout.setSpacing(0)
         self.titleBarLayout.addWidget(self.teamResultLabel)
         self.titleBarLayout.addSpacing(18)
@@ -554,9 +573,17 @@ class TeamView(QFrame):
         self.titleBarLayout.addSpacerItem(QSpacerItem(
             1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum))
         self.titleBarLayout.addWidget(self.bansButton)
-        self.titleBarLayout.addSpacing(59)
-        self.titleBarLayout.addWidget(self.kdaLabel)
-        self.titleBarLayout.addSpacing(24)
+        self.titleBarLayout.addSpacing(63)
+        self.titleBarLayout.addWidget(self.kills)
+        self.titleBarLayout.addSpacing(1)
+        self.titleBarLayout.addWidget(self.slash1)
+        self.titleBarLayout.addSpacing(1)
+        self.titleBarLayout.addWidget(self.deaths)
+        self.titleBarLayout.addSpacing(1)
+        self.titleBarLayout.addWidget(self.slash2)
+        self.titleBarLayout.addSpacing(1)
+        self.titleBarLayout.addWidget(self.assists)
+        self.titleBarLayout.addSpacing(21)
         self.titleBarLayout.addWidget(self.csIconLabel)
         self.titleBarLayout.addSpacing(43)
         self.titleBarLayout.addWidget(self.goldIconLabel)
@@ -564,14 +591,14 @@ class TeamView(QFrame):
         self.titleBarLayout.addWidget(self.dmgIconLabel)
         self.titleBarLayout.addSpacing(7)
 
-        self.summonersLayout.setContentsMargins(0, 0, 0, 0)
+        self.summonersLayout.setContentsMargins(2, 4, 2, 2)
         self.summonersLayout.setSpacing(4)
 
-        self.vBoxLayout.setContentsMargins(7, 0, 7, 6)
-        self.vBoxLayout.addLayout(self.titleBarLayout)
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 4)
+        self.vBoxLayout.setSpacing(0)
+        self.vBoxLayout.addWidget(self.titleBarWidget)
+        self.vBoxLayout.addSpacing(8)
         self.vBoxLayout.addLayout(self.summonersLayout)
-        # self.vBoxLayout.addSpacerItem(
-        #     QSpacerItem(1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
     def updateTeam(self, team, isCherry, result):
         if not self.isToolTipInit:
@@ -599,9 +626,11 @@ class TeamView(QFrame):
         elif win == "Win":
             self.teamResultLabel.setText(self.tr("Winner"))
             self.teamResultLabel.setType('win')
+            self.setType('win')
         else:
             self.teamResultLabel.setText(self.tr("Loser"))
             self.teamResultLabel.setType('lose')
+            self.setType('lose')
 
         self.towerKillsLabel.setText(str(towerKills))
         self.inhibitorKillsLabel.setText(str(inhibitorKills))
@@ -634,23 +663,28 @@ class TeamView(QFrame):
         self.csIconLabel.setVisible(True)
         self.goldIconLabel.setVisible(True)
 
-        self.kdaLabel.setText(f"{kills} / {deaths} / {assists}")
+        self.kills.setText(f"{kills}")
+        self.deaths.setText(f"{deaths}")
+        self.assists.setText(f"{assists}")
+        self.slash1.setText("/")
+        self.slash2.setText("/")
 
     def updateSummoners(self, summoners):
         for i in reversed(range(self.summonersLayout.count())):
             item = self.summonersLayout.itemAt(i)
             self.summonersLayout.removeItem(item)
-            if item.widget():
-                item.widget().deleteLater()
+            if (widget := item.widget()):
+                widget.deleteLater()
 
         for summoner in summoners:
             infoBar = SummonerInfoBar(summoner)
 
-            self.summonersLayout.addWidget(infoBar)
+            self.summonersLayout.addWidget(infoBar, stretch=1)
 
         if len(summoners) != 5:
-            self.summonersLayout.addSpacerItem(QSpacerItem(
-                1, 1, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            self.summonersLayout.addStretch(5 - len(summoners))
+            spacing = self.summonersLayout.spacing()
+            self.summonersLayout.addSpacing(spacing * (5 - len(summoners)))
 
     def __updateIconColor(self, theme: Theme):
         color = "white" if theme == Theme.DARK else "black"
@@ -660,6 +694,18 @@ class TeamView(QFrame):
     def __onBansButtonClicked(self):
         flyout = BansFlyoutView(self.bansInfo)
         self.bansFlyOut = Flyout.make(flyout, self.bansButton, self)
+
+    def setColor(self, c1, c2, c3, c4):
+        # self.setStyleSheet(
+        #     f"TeamView {{border-color: {c4.name(QColor.HexArgb)};}}")
+
+        self.titleBarWidget.setStyleSheet(f"""
+            #titleBarWidget {{
+                background-color: {c1.name(QColor.HexArgb)};
+            }}
+        """)
+
+        return
 
 
 class BansFlyoutView(FlyoutViewBase):
@@ -672,10 +718,10 @@ class BansFlyoutView(FlyoutViewBase):
             self.hBoxLayout.addWidget(icon)
 
 
-class SummonerInfoBar(CardWidget):
+class SummonerInfoBar(QFrame):
     def __init__(self, summoner, parent=None):
         super().__init__(parent)
-        self._pressedBackgroundColor = self._hoverBackgroundColor
+        # self._pressedBackgroundColor = self._hoverBackgroundColor
 
         self.setFixedHeight(39)
 
@@ -697,7 +743,12 @@ class SummonerInfoBar(CardWidget):
         self.itemsLayout = QHBoxLayout()
         self.items = []
 
-        self.kdaLabel = QLabel()
+        self.kills = QLabel()
+        self.slash1 = QLabel("/")
+        self.deaths = DeathsLabel()
+        self.slash2 = QLabel("/")
+        self.assists = QLabel()
+
         self.csLabel = QLabel()
         self.goldLabel = QLabel()
         self.demageLabel = QLabel()
@@ -712,6 +763,7 @@ class SummonerInfoBar(CardWidget):
         self.isCurrent = summoner["isCurrent"]
         if self.isCurrent:
             self.setObjectName("currentSummonerWidget")
+            self.setProperty("current", True)
 
         self.summonerName.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.summonerName.setSizePolicy(
@@ -753,10 +805,20 @@ class SummonerInfoBar(CardWidget):
                 self.rankIcon.setFixedWidth(40)
                 self.rankIcon.setAlignment(Qt.AlignCenter)
 
-        self.kdaLabel.setText(
-            f"{summoner['kills']} / {summoner['deaths']} / {summoner['assists']}")
-        self.kdaLabel.setFixedWidth(100)
-        self.kdaLabel.setAlignment(Qt.AlignCenter)
+        self.kills.setText(f"{summoner['kills']}")
+        self.kills.setFixedWidth(20)
+        self.kills.setAlignment(Qt.AlignCenter)
+        self.deaths.setText(f"{summoner['deaths']}")
+        self.deaths.setFixedWidth(20)
+        self.deaths.setAlignment(Qt.AlignCenter)
+        self.assists.setText(f"{summoner['assists']}")
+        self.assists.setFixedWidth(20)
+        self.assists.setAlignment(Qt.AlignCenter)
+
+        self.slash1.setFixedWidth(10)
+        self.slash1.setAlignment(Qt.AlignCenter)
+        self.slash2.setFixedWidth(10)
+        self.slash2.setAlignment(Qt.AlignCenter)
 
         self.csLabel.setText(str(summoner["cs"]))
         self.csLabel.setAlignment(Qt.AlignCenter)
@@ -782,7 +844,7 @@ class SummonerInfoBar(CardWidget):
         for icon in self.items:
             self.itemsLayout.addWidget(icon)
 
-        self.hBoxLayout.setContentsMargins(6, 0, 6, 0)
+        self.hBoxLayout.setContentsMargins(8, 0, 6, 2)
         self.hBoxLayout.addWidget(self.runeIcon)
         self.hBoxLayout.addLayout(self.spellsLayout)
         self.hBoxLayout.addWidget(self.levelLabel)
@@ -795,8 +857,17 @@ class SummonerInfoBar(CardWidget):
         self.hBoxLayout.addWidget(self.rankIcon)
         self.hBoxLayout.addSpacing(5)
         self.hBoxLayout.addLayout(self.itemsLayout)
-
-        self.hBoxLayout.addWidget(self.kdaLabel)
+        self.hBoxLayout.addSpacing(22)
+        self.hBoxLayout.addWidget(self.kills)
+        self.hBoxLayout.addSpacing(-5)
+        self.hBoxLayout.addWidget(self.slash1)
+        self.hBoxLayout.addSpacing(-5)
+        self.hBoxLayout.addWidget(self.deaths)
+        self.hBoxLayout.addSpacing(-5)
+        self.hBoxLayout.addWidget(self.slash2)
+        self.hBoxLayout.addSpacing(-5)
+        self.hBoxLayout.addWidget(self.assists)
+        self.hBoxLayout.addSpacing(5)
         self.hBoxLayout.addWidget(self.csLabel)
         self.hBoxLayout.addWidget(self.goldLabel)
         self.hBoxLayout.addWidget(self.demageLabel)
@@ -835,7 +906,7 @@ class GameTitleBar(QFrame, ColorChangeable):
 
     def __initLayout(self):
         self.infoLayout.setSpacing(0)
-        self.infoLayout.setContentsMargins(0, 4, 0, 6)
+        self.infoLayout.setContentsMargins(0, 4, 0, 2)
         self.infoLayout.addSpacing(-5)
         self.infoLayout.addWidget(self.resultLabel)
         self.infoLayout.addWidget(self.infoLabel)
@@ -898,7 +969,6 @@ class GameTitleBar(QFrame, ColorChangeable):
         self.setStyleSheet(f"""
             GameTitleBar {{
                 background-color: {c1.name(QColor.HexArgb)};
-                border-color: {c4.name(QColor.HexArgb)}
             }}
         """)
 
@@ -964,14 +1034,21 @@ class GameTab(ColorAnimationFrame):
 
         self.vBoxLayout = QHBoxLayout(self)
         self.nameTimeKdaLayout = QVBoxLayout()
+        self.infoLayout = QHBoxLayout()
 
         self.gameId = game["gameId"]
         self.championIcon = RoundIcon(game["championIcon"], 32, 2, 2)
 
         self.modeName = QLabel(game["name"].replace("排位赛 ", ""))
 
-        self.time = QLabel(
-            f"{game['shortTime']}  {game['kills']}/{game['deaths']}/{game['assists']}")
+        self.kills = QLabel(str(game['kills']))
+        self.slash1 = QLabel("/")
+        self.deaths = DeathsLabel(str(game['deaths']))
+        self.slash2 = QLabel("/")
+        self.assists = QLabel(str(game['assists']))
+
+        self.time = QLabel(game['shortTime'])
+
         self.resultLabel = QLabel()
 
         if game["remake"]:
@@ -990,14 +1067,42 @@ class GameTab(ColorAnimationFrame):
         self.clicked.connect(lambda: signalBus.gameTabClicked.emit(self))
 
     def __initWidget(self):
+        self.kills.setObjectName("kills")
+        self.slash1.setObjectName("slash1")
+        self.deaths.setObjectName("deaths")
+        self.slash2.setObjectName("slash2")
+        self.assists.setObjectName("assists")
+        self.kills.setAlignment(Qt.AlignCenter)
+        self.slash1.setAlignment(Qt.AlignCenter)
+        self.deaths.setAlignment(Qt.AlignCenter)
+        self.slash2.setAlignment(Qt.AlignCenter)
+        self.assists.setAlignment(Qt.AlignCenter)
+
         self.time.setObjectName("time")
 
-    def __initLayout(self):
-        self.nameTimeKdaLayout.addWidget(self.modeName)
-        self.nameTimeKdaLayout.addWidget(self.time)
+        self.kills.setFixedWidth(12)
+        self.slash1.setFixedWidth(6)
+        self.deaths.setFixedWidth(12)
+        self.slash2.setFixedWidth(6)
+        self.assists.setFixedWidth(12)
 
+    def __initLayout(self):
+        self.infoLayout.setContentsMargins(0, 0, 0, 0)
+        self.infoLayout.setSpacing(0)
+
+        self.infoLayout.addWidget(self.time)
+        self.infoLayout.addSpacing(5)
+        self.infoLayout.addWidget(self.kills)
+        self.infoLayout.addWidget(self.slash1)
+        self.infoLayout.addWidget(self.deaths)
+        self.infoLayout.addWidget(self.slash2)
+        self.infoLayout.addWidget(self.assists)
+
+        self.nameTimeKdaLayout.addWidget(self.modeName)
+        self.nameTimeKdaLayout.addLayout(self.infoLayout)
+
+        self.vBoxLayout.setContentsMargins(7, 7, 7, 7)
         self.vBoxLayout.addWidget(self.championIcon)
-        self.vBoxLayout.addSpacing(2)
         self.vBoxLayout.addLayout(self.nameTimeKdaLayout)
 
         self.vBoxLayout.addSpacerItem(QSpacerItem(
@@ -1239,7 +1344,8 @@ class SearchInterface(SeraphineInterface):
                 return
             t2 = time.time()
 
-            logger.debug(f"load games {self.puuid} [{begIdx}-{endIdx}] finish {t2-t1}s", TAG)
+            logger.debug(
+                f"load games {self.puuid} [{begIdx}-{endIdx}] finish {t2-t1}s", TAG)
             # 1000 局搜完了，或者正好上一次就是最后
             # 在切换了puuid时, 就不要再把数据刷到Games上了 -- By Hpero4
             if games['gameCount'] == 0 or self.puuid != puuid:
@@ -1290,7 +1396,8 @@ class SearchInterface(SeraphineInterface):
         await self.updateGameDetailView(tab.gameId, self.puuid)
 
     async def updateGameDetailView(self, gameId, puuid):
-        if cfg.get(cfg.showTierInGameInfo):
+        # if cfg.get(cfg.showTierInGameInfo):
+        if True:
             self.gamesView.gameDetailView.setLoadingPageEnabled(True)
 
         # NOTE self.detailViewLoadTask 用于标记详情正在加载, self.loadGame会为其让行 -- By Hpero4
@@ -1305,7 +1412,8 @@ class SearchInterface(SeraphineInterface):
             game = await self.detailViewLoadTask
             self.gamesView.gameDetailView.updateGame(game)
 
-        if cfg.get(cfg.showTierInGameInfo):
+        # if cfg.get(cfg.showTierInGameInfo):
+        if True:
             self.gamesView.gameDetailView.setLoadingPageEnabled(False)
 
     @asyncSlot(int)

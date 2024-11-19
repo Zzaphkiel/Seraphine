@@ -42,6 +42,26 @@ GameTab>#time {
     font: 12px;
 }
 
+GameTab>#kills {
+    font: 12px;
+}
+
+GameTab>#slash1 {
+    font: 12px;
+}
+
+GameTab>#deaths {
+    font: 12px;
+}
+
+GameTab>#slash2 {
+    font: 12px;
+}
+
+GameTab>#assists {
+    font: 12px;
+}
+
 GameDetailView {
     /* border-left: 1px solid rgb(230, 230, 230);
     border-top-left-radius: 6px;
@@ -74,24 +94,47 @@ TeamView {
     background-color: rgba(245, 245, 245, 0.667);
 }
 
-TeamView>#teamResult {
+TeamView {
+    border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px;
+    background-color: rgba(245, 245, 245, 0.667);
+}
+
+TeamView>#titleBarWidget>QLabel {
+    font: 14px 'Segoe UI', 'Microsoft YaHei';
+    /* border: 1px solid black; */
+}
+
+#titleBarWidget>#teamResult {
     font: bold 18px 'Segoe UI', 'Microsoft YaHei';
     padding-left: 1px;
 }
 
-TeamView>#dmgIconLabel {
+#titleBarWidget>#dmgIconLabel {
     font: bold 14px 'Segoe UI', 'Microsoft YaHei';
     color: rgb(160, 155, 140)
 }
 
-TeamView>QLabel {
-    font: 14px 'Segoe UI', 'Microsoft YaHei';
+#titleBarWidget {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    /* border-bottom: none; */
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 
 SummonerInfoBar {
-    border: 1px solid rgba(0, 0, 0, 0.095);
+    /* border: 1px solid rgba(0, 0, 0, 0.095);
+    border-radius: 6px; */
+    /* background: transparent; */
+    border: none;
     border-radius: 6px;
+    background-color: transparent;
 }
 
 #gameScrollArea {
@@ -106,12 +149,17 @@ SummonerInfoBar {
 
 SummonerInfoBar>QLabel {
     font: 14px 'Segoe UI', 'Microsoft YaHei';
+    /* border: 1px solid black; */
 }
 
 
 SummonerInfoBar#currentSummonerWidget>QLabel {
     font: bold 14px 'Segoe UI', 'Microsoft YaHei';
     color: --ThemeColorPrimary;
+}
+
+SummonerInfoBar[current=true] {
+    background-color: rgba(233, 233, 233, 0.667);
 }
 
 SummonerName {
