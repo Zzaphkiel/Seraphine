@@ -809,14 +809,14 @@ class LolClientConnector(QObject):
     # 同意交换英雄
     @retry()
     async def acceptTrade(self, id):
-        res = await self.__post(f"/lol-champ-select/v1/session/trades/{id}/accept")
-        return await res.json()
+        await self.__post(f"/lol-champ-select/v1/session/trades/{id}/accept")
+        await self.__post(f"/lol-champ-select/v1/ongoing-trade/{id}/clear")
 
     # 同意交换楼层
     @retry()
     async def acceptSwap(self, id):
-        res = await self.__post(f"/lol-champ-select/v1/session/swaps/{id}/accept")
-        return await res.json()
+        await self.__post(f"/lol-champ-select/v1/session/swaps/{id}/accept")
+        await self.__post(f"/lol-champ-select/v1/ongoing-swap/{id}/clear")
 
     # 备战席交换
     async def benchSwap(self, championId):
