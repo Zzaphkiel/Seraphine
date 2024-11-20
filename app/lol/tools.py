@@ -1397,7 +1397,9 @@ async def autoSwap(data, selection: ChampionSelection):
 
     for pickOrderSwap in data['pickOrderSwaps']:
         if 'RECEIVED' == pickOrderSwap['state']:
+            await asyncio.sleep(0.5)
             await connector.acceptSwap(pickOrderSwap['id'])
+
             selection.isChampionPickedCompleted = False
             return True
 
@@ -1411,7 +1413,9 @@ async def autoTrade(data, selection):
 
     for trade in data['trades']:
         if 'RECEIVED' == trade['state']:
+            await asyncio.sleep(0.5)
             await connector.acceptTrade(trade['id'])
+
             return True
 
     return False
