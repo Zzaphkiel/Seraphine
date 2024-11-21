@@ -4,7 +4,8 @@ import traceback
 
 from PyQt5.QtGui import QColor, QClipboard
 from PyQt5.QtCore import QObject
-from app.common.qfluentwidgets import StyleSheetBase, Theme, qconfig, isDarkTheme
+from app.common.qfluentwidgets import (StyleSheetBase, Theme, qconfig, isDarkTheme,
+                                       themeColor)
 
 from app.common.config import cfg
 from app.common.signals import signalBus
@@ -220,6 +221,36 @@ def __getTier4Color():
 @colorManager.registerColor('tier5')
 def __getTier5Color():
     color = QColor.fromRgb(168, 138, 103, 39)
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor("deaths")
+def __getDeathsNumberColor():
+    if isDarkTheme():
+        color = cfg.get(cfg.darkDeathsNumberColor)
+    else:
+        color = cfg.get(cfg.lightDeathsNumberColor)
+
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor("deathsLight")
+def __getDeathsNumberColor():
+    color = cfg.get(cfg.lightDeathsNumberColor)
+
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor("deathsDark")
+def __getDeathsNumberColor():
+    color = cfg.get(cfg.darkDeathsNumberColor)
+
+    return __getStyleSheetColor(color)
+
+
+@colorManager.registerColor("theme")
+def __getThemeColor():
+    color = themeColor()
     return __getStyleSheetColor(color)
 
 

@@ -1,10 +1,10 @@
 # coding:utf-8
 from typing import Union
 
-from app.common.qfluentwidgets import (
-    FluentIconBase, ExpandGroupSettingCard, ConfigItem, qconfig, PushButton, SpinBox,
-    ColorDialog, LineEdit, SwitchButton,  IndicatorPosition, setCustomStyleSheet,
-    SwitchSettingCard, TransparentToolButton, FluentIcon)
+from app.common.qfluentwidgets import (FluentIconBase, ExpandGroupSettingCard,
+                                       ConfigItem, qconfig, PushButton, SpinBox,
+                                       ColorDialog, LineEdit, SwitchButton,
+                                       IndicatorPosition, setCustomStyleSheet, SwitchSettingCard, TransparentToolButton, FluentIcon, setThemeColor)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton,
@@ -219,6 +219,214 @@ class GameTabColorSettingCard(ExpandGroupSettingCard):
         signalBus.customColorChanged.emit('win')
         signalBus.customColorChanged.emit('lose')
         signalBus.customColorChanged.emit('remake')
+
+
+class DeathsNumberColorSettingCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None, lightConfigItem: ConfigItem = None,
+                 darkConfigItem: ConfigItem = None, parent=None):
+        super().__init__(Icon.TEXTCOLOR, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.lightHintLabel = QLabel(self.tr("Color in Light theme:"))
+        self.darkHintLabel = QLabel(self.tr("Color in Dark theme:"))
+
+        self.lightSettingButton = ColorAnimationFrame(type='deathsLight')
+        self.darkSettingButton = ColorAnimationFrame(type='deathsDark')
+
+        self.resetWidget = QWidget()
+        self.resetLayout = QHBoxLayout(self.resetWidget)
+        self.resetButton = PushButton(self.tr("Reset"))
+
+        self.defaultLightColor = QColor(lightConfigItem.defaultValue)
+        self.defaultDarkColor = QColor(darkConfigItem.defaultValue)
+
+        self.lightConfigItem = lightConfigItem
+        self.darkConfigItem = darkConfigItem
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.lightHintLabel, 0, 0, alignment=Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.darkHintLabel, 1, 0, alignment=Qt.AlignLeft)
+
+        self.inputLayout.addWidget(
+            self.lightSettingButton, 0, 1, alignment=Qt.AlignRight)
+        self.inputLayout.addWidget(
+            self.darkSettingButton, 1, 1, alignment=Qt.AlignRight)
+
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.resetLayout.setContentsMargins(48, 18, 44, 18)
+        self.resetLayout.addWidget(self.resetButton, 0, Qt.AlignRight)
+        self.resetLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.resetWidget)
+
+    def __initWidget(self):
+        self.lightSettingButton.setFixedSize(100, 32)
+        self.darkSettingButton.setFixedSize(100, 32)
+
+        self.resetButton.setMinimumWidth(100)
+
+        self.setValue(qconfig.get(self.lightConfigItem),
+                      qconfig.get(self.darkConfigItem))
+
+        self.lightSettingButton.clicked.connect(
+            lambda: self.__onSettingButtonClicked('deathsLight'))
+        self.darkSettingButton.clicked.connect(
+            lambda: self.__onSettingButtonClicked('deathsDark'))
+
+        self.resetButton.clicked.connect(self.__reset)
+
+    def setValue(self, lightColor: QColor = None, darkColor: QColor = None):
+        if lightColor:
+            qconfig.set(self.lightConfigItem, lightColor)
+
+        if darkColor:
+            qconfig.set(self.darkConfigItem, darkColor)
+
+        self.__setStatusLabel()
+
+    def __setStatusLabel(self):
+        if (qconfig.get(self.lightConfigItem) == self.defaultLightColor and
+                qconfig.get(self.darkConfigItem) == self.defaultDarkColor):
+            self.statusLabel.setText(self.tr("Default color"))
+            self.resetButton.setEnabled(False)
+        else:
+            self.statusLabel.setText(self.tr("Custom color"))
+            self.resetButton.setEnabled(True)
+
+    def __onSettingButtonClicked(self, name):
+        if name == 'deathsLight':
+            configItem = self.lightConfigItem
+        elif name == 'deathsDark':
+            configItem = self.darkConfigItem
+
+        w = ColorDialog(
+            qconfig.get(configItem), self.tr('Choose color'), self.window())
+        w.colorChanged.connect(
+            lambda color: self.__onColorChanged(color, name))
+        w.exec()
+
+    def __onColorChanged(self, color, name):
+        if name == 'deathsLight':
+            self.setValue(lightColor=color)
+        elif name == 'deathsDark':
+            self.setValue(darkColor=color)
+
+        signalBus.customColorChanged.emit(name)
+        signalBus.customColorChanged.emit("deaths")
+
+    def __reset(self):
+        self.setValue(self.defaultLightColor, self.defaultDarkColor)
+
+        signalBus.customColorChanged.emit('deathsLight')
+        signalBus.customColorChanged.emit('deathsDark')
+        signalBus.customColorChanged.emit("deaths")
+
+
+class ThemeColorSettingCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None,
+                 colorConfigItem: ConfigItem = None,
+                 parent=None):
+        super().__init__(Icon.PALETTE, title, content, parent)
+
+        self.statusLabel = QLabel(self)
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.colorHintLabel = QLabel(self.tr("Theme color:"))
+
+        self.colorSettingButton = ColorAnimationFrame(type='theme')
+
+        self.resetWidget = QWidget()
+        self.resetLayout = QHBoxLayout(self.resetWidget)
+        self.resetButton = PushButton(self.tr("Reset"))
+
+        self.defaultColor = QColor(colorConfigItem.defaultValue)
+
+        self.colorConfigItem = colorConfigItem
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.inputLayout.setSpacing(19)
+        self.inputLayout.setAlignment(Qt.AlignTop)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+
+        self.inputLayout.addWidget(
+            self.colorHintLabel, 0, 0, alignment=Qt.AlignLeft)
+
+        self.inputLayout.addWidget(
+            self.colorSettingButton, 0, 1, alignment=Qt.AlignRight)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.resetLayout.setContentsMargins(48, 18, 44, 18)
+        self.resetLayout.addWidget(self.resetButton, 0, Qt.AlignRight)
+        self.resetLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.resetWidget)
+
+    def __initWidget(self):
+        self.colorSettingButton.setFixedSize(100, 32)
+        self.resetButton.setMinimumWidth(100)
+
+        self.setValue(qconfig.get(self.colorConfigItem))
+
+        self.colorSettingButton.clicked.connect(self.__onSettingButtonClicked)
+        self.resetButton.clicked.connect(
+            lambda: self.__onColorChanged(self.defaultColor))
+
+    def setValue(self, color):
+        qconfig.set(self.colorConfigItem, color)
+
+        self.__setStatusLabel()
+
+    def __setStatusLabel(self):
+        if qconfig.get(self.colorConfigItem) == self.defaultColor:
+            self.statusLabel.setText(self.tr("Default color"))
+            self.resetButton.setEnabled(False)
+        else:
+            self.statusLabel.setText(self.tr("Custom color"))
+            self.resetButton.setEnabled(True)
+
+    def __onSettingButtonClicked(self):
+        configItem = self.colorConfigItem
+
+        w = ColorDialog(
+            qconfig.get(configItem), self.tr('Choose color'), self.window(), False)
+        w.colorChanged.connect(self.__onColorChanged)
+
+        w.exec()
+
+    def __onColorChanged(self, color):
+        self.setValue(color=color)
+
+        signalBus.customColorChanged.emit('theme')
+        setThemeColor(color)
 
 
 class ProxySettingCard(ExpandGroupSettingCard):

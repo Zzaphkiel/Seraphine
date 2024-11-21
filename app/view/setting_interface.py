@@ -2,7 +2,7 @@
 import os
 
 from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, ComboBoxSettingCard,
-                                       PushSettingCard, ExpandLayout, CustomColorSettingCard, InfoBar,
+                                       PushSettingCard, ExpandLayout, InfoBar,
                                        setTheme, setThemeColor, PrimaryPushSettingCard, HyperlinkCard,
                                        TeachingTip, TeachingTipTailPosition, TeachingTipView, PushButton)
 from PyQt5.QtCore import Qt, QUrl
@@ -16,7 +16,7 @@ from app.common.style_sheet import StyleSheet
 from app.components.seraphine_interface import SeraphineInterface
 from app.components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
                                           LooseSwitchSettingCard, ProxySettingCard,
-                                          )
+                                          DeathsNumberColorSettingCard, ThemeColorSettingCard)
 from app.components.message_box import MultiPathSettingMsgBox
 
 
@@ -156,14 +156,24 @@ class SettingInterface(SeraphineInterface):
                 self.tr("Use system setting")
             ],
             parent=self.personalizationGroup)
-        self.themeColorCard = CustomColorSettingCard(
-            cfg.themeColor, Icon.PALETTE, self.tr("Theme color"),
-            self.tr("Change the theme color of Seraphine"),
-            self.personalizationGroup)
+        # self.themeColorCard = CustomColorSettingCard(
+        #     cfg.themeColor, Icon.PALETTE, self.tr("Theme color"),
+        #     self.tr("Change the theme color of Seraphine"),
+        #     self.personalizationGroup)
+        self.themeColorCard = ThemeColorSettingCard(
+            self.tr("Theme color"), self.tr(
+                "Change the theme color of Seraphine"),
+            cfg.themeColor, self.personalizationGroup)
         self.gameTabColorSettingCard = GameTabColorSettingCard(
             self.tr("Game tabs color"),
             self.tr("Change the color of game tabs"),
             cfg.winCardColor, cfg.loseCardColor, cfg.remakeCardColor,
+            self.personalizationGroup
+        )
+        self.deathNumberColorSettingCard = DeathsNumberColorSettingCard(
+            self.tr("Deaths number color"),
+            self.tr("Change the color of Deaths number of KDA"),
+            cfg.lightDeathsNumberColor, cfg.darkDeathsNumberColor,
             self.personalizationGroup
         )
         self.zoomCard = ComboBoxSettingCard(
@@ -259,6 +269,8 @@ class SettingInterface(SeraphineInterface):
         self.personalizationGroup.addSettingCard(self.themeCard)
         self.personalizationGroup.addSettingCard(self.themeColorCard)
         self.personalizationGroup.addSettingCard(self.gameTabColorSettingCard)
+        self.personalizationGroup.addSettingCard(
+            self.deathNumberColorSettingCard)
         self.personalizationGroup.addSettingCard(self.zoomCard)
         self.personalizationGroup.addSettingCard(self.languageCard)
 
@@ -283,7 +295,6 @@ class SettingInterface(SeraphineInterface):
 
         self.themeCard.comboBox.currentIndexChanged.connect(
             lambda: setTheme(cfg.get(cfg.themeMode)))
-        self.themeColorCard.colorChanged.connect(setThemeColor)
 
         cfg.appRestartSig.connect(self.__showRestartToolTip)
         self.careerGamesCount.pushButton.clicked.connect(

@@ -56,6 +56,11 @@ class Config(QConfig):
     remakeCardColor = ColorConfigItem(
         "Personalization", "RemakeCardColor", '#28a2a2a2')
 
+    lightDeathsNumberColor = ColorConfigItem(
+        "Personalization", "LightDeathsNumberColor", "#ffb60000")
+    darkDeathsNumberColor = ColorConfigItem(
+        "Personalization", "DarkDeathsNumberColor", "#ffff8d8d")
+
     careerGamesNumber = RangeConfigItem("Functions", "CareerGamesNumber", 20,
                                         RangeValidator(10, 100))
     apiConcurrencyNumber = RangeConfigItem("Functions", "ApiConcurrencyNumber", 1,

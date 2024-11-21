@@ -1,16 +1,15 @@
 # coding:utf-8
-from app.view.main_window import MainWindow
-from app.common.config import cfg, VERSION, BETA
-import sys
 import os
-
-import asyncio
-from qasync import QApplication, QEventLoop
-from app.common.qfluentwidgets import FluentTranslator
-from PyQt5.QtCore import Qt, QTranslator
-from PyQt5.QtGui import QFont
-
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QTranslator
+from app.common.qfluentwidgets import FluentTranslator
+from qasync import QApplication, QEventLoop
+import asyncio
+import sys
+from app.common.config import cfg, VERSION, BETA
+from app.view.main_window import MainWindow
 
 
 def main():

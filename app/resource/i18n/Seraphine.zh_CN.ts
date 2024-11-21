@@ -943,6 +943,39 @@ If champions set by lane are not available, default settings will be used.</sour
     </message>
 </context>
 <context>
+    <name>DeathsNumberColorSettingCard</name>
+    <message>
+        <location filename="../../components/setting_cards.py" line="234"/>
+        <source>Color in Light theme:</source>
+        <translation>浅色主题下的颜色：</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="235"/>
+        <source>Color in Dark theme:</source>
+        <translation>深色主题下的颜色：</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="242"/>
+        <source>Reset</source>
+        <translation>恢复默认</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="309"/>
+        <source>Default color</source>
+        <translation>默认颜色</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="312"/>
+        <source>Custom color</source>
+        <translation>自定义颜色</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="321"/>
+        <source>Choose color</source>
+        <translation>选择颜色</translation>
+    </message>
+</context>
+<context>
     <name>DodgeCard</name>
     <message>
         <location filename="../../view/auxiliary_interface.py" line="1073"/>
@@ -1154,42 +1187,42 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>GameTitleBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="853"/>
+        <location filename="../../view/search_interface.py" line="903"/>
         <source>Copy game ID</source>
         <translation>复制游戏 ID</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="912"/>
+        <location filename="../../view/search_interface.py" line="962"/>
         <source>Game ID: </source>
         <translation>游戏 ID：</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="879"/>
+        <location filename="../../view/search_interface.py" line="929"/>
         <source>Remake</source>
         <translation>重开</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="882"/>
+        <location filename="../../view/search_interface.py" line="932"/>
         <source>Win</source>
         <translation>胜利</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="885"/>
+        <location filename="../../view/search_interface.py" line="935"/>
         <source>Lose</source>
         <translation>失败</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="891"/>
+        <location filename="../../view/search_interface.py" line="941"/>
         <source>1st</source>
         <translation>第一名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="893"/>
+        <location filename="../../view/search_interface.py" line="943"/>
         <source>2nd</source>
         <translation>第二名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="895"/>
+        <location filename="../../view/search_interface.py" line="945"/>
         <source>3rd</source>
         <translation>第三名</translation>
     </message>
@@ -1199,27 +1232,27 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">第四名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="897"/>
+        <location filename="../../view/search_interface.py" line="947"/>
         <source>4rd</source>
         <translation>第四名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="899"/>
+        <location filename="../../view/search_interface.py" line="949"/>
         <source>5rd</source>
         <translation>第五名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="901"/>
+        <location filename="../../view/search_interface.py" line="951"/>
         <source>6rd</source>
         <translation>第六名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="903"/>
+        <location filename="../../view/search_interface.py" line="953"/>
         <source>7rd</source>
         <translation>第七名</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="905"/>
+        <location filename="../../view/search_interface.py" line="955"/>
         <source>8th</source>
         <translation>第八名</translation>
     </message>
@@ -1330,12 +1363,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>LooseSwitchSettingCard</name>
     <message>
-        <location filename="../../components/setting_cards.py" line="309"/>
+        <location filename="../../components/setting_cards.py" line="517"/>
         <source>On</source>
         <translation>开</translation>
     </message>
     <message>
-        <location filename="../../components/setting_cards.py" line="310"/>
+        <location filename="../../components/setting_cards.py" line="518"/>
         <source>Off</source>
         <translation>关</translation>
     </message>
@@ -2320,17 +2353,17 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">HTTP 代理地址：</translation>
     </message>
     <message>
-        <location filename="../../components/setting_cards.py" line="298"/>
+        <location filename="../../components/setting_cards.py" line="506"/>
         <source>Enabled, proxy: </source>
         <translation>已启用，代理：</translation>
     </message>
     <message>
-        <location filename="../../components/setting_cards.py" line="300"/>
+        <location filename="../../components/setting_cards.py" line="508"/>
         <source>Disabled</source>
         <translation>未启用</translation>
     </message>
     <message>
-        <location filename="../../components/setting_cards.py" line="234"/>
+        <location filename="../../components/setting_cards.py" line="442"/>
         <source>HTTP proxy:</source>
         <translation>HTTP 代理地址：</translation>
     </message>
@@ -2380,12 +2413,12 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>SearchInterface</name>
     <message>
-        <location filename="../../view/search_interface.py" line="1041"/>
+        <location filename="../../view/search_interface.py" line="1126"/>
         <source>Career</source>
         <translation>生涯</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1112"/>
+        <location filename="../../view/search_interface.py" line="1197"/>
         <source>Summoner not found</source>
         <translation>召唤师未找到</translation>
     </message>
@@ -2395,32 +2428,32 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">请检查召唤师名后重试</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1059"/>
+        <location filename="../../view/search_interface.py" line="1144"/>
         <source>Please input summoner name</source>
         <translation>请输入同大区召唤师名及编号</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1151"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1151"/>
         <source>Normal</source>
         <translation>匹配模式</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1151"/>
         <source>A.R.A.M.</source>
         <translation>极地大乱斗</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1151"/>
         <source>Ranked Solo</source>
         <translation>单 / 双排</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1066"/>
+        <location filename="../../view/search_interface.py" line="1151"/>
         <source>Ranked Flex</source>
         <translation>灵活排位</translation>
     </message>
@@ -2435,7 +2468,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">没有找到该玩家相关对局</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="1112"/>
+        <location filename="../../view/search_interface.py" line="1197"/>
         <source>Please check the summoner&apos;s name and retry</source>
         <translation>请检查召唤师名后重试</translation>
     </message>
@@ -2506,47 +2539,47 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>深色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="179"/>
+        <location filename="../../view/setting_interface.py" line="189"/>
         <source>Use system setting</source>
         <translation>跟随系统设置</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="159"/>
+        <location filename="../../view/setting_interface.py" line="163"/>
         <source>Theme color</source>
         <translation>主题色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="159"/>
+        <location filename="../../view/setting_interface.py" line="163"/>
         <source>Change the theme color of Seraphine</source>
         <translation>调整 Seraphine 的主题色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="169"/>
+        <location filename="../../view/setting_interface.py" line="179"/>
         <source>Interface zoom</source>
         <translation>界面缩放</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="169"/>
+        <location filename="../../view/setting_interface.py" line="179"/>
         <source>Change the size of widgets and fonts</source>
         <translation>调整部件和字体的大小</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="311"/>
+        <location filename="../../view/setting_interface.py" line="322"/>
         <source>Updated successfully</source>
         <translation>更新成功</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="305"/>
+        <location filename="../../view/setting_interface.py" line="316"/>
         <source>Configuration takes effect after restart</source>
         <translation>设置在重启软件后生效</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="179"/>
+        <location filename="../../view/setting_interface.py" line="189"/>
         <source>Language</source>
         <translation>语言</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="179"/>
+        <location filename="../../view/setting_interface.py" line="189"/>
         <source>Set your preferred language for Seraphine</source>
         <translation>选择 Seraphine 所使用的语言</translation>
     </message>
@@ -2577,27 +2610,27 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">在对局详情界面中显示段位图标，启动该选项将影响加载该界面的速度</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="212"/>
+        <location filename="../../view/setting_interface.py" line="222"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="203"/>
+        <location filename="../../view/setting_interface.py" line="213"/>
         <source>Provide feedback</source>
         <translation>提供反馈</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="203"/>
+        <location filename="../../view/setting_interface.py" line="213"/>
         <source>Help us improve Seraphine by providing feedback</source>
         <translation>通过提供反馈帮助我们改善 Seraphine</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="212"/>
+        <location filename="../../view/setting_interface.py" line="222"/>
         <source>Copyright</source>
         <translation>版权所有</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="212"/>
+        <location filename="../../view/setting_interface.py" line="222"/>
         <source>Version</source>
         <translation>当前版本</translation>
     </message>
@@ -2617,12 +2650,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>删除所有游戏资源的缓存（建议在游戏资源有更新时使用）</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="212"/>
+        <location filename="../../view/setting_interface.py" line="222"/>
         <source>View GitHub</source>
         <translation>查看 GitHub</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="337"/>
+        <location filename="../../view/setting_interface.py" line="348"/>
         <source>Really?</source>
         <translation>真的要删除吗？</translation>
     </message>
@@ -2634,7 +2667,7 @@ If champions set by lane are not available, default settings will be used.</sour
                 这有可能会消耗更多的时间</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="345"/>
+        <location filename="../../view/setting_interface.py" line="356"/>
         <source>Confirm delete</source>
         <translation>确定删除</translation>
     </message>
@@ -2659,7 +2692,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>点击右上角关闭时将程序最小化到托盘</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="311"/>
+        <location filename="../../view/setting_interface.py" line="322"/>
         <source>Settings have been applied</source>
         <translation>设置已应用</translation>
     </message>
@@ -2674,12 +2707,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>打开此选项后，当你在排位时，对局信息界面将只显示排位模式对局战绩</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="190"/>
+        <location filename="../../view/setting_interface.py" line="200"/>
         <source>Check for updates</source>
         <translation>检查更新</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="190"/>
+        <location filename="../../view/setting_interface.py" line="200"/>
         <source>Automatically check for updates when software starts</source>
         <translation>在 Seraphine 启动时自动检查更新</translation>
     </message>
@@ -2714,12 +2747,12 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="196"/>
+        <location filename="../../view/setting_interface.py" line="206"/>
         <source>Using a proxy when connecting to GitHub</source>
         <translation>连接 GitHub 时启用 HTTP 代理</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="188"/>
+        <location filename="../../view/setting_interface.py" line="198"/>
         <source>Update</source>
         <translation>软件更新</translation>
     </message>
@@ -2739,17 +2772,17 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>该值越大数据加载速度越快，但越可能引起客户端闪退</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="163"/>
+        <location filename="../../view/setting_interface.py" line="167"/>
         <source>Game tabs color</source>
         <translation>对局卡片颜色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="163"/>
+        <location filename="../../view/setting_interface.py" line="167"/>
         <source>Change the color of game tabs</source>
         <translation>改变对局卡片提示胜利 / 失败的颜色</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="196"/>
+        <location filename="../../view/setting_interface.py" line="206"/>
         <source>HTTP proxy</source>
         <translation>HTTP 代理</translation>
     </message>
@@ -2789,7 +2822,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation>在搜索界面对局详情界面中显示段位，启动该选项将影响加载该界面的速度</translation>
     </message>
     <message>
-        <location filename="../../view/setting_interface.py" line="337"/>
+        <location filename="../../view/setting_interface.py" line="348"/>
         <source>Game resources will be downloaded again
 when they are used by Seraphine, which will cost more time</source>
         <translation>游戏资源将会在它们要被 Seraphine 使用时重新下载，
@@ -2834,6 +2867,16 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../view/setting_interface.py" line="74"/>
         <source>Reserve Game Information interface until the next champion selection starts</source>
         <translation>保留上一局的对局信息内容直到下一次对局开始</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="173"/>
+        <source>Deaths number color</source>
+        <translation>死亡数字体颜色</translation>
+    </message>
+    <message>
+        <location filename="../../view/setting_interface.py" line="173"/>
+        <source>Change the color of Deaths number of KDA</source>
+        <translation>改变 KDA 标签中死亡数字的字体颜色</translation>
     </message>
 </context>
 <context>
@@ -3001,7 +3044,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SummonerInfoBar</name>
     <message>
-        <location filename="../../view/search_interface.py" line="768"/>
+        <location filename="../../view/search_interface.py" line="799"/>
         <source>Unranked</source>
         <translation>未定级</translation>
     </message>
@@ -3061,52 +3104,52 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>TeamView</name>
     <message>
-        <location filename="../../view/search_interface.py" line="605"/>
+        <location filename="../../view/search_interface.py" line="627"/>
         <source>Winner</source>
         <translation>胜方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="609"/>
+        <location filename="../../view/search_interface.py" line="631"/>
         <source>Loser</source>
         <translation>败方</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="506"/>
+        <location filename="../../view/search_interface.py" line="520"/>
         <source>Tower destroyed</source>
         <translation>摧毁防御塔</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="507"/>
+        <location filename="../../view/search_interface.py" line="521"/>
         <source>Inhibitor destroyed</source>
         <translation>摧毁召唤水晶</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="508"/>
+        <location filename="../../view/search_interface.py" line="522"/>
         <source>Baron Nashor killed</source>
         <translation>击杀男爵</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="509"/>
+        <location filename="../../view/search_interface.py" line="523"/>
         <source>Dragon killed</source>
         <translation>击杀巨龙</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="510"/>
+        <location filename="../../view/search_interface.py" line="524"/>
         <source>Rift Herald killed</source>
         <translation>击杀峡谷先锋</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="523"/>
+        <location filename="../../view/search_interface.py" line="537"/>
         <source>Minions killed</source>
         <translation>小兵及野怪击杀</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="524"/>
+        <location filename="../../view/search_interface.py" line="538"/>
         <source>Gold earned</source>
         <translation>获取金钱</translation>
     </message>
     <message>
-        <location filename="../../view/search_interface.py" line="525"/>
+        <location filename="../../view/search_interface.py" line="539"/>
         <source>Damage dealed to champions</source>
         <translation>对英雄造成伤害</translation>
     </message>
@@ -3132,6 +3175,34 @@ when they are used by Seraphine, which will cost more time</source>
         <location filename="../../view/career_interface.py" line="675"/>
         <source>Losses: </source>
         <translation>负：</translation>
+    </message>
+</context>
+<context>
+    <name>ThemeColorSettingCard</name>
+    <message>
+        <location filename="../../components/setting_cards.py" line="355"/>
+        <source>Theme color:</source>
+        <translation>设置主题色：</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="361"/>
+        <source>Reset</source>
+        <translation>恢复默认</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="410"/>
+        <source>Default color</source>
+        <translation>默认颜色</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="413"/>
+        <source>Custom color</source>
+        <translation>自定义颜色</translation>
+    </message>
+    <message>
+        <location filename="../../components/setting_cards.py" line="419"/>
+        <source>Choose color</source>
+        <translation>选择颜色</translation>
     </message>
 </context>
 <context>
