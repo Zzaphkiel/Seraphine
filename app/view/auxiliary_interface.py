@@ -1082,7 +1082,6 @@ class DodgeCard(SettingCard):
 
 
 class LockConfigCard(SettingCard):
-
     def __init__(self, title, content, parent):
         super().__init__(Icon.LOCK, title, content, parent)
 
@@ -1099,6 +1098,7 @@ class LockConfigCard(SettingCard):
         if not os.path.exists(path):
             self.switchButton.setChecked(False)
             self.switchButton.setEnabled(False)
+
             return
 
         try:
@@ -1135,6 +1135,7 @@ class LockConfigCard(SettingCard):
         try:
             os.chmod(path, mode)
             currentMode = stat.S_IMODE(os.lstat(path).st_mode)
+
             if currentMode != mode:
                 return False
         except:

@@ -334,7 +334,8 @@ class OpggWindow(OpggWindowBase):
         if pos:
             self.__setComboBoxCurrentData(self.positionComboBox, pos)
 
-        await self.updateAndSwitchTo(self.tierInterface, self.buildInterface)
+        current = self.stackedWidget.currentWidget()
+        await self.updateAndSwitchTo(current, self.buildInterface)
 
     async def updateAndSwitchTo(self, current, to):
         """
@@ -364,9 +365,6 @@ class OpggWindow(OpggWindowBase):
         except Exception as e:
             stack = traceback.format_exc()
             logger.error(f"Get OPGG data failed, {stack}\n{e}", TAG)
-
-            # DEBUG
-            print(f"{stack}\n{e}")
 
             # 记录一下是想要进入到哪个界面时加载出错了
             self.errorInterface.setFromInterface(to)

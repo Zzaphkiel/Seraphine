@@ -2,23 +2,24 @@ from typing import List
 
 from PyQt5.QtWidgets import (QHBoxLayout, QWidget, QFrame, QVBoxLayout, QSpacerItem,
                              QSizePolicy, QLabel, QHBoxLayout, QWidget, QLabel, QFrame,
-                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout, QGridLayout,
-                             )
+                             QVBoxLayout, QSpacerItem, QSizePolicy, QLayout, QGridLayout)
 from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap, QColor, QCursor
 from qasync import asyncSlot
 
 from app.lol.tools import ToolsTranslator
-from app.components.animation_frame import ColorAnimationFrame, NoBorderColorAnimationFrame
+from app.components.animation_frame import (ColorAnimationFrame,
+                                            NoBorderColorAnimationFrame, CardWidget)
 from app.components.transparent_button import PrimaryButton
 from app.components.champion_icon_widget import RoundIcon, RoundedLabel
 from app.common.style_sheet import StyleSheet
 from app.common.qfluentwidgets import (SmoothScrollArea, IconWidget, isDarkTheme,
                                        ToolTipFilter, ToolTipPosition, PushButton,
                                        PrimaryToolButton, FluentIcon, PillToolButton,
-                                       TransparentToolButton)
+                                       TransparentToolButton, ThemeColor)
 from app.common.icons import Icon
-from app.common.config import qconfig
+from app.common.config import qconfig, cfg
+from app.common.signals import signalBus
 from app.lol.connector import connector
 
 
@@ -629,8 +630,7 @@ class CounterChampionWidget(QFrame):
         self.hBoxLayout = QHBoxLayout(self)
 
         self.winRate = data['winRate']
-        self.icon = RoundIcon(data['icon'], 26, 4, 3)
-        self.nameLabel = QLabel(data['name'])
+        self.champion = ChampionWidget(data)
         self.winRateLabel = QLabel(f"{self.winRate*100:.2f}%")
         self.playsLabel = QLabel(f"{data['play']:,} " + self.tr("Games"))
 
@@ -645,9 +645,6 @@ class CounterChampionWidget(QFrame):
         self.setFixedHeight(32)
 
     def __initWidget(self):
-        self.nameLabel.setObjectName("bodyLabel")
-        self.nameLabel.setContentsMargins(0, 0, 0, 2)
-
         self.winRateLabel.setObjectName("boldBodyLabel")
         self.winRateLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.winRateLabel.setFixedWidth(43)
@@ -663,9 +660,7 @@ class CounterChampionWidget(QFrame):
 
     def __initLayout(self):
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.hBoxLayout.addWidget(self.icon)
-        self.hBoxLayout.addSpacing(2)
-        self.hBoxLayout.addWidget(self.nameLabel)
+        self.hBoxLayout.addWidget(self.champion)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addWidget(self.playsLabel)
@@ -685,6 +680,76 @@ class CounterChampionWidget(QFrame):
                 color = f"color: rgb({255 - self.color}, 255, {255 - self.color})"
 
         self.winRateLabel.setStyleSheet(color)
+
+
+class ChampionWidget(QFrame):
+    def __init__(self, data: dict, d=26, o=4, w=2, s=2, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.icon = RoundIcon(data['icon'], d, o, w)
+        self.nameLabel = QLabel(data['name'])
+        self.championId = data.get('championId')
+
+        self.space = s
+
+        self.__initWidget()
+        self.__initLayout()
+
+        cfg.themeChanged.connect(self.__setDefaultLabelColor)
+
+    def __initWidget(self):
+        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self.nameLabel.setObjectName("bodyLabel")
+        self.nameLabel.setContentsMargins(0, 0, 0, 1)
+
+    def __initLayout(self):
+        self.hBoxLayout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.hBoxLayout.addWidget(self.icon, alignment=Qt.AlignCenter)
+        self.hBoxLayout.addSpacing(self.space)
+        self.hBoxLayout.addWidget(self.nameLabel, alignment=Qt.AlignCenter)
+
+    # Q: 为什么这堆东西不写到 qss 里面？
+    # A: 因为不会 ^^_
+    #    qss 写不了类似 ChampionWidget:hover>#bodyLabel 一类的玩意
+    def __setDefaultLabelColor(self):
+        color = 'white' if isDarkTheme() else 'black'
+        self.nameLabel.setStyleSheet(f"QLabel {{color: {color};}}")
+
+    def __setHoverLabelColor(self):
+        color = ThemeColor.DARK_1.color()
+        self.nameLabel.setStyleSheet(f"QLabel {{color: {color.name()};}}")
+
+    def __setPressedLabelColor(self):
+        color = ThemeColor.LIGHT_1.color()
+        self.nameLabel.setStyleSheet(f"QLabel {{color: {color.name()};}}")
+
+    def enterEvent(self, e):
+        self.__setHoverLabelColor()
+        return super().enterEvent(e)
+
+    def leaveEvent(self, a0):
+        self.__setDefaultLabelColor()
+        return super().leaveEvent(a0)
+
+    def mousePressEvent(self, a0):
+        self.__setPressedLabelColor()
+        return super().mousePressEvent(a0)
+
+    def mouseReleaseEvent(self, a0):
+        self.__setHoverLabelColor()
+        self.__onMouseClicked()
+
+        return super().mouseReleaseEvent(a0)
+
+    def __onMouseClicked(self):
+        if not self.championId:
+            return
+
+        signalBus.toOpggBuildInterface.emit(self.championId, "", "")
 
 
 class ChampionCountersWidget(BuildWidgetBase):
@@ -1217,8 +1282,7 @@ class SynergyItemWidget(QFrame):
         super().__init__(parent)
 
         self.hBoxLayout = QHBoxLayout(self)
-        self.icon = RoundIcon(data['icon'], 32, 4, 3)
-        self.name = QLabel(data['name'])
+        self.champion = ChampionWidget(data, 32, 4, 3, 5)
 
         self.averagePlaceLayout = QVBoxLayout()
         self.averagePlaceTextLabel = QLabel(self.tr("Average Place"))
@@ -1241,9 +1305,6 @@ class SynergyItemWidget(QFrame):
         self.__initLayout()
 
     def __initWidget(self):
-        self.name.setObjectName("bodyLabel")
-        self.name.setContentsMargins(0, 0, 0, 2)
-
         self.averagePlaceLabel.setObjectName("bodyLabel")
         self.averagePlaceTextLabel.setObjectName("grayBodyLabel")
         self.averagePlaceTextLabel.setFixedWidth(81)
@@ -1288,9 +1349,7 @@ class SynergyItemWidget(QFrame):
         self.winRateLayout.addWidget(self.playLabel, alignment=Qt.AlignCenter)
 
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.hBoxLayout.addWidget(self.icon)
-        self.hBoxLayout.addSpacing(4)
-        self.hBoxLayout.addWidget(self.name)
+        self.hBoxLayout.addWidget(self.champion)
         self.hBoxLayout.addSpacerItem(QSpacerItem(
             0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         self.hBoxLayout.addLayout(self.averagePlaceLayout)
