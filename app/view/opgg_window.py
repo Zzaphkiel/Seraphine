@@ -499,7 +499,7 @@ class OpggWindow(OpggWindowBase):
         dpi = self.devicePixelRatioF()
         x = pos.right()
         y = pos.center().y() - size.height() * dpi / 2
-        rect = QRect(x // dpi, y // dpi, size.width(), size.height())
+        rect = QRect( int(x / dpi), int(y / dpi), size.width(), size.height())
 
         # 如果超出右边界，则直接 return 了
         screenWidth = win32api.GetSystemMetrics(0)
