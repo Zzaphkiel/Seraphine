@@ -11,7 +11,7 @@ import pyperclip
 import asyncio
 from aiohttp.client_exceptions import ClientConnectorError
 from qasync import asyncClose, asyncSlot
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QEvent
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 
@@ -100,6 +100,8 @@ class MainWindow(FluentWindow):
 
         self.lastTipsTime = time.time()
         self.lastTipsType = None
+
+        self.isDragging = False
 
         self.__initInterface()
         self.__initNavigation()
@@ -1037,3 +1039,10 @@ class MainWindow(FluentWindow):
     def __onCurrentStackedChanged(self, index):
         widget: SmoothScrollArea = self.stackedWidget.view.currentWidget()
         widget.delegate.vScrollBar.resetValue(0)
+
+    def eventFilter(self, obj, e: QEvent):
+        # Fix #553
+        if e.type() == QEvent.Type.MouseButtonRelease:
+            self.adjustSize()
+
+        return super().eventFilter(obj, e)

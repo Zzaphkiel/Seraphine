@@ -4,7 +4,7 @@ import traceback
 
 from qasync import asyncSlot, asyncClose
 from PyQt5.QtGui import QColor, QPainter, QIcon, QShowEvent
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QRect
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QRect, QEvent
 from PyQt5.QtWidgets import (QHBoxLayout, QStackedWidget, QWidget, QLabel,
                              QFrame, QVBoxLayout, QSpacerItem, QSizePolicy,
                              QApplication)
@@ -499,7 +499,7 @@ class OpggWindow(OpggWindowBase):
         dpi = self.devicePixelRatioF()
         x = pos.right()
         y = pos.center().y() - size.height() * dpi / 2
-        rect = QRect( int(x / dpi), int(y / dpi), size.width(), size.height())
+        rect = QRect(int(x / dpi), int(y / dpi), size.width(), size.height())
 
         # 如果超出右边界，则直接 return 了
         screenWidth = win32api.GetSystemMetrics(0)
@@ -521,6 +521,13 @@ class OpggWindow(OpggWindowBase):
     def setHomeInterfaceEnabled(self, enabeld):
         interface = self.homeInterface if enabeld else self.tierInterface
         self.stackedWidget.setCurrentWidget(interface)
+
+    def eventFilter(self, obj, e: QEvent):
+        # Fix #553
+        if e.type() == QEvent.Type.MouseButtonRelease:
+            self.adjustSize()
+
+        return super().eventFilter(obj, e)
 
 
 class WaitingInterface(QFrame):
