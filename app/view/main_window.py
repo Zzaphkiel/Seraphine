@@ -11,7 +11,7 @@ import pyperclip
 import asyncio
 from aiohttp.client_exceptions import ClientConnectorError
 from qasync import asyncClose, asyncSlot
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QEvent
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QEvent, QTimer
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 
@@ -101,8 +101,6 @@ class MainWindow(FluentWindow):
         self.lastTipsTime = time.time()
         self.lastTipsType = None
 
-        self.isDragging = False
-
         self.__initInterface()
         self.__initNavigation()
         self.__initListener()
@@ -114,6 +112,8 @@ class MainWindow(FluentWindow):
         self.opggWindow = OpggWindow()
 
         logger.critical("Seraphine initialized", TAG)
+
+        self.__silentStart()
 
     def __initConfig(self):
         folder = cfg.get(cfg.lolFolder)
@@ -278,6 +278,7 @@ class MainWindow(FluentWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.show()
+
         QApplication.processEvents()
 
         self.oldHook = sys.excepthook
@@ -739,6 +740,12 @@ class MainWindow(FluentWindow):
         else:
             a0.ignore()
             self.hide()
+
+    def __silentStart(self):
+        if not cfg.get(cfg.enableSilent):
+            return
+
+        QTimer.singleShot(0, self.hide)
 
     @asyncSlot(str)
     async def __switchToSearchInterface(self, name):

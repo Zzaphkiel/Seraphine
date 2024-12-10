@@ -163,6 +163,9 @@ class Config(QConfig):
     enableReserveGameinfo = ConfigItem(
         "Functions", "EnableReserveGameinfo", False, BoolValidator())
 
+    enableSilent = ConfigItem(
+        "General", "EnableSilent", False, BoolValidator())
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"

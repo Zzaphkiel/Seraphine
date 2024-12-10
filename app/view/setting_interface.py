@@ -91,6 +91,13 @@ class SettingInterface(SeraphineInterface):
         self.lolFolderCard.button.setStyleSheet(
             "QPushButton {padding-left: 0; padding-right: 0;}")
 
+        self.silentCard = SwitchSettingCard(
+            Icon.SNOOZE, self.tr("Silently start"),
+            self.tr(
+                "Show Seraphine window minimized when it starts"),
+            cfg.enableSilent
+        )
+
         self.logGroup = SettingCardGroup(self.tr("Log"), self.scrollWidget)
 
         self.logLevelCard = ComboBoxSettingCard(
@@ -197,6 +204,7 @@ class SettingInterface(SeraphineInterface):
 
         self.updateGroup = SettingCardGroup(
             self.tr("Update"), self.scrollWidget)
+
         self.checkUpdateCard = SwitchSettingCard(
             Icon.UPDATE, self.tr("Check for updates"),
             self.tr(
@@ -261,6 +269,7 @@ class SettingInterface(SeraphineInterface):
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
         self.generalGroup.addSettingCard(self.deleteResourceCard)
         self.generalGroup.addSettingCard(self.enableCloseToTray)
+        self.generalGroup.addSettingCard(self.silentCard)
 
         self.logGroup.addSettingCard(self.logLevelCard)
         self.logGroup.addSettingCard(self.viewLogCard)
