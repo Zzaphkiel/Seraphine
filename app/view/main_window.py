@@ -11,7 +11,7 @@ import pyperclip
 import asyncio
 from aiohttp.client_exceptions import ClientConnectorError
 from qasync import asyncClose, asyncSlot
-from PyQt5.QtCore import Qt, pyqtSignal, QSize, QEvent, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QSize, QEvent, QTimer, QPoint
 from PyQt5.QtGui import QIcon, QImage
 from PyQt5.QtWidgets import QApplication, QSystemTrayIcon
 
@@ -65,6 +65,8 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         logger.critical(f"Seraphine started, version: {BETA or VERSION}", TAG)
+
+        self.windowSize = cfg.get(cfg.windowSize)
 
         self.__initConfig()
         self.__initWindow()
@@ -258,7 +260,6 @@ class MainWindow(FluentWindow):
         self.mainWindowHide.connect(self.__onWindowHide)
 
     def __initWindow(self):
-        self.resize(1134, 826)
         self.setMinimumSize(1134, 826)
         self.setWindowIcon(QIcon("app/resource/images/logo.png"))
         self.setWindowTitle("Seraphine")
@@ -736,6 +737,8 @@ class MainWindow(FluentWindow):
             self.__terminateListeners()
             self.opggWindow.close()
 
+            cfg.set(cfg.windowSize, self.windowSize)
+
             return super().closeEvent(a0)
         else:
             a0.ignore()
@@ -1048,8 +1051,11 @@ class MainWindow(FluentWindow):
         widget.delegate.vScrollBar.resetValue(0)
 
     def eventFilter(self, obj, e: QEvent):
-        # Fix #553
-        if e.type() == QEvent.Type.MouseButtonRelease:
-            self.adjustSize()
+        # Fix #553, #560
+        if e.type() == QEvent.Type.Resize:
+            self.windowSize = self.size()
+
+        if e.type() == QEvent.Type.Move:
+            self.resize(self.windowSize)
 
         return super().eventFilter(obj, e)

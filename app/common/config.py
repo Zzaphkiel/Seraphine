@@ -2,7 +2,8 @@ from enum import Enum
 import os
 import sys
 
-from PyQt5.QtCore import QLocale
+from PyQt5.QtCore import QLocale, QSize
+
 
 from .qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
                              OptionsConfigItem, OptionsValidator, ConfigSerializer,
@@ -16,12 +17,20 @@ class Language(Enum):
 
 
 class LanguageSerializer(ConfigSerializer):
-
     def serialize(self, language: Language):
         return language.value.name() if language != Language.AUTO else "Auto"
 
     def deserialize(self, value: str):
         return Language(QLocale(value)) if value != 'Auto' else Language.AUTO
+
+
+class QSizeSerializer(ConfigSerializer):
+    def serialize(self, size: QSize) -> str:
+        return f"{size.width()}, {size.height()}"
+
+    def deserialize(self, value: str) -> QSize:
+        width, height = map(int, value.split(', '))
+        return QSize(width, height)
 
 
 def isWin11():
@@ -165,6 +174,9 @@ class Config(QConfig):
 
     enableSilent = ConfigItem(
         "General", "EnableSilent", False, BoolValidator())
+
+    windowSize = ConfigItem("Personalization", "WindowSize", QSize(
+        1134, 826), None, QSizeSerializer())
 
 
 YEAR = 2023

@@ -524,7 +524,7 @@ class OpggWindow(OpggWindowBase):
 
     def eventFilter(self, obj, e: QEvent):
         # Fix #553
-        if e.type() == QEvent.Type.MouseButtonRelease:
+        if e.type() == QEvent.Type.Move:
             self.adjustSize()
 
         return super().eventFilter(obj, e)
