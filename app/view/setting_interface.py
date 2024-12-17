@@ -66,17 +66,26 @@ class SettingInterface(SeraphineInterface):
                 "Show tier icon in game information interface. Enabling this option affects APP's performance"),
             cfg.showTierInGameInfo)
 
-        self.autoShowOpggCard = SwitchSettingCard(
-            Icon.WINDOW, self.tr("Show OP.GG window automatically"),
-            self.tr("Show OP.GG window automatically when champion selection starts"),
-            cfg.autoShowOpgg)
-
         self.autoClearGameinfoCard = SwitchSettingCard(
             Icon.ATTACHTEXT, self.tr("Reserve Game Information interface"),
             self.tr(
                 "Reserve Game Information interface until the next champion selection starts"),
             cfg.enableReserveGameinfo
         )
+
+        self.opggGroup = SettingCardGroup(self.tr("OP.GG"),
+                                          self.scrollWidget)
+
+        self.autoShowOpggCard = SwitchSettingCard(
+            Icon.WINDOW, self.tr("Show OP.GG window automatically"),
+            self.tr("Show OP.GG window automatically when champion selection starts"),
+            cfg.autoShowOpgg)
+        self.opggOnTopCard = SwitchSettingCard(
+            Icon.PADDINGTOP, self.tr(
+                "Show OP.GG window on top"),
+            self.tr(
+                "Show OP.GG window in front of other windows while selecting champions"),
+            cfg.enableOpggOnTop)
 
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
@@ -262,8 +271,10 @@ class SettingInterface(SeraphineInterface):
         self.functionGroup.addSettingCard(self.careerGamesCount)
         self.functionGroup.addSettingCard(self.gameInfoFilterCard)
         self.functionGroup.addSettingCard(self.autoClearGameinfoCard)
-        self.functionGroup.addSettingCard(self.autoShowOpggCard)
         self.functionGroup.addSettingCard(self.gameInfoShowTierCard)
+
+        self.opggGroup.addSettingCard(self.autoShowOpggCard)
+        self.opggGroup.addSettingCard(self.opggOnTopCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)
@@ -293,6 +304,7 @@ class SettingInterface(SeraphineInterface):
         self.expandLayout.setSpacing(30)
         self.expandLayout.setContentsMargins(36, 0, 36, 0)
         self.expandLayout.addWidget(self.functionGroup)
+        self.expandLayout.addWidget(self.opggGroup)
         self.expandLayout.addWidget(self.generalGroup)
         self.expandLayout.addWidget(self.logGroup)
         self.expandLayout.addWidget(self.personalizationGroup)

@@ -827,6 +827,9 @@ class MainWindow(FluentWindow):
 
         self.isGaming = isGaming
 
+        if status != 'ChampSelect':
+            self.opggWindow.setStaysOnTopEnabled(False)
+
         if title != None:
             self.setWindowTitle("Seraphine - " + title)
 
@@ -866,6 +869,9 @@ class MainWindow(FluentWindow):
 
         if cfg.get(cfg.autoShowOpgg):
             self.opggWindow.show()
+
+            if cfg.get(cfg.enableOpggOnTop):
+                self.opggWindow.setStaysOnTopEnabled(True)
 
         currentSummonerId = self.currentSummoner['summonerId']
         info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
@@ -997,6 +1003,8 @@ class MainWindow(FluentWindow):
 
     def showOpggWindow(self):
         self.opggWindow.show()
+        self.opggWindow.showNormal()
+
         self.opggWindow.raise_()
 
     @asyncSlot()

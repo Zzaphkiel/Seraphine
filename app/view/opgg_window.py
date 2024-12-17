@@ -88,6 +88,35 @@ class OpggWindowBase(BackgroundAnimationWidget, FramelessWindow):
     def isMicaEffectEnabled(self):
         return self._isMicaEnabled
 
+    def setStaysOnTopEnabled(self, enable: bool):
+        isMinimized = self.isMinimized()
+        isVisiable = self.isVisible()
+
+        if enable:
+            flag = self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint
+        else:
+            flag = self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint
+
+        self.setWindowFlags(flag)
+
+        self.windowEffect.enableBlurBehindWindow(self.winId())
+        self.windowEffect.addWindowAnimation(self.winId())
+
+        if sys.platform == 'win32' and sys.getwindowsversion().build >= 22000:
+            self.windowEffect.addShadowEffect(self.winId())
+
+        if not isMinimized and isVisiable:
+            self.show()
+        elif isVisiable and isMinimized:
+            self.showMinimized()
+            self.setWindowState(self.windowState() | Qt.WindowMinimized)
+
+    def show(self):
+        self.activateWindow()
+        self.setWindowState(self.windowState() & ~
+                            Qt.WindowMinimized | Qt.WindowActive)
+        self.showNormal()
+
 
 class OpggWindow(OpggWindowBase):
     def __init__(self, parent=None):
@@ -524,7 +553,7 @@ class OpggWindow(OpggWindowBase):
 
     def eventFilter(self, obj, e: QEvent):
         # Fix #553
-        if e.type() == QEvent.Type.Move:
+        if e.type() == QEvent.Type.MouseButtonRelease:
             self.adjustSize()
 
         return super().eventFilter(obj, e)
