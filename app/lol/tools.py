@@ -304,6 +304,7 @@ async def parseGameDetailData(puuid, game):
             'riftHeraldIcon': f'app/resource/images/herald-{teamId}.png',
             'inhibitorKills': 0,
             'inhibitorIcon': f'app/resource/images/inhibitor-{teamId}.png',
+            'hordeKills': 0,
             'towerKills': 0,
             'towerIcon': f'app/resource/images/tower-{teamId}.png',
             'kills': 0,
@@ -341,6 +342,7 @@ async def parseGameDetailData(puuid, game):
         teams[teamId]['baronKills'] = team['baronKills']
         teams[teamId]['dragonKills'] = team['dragonKills']
         teams[teamId]['riftHeraldKills'] = team['riftHeraldKills']
+        teams[teamId]['hordeKills'] = team['hordeKills']
         teams[teamId]['towerKills'] = team['towerKills']
         teams[teamId]['inhibitorKills'] = team['inhibitorKills']
 

@@ -503,7 +503,8 @@ class TeamView(QFrame, ColorChangeable):
         self.baronIconLabel.setAlignment(Qt.AlignCenter)
         self.dragonIconLabel.setToolTip(self.tr("Dragon killed"))
         self.dragonIconLabel.setAlignment(Qt.AlignCenter)
-        self.riftHeraldIconLabel.setToolTip(self.tr("Rift Herald killed"))
+        self.riftHeraldIconLabel.setToolTip(
+            self.tr("Rift Herald / Horde killed"))
         self.riftHeraldIconLabel.setAlignment(Qt.AlignCenter)
 
         self.towerIconLabel.installEventFilter(ToolTipFilter(
@@ -521,7 +522,8 @@ class TeamView(QFrame, ColorChangeable):
         self.inhibitorKillsLabel.setToolTip(self.tr("Inhibitor destroyed"))
         self.baronKillsLabel.setToolTip(self.tr("Baron Nashor killed"))
         self.dragonKillsLabel.setToolTip(self.tr("Dragon killed"))
-        self.riftHeraldKillsLabel.setToolTip(self.tr("Rift Herald killed"))
+        self.riftHeraldKillsLabel.setToolTip(
+            self.tr("Rift Herald / Horde killed"))
 
         self.towerKillsLabel.installEventFilter(ToolTipFilter(
             self.towerKillsLabel, 500, ToolTipPosition.TOP))
@@ -612,6 +614,7 @@ class TeamView(QFrame, ColorChangeable):
         dragonKills = team['dragonKills']
         riftHeraldIcon = team['riftHeraldIcon']
         riftHeraldKills = team['riftHeraldKills']
+        hordeKills = team['hordeKills']
         inhibitorIcon = team['inhibitorIcon']
         inhibitorKills = team['inhibitorKills']
         towerIcon = team['towerIcon']
@@ -636,7 +639,7 @@ class TeamView(QFrame, ColorChangeable):
         self.inhibitorKillsLabel.setText(str(inhibitorKills))
         self.baronKillsLabel.setText(str(baronKills))
         self.dragonKillsLabel.setText(str(dragonKills))
-        self.riftHeraldKillsLabel.setText(str(riftHeraldKills))
+        self.riftHeraldKillsLabel.setText(f"{riftHeraldKills} / {hordeKills}")
 
         self.towerIconLabel.setPicture(towerIcon)
         self.inhibitorIconLabel.setPicture(inhibitorIcon)
