@@ -558,6 +558,11 @@ class OpggWindow(OpggWindowBase):
 
         return super().eventFilter(obj, e)
 
+    def closeEvent(self, e):
+        # Fix #555
+        e.ignore()
+        self.hide()
+
 
 class WaitingInterface(QFrame):
     def __init__(self, parent: QWidget = None):
