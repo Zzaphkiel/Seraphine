@@ -70,7 +70,6 @@ class MainWindow(FluentWindow):
 
         self.__initConfig()
         self.__initWindow()
-        self.__checkWindowSize()
         self.__initSystemTray()
 
         # create sub interface
