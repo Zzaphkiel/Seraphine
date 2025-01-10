@@ -954,6 +954,12 @@ class LolClientConnector(QObject):
         res = await self.__post("/lol-perks/v1/pages", data=body)
         res = await res.json()
 
+    @retry()
+    async def setSummonerSpells(self, spell1Id, spell2Id):
+        data = {'spell1Id': spell1Id, 'spell2Id': spell2Id}
+
+        return await self.__patch("/lol-champ-select/v1/session/my-selection", data)
+
     async def spectate(self, summonerName):
         info = await self.getSummonerByName(summonerName)
         puuid = info.get('puuid')

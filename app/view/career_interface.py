@@ -78,7 +78,8 @@ class CareerInterface(SeraphineInterface):
             self.tr('games)'))
         self.winsLabel = ColorLabel(self.tr("Wins:") + " None", 'win')
         self.lossesLabel = ColorLabel(self.tr("Losses:") + " None", 'lose')
-        self.kdaLabel = QLabel(self.tr("KDA:") + " None / None / None" + self.tr("(") + "0" + self.tr(")"))
+        self.kdaLabel = QLabel(
+            self.tr("KDA:") + " None / None / None" + self.tr("(") + "0" + self.tr(")"))
         self.championsCard = ChampionsCard()
         self.recentTeamButton = PushButton(self.tr("Recent teammates"))
         self.filterComboBox = ComboBox()
