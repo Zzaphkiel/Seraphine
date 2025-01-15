@@ -180,6 +180,23 @@ class Config(QConfig):
     windowSize = ConfigItem("Personalization", "WindowSize", QSize(
         1134, 826), None, QSizeSerializer())
 
+    enableAutoSetSpells = ConfigItem(
+        "Functions", "EnableAutoSetSpells", False, BoolValidator())
+
+    autoSetSummonerSpell = ConfigItem(
+        "Functions", "AutoSetSummonerSpell", [54, 54])
+
+    autoSetSummonerSpellTop = ConfigItem(
+        "Functions", "AutoSetSummonerSpellTop", [54, 54])
+    autoSetSummonerSpellJug = ConfigItem(
+        "Functions", "AutoSetSummonerSpellJug", [54, 54])
+    autoSetSummonerSpellMid = ConfigItem(
+        "Functions", "AutoSetSummonerSpellMid", [54, 54])
+    autoSetSummonerSpellBot = ConfigItem(
+        "Functions", "AutoSetSummonerSpellBot", [54, 54])
+    autoSetSummonerSpellSup = ConfigItem(
+        "Functions", "AutoSetSummonerSpellSup", [54, 54])
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"

@@ -1378,6 +1378,7 @@ def getNameTagLineFromGame(game, puuid):
 
 class ChampionSelection:
     def __init__(self):
+        self.isSummonerSpellSetted = False
         self.isChampionShowed = False
         self.isChampionBanned = False
         self.isChampionPicked = False
@@ -1569,7 +1570,7 @@ async def autoComplete(data, selection: ChampionSelection):
 
     selection.isChampionPickedCompleted = True
 
-    sleepTime = int(data['timer']['adjustedTimeLeftInPhase'] / 1000) - 2
+    sleepTime = int(data['timer']['adjustedTimeLeftInPhase'] / 1000) - 4
     await asyncio.sleep(sleepTime)
 
     data = await connector.getChampSelectSession()
@@ -1703,6 +1704,46 @@ async def autoBan(data, selection: ChampionSelection):
                 selection.isChampionBanned = True
 
                 return True
+
+
+async def autoSetSummonerSpell(data, selection: ChampionSelection):
+    if selection.isSummonerSpellSetted:
+        return False
+
+    selection.isSummonerSpellSetted = True
+
+    if not cfg.get(cfg.enableAutoSetSpells):
+        return False
+
+    cellId = data['localPlayerCellId']
+
+    for player in data['myTeam']:
+        if player['cellId'] != cellId:
+            continue
+
+        pos = player.get("assignedPosition", None)
+        break
+
+    if pos == 'top':
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpellTop))
+    elif pos == 'jungle':
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpellJug))
+    elif pos == 'middle':
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpellMid))
+    elif pos == 'bottom':
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpellBot))
+    elif pos == 'utility':
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpellSup))
+    else:
+        spells = [54, 54]
+
+    if 54 in spells:
+        spells = deepcopy(cfg.get(cfg.autoSetSummonerSpell))
+
+    if 54 in spells:
+        return False
+
+    await connector.setSummonerSpells(spells[0], spells[1])
 
 
 async def autoShow(data, selection: ChampionSelection):

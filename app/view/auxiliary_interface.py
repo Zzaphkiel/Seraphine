@@ -1,8 +1,10 @@
 import os
 import stat
 import threading
+import asyncio
+from copy import deepcopy
 
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize, QObject
 from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QFrame, QSpacerItem, QSizePolicy)
 from qasync import asyncSlot
@@ -17,9 +19,10 @@ from app.common.qfluentwidgets import (SettingCardGroup, SwitchSettingCard, Expa
                                        FluentIcon, Flyout, FlyoutAnimationType, MessageBox, ToolTipFilter,
                                        ToolTipPosition)
 from app.common.style_sheet import StyleSheet
-from app.components.champion_icon_widget import RoundIcon
+from app.components.champion_icon_widget import RoundIcon, SummonerSpellButton
 from app.components.message_box import MultiChampionSelectMsgBox
 from app.components.multi_champion_select import ChampionSelectFlyout, SplashesFlyout
+from app.components.summoner_spell_widget import SummonerSpellSelectFlyout
 from app.components.seraphine_interface import SeraphineInterface
 from app.lol.connector import connector
 from app.lol.exceptions import *
@@ -114,7 +117,7 @@ class AuxiliaryInterface(SeraphineInterface):
             self.bpGroup)
         self.autoSelectChampionCard = AutoSelectChampionCard(
             self.tr("Auto select champion"),
-            self.tr("Auto select champion when your selection begin"),
+            self.tr("Auto select champion when your selection begins"),
             cfg.enableAutoSelectChampion,
             cfg.autoSelectChampion,
             cfg.autoSelectChampionTop,
@@ -126,7 +129,7 @@ class AuxiliaryInterface(SeraphineInterface):
             self.bpGroup)
         self.autoBanChampionsCard = AutoBanChampionCard(
             self.tr("Auto ban champion"),
-            self.tr("Auto ban champion when your ban section begin"),
+            self.tr("Auto ban champion when your ban section begins"),
             cfg.enableAutoBanChampion,
             cfg.autoBanChampion,
             cfg.autoBanChampionTop,
@@ -137,6 +140,18 @@ class AuxiliaryInterface(SeraphineInterface):
             cfg.pretentBan,
             cfg.autoBanDelay,
             self.bpGroup)
+        self.autoSetSpellCard = AutoSetSummonerSpellCard(
+            self.tr("Auto set summoner spells"),
+            self.tr("Auto set your summoner spells when champion selection begins"),
+            cfg.enableAutoSetSpells,
+            cfg.autoSetSummonerSpell,
+            cfg.autoSetSummonerSpellTop,
+            cfg.autoSetSummonerSpellJug,
+            cfg.autoSetSummonerSpellMid,
+            cfg.autoSetSummonerSpellBot,
+            cfg.autoSetSummonerSpellSup,
+            self.bpGroup
+        )
 
         self.__initWidget()
         self.__initLayout()
@@ -168,6 +183,7 @@ class AuxiliaryInterface(SeraphineInterface):
         self.bpGroup.addSettingCard(self.autoAcceptSwapingCard)
         self.bpGroup.addSettingCard(self.autoSelectChampionCard)
         self.bpGroup.addSettingCard(self.autoBanChampionsCard)
+        self.bpGroup.addSettingCard(self.autoSetSpellCard)
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoReconnectCard)
@@ -187,11 +203,15 @@ class AuxiliaryInterface(SeraphineInterface):
         self.expandLayout.addWidget(self.profileGroup)
 
     async def initChampionList(self):
-        champions = await self.autoSelectChampionCard.initChampionList()
-        await self.autoBanChampionsCard.initChampionList(champions)
-        await self.profileBackgroundCard.initChampionList(champions)
+        async def initChampions():
+            champions = await self.autoSelectChampionCard.initChampionList()
+            await self.autoBanChampionsCard.initChampionList(champions)
+            await self.profileBackgroundCard.initChampionList(champions)
 
-        return champions
+        async def initSummonerSpell():
+            await self.autoSetSpellCard.initSummonerSpells()
+
+        await asyncio.gather(initChampions(), initSummonerSpell())
 
 
 class OnlineStatusCard(ExpandGroupSettingCard):
@@ -1836,3 +1856,262 @@ class ChampionsCard(QFrame):
     def leaveEvent(self, a0: QEvent) -> None:
         self.clearButton.setVisible(False)
         return super().leaveEvent(a0)
+
+
+class AutoSetSummonerSpellCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None,
+                 enableConfigItem: ConfigItem = None,
+                 spellConfigItem: ConfigItem = None,
+                 topSpellConfigItem: ConfigItem = None,
+                 jugSpellConfigItem: ConfigItem = None,
+                 midSpellConfigItem: ConfigItem = None,
+                 botSpellConfigItem: ConfigItem = None,
+                 supSpellConfigItem: ConfigItem = None,
+                 parent=None):
+        super().__init__(Icon.CHECK, title, content, parent)
+
+        self.spells = {}
+
+        self.enableConfigItem = enableConfigItem
+        self.defaultSpellConfigItem = spellConfigItem
+        self.topSpellConfigItem = topSpellConfigItem
+        self.jugSpellConfigItem = jugSpellConfigItem
+        self.midSpellConfigItem = midSpellConfigItem
+        self.botSpellConfigItem = botSpellConfigItem
+        self.supSpellConfigItem = supSpellConfigItem
+
+        self.statusLabel = QLabel()
+
+        self.defaultCfgWidget = QWidget(self.view)
+        self.defaultCfgLayout = QGridLayout(self.defaultCfgWidget)
+        self.defaultHintLabel = QLabel(self.tr("Default Configurations"))
+
+        self.defaultLabel = QLabel(self.tr("Default summoner spells: "))
+        self.defaultButtonLayout = QHBoxLayout()
+        self.defaultSelectButton1 = SummonerSpellButton()
+        self.defaultSelectButton2 = SummonerSpellButton()
+
+        self.rankCfgWidget = QWidget(self.view)
+        self.rankCfgLayout = QGridLayout(self.rankCfgWidget)
+        self.rankLabel = QLabel(self.tr("Rank Configurations"))
+
+        self.topLabel = QLabel(self.tr("Top: "))
+        self.jugLabel = QLabel(self.tr("Juggle: "))
+        self.midLabel = QLabel(self.tr("Mid: "))
+        self.botLabel = QLabel(self.tr("Bottom: "))
+        self.supLabel = QLabel(self.tr("Support: "))
+
+        self.topButtonLayout = QHBoxLayout()
+        self.topSelectButton1 = SummonerSpellButton()
+        self.topSelectButton2 = SummonerSpellButton()
+        self.jugButtonLayout = QHBoxLayout()
+        self.jugSelectButton1 = SummonerSpellButton()
+        self.jugSelectButton2 = SummonerSpellButton()
+        self.midButtonLayout = QHBoxLayout()
+        self.midSelectButton1 = SummonerSpellButton()
+        self.midSelectButton2 = SummonerSpellButton()
+        self.botButtonLayout = QHBoxLayout()
+        self.botSelectButton1 = SummonerSpellButton()
+        self.botSelectButton2 = SummonerSpellButton()
+        self.supButtonLayout = QHBoxLayout()
+        self.supSelectButton1 = SummonerSpellButton()
+        self.supSelectButton2 = SummonerSpellButton()
+
+        self.buttonsWidget = QWidget(self.view)
+        self.buttonsLayout = QGridLayout(self.buttonsWidget)
+        self.enableHintLabel = QLabel(self.tr("Enable:"))
+        self.enableSwitchButton = SwitchButton(
+            indicatorPos=IndicatorPosition.RIGHT)
+        self.resetButton = PushButton(self.tr("Reset"))
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        # 逻辑是，必须要设置默认，才能设置具体分路和启动功能
+        self.defaultHintLabel.setStyleSheet("font: bold")
+        self.rankLabel.setStyleSheet("font: bold")
+
+        # 54 是占位用的空图标
+        selected = 54 not in qconfig.get(self.defaultSpellConfigItem)
+        checked = qconfig.get(self.enableConfigItem)
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            for index in [1, 2]:
+                button: SummonerSpellButton = getattr(
+                    self, f"{ty}SelectButton{index}")
+                button.setFixedSize(40, 40)
+                button.clicked.connect(
+                    lambda _, t=ty, i=index: self.__onButtonClicked(t, i))
+
+                if ty != 'default':
+                    button.setEnabled(selected)
+
+        self.enableSwitchButton.checkedChanged.connect(
+            self.__onEnableSelectChanged)
+        self.enableSwitchButton.setEnabled(selected)
+        self.enableSwitchButton.setChecked(checked)
+        self.resetButton.setMinimumWidth(100)
+        self.resetButton.clicked.connect(self.__onResetButtonClicked)
+
+        self.__updateStatusLabel()
+
+    def __initLayout(self):
+        self.addWidget(self.statusLabel)
+
+        self.defaultCfgLayout.setVerticalSpacing(19)
+        self.defaultCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.defaultCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.defaultButtonLayout.addWidget(self.defaultSelectButton1)
+        self.defaultButtonLayout.addWidget(self.defaultSelectButton2)
+        self.defaultButtonLayout.setSpacing(10)
+        self.defaultButtonLayout.setContentsMargins(0, 0, 0, 0)
+        self.defaultCfgLayout.addWidget(
+            self.defaultHintLabel, 0, 0, Qt.AlignLeft)
+        self.defaultCfgLayout.addWidget(
+            self.defaultLabel, 1, 0, Qt.AlignLeft)
+        self.defaultCfgLayout.addLayout(
+            self.defaultButtonLayout, 1, 1, Qt.AlignRight)
+
+        self.rankCfgLayout.setVerticalSpacing(19)
+        self.rankCfgLayout.setContentsMargins(48, 18, 44, 18)
+        self.rankCfgLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.rankCfgLayout.addWidget(self.rankLabel, 0, 0, Qt.AlignLeft)
+
+        for i, ty in enumerate(['top', 'jug', 'mid', 'bot', 'sup']):
+            label = getattr(self, f"{ty}Label")
+            button1 = getattr(self, f"{ty}SelectButton1")
+            button2 = getattr(self, f"{ty}SelectButton2")
+            layout: QHBoxLayout = getattr(self, f"{ty}ButtonLayout")
+
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setSpacing(10)
+            layout.addWidget(button1)
+            layout.addWidget(button2)
+
+            self.rankCfgLayout.addWidget(label, i + 1, 0, Qt.AlignLeft)
+            self.rankCfgLayout.addLayout(layout, i + 1, 1, Qt.AlignRight)
+
+        self.buttonsLayout.setVerticalSpacing(19)
+        self.buttonsLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonsLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.buttonsLayout.addWidget(
+            self.enableHintLabel, 0, 0, Qt.AlignLeft)
+        self.buttonsLayout.addWidget(
+            self.enableSwitchButton, 0, 1, Qt.AlignRight)
+
+        self.buttonsLayout.addWidget(
+            self.resetButton, 1, 1, Qt.AlignRight)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.addGroupWidget(self.defaultCfgWidget)
+        self.addGroupWidget(self.rankCfgWidget)
+        self.addGroupWidget(self.buttonsWidget)
+
+    async def initSummonerSpells(self):
+        self.spells = {
+            i: await connector.getSummonerSpellIcon(i)
+            for i in connector.manager.getSummonerSpellList()
+        }
+
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            configItem = getattr(self, f"{ty}SpellConfigItem")
+            selected = qconfig.get(configItem)
+
+            for i in [1, 2]:
+                spellId = selected[i - 1]
+
+                button = f"{ty}SelectButton{i}"
+                button: SummonerSpellButton = getattr(self, button)
+                button.setPicture(self.spells[spellId])
+                button.setSpellId(spellId)
+
+    def __onButtonClicked(self, type: str, index: int):
+        view = SummonerSpellSelectFlyout(self.spells)
+        view.selectWidget.spellClicked.connect(
+            lambda i, ty=type, ind=index: self.__onSpellSelected(ty, ind, i))
+
+        button = QObject.sender(self)
+
+        if index == 1:
+            position = FlyoutAnimationType.SLIDE_LEFT
+        else:
+            position = FlyoutAnimationType.SLIDE_RIGHT
+
+        self.w = Flyout.make(view, button, self, position, True)
+        view.selectWidget.spellClicked.connect(self.w.fadeOut)
+
+    def __onSpellSelected(self, type: str, index: int, id):
+
+        button = f"{type}SelectButton{index}"
+        button: SummonerSpellButton = getattr(self, button)
+
+        if id != 54:
+            anotherButton = f"{type}SelectButton{2 if index == 1 else 1}"
+            anotherButton: SummonerSpellButton = getattr(self, anotherButton)
+            anotherSpellId = anotherButton.getSpellId()
+
+            # 选的技能和另一个已经选好的一样，认为是想要交换位置
+            if id == anotherSpellId:
+                currentSpellId = button.getSpellId()
+                anotherButton.setPicture(self.spells[currentSpellId])
+                anotherButton.setSpellId(currentSpellId)
+                anotherButton.repaint()
+
+        button.setPicture(self.spells[id])
+        button.setSpellId(id)
+        button.repaint()
+
+        button1 = f"{type}SelectButton1"
+        button1: SummonerSpellButton = getattr(self, button1)
+        button2 = f"{type}SelectButton2"
+        button2: SummonerSpellButton = getattr(self, button2)
+
+        spells = [button1.getSpellId(), button2.getSpellId()]
+
+        configItem = getattr(self, f"{type}SpellConfigItem")
+        cfg.set(configItem, spells)
+
+        if type != 'default':
+            return
+
+        buttonEnabled = False
+        if id == 54:
+            self.enableSwitchButton.setChecked(False)
+            self.enableSwitchButton.setEnabled(False)
+        elif 54 not in spells:
+            self.enableSwitchButton.setEnabled(True)
+            buttonEnabled = True
+
+        for ty in ['top', 'jug', 'mid', 'bot', 'sup']:
+            for i in [1, 2]:
+                button = f"{ty}SelectButton{i}"
+                button: SummonerSpellButton = getattr(self, button)
+                button.setEnabled(buttonEnabled)
+
+    def __onEnableSelectChanged(self, checked):
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            for i in [1, 2]:
+                button = f"{ty}SelectButton{i}"
+                button: SummonerSpellButton = getattr(self, button)
+                button.setEnabled(not checked)
+
+        cfg.set(self.enableConfigItem, checked)
+
+        self.__updateStatusLabel()
+
+    def __onResetButtonClicked(self):
+        for ty in ['default', 'top', 'jug', 'mid', 'bot', 'sup']:
+            for i in [1, 2]:
+                self.__onSpellSelected(ty, i, 54)
+
+    def __updateStatusLabel(self):
+        checked = self.enableSwitchButton.isChecked()
+
+        text = self.tr("Enabled") if checked else self.tr("Disabled")
+        self.statusLabel.setText(text)

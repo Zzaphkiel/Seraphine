@@ -272,3 +272,99 @@ class RoundedLabel(QLabel):
         self.havePic = False
 
         return super().setText(text)
+
+
+class SummonerSpellButton(QFrame):
+    clicked = pyqtSignal(int)
+
+    def __init__(self, imagePath=None, spellId=None, parent=None):
+        super().__init__(parent)
+
+        if imagePath:
+            self.image = QPixmap(imagePath)
+        else:
+            self.image = None
+
+        self.spellId = spellId
+        self.radius = 5.0
+        self.borderWidth = 2
+        self.borderColor = QColor(120, 90, 40)
+
+        self.isPressed = False
+        self.isHovered = False
+        self.enabled = True
+
+    def paintEvent(self, e):
+        if not self.image:
+            return super().paintEvent(e)
+
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing)
+
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()), self.radius, self.radius)
+        painter.setClipPath(path)
+
+        size = self.size() * self.devicePixelRatioF()
+        image = self.image.scaled(size, Qt.AspectRatioMode.KeepAspectRatio,
+                                  Qt.TransformationMode.SmoothTransformation)
+
+        if not self.enabled:
+            painter.setOpacity(0.5)
+        elif self.isPressed:
+            painter.setOpacity(0.63)
+        elif self.isHovered:
+            painter.setOpacity(0.80)
+        else:
+            painter.setOpacity(1)
+
+        painter.drawPixmap(self.rect(), image)
+
+        painter.setPen(
+            QPen(self.borderColor, self.borderWidth, Qt.SolidLine))
+
+        painter.drawRoundedRect(
+            QRectF(self.rect()), self.radius, self.radius)
+
+        return super().paintEvent(e)
+
+    def setPicture(self, path):
+        self.image = QPixmap(path)
+
+    def setSpellId(self, id):
+        self.spellId = id
+
+    def getSpellId(self):
+        return self.spellId
+
+    def enterEvent(self, a0: QEvent) -> None:
+        self.isHovered = True
+        self.update()
+        return super().enterEvent(a0)
+
+    def leaveEvent(self, a0: QEvent) -> None:
+        self.isHovered = False
+        self.update()
+        return super().leaveEvent(a0)
+
+    def mousePressEvent(self, a0: QMouseEvent) -> None:
+        self.isPressed = True
+        self.update()
+        return super().mousePressEvent(a0)
+
+    def mouseReleaseEvent(self, a0: QMouseEvent) -> None:
+        self.isPressed = False
+        self.update()
+        ret = super().mouseReleaseEvent(a0)
+
+        if self.enabled:
+            self.clicked.emit(self.spellId)
+
+        return ret
+
+    def isEnabled(self):
+        return self.isEnabled()
+
+    def setEnabled(self, enabled: bool):
+        self.enabled = enabled
+        return super().setEnabled(enabled)

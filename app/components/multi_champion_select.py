@@ -1,11 +1,8 @@
-
-import shutil
-
 from qasync import asyncSlot
-from PyQt5.QtCore import (Qt, pyqtSignal, QSize, QEasingCurve, QUrl)
+from PyQt5.QtCore import (Qt, pyqtSignal, QSize, QEasingCurve)
 from PyQt5.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QWidget, QFileDialog, QGraphicsOpacityEffect)
-from PyQt5.QtGui import QFont, QLinearGradient
+    QVBoxLayout, QHBoxLayout, QLabel, QWidget)
+from PyQt5.QtGui import QFont
 from app.common.qfluentwidgets import (TransparentToolButton, FluentIcon, SearchLineEdit,
                                        FlowLayout, SmoothScrollArea, FlyoutViewBase,
                                        PipsScrollButtonDisplayMode, HorizontalPipsPager,

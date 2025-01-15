@@ -1385,5 +1385,21 @@ class JsonManager:
     def getAugmentsName(self, augmentId):
         return self.cherryAugments[augmentId]['nameTRA']
 
+    def getSummonerSpellList(self):
+        # 没找到 LCU API 返回这个玩意的，硬编码妥了
+        # 1  -> 净化
+        # 3  -> 虚弱
+        # 4  -> 闪现
+        # 6  -> 幽灵疾步
+        # 7  -> 治疗术
+        # 11 -> 惩戒
+        # 12 -> 传送
+        # 13 -> 清晰术
+        # 14 -> 点燃
+        # 21 -> 屏障
+        # 32 -> 标记（雪球）
+        # 54 -> 无（占位图标）
+        return [1, 3, 4, 6, 7, 11, 12, 13, 14, 21, 32, 54]
+
 
 connector = LolClientConnector()
