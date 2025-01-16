@@ -1465,8 +1465,6 @@ async def showOpggBuild(data, selection: ChampionSelection):
     if championId == 0:
         return False
 
-    print(selection.queueId)
-
     if selection.queueId == None:
         if data.get('benchEnabled'):
             mode = "aram"
