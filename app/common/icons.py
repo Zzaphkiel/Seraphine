@@ -68,6 +68,7 @@ class Icon(FluentIconBase, Enum):
     TEXTCOLOR = "TextColor"
     SNOOZE = "Snooze"
     PADDINGTOP = "PaddingTop"
+    CHECKBOXFILL = "CheckBoxFill"
 
     def path(self, theme=Theme.AUTO):
         return f'./app/resource/icons/{self.value}_{getIconColor(theme)}.svg'

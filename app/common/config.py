@@ -197,6 +197,13 @@ class Config(QConfig):
     autoSetSummonerSpellSup = ConfigItem(
         "Functions", "AutoSetSummonerSpellSup", [54, 54])
 
+    queueFilter = ConfigItem("Functions", "QueueFilter", {
+        420: [],
+        430: [],
+        440: [],
+        450: [],
+    })
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
