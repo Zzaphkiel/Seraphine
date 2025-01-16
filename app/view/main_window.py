@@ -865,7 +865,15 @@ class MainWindow(FluentWindow):
     # 进入英雄选择界面时触发
     async def __onChampionSelectBegin(self):
         self.championSelection.reset()
-        session = await connector.getChampSelectSession()
+        cSession, gSession = await asyncio.gather(connector.getChampSelectSession(),
+                                                  connector.getGameflowSession())
+
+        try:
+            queueId = gSession['gameData']['queue']['id']
+        except:
+            queueId = None
+
+        self.championSelection.queueId = queueId
 
         if cfg.get(cfg.autoShowOpgg):
             self.opggWindow.show()
@@ -874,7 +882,7 @@ class MainWindow(FluentWindow):
                 self.opggWindow.setStaysOnTopEnabled(True)
 
         currentSummonerId = self.currentSummoner['summonerId']
-        info = await parseAllyGameInfo(session, currentSummonerId, useSGP=True)
+        info = await parseAllyGameInfo(cSession, currentSummonerId, useSGP=True)
         self.gameInfoInterface.updateAllySummoners(info)
 
         self.checkAndSwitchTo(self.gameInfoInterface)

@@ -1385,6 +1385,7 @@ class ChampionSelection:
         self.isChampionPickedCompleted = False
         self.isSkinPicked = False
         self.opggShowChampionId = None
+        self.queueId = None
 
     def reset(self):
         self.__init__()
@@ -1464,17 +1465,28 @@ async def showOpggBuild(data, selection: ChampionSelection):
     if championId == 0:
         return False
 
-    # 判断一下是不是大乱斗
-    if data.get('benchEnabled'):
-        mode = "aram"
-    # 不知道怎么判断斗魂竞技场，用这种方式判断一下吧
-    elif len(data['myTeam']) == 2:
-        mode = 'arena'
+    print(selection.queueId)
+
+    if selection.queueId == None:
+        if data.get('benchEnabled'):
+            mode = "aram"
+        elif len(data['myTeam']) == 2:
+            mode = 'arena'
+        else:
+            mode = ""
     else:
-        mode = ""
+        if selection.queueId == 450:
+            mode = 'aram'
+        elif selection.queueId in (1700, 1710):
+            mode = 'arena'
+        elif selection.queueId == 1300:
+            mode = 'nexus_blitz'
+        elif selection.queueId in (900, 1900):
+            mode = 'urf'
+        else:
+            mode = 'ranked'
 
     selection.opggShowChampionId = championId
-
     signalBus.toOpggBuildInterface.emit(championId, mode, position)
 
     return True

@@ -806,6 +806,11 @@ class LolClientConnector(QObject):
         res = await self.__get("/lol-champ-select/v1/session")
         return await res.json()
 
+    @retry()
+    async def getGameQueues(self):
+        res = await self.__get("/lol-game-queues/v1/queues")
+        return await res.json()
+
     # 同意交换英雄
     @retry()
     async def acceptTrade(self, id):
