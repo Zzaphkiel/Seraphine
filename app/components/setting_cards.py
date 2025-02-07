@@ -1,10 +1,12 @@
 # coding:utf-8
 from typing import Union
+from copy import deepcopy
 
 from app.common.qfluentwidgets import (FluentIconBase, ExpandGroupSettingCard,
                                        ConfigItem, qconfig, PushButton, SpinBox,
                                        ColorDialog, LineEdit, SwitchButton,
-                                       IndicatorPosition, setCustomStyleSheet, SwitchSettingCard, TransparentToolButton, FluentIcon, setThemeColor)
+                                       IndicatorPosition, setCustomStyleSheet, SwitchSettingCard, TransparentToolButton, FluentIcon, setThemeColor,
+                                       PillPushButton)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtWidgets import (QWidget, QLabel, QHBoxLayout, QGridLayout, QFrame, QPushButton,
@@ -534,3 +536,213 @@ class LooseSwitchSettingCard(SwitchSettingCard):
             super().setValue(isChecked)
         else:
             self.switchButton.setChecked(False)
+
+
+class ModeCheckButtonsGroup(QWidget):
+    selectedChanged = pyqtSignal(list)
+
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+        self.hBoxLayout = QHBoxLayout(self)
+
+        self.allButton = PillPushButton(self.tr("Show All"))
+
+        self.normalButton = PillPushButton(self.tr("Normal"))
+        self.quickButton = PillPushButton(self.tr("Quickplay"))
+        self.soloDuoButton = PillPushButton(self.tr("Ranked Solo / Duo"))
+        self.flexButton = PillPushButton(self.tr("Ranked Flex"))
+        self.aramButton = PillPushButton(self.tr("A.R.A.M."))
+
+        self.modeButtons = [self.normalButton,
+                            self.quickButton,
+                            self.soloDuoButton,
+                            self.flexButton,
+                            self.aramButton]
+
+        self.separator = QFrame()
+        self.separator.setFrameShape(QFrame.Shape.VLine)
+        self.separator.setLineWidth(1)
+
+        self.selected = []
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.separator.setObjectName("separator")
+
+        # 只能从未选中变成选中
+        self.allButton.clicked.connect(self.__onAllButtonClicked)
+
+        self.normalButton.clicked.connect(
+            lambda: self.__onModeButtonClicked(430))
+        self.quickButton.clicked.connect(
+            lambda: self.__onModeButtonClicked(480))
+        self.soloDuoButton.clicked.connect(
+            lambda: self.__onModeButtonClicked(420))
+        self.flexButton.clicked.connect(
+            lambda: self.__onModeButtonClicked(440))
+        self.aramButton.clicked.connect(
+            lambda: self.__onModeButtonClicked(450))
+
+    def __initLayout(self):
+        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.hBoxLayout.setSpacing(12)
+
+        self.hBoxLayout.addWidget(self.allButton)
+        self.hBoxLayout.addSpacing(5)
+        self.hBoxLayout.addWidget(self.separator)
+        self.hBoxLayout.addSpacing(5)
+        self.hBoxLayout.addWidget(self.normalButton)
+        self.hBoxLayout.addWidget(self.quickButton)
+        self.hBoxLayout.addWidget(self.soloDuoButton)
+        self.hBoxLayout.addWidget(self.flexButton)
+        self.hBoxLayout.addWidget(self.aramButton)
+
+    def setSelectedButtons(self, selected: list):
+        self.selected = selected
+
+        if len(selected) == 0:
+            self.allButton.setChecked(True)
+
+            for button in self.modeButtons:
+                button.setChecked(False)
+        else:
+            self.allButton.setChecked(False)
+
+            for queueId in selected:
+                button = self.getButton(queueId)
+                button.setChecked(True)
+
+    def getButton(self, queueId) -> PillPushButton:
+        return {
+            430: self.normalButton,
+            420: self.soloDuoButton,
+            440: self.flexButton,
+            450: self.aramButton,
+            480: self.quickButton,
+        }[queueId]
+
+    def __onAllButtonClicked(self):
+        if self.allButton.isChecked():
+            for button in self.modeButtons:
+                button.setChecked(False)
+
+            self.selected = []
+            self.selectedChanged.emit(self.selected)
+        else:
+            self.allButton.setChecked(True)
+
+    def __onModeButtonClicked(self, queueId):
+        button = self.getButton(queueId)
+
+        if button.isChecked():
+            self.selected.append(queueId)
+            self.allButton.setChecked(False)
+        else:
+            self.selected.remove(queueId)
+
+            if all(map(lambda button: not button.isChecked(),
+                       self.modeButtons)):
+                self.allButton.setChecked(True)
+
+        self.selectedChanged.emit(self.selected)
+
+
+class QueueFilterCard(ExpandGroupSettingCard):
+    def __init__(self, title, content=None,
+                 configItem: ConfigItem = None,
+                 parent=None):
+        super().__init__(Icon.FILTER, title, content, parent)
+
+        self.configItem = configItem
+
+        self.inputWidget = QWidget(self.view)
+        self.inputLayout = QGridLayout(self.inputWidget)
+
+        self.normalHintLabel = QLabel(self.tr("Normal:"))
+        self.quickHintLabel = QLabel(self.tr("Quickplay:"))
+        self.soloDuoHintLabel = QLabel(self.tr("Ranked Solo / Duo:"))
+        self.flexHintLabel = QLabel(self.tr("Ranked Flex:"))
+        self.aramHintLabel = QLabel(self.tr("A.R.A.M.:"))
+
+        self.normalButtonsGroup = ModeCheckButtonsGroup()
+        self.quickButtonsGroup = ModeCheckButtonsGroup()
+        self.soloDuoButtonsGroup = ModeCheckButtonsGroup()
+        self.flexButtonsGroup = ModeCheckButtonsGroup()
+        self.aramButtonsGroup = ModeCheckButtonsGroup()
+
+        self.buttonsWidget = QWidget(self.view)
+        self.buttonsLayout = QGridLayout(self.buttonsWidget)
+        self.resetButton = PushButton(self.tr("Reset"))
+
+        self.__initWidget()
+        self.__initLayout()
+
+    def __initWidget(self):
+        self.resetButton.setMinimumWidth(100)
+
+        selected = deepcopy(qconfig.get(self.configItem))
+
+        self.normalButtonsGroup.setSelectedButtons(selected['430'])
+        self.quickButtonsGroup.setSelectedButtons(selected['480'])
+        self.soloDuoButtonsGroup.setSelectedButtons(selected['420'])
+        self.flexButtonsGroup.setSelectedButtons(selected['440'])
+        self.aramButtonsGroup.setSelectedButtons(selected['450'])
+
+        self.normalButtonsGroup.selectedChanged.connect(
+            lambda l: self.__onButtonsGroupSelectChanged(l, '430'))
+        self.quickButtonsGroup.selectedChanged.connect(
+            lambda l: self.__onButtonsGroupSelectChanged(l, '480'))
+        self.soloDuoButtonsGroup.selectedChanged.connect(
+            lambda l: self.__onButtonsGroupSelectChanged(l, '420'))
+        self.flexButtonsGroup.selectedChanged.connect(
+            lambda l: self.__onButtonsGroupSelectChanged(l, '440'))
+        self.aramButtonsGroup.selectedChanged.connect(
+            lambda l: self.__onButtonsGroupSelectChanged(l, '450'))
+
+        self.resetButton.clicked.connect(self.__onResetButtonClicked)
+
+    def __initLayout(self):
+        self.inputLayout.setVerticalSpacing(19)
+        self.inputLayout.setContentsMargins(48, 18, 44, 18)
+        self.inputLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+
+        self.inputLayout.addWidget(self.normalHintLabel, 0, 0, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.quickHintLabel, 1, 0, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.soloDuoHintLabel, 2, 0, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.flexHintLabel, 3, 0, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.aramHintLabel, 4, 0, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.normalButtonsGroup, 0, 1, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.quickButtonsGroup, 1, 1, Qt.AlignLeft)
+        self.inputLayout.addWidget(
+            self.soloDuoButtonsGroup, 2, 1, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.flexButtonsGroup, 3, 1, Qt.AlignLeft)
+        self.inputLayout.addWidget(self.aramButtonsGroup, 4, 1, Qt.AlignLeft)
+
+        self.buttonsLayout.setVerticalSpacing(19)
+        self.buttonsLayout.setContentsMargins(48, 18, 44, 18)
+        self.buttonsLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
+        self.buttonsLayout.addWidget(self.resetButton, 0, 1, Qt.AlignRight)
+
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.addGroupWidget(self.inputWidget)
+        self.addGroupWidget(self.buttonsWidget)
+
+    def __onButtonsGroupSelectChanged(self, selected, queueId):
+        current = deepcopy(qconfig.get(self.configItem))
+        current[queueId] = selected
+        qconfig.set(self.configItem, current)
+
+    def __onResetButtonClicked(self):
+        self.normalButtonsGroup.setSelectedButtons([])
+        self.quickButtonsGroup.setSelectedButtons([])
+        self.soloDuoButtonsGroup.setSelectedButtons([])
+        self.flexButtonsGroup.setSelectedButtons([])
+        self.aramButtonsGroup.setSelectedButtons([])
+
+        default = self.configItem.defaultValue
+        qconfig.set(self.configItem, default)

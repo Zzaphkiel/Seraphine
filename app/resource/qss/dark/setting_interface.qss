@@ -36,3 +36,7 @@ ColorAnimationFrame {
     border: 1px solid;
     border-radius: 6px;
 }
+
+ModeCheckButtonsGroup>#separator {
+    color: rgb(82, 82, 82);
+}

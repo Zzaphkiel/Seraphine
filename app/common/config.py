@@ -198,13 +198,12 @@ class Config(QConfig):
         "Functions", "AutoSetSummonerSpellSup", [54, 54])
 
     queueFilter = ConfigItem("Functions", "QueueFilter", {
-        420: [],
-        430: [],
-        440: [],
-        450: [],
-        480: [],
-    })# 420->单双 430->匹配 440->组排 450->大乱斗 480->快速匹配模式
-
+        "420": [],
+        "430": [],
+        "440": [],
+        "450": [],
+        "480": [],
+    })
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
