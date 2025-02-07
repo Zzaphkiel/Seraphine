@@ -16,7 +16,8 @@ from app.common.style_sheet import StyleSheet
 from app.components.seraphine_interface import SeraphineInterface
 from app.components.setting_cards import (LineEditSettingCard, GameTabColorSettingCard,
                                           LooseSwitchSettingCard, ProxySettingCard,
-                                          DeathsNumberColorSettingCard, ThemeColorSettingCard)
+                                          DeathsNumberColorSettingCard, ThemeColorSettingCard,
+                                          QueueFilterCard)
 from app.components.message_box import MultiPathSettingMsgBox
 
 
@@ -53,11 +54,11 @@ class SettingInterface(SeraphineInterface):
                 "Setting the maximum number of games shows in the career interface"),
             self.functionGroup)
 
-        self.gameInfoFilterCard = SwitchSettingCard(
-            Icon.FILTER, self.tr("Rank filter other mode"),
+        self.gameInfoFilterCard = QueueFilterCard(
+            self.tr("Game Infomation filter"),
             self.tr(
-                "Filter out other modes on the Game Information interface when ranking"),
-            cfg.gameInfoFilter
+                "Show game modes in Game Infomation interface based on your current game mode"),
+            cfg.queueFilter
         )
 
         self.gameInfoShowTierCard = SwitchSettingCard(

@@ -198,10 +198,11 @@ class Config(QConfig):
         "Functions", "AutoSetSummonerSpellSup", [54, 54])
 
     queueFilter = ConfigItem("Functions", "QueueFilter", {
-        420: [],
-        430: [],
-        440: [],
-        450: [],
+        "420": [],
+        "430": [],
+        "440": [],
+        "450": [],
+        "480": [],
     })
 
 
