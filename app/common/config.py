@@ -205,7 +205,6 @@ class Config(QConfig):
         "480": [],
     })
 
-
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
 VERSION = "1.1.4"

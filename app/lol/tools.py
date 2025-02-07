@@ -811,23 +811,21 @@ def parseGames(games, targetId=0):
     return hitGames, kills, deaths, assists, wins, losses
 
 
-async def parseAllyGameInfo(session, currentSummonerId, useSGP=False):
-    # 排位会有预选位
-    isRank = bool(session["myTeam"][0]["assignedPosition"])
+async def parseAllyGameInfo(session, currentSummonerId, queueID, useSGP=False):
 
     if useSGP and connector.isInTencent():
         # 如果是国服就优先尝试 SGP
         try:
-            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId)
+            tasks = [getSummonerGamesInfoViaSGP(item, queueID, currentSummonerId)
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
         except:
-            tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+            tasks = [parseSummonerGameInfo(item, queueID, currentSummonerId)
                      for item in session['myTeam']]
             summoners = await asyncio.gather(*tasks)
 
     else:
-        tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+        tasks = [parseSummonerGameInfo(item, queueID, currentSummonerId)
                  for item in session['myTeam']]
         summoners = await asyncio.gather(*tasks)
 
@@ -861,8 +859,6 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSG
     if queueId in (1700, 1090, 1100, 1110, 1130, 1160):  # 斗魂 云顶匹配 (排位)
         return None
 
-    isRank = queueId in (420, 440)
-
     if side == 'enemy':
         _, team = separateTeams(data, currentSummonerId)
     else:
@@ -871,23 +867,23 @@ async def parseGameInfoByGameflowSession(session, currentSummonerId, side, useSG
     if useSGP and connector.isInTencent():
         # 如果是国服就优先尝试 SGP
         try:
-            tasks = [getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId)
+            tasks = [getSummonerGamesInfoViaSGP(item, queueId, currentSummonerId)
                      for item in team]
             summoners = await asyncio.gather(*tasks)
 
         except:
-            tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+            tasks = [parseSummonerGameInfo(item, queueId, currentSummonerId)
                      for item in team]
             summoners = await asyncio.gather(*tasks)
 
     else:
-        tasks = [parseSummonerGameInfo(item, isRank, currentSummonerId)
+        tasks = [parseSummonerGameInfo(item, queueId, currentSummonerId)
                  for item in team]
         summoners = await asyncio.gather(*tasks)
 
     summoners = [summoner for summoner in summoners if summoner]
 
-    if isRank:
+    if queueId in [420, 440]:
         s = sortedSummonersByGameRole(summoners)
 
         if s != None:
@@ -996,7 +992,7 @@ async def parseGamesDataConcurrently(games):
     return await asyncio.gather(*tasks)
 
 
-async def parseSummonerGameInfo(item, isRank, currentSummonerId):
+async def parseSummonerGameInfo(item, queueId, currentSummonerId):
     summonerId = item.get('summonerId', None)
 
     if item.get('nameVisibilityType') == 'HIDDEN':
@@ -1026,17 +1022,19 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
         origGamesInfo = await connector.getSummonerGamesByPuuid(
             puuid, 0, 14)
 
-        if cfg.get(cfg.gameInfoFilter) and isRank:
+        queueFilterList = cfg.get(cfg.queueFilter)
+        queueIds = queueFilterList.get(f"{queueId}")
+        if queueIds:
             origGamesInfo["games"] = [
-                game for game in origGamesInfo["games"] if game["queueId"] in (420, 440)]
+                game for game in origGamesInfo["games"] if game["queueId"] in queueIds]
 
             begIdx = 15
-            while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
+            while len(origGamesInfo["games"]) < 11 and begIdx <= 70:
                 endIdx = begIdx + 5
                 new = (await connector.getSummonerGamesByPuuid(puuid, begIdx, endIdx))["games"]
 
                 for game in new:
-                    if game["queueId"] in (420, 440):
+                    if game["queueId"] in queueIds:
                         origGamesInfo['games'].append(game)
 
                 begIdx = endIdx + 1
@@ -1093,7 +1091,7 @@ async def parseSummonerGameInfo(item, isRank, currentSummonerId):
     }
 
 
-async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
+async def getSummonerGamesInfoViaSGP(item, queueID, currentSummonerId):
     '''
     使用 SGP 接口取战绩信息
     '''
@@ -1119,17 +1117,19 @@ async def getSummonerGamesInfoViaSGP(item, isRank, currentSummonerId):
     try:
         origGamesInfo = await connector.getSummonerGamesByPuuidViaSGP(puuid, 0, 14)
 
-        if cfg.get(cfg.gameInfoFilter) and isRank:
+        queueFilterList = cfg.get(cfg.queueFilter)
+        queueIds = queueFilterList.get(f"{queueID}")
+        if queueIds:
             origGamesInfo["games"] = [
-                game for game in origGamesInfo["games"] if game['json']["queueId"] in (420, 440)]
+                game for game in origGamesInfo["games"] if game['json']["queueId"] in queueIds]
 
             begIdx = 15
-            while len(origGamesInfo["games"]) < 11 and begIdx <= 95:
+            while len(origGamesInfo["games"]) < 11 and begIdx <= 70:
                 endIdx = begIdx + 10
                 new = (await connector.getSummonerGamesByPuuidViaSGP(puuid, begIdx, endIdx))["games"]
 
                 for game in new:
-                    if game['json']["queueId"] in (420, 440):
+                    if game['json']["queueId"] in queueIds:
                         origGamesInfo['games'].append(game)
 
                 begIdx = endIdx + 1
