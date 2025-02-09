@@ -87,11 +87,11 @@ class AuxiliaryInterface(SeraphineInterface):
             self.clientGroup
         )
 
-        self.createPracticeLobbyCard = CreatePracticeLobbyCard(
-            self.tr("Create 5v5 practice lobby"),
-            self.tr("Only bots can be added to the lobby"),
-            self.gameGroup)
-        # 自动接受对局
+        # self.createPracticeLobbyCard = CreatePracticeLobbyCard(
+        #     self.tr("Create 5v5 practice lobby"),
+        #     self.tr("Only bots can be added to the lobby"),
+        #     self.gameGroup)
+
         self.autoReconnectCard = SwitchSettingCard(
             Icon.CONNECTION,
             self.tr("Auto reconnect"),
@@ -187,7 +187,7 @@ class AuxiliaryInterface(SeraphineInterface):
 
         # 游戏
         self.gameGroup.addSettingCard(self.autoReconnectCard)
-        self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
+        # self.gameGroup.addSettingCard(self.createPracticeLobbyCard)
         self.gameGroup.addSettingCard(self.spectateCard)
         self.gameGroup.addSettingCard(self.lockConfigCard)
 
