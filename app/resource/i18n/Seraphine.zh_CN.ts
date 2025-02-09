@@ -85,12 +85,12 @@
         <translation type="obsolete">第一率：</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1203"/>
+        <location filename="../../view/opgg_build_interface.py" line="1220"/>
         <source>Games</source>
         <translation>对局</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1218"/>
+        <location filename="../../view/opgg_build_interface.py" line="1235"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
@@ -834,14 +834,27 @@ If champions set by lane are not available, default settings will be used.</sour
     </message>
 </context>
 <context>
+    <name>ChampionCountersWidget</name>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="818"/>
+        <source>&apos;s strong against</source>
+        <translation>好打的英雄</translation>
+    </message>
+    <message>
+        <location filename="../../view/opgg_build_interface.py" line="824"/>
+        <source>&apos;s weak against</source>
+        <translation>不好打的英雄</translation>
+    </message>
+</context>
+<context>
     <name>ChampionPerksWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="823"/>
+        <location filename="../../view/opgg_build_interface.py" line="840"/>
         <source>Set Rune Page</source>
         <translation>设为当前符文页</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="899"/>
+        <location filename="../../view/opgg_build_interface.py" line="916"/>
         <source>: </source>
         <translation>：</translation>
     </message>
@@ -862,7 +875,7 @@ If champions set by lane are not available, default settings will be used.</sour
         <translation type="obsolete">英雄技能</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="471"/>
+        <location filename="../../view/opgg_build_interface.py" line="473"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -870,27 +883,27 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ChampionTitleBar</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="162"/>
+        <location filename="../../view/opgg_build_interface.py" line="164"/>
         <source>Win Rate</source>
         <translation>胜率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="165"/>
+        <location filename="../../view/opgg_build_interface.py" line="167"/>
         <source>Pick Rate</source>
         <translation>登场率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="169"/>
+        <location filename="../../view/opgg_build_interface.py" line="171"/>
         <source>Ban Rate</source>
         <translation>禁用率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="153"/>
+        <location filename="../../view/opgg_build_interface.py" line="155"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="156"/>
+        <location filename="../../view/opgg_build_interface.py" line="158"/>
         <source>Average Place</source>
         <translation>平均排名</translation>
     </message>
@@ -992,7 +1005,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>CounterChampionWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="635"/>
+        <location filename="../../view/opgg_build_interface.py" line="637"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -1379,7 +1392,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>ItemsWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="549"/>
+        <location filename="../../view/opgg_build_interface.py" line="551"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -2214,7 +2227,7 @@ If champions set by lane are not available, default settings will be used.</sour
 <context>
     <name>PerksSummaryWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="955"/>
+        <location filename="../../view/opgg_build_interface.py" line="972"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -3124,7 +3137,7 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>Spell</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="334"/>
+        <location filename="../../view/opgg_build_interface.py" line="336"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>
@@ -3270,17 +3283,17 @@ when they are used by Seraphine, which will cost more time</source>
 <context>
     <name>SynergyItemWidget</name>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1288"/>
+        <location filename="../../view/opgg_build_interface.py" line="1305"/>
         <source>Average Place</source>
         <translation>平均排名</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1293"/>
+        <location filename="../../view/opgg_build_interface.py" line="1310"/>
         <source>First Rate</source>
         <translation>第一率</translation>
     </message>
     <message>
-        <location filename="../../view/opgg_build_interface.py" line="1300"/>
+        <location filename="../../view/opgg_build_interface.py" line="1317"/>
         <source>Games</source>
         <translation>局游戏</translation>
     </message>

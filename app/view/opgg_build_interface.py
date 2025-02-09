@@ -84,12 +84,14 @@ class BuildInterface(QFrame):
         return self.championId
 
     def updateInterface(self, data: dict):
-        self.titleBar.updateWidget(data.get('summary'))
+        summary = data.get('summary')
+
+        self.titleBar.updateWidget(summary)
         self.summonerSpells.updateWidget(data.get('summonerSpells'))
-        self.championPerks.updateWidget(data.get('perks'), data.get('summary'))
+        self.championPerks.updateWidget(data.get('perks'), summary)
         self.championSkills.updateWidget(data.get('championSkills'))
         self.championItems.updateWidget(data.get('items'))
-        self.championCounters.updateWidget(data.get('counters'))
+        self.championCounters.updateWidget(data.get('counters'), summary)
         self.championAugments.updateWidget(data.get('augments'))
         self.championSynergies.updateWidget(data.get('synergies'))
 
@@ -758,9 +760,12 @@ class ChampionCountersWidget(BuildWidgetBase):
 
         self.hBoxLayout = QHBoxLayout(self)
 
-        self.strongAgainstLayout = QVBoxLayout()
+        self.strongAgainstWidget = QWidget()
+        self.strongAgainstLayout = QVBoxLayout(self.strongAgainstWidget)
         self.separatorLine = SeparatorLine(QFrame.Shape.VLine)
-        self.weakAgainstLayout = QVBoxLayout()
+
+        self.weakAgainstWidget = QWidget()
+        self.weakAgainstLayout = QVBoxLayout(self.weakAgainstWidget)
 
         self.__initWidget()
         self.__initLayout()
@@ -777,11 +782,11 @@ class ChampionCountersWidget(BuildWidgetBase):
         self.weakAgainstLayout.setSpacing(6)
 
         self.hBoxLayout.setContentsMargins(13, 11, 13, 11)
-        self.hBoxLayout.addLayout(self.strongAgainstLayout)
+        self.hBoxLayout.addWidget(self.strongAgainstWidget)
         self.hBoxLayout.addSpacing(4)
         self.hBoxLayout.addWidget(self.separatorLine)
         self.hBoxLayout.addSpacing(4)
-        self.hBoxLayout.addLayout(self.weakAgainstLayout)
+        self.hBoxLayout.addWidget(self.weakAgainstWidget)
 
     def __updateLayout(self, layout: QLayout, data: list):
         for i in reversed(range(layout.count())):
@@ -795,7 +800,7 @@ class ChampionCountersWidget(BuildWidgetBase):
             item = CounterChampionWidget(x)
             layout.addWidget(item)
 
-    def updateWidget(self, data):
+    def updateWidget(self, data, summary: dict):
         if not data:
             self.setVisible(False)
             return
@@ -809,6 +814,18 @@ class ChampionCountersWidget(BuildWidgetBase):
 
         self.__updateLayout(self.strongAgainstLayout, strong)
         self.__updateLayout(self.weakAgainstLayout, weak)
+
+        tooltip = self.tr(f"<b>{summary.get('name')}</b>" +
+                          self.tr("'s strong against"))
+        self.strongAgainstWidget.setToolTip(tooltip)
+        self.strongAgainstWidget.installEventFilter(
+            ToolTipFilter(self.strongAgainstWidget, 300))
+
+        tooltip = self.tr(f"<b>{summary.get('name')}</b>" +
+                          self.tr("'s weak against"))
+        self.weakAgainstWidget.setToolTip(tooltip)
+        self.weakAgainstWidget.installEventFilter(
+            ToolTipFilter(self.weakAgainstWidget))
 
         self.setVisible(True)
 
