@@ -1,4 +1,7 @@
-### 2024 / 6 / 13
+### 2025 / 2 / 10
 
-- 本程序是**免费**且**开源**的，如果您是从闲鱼 / 淘宝等平台**通过付费渠道**获取的该程序，请立即**退款**。
-- 本程序开源在 https://github.com/Zzaphkiel/Seraphine ，有能力请点击 Star 支持我们的工作。
+进入大乱斗模式时，如果报错 `getInfoByChampionId KeyError: 'champions'`，可以通过以下步骤式解决：
+
+1. 按 `Win + R` 打开 “开始”，
+2. 输入 `%AppData%/Seraphine` 并回车前往，
+3. 删除 `AramBuff.json` 文件后重启 Seraphine 。
