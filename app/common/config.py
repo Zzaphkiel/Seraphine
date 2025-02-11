@@ -1,4 +1,5 @@
 from enum import Enum
+from copy import deepcopy
 import os
 import sys
 
@@ -7,7 +8,7 @@ from PyQt5.QtCore import QLocale, QSize
 
 from .qfluentwidgets import (qconfig, QConfig, ConfigItem, FolderValidator, BoolValidator,
                              OptionsConfigItem, OptionsValidator, ConfigSerializer,
-                             RangeConfigItem, RangeValidator, EnumSerializer, ColorConfigItem)
+                             RangeConfigItem, RangeValidator, EnumSerializer, ColorConfigItem, ConfigValidator)
 
 
 class Language(Enum):
@@ -35,6 +36,27 @@ class QSizeSerializer(ConfigSerializer):
 
 def isWin11():
     return sys.platform == 'win32' and sys.getwindowsversion().build >= 22000
+
+
+class QueueFilterValidator(ConfigValidator):
+    def validate(self, value):
+        keys = ["420", "430", "440", "450", "480"]
+
+        for key in keys:
+            if key not in value:
+                return False
+
+        return True
+
+    def correct(self, value):
+        keys = ["420", "430", "440", "450", "480"]
+        new = deepcopy(value)
+
+        for key in keys:
+            if key not in value:
+                new[key] = []
+
+        return new
 
 
 class Config(QConfig):
@@ -203,7 +225,8 @@ class Config(QConfig):
         "440": [],
         "450": [],
         "480": [],
-    })
+    }, QueueFilterValidator())
+
 
 YEAR = 2023
 AUTHOR = "Zzaphkiel"
