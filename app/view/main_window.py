@@ -731,7 +731,7 @@ class MainWindow(FluentWindow):
             msgBox.cancelButton.setText(self.tr('Exit'))
             self.update()
 
-            cfg.set(cfg.enableCloseToTray, msgBox.exec())
+            cfg.set(cfg.enableCloseToTray, (True if 1 == msgBox.exec() else False))
 
         if not cfg.get(cfg.enableCloseToTray) or self.isTrayExit:
             self.__terminateListeners()
