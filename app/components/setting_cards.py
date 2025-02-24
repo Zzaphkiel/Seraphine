@@ -478,9 +478,19 @@ class ProxySettingCard(ExpandGroupSettingCard):
     def __initWidget(self):
         self.lineEdit.setText(cfg.get(self.addrConfigItem))
         self.lineEdit.setMinimumWidth(250)
-        self.lineEdit.setPlaceholderText("127.0.0.1:10809")
 
-        self.switchButton.setChecked(cfg.get(self.enableConfigItem))
+        # 之前 lineEdit 有一个 placeholder "127.0.0.1:10809"，本意是提示用户将 proxy 写成这种形式，
+        # 但部分用户误以为此 placeholder 是已经填好的数值；
+        # 同时，switchButton 可以在 lineEidt 为空的时候设置为 checked，这更让用户误以为启用了代理。
+        # 所以这里修改了部分代码逻辑
+
+        enable = self.lineEdit.text() != ""
+        self.switchButton.setEnabled(enable)
+        self.switchButton.setChecked(cfg.get(self.enableConfigItem) and enable)
+
+        # 防止之前有人在 HttpProxy 为空的时候设置了 enable
+        if cfg.get(self.enableConfigItem) and not enable:
+            cfg.set(self.enableConfigItem, False)
 
         self.lineEdit.textChanged.connect(self.__onLineEditValueChanged)
         self.switchButton.checkedChanged.connect(
@@ -490,18 +500,14 @@ class ProxySettingCard(ExpandGroupSettingCard):
         self.__setStatusLableText(value, isChecked)
         self.lineEdit.setEnabled(not isChecked)
 
-    def setValue(self, addr: int, isChecked: bool):
-        qconfig.set(self.addrConfigItem, addr)
-        qconfig.set(self.enableConfigItem, isChecked)
-
-        self.__setStatusLableText(addr, isChecked)
-
     def __onSwitchButtonCheckedChanged(self, isChecked: bool):
-        self.setValue(self.lineEdit.text(), isChecked)
+        cfg.set(self.enableConfigItem, isChecked)
         self.lineEdit.setEnabled(not isChecked)
+        self.__setStatusLableText(self.lineEdit.text(), isChecked)
 
     def __onLineEditValueChanged(self, value):
-        self.setValue(value, self.switchButton.isChecked())
+        cfg.set(self.addrConfigItem, value)
+        self.switchButton.setEnabled(value != "")
 
     def __setStatusLableText(self, addr, isChecked):
         if isChecked:

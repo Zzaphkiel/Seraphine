@@ -182,8 +182,15 @@ class Config(QConfig):
     logLevel = OptionsConfigItem(
         "General", "LogLevel", 40, OptionsValidator([10, 20, 30, 40]), restart=True)
 
-    enableProxy = ConfigItem("General", "EnableProxy", False, BoolValidator())
-    proxyAddr = ConfigItem("General", "HttpProxy", "")
+    enableGithubProxy = ConfigItem(
+        "General", "EnableGithubProxy", False, BoolValidator())
+    githubProxyAddr = ConfigItem(
+        "General", "GithubProxyAddr", "127.0.0.1:10809")
+
+    enableOpggProxy = ConfigItem(
+        "General", "EnableOpggProxy", False, BoolValidator(), restart=True)
+    opggProxyAddr = ConfigItem(
+        "General", "OpggProxyAddr", "127.0.0.1:10809")
 
     opggRegion = ConfigItem("Functions", "OpggRegion", "kr",
                             OptionsValidator(["kr", "global"]), restart=True)

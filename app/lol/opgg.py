@@ -2,6 +2,7 @@ import aiohttp
 from async_lru import alru_cache
 
 from app.lol.connector import connector
+from app.common.config import cfg
 
 TAG = "opgg"
 
@@ -9,6 +10,10 @@ TAG = "opgg"
 class Opgg:
     def __init__(self):
         self.session = None
+        self.proxy = None
+
+        if cfg.get(cfg.enableOpggProxy):
+            self.proxy = f"http://{cfg.get(cfg.opggProxyAddr)}"
 
     async def start(self):
         self.session = aiohttp.ClientSession("https://lol-api-champion.op.gg")
@@ -16,6 +21,10 @@ class Opgg:
     async def close(self):
         if self.session:
             await self.session.close()
+
+    async def __get(self, url, params=None):
+        res = await self.session.get(url, params=params, ssl=False, proxy=self.proxy)
+        return await res.json()
 
     @alru_cache(maxsize=512)
     async def __fetchTierList(self, region, mode, tier):
@@ -80,10 +89,6 @@ class Opgg:
                 return [p['name'] for p in item['positions']]
 
         return []
-
-    async def __get(self, url, params=None):
-        res = await self.session.get(url, params=params, ssl=False, proxy=None)
-        return await res.json()
 
 
 class OpggDataParser:

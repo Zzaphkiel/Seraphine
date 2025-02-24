@@ -815,14 +815,13 @@ class ChampionCountersWidget(BuildWidgetBase):
         self.__updateLayout(self.strongAgainstLayout, strong)
         self.__updateLayout(self.weakAgainstLayout, weak)
 
-        tooltip = self.tr(f"<b>{summary.get('name')}</b>" +
-                          self.tr("'s strong against"))
+        tooltip = f"<b>{summary.get('name')}</b>" + \
+            self.tr("'s strong against")
         self.strongAgainstWidget.setToolTip(tooltip)
         self.strongAgainstWidget.installEventFilter(
             ToolTipFilter(self.strongAgainstWidget, 300))
 
-        tooltip = self.tr(f"<b>{summary.get('name')}</b>" +
-                          self.tr("'s weak against"))
+        tooltip = f"<b>{summary.get('name')}</b>" + self.tr("'s weak against")
         self.weakAgainstWidget.setToolTip(tooltip)
         self.weakAgainstWidget.installEventFilter(
             ToolTipFilter(self.weakAgainstWidget))

@@ -1082,6 +1082,12 @@ class LolClientConnector(QObject):
 
         return await res.json()
 
+    @retry()
+    async def getFriends(self):
+        res = await self.__get("/lol-chat/v1/friends")
+
+        return await res.json()
+
     async def getGameReplay(self, gameId):
         data = {"componentType": "replay-button_match-history", "gameId": gameId}
         res = await self.__post(f"/lol-replays/v1/rofls/{gameId}/download", data=data)

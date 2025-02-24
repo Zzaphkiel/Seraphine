@@ -80,13 +80,17 @@ class SettingInterface(SeraphineInterface):
         self.autoShowOpggCard = SwitchSettingCard(
             Icon.WINDOW, self.tr("Show OP.GG window automatically"),
             self.tr("Show OP.GG window automatically when champion selection starts"),
-            cfg.autoShowOpgg)
+            cfg.autoShowOpgg, self.opggGroup)
         self.opggOnTopCard = SwitchSettingCard(
             Icon.PADDINGTOP, self.tr(
                 "Show OP.GG window on top"),
             self.tr(
                 "Show OP.GG window in front of other windows while selecting champions"),
-            cfg.enableOpggOnTop)
+            cfg.enableOpggOnTop, self.opggGroup)
+        self.opggProxyCard = ProxySettingCard(
+            self.tr("OP.GG HTTP proxy"), self.tr(
+                "Using a proxy when connecting to OP.GG"),
+            cfg.enableOpggProxy, cfg.opggProxyAddr, self.opggGroup)
 
         self.generalGroup = SettingCardGroup(self.tr("General"),
                                              self.scrollWidget)
@@ -222,9 +226,9 @@ class SettingInterface(SeraphineInterface):
             cfg.enableCheckUpdate
         )
         self.httpProxyCard = ProxySettingCard(
-            self.tr("HTTP proxy"), self.tr(
+            self.tr("GitHub HTTP proxy"), self.tr(
                 "Using a proxy when connecting to GitHub"),
-            cfg.enableProxy, cfg.proxyAddr, self.updateGroup)
+            cfg.enableGithubProxy, cfg.githubProxyAddr, self.updateGroup)
 
         self.aboutGroup = SettingCardGroup(self.tr("About"), self.scrollWidget)
 
@@ -276,6 +280,7 @@ class SettingInterface(SeraphineInterface):
 
         self.opggGroup.addSettingCard(self.autoShowOpggCard)
         self.opggGroup.addSettingCard(self.opggOnTopCard)
+        self.opggGroup.addSettingCard(self.opggProxyCard)
 
         self.generalGroup.addSettingCard(self.lolFolderCard)
         self.generalGroup.addSettingCard(self.enableStartLolWithApp)

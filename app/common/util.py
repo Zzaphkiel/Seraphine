@@ -34,8 +34,8 @@ class Github:
     def getReleasesInfo(self):
         url = f"{self.githubApi}/repos/{self.user}/{self.repositories}/releases/latest"
 
-        if cfg.get(cfg.enableProxy):
-            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        if cfg.get(cfg.enableGithubProxy):
+            proxy = {'https': cfg.get(cfg.githubProxyAddr)}
         else:
             proxy = None
 
@@ -48,17 +48,17 @@ class Github:
         """
         info = self.getReleasesInfo()
 
-        ver_info = self.__get_ver_info()
+        ver_info = self.__getVersionInfo()
         info["forbidden"] = ver_info.get("forbidden", False)
 
         if info.get("tag_name")[1:] != VERSION:
             return info
         return None
 
-    def __get_ver_info(self):
+    def __getVersionInfo(self):
         url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/ver.json'
-        if cfg.get(cfg.enableProxy):
-            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        if cfg.get(cfg.enableGithubProxy):
+            proxy = {'https': cfg.get(cfg.githubProxyAddr)}
         else:
             proxy = None
 
@@ -72,8 +72,8 @@ class Github:
     def getNotice(self):
         url = f'{self.githubApi}/repos/{self.user}/{self.repositories}/contents/document/notice.md'
 
-        if cfg.get(cfg.enableProxy):
-            proxy = {'https': cfg.get(cfg.proxyAddr)}
+        if cfg.get(cfg.enableGithubProxy):
+            proxy = {'https': cfg.get(cfg.githubProxyAddr)}
         else:
             proxy = None
 
