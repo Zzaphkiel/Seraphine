@@ -1014,7 +1014,10 @@ class PerksWidget(QFrame):
         self.__initLayout()
 
     def __initWidget(self):
-        pass
+        self.mainTitleIcon.installEventFilter(ToolTipFilter(
+            self.mainTitleIcon, 200, ToolTipPosition.TOP))
+        self.secondaryTitleIcon.installEventFilter(ToolTipFilter(
+            self.secondaryTitleIcon, 200, ToolTipPosition.TOP))
 
     def __initLayout(self):
         self.primaryPerksLayout.setSpacing(8)
@@ -1080,8 +1083,6 @@ class PerksWidget(QFrame):
         main = styles[main]
         self.mainTitleIcon.setIcon(main['icon'])
         self.mainTitleIcon.setToolTip(main['name'])
-        self.mainTitleIcon.installEventFilter(ToolTipFilter(
-            self.mainTitleIcon, 200, ToolTipPosition.TOP))
 
         for i, slot in enumerate(main['slots'][:4]):
             for perk in slot:
@@ -1102,8 +1103,6 @@ class PerksWidget(QFrame):
         sub = styles[sub]
         self.secondaryTitleIcon.setIcon(sub['icon'])
         self.secondaryTitleIcon.setToolTip(sub['name'])
-        self.secondaryTitleIcon.installEventFilter(ToolTipFilter(
-            self.secondaryTitleIcon, 200, ToolTipPosition.TOP))
 
         for i, slot in enumerate(sub['slots'][1:4]):
             for perk in slot:
