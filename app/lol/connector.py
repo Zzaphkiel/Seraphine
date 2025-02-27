@@ -947,17 +947,42 @@ class LolClientConnector(QObject):
                 f"deleteCurrentRunePage error {stack = }, {e =}", TAG)
 
     @retry()
-    async def createRunePage(self, name, primaryId, secondaryId, perks):
+    async def createRunePage(self, name, primaryId):
         body = {
+            "name": name,
+            "primaryStyleId": primaryId,
+            "isEditable": True,
+            "current": True,
+        }
+
+        res = await self.__post("/lol-perks/v1/pages", data=body)
+        return await res.json()
+
+    @retry()
+    async def putRunePage(self, id, name, primaryId, secondaryId, perks):
+        body = {
+            "id": id,
+            "isRecommendationOverride": False,
+            "isTemporary": False,
             "name": name,
             "primaryStyleId": primaryId,
             "subStyleId": secondaryId,
             "selectedPerkIds": perks,
-            "current": True
+            "current": True,
         }
 
-        res = await self.__post("/lol-perks/v1/pages", data=body)
+        res = await self.__put(f"/lol-perks/v1/pages/{id}", data=body)
         res = await res.json()
+
+    @retry()
+    async def getRuneInventory(self):
+        res = await self.__get("/lol-perks/v1/inventory")
+        return await res.json()
+
+    @retry()
+    async def getRunePages(self):
+        res = await self.__get('/lol-perks/v1/pages')
+        return await res.json()
 
     @retry()
     async def setSummonerSpells(self, spell1Id, spell2Id):

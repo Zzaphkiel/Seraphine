@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QEasingCurve
 from PyQt5.QtGui import QPixmap, QColor, QCursor
 from qasync import asyncSlot
 
-from app.lol.tools import ToolsTranslator
+from app.lol.tools import ToolsTranslator, createAndSetRunePage
 from app.components.animation_frame import (ColorAnimationFrame,
                                             NoBorderColorAnimationFrame, CardWidget)
 from app.components.transparent_button import PrimaryButton
@@ -913,10 +913,25 @@ class ChampionPerksWidget(BuildWidgetBase):
     async def __onSetRunePageButtonClicked(self, _):
         data = self.data[self.selectedIndex]
         name = "Seraphine" + self.tr(": ") + self.summary['name']
+        primaryId = data['primaryId']
+        secondaryId = data['secondaryId']
+        perks = data['perks']
 
-        await connector.deleteCurrentRunePage()
-        await connector.createRunePage(
-            name, data['primaryId'], data['secondaryId'], data['perks'])
+        pages = await connector.getRunePages()
+
+        if not len(pages):
+            await createAndSetRunePage(name, primaryId, secondaryId, perks)
+            return
+
+        pageId = next((page.get("id")
+                      for page in pages
+                      if page.get("current") and page.get("isEditable")), None)
+
+        if not pageId:
+            await createAndSetRunePage(name, primaryId, secondaryId, perks)
+            return
+
+        await connector.putRunePage(pageId, name, primaryId, secondaryId, perks)
 
 
 class PerksSummaryWidget(NoBorderColorAnimationFrame):

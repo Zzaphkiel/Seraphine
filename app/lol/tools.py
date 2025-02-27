@@ -1822,6 +1822,14 @@ async def rollAndSwapBack():
     await connector.benchSwap(championId)
 
 
+async def createAndSetRunePage(name, primaryId, secondaryId, perks):
+    pages = await connector.createRunePage(name, primaryId)
+
+    if id := pages.get('id'):
+        await connector.putRunePage(id, name, primaryId,
+                                    secondaryId, perks)
+
+
 async def fixLCUWindowViaExe():
     zoom = await connector.getClientZoom()
 
