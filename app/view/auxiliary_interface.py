@@ -1,13 +1,13 @@
+import asyncio
 import os
 import stat
 import threading
-import asyncio
-from copy import deepcopy
 
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent, QSize, QObject
 from PyQt5.QtWidgets import (QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout,
-                             QFrame, QSpacerItem, QSizePolicy)
+                             QFrame, QSpacerItem, QSizePolicy, QCompleter)
 from qasync import asyncSlot
+from qfluentwidgets import EditableComboBox
 
 from app.common.config import cfg
 from app.common.icons import Icon
@@ -22,8 +22,8 @@ from app.common.style_sheet import StyleSheet
 from app.components.champion_icon_widget import RoundIcon, SummonerSpellButton
 from app.components.message_box import MultiChampionSelectMsgBox
 from app.components.multi_champion_select import ChampionSelectFlyout, SplashesFlyout
-from app.components.summoner_spell_widget import SummonerSpellSelectFlyout
 from app.components.seraphine_interface import SeraphineInterface
+from app.components.summoner_spell_widget import SummonerSpellSelectFlyout
 from app.lol.connector import connector
 from app.lol.exceptions import *
 from app.lol.tools import fixLCUWindowViaExe
@@ -849,7 +849,7 @@ class SpectateCard(ExpandGroupSettingCard):
 
         self.summonerNameLabel = QLabel(
             self.tr("Summoner's name you want to spectate:"))
-        self.lineEdit = LineEdit()
+        self.spectateNameComboBox = EditableComboBox()
 
         self.spectateTypeLabel = QLabel(self.tr("Method:"))
         self.spectateTypeComboBox = ComboBox()
@@ -869,7 +869,7 @@ class SpectateCard(ExpandGroupSettingCard):
         self.inputLayout.addWidget(
             self.summonerNameLabel, 0, 0, alignment=Qt.AlignLeft)
         self.inputLayout.addWidget(
-            self.lineEdit, 0, 1, alignment=Qt.AlignRight)
+            self.spectateNameComboBox, 0, 1, alignment=Qt.AlignRight)
         self.inputLayout.addWidget(
             self.spectateTypeLabel, 1, 0, alignment=Qt.AlignLeft)
         self.inputLayout.addWidget(
@@ -887,10 +887,10 @@ class SpectateCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.buttonWidget)
 
     def __initWidget(self):
-        self.lineEdit.setPlaceholderText(
+        self.spectateNameComboBox.setPlaceholderText(
             self.tr("Please input summoner's name"))
-        self.lineEdit.setMinimumWidth(250)
-        self.lineEdit.setClearButtonEnabled(True)
+        self.spectateNameComboBox.setMinimumWidth(250)
+        self.spectateNameComboBox.setClearButtonEnabled(True)
 
         self.button.setMinimumWidth(100)
         self.button.setEnabled(False)
@@ -899,12 +899,29 @@ class SpectateCard(ExpandGroupSettingCard):
         self.spectateTypeComboBox.addItem(self.tr("CMD"), userData="CMD")
         self.spectateTypeComboBox.setMinimumWidth(100)
 
-        self.lineEdit.textChanged.connect(self.__onLineEditTextChanged)
+        self.spectateNameComboBox.currentTextChanged.connect(self.__onSpectateNameTextChanged)
         self.button.clicked.connect(self.__onButtonClicked)
 
-    def __onLineEditTextChanged(self):
-        enable = self.lineEdit.text() != ""
+    def __onSpectateNameTextChanged(self):
+        enable = self.spectateNameComboBox.text() != ""
         self.button.setEnabled(enable)
+        # FIXME: 点输入框的x号会清除文本，应该监听该事件将按钮禁用
+
+    def setExpand(self, isExpand: bool):
+        super().setExpand(isExpand)
+        if isExpand:
+            asyncio.create_task(self.__initFriendList())
+
+    async def __initFriendList(self):
+        res = await connector.getFriends()
+        self.spectateNameComboBox.clear()
+        items = [f"{i['gameName']}#{i['gameTag']}" for i in res]
+        if len(items) == 0:
+            return
+        self.spectateNameComboBox.addItems(items)
+        self.spectateNameComboBox.setCurrentIndex(-1)
+        completer = QCompleter(items, self.spectateNameComboBox)
+        self.spectateNameComboBox.setCompleter(completer)
 
     @asyncSlot()
     async def __onButtonClicked(self):
@@ -916,7 +933,7 @@ class SpectateCard(ExpandGroupSettingCard):
               parent=self.window().auxiliaryFuncInterface)
 
         try:
-            text = self.lineEdit.text()
+            text = self.spectateNameComboBox.text()
             text = text.replace('\u2066', '').replace('\u2069', '')
 
             if self.spectateTypeComboBox.currentData() == 'LCU':

@@ -899,6 +899,13 @@ class LolClientConnector(QObject):
         return await res.json()
 
     @retry()
+    async def getFriends(self):
+        """
+        获取好友列表
+        """
+        res = await self.__get("/lol-chat/v1/friends")
+        return await res.json()
+
     async def getSummonerById(self, summonerId):
         res = await self.__get(f"/lol-summoner/v1/summoners/{summonerId}")
 
