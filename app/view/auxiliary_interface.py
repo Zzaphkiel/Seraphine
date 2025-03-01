@@ -915,7 +915,7 @@ class SpectateCard(ExpandGroupSettingCard):
     async def __initFriendList(self):
         res = await connector.getFriends()
         self.spectateNameComboBox.clear()
-        items = [f"{i['gameName']}#{i['gameTag']}" for i in res]
+        items = [f"{i['gameName']}#{i['gameTag']}" for i in res if i.get('availability') != 'offline']
         if len(items) == 0:
             return
         self.spectateNameComboBox.addItems(items)
